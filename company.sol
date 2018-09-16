@@ -10,13 +10,12 @@ contract IssuingEntity is STBase {
   using SafeMath64 for uint64;
   using SafeMath for uint256;
   
-  SecurityToken[] public tokens;
-
   uint64 public accredittedInvestors;
   uint64 public nonAccredittedInvestors;
   uint64 public accredittedInvestorLimit;
   uint64 public nonAccredittedInvestorLimit;
   uint64 public totalInvestorLimit;
+  SecurityToken[] public tokens;
   
   struct Account {
     uint256 balance;
@@ -51,11 +50,12 @@ contract IssuingEntity is STBase {
   }
   
   mapping (bytes32 => bool) exchangeApproval;
-
   mapping (bytes32 => Account) accounts;
+  mapping (string => bytes32) documentHashes;
   mapping (uint16 => Country) public countries;
   
   event TransferOwnership(bytes32 senderID, bytes32 receiverID, uint tokens);
+  event NewDocumentHash(string document, bytes32 hash);
   
   constructor(address _registrar) public {
     registrar = InvestorRegistrar(_registrar);
@@ -332,6 +332,12 @@ contract IssuingEntity is STBase {
       e.tReserved = 0;
     }
     return true;
+  }
+  
+  function setDocumentHash(string _document, bytes32 _hash) public onlyIssuer {
+    require (documentHashes[_document] == 0);
+    documentHashes[_document] = _hash;
+    emit NewDocumentHash(_document, _hash);
   }
   
 }
