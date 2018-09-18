@@ -70,12 +70,12 @@ contract SecurityToken is STBase {
     return allowed[_owner][_spender];
   }
   
-  function checkTransferValidity(address _from, address _to, uint256 _value) public view returns (bool) {
+  function checkTransfer(address _from, address _to, uint256 _value) public view returns (bool) {
     bytes32 _idFrom = registrar.idMap(_from);
     bytes32 _idTo = registrar.idMap(_to); 
     require (countryLock[registrar.getCountry(_idFrom)] < now);
     require (countryLock[registrar.getCountry(_idTo)] < now);
-    require (issuer.checkTransferValidity(_idFrom, _idTo, _value));
+    require (issuer.checkTransfer(_idFrom, _idTo, _value));
     return true;
   }
   
@@ -88,7 +88,7 @@ contract SecurityToken is STBase {
     if (registrar.idMap(_from) == issuerID) {
       _from = address(issuer);
     } else {
-      require (checkTransferValidity(_from, _to, _value));
+      require (checkTransfer(_from, _to, _value));
     }
     require (issuer.transferOwnership(_from, _to, _value));
     _setBalance(_from, balances[_from], balances[_from].sub(_value));
@@ -122,7 +122,11 @@ contract SecurityToken is STBase {
     onlyUnlocked
     returns (bool)
   {
-    if (registrar.idMap(_from) != registrar.idMap(msg.sender) && registrar.idMap(msg.sender) != issuerID) {
+    if (
+      registrar.idMap(_from) != registrar.idMap(msg.sender) &&
+      (registrar.idMap(msg.sender) != issuerID)
+    )
+    {
       allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
     }
     _transfer(_from, _to, _value);
@@ -188,7 +192,16 @@ contract SecurityToken is STBase {
     e.total = e.total.sub(_value);
   }
   
-  function dexTransfer(address _from, address _to, uint256 _value, bool _locked) public onlyUnlocked returns (bool) {
+  function dexTransfer(
+    address _from, 
+    address _to, 
+    uint256 _value,
+     bool _locked
+  ) 
+    public
+    onlyUnlocked 
+    returns (bool) 
+  {
     bytes32 _id = registrar.idMap(msg.sender);
     _dexUnlock(_id, _from, _value);
     _transfer(_from, _to, _value);

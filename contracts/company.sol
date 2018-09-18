@@ -71,7 +71,7 @@ contract IssuingEntity is STBase {
     return accredittedInvestors.add(nonAccredittedInvestors);
   }
   
-  function checkTransferValidity(
+  function checkTransfer(
     bytes32 _idFrom,
     bytes32 _idTo,
     uint256 _value
