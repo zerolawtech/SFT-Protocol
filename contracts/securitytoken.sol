@@ -14,19 +14,8 @@ contract SecurityToken is STBase {
   uint8 public constant decimals = 0;
   string public name;
   string public symbol;
-  
-  struct Dividend {
-    uint256 amount;
-    uint256 remaining;
-    uint256 totalSupply;
-    uint256 checkpoint;
-    uint40 claimExpiration;
-    bool expired;
-    mapping (address => bool) claimed;
-  }
-  
-  uint256[] _totalSupply;
-  uint256[] tsIndex;
+  uint256 public totalSupply;
+  CheckpointModule[] checkpoints;
   
   mapping (uint16 => uint256) public countryLock;
   
@@ -36,20 +25,12 @@ contract SecurityToken is STBase {
   }
   
   mapping (address => ExchangeBalance) exchangeBalances; 
-  
-  Dividend[] dividends;
-  uint40[] cpTimes;
-  mapping (address => uint256[]) balances;
-  mapping (address => uint256[]) cpIndex;
-  
+  mapping (address => uint256) balances; 
   mapping (address => mapping (address => uint256)) allowed;
   
   event Transfer(address indexed from, address indexed to, uint tokens);
   event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
   event TokenBurn(address tokenOwner, uint tokens);
-  event DividendIssued(uint256 dividendID, uint256 amount);
-  event DividendClaimed(uint256 dividendID, address beneficiary, uint256 amount);
-  event DividendExpired(uint256 dividendID, uint256 unclaimedAmount);
   
   constructor(string _name, string _symbol, uint256 _tS) public {
     issuer = IssuingEntity(msg.sender);
@@ -57,11 +38,8 @@ contract SecurityToken is STBase {
     registrar = InvestorRegistrar(issuer.registrar());
     name = _name;
     symbol = _symbol;
-    cpTimes.push(0);
-    balances[msg.sender].push(_tS);
-    cpIndex[msg.sender].push(1);
-    _totalSupply.push(_tS);
-    tsIndex.push(1);
+    balances[msg.sender] = _tS;
+    totalSupply = _tS;
   }
   
   function() public payable {
@@ -69,41 +47,16 @@ contract SecurityToken is STBase {
   }
   
   function circulatingSupply() public view returns (uint256) {
-    return totalSupply().sub(balanceOf(address(issuer)));
+    return totalSupply.sub(balanceOf(address(issuer)));
   }
   
   function treasurySupply() public view returns (uint256) {
     return balanceOf(address(issuer));
   }
-  
-  function totalSupply() public view returns (uint256) {
-    return _totalSupply[_totalSupply.length.sub(1)];
-  }
-  
-  function totalSupplyAt(uint256 _index) public view returns (uint256) {
-    require (_index < cpTimes.length);
-    for (uint256 i = 0; i < _totalSupply.length.sub(1); i++) {
-      if (tsIndex[i] <= _index && tsIndex[i.add(1)] > _index) {
-        return _totalSupply[i];
-      }
-    }
-    return _totalSupply[_totalSupply.length.sub(1)];
-  }
+
   
   function balanceOf(address _owner) public view returns (uint256) {
-    if (balances[_owner].length == 0) return 0;
-    return balances[_owner][balances[_owner].length.sub(1)];
-  }
-  
-  function balanceOfAt(address _owner, uint256 _index) public view returns (uint256) {
-    require (_index < cpTimes.length);
-    if (balances[_owner].length == 0) return 0;
-    for (uint256 i = 0; i < balances[_owner].length.sub(1); i++) {
-      if (cpIndex[_owner][i] <= _index && cpIndex[_owner][i.add(1)] > _index) {
-        return balances[_owner][i];
-      }
-    }
-    return balances[_owner][balances[_owner].length.sub(1)];
+    return balances[_owner];
   }
   
   function allowance(
@@ -138,28 +91,18 @@ contract SecurityToken is STBase {
       require (checkTransferValidity(_from, _to, _value));
     }
     require (issuer.transferOwnership(_from, _to, _value));
-    uint256 _balanceFrom = _getBalance(_from);
-    _setBalance(_from, _balanceFrom.sub(_value));
-    uint256 _balanceTo = _getBalance(_to);
-    _setBalance(_to, _balanceTo.add(_value));
+    _setBalance(_from, balances[_from], balances[_from].sub(_value));
+    _setBalance(_to, balances[_to], balances[_to].add(_value));
     emit Transfer(_from, _to, _value);
   }
   
-  function _getBalance(address _addr) internal returns (uint256) {
-    if (cpIndex[_addr].length == 0) {
-      cpIndex[_addr].push(0);
-      balances[_addr].push(0);
-    }
-    return balances[_addr][balances[_addr].length.sub(1)];
-  }
   
-  function _setBalance(address _addr, uint256 _value) internal {
-    uint256 _idx = cpTimes[cpTimes.length.sub(1)] > now ? cpTimes.length.sub(1) : cpTimes.length;
-    if (cpIndex[_addr][cpIndex[_addr].length.sub(1)] != _idx) {
-      balances[_addr].push(_value);
-      cpIndex[_addr].push(_idx);
-    } else {
-      balances[_addr][balances[_addr].length.sub(1)] = _value;
+  function _setBalance(address _owner, uint256 _old, uint256 _new) internal {
+    balances[_owner] = _new;
+    for (uint256 i = 0; i < checkpoints.length; i++) {
+      if (address(checkpoints[i]) != 0) {
+        checkpoints[i].balanceChanged(_owner, _old, _new);
+      }
     }
   }
   
@@ -186,99 +129,27 @@ contract SecurityToken is STBase {
     return true;
   }
   
-  function lockTransfers () public onlyIssuer {
-    locked = true;
-  }
-  
-  function unlockTransfers () public onlyIssuer {
-    locked = false;
-  }
-  
-  function addCheckpoint(uint40 _epochTime) public onlyIssuer returns (uint256) {
-    if (_epochTime == 0) {
-      _epochTime = uint40(now);
-    }
-    require (_epochTime >= now);
-    require (_epochTime > cpTimes[cpTimes.length.sub(1)]);
-    require (now > cpTimes[cpTimes.length.sub(1)]);
-    cpTimes.push(_epochTime);
-    return cpTimes.length.sub(1);
-  }
-  
-  function modifyCheckpoint(uint40 _epochTime) public onlyIssuer returns (uint256) {
-    if (_epochTime == 0) {
-      _epochTime = uint40(now);
-    }
-    require (_epochTime >= now);
-    require (cpTimes[cpTimes.length.sub(1)] > now);
-    cpTimes[cpTimes.length.sub(1)] = _epochTime;
-    return cpTimes.length.sub(1);
-  }
-  
-  function getCheckpointTime(uint256 _index) public view returns (uint256 _epochTime) {
-    return cpTimes[_index];
-  }
-  
-  function issueDividend(uint256 _checkpoint, uint40 _claimExpiration) public onlyIssuer payable returns (uint256) {
-    require (_claimExpiration > now);
-    uint256 _cs = totalSupplyAt(_checkpoint).sub(balanceOfAt(address(issuer), _checkpoint));
-    dividends.push(Dividend(msg.value, msg.value, _cs, _checkpoint, _claimExpiration, false));
-    emit DividendIssued(dividends.length.sub(1), msg.value);
-    return dividends.length.sub(1);
-  }
-  
-  function claimDividend(uint256 _dividendID, address _beneficiary) public {
-    if (_dividendID == 0 && dividends.length > 1) {
-      _dividendID = dividends.length.sub(1);
-    }
-    if (_beneficiary == 0) {
-      _beneficiary = msg.sender;
-    }
-    require (registrar.idMap(_beneficiary) != issuerID);
-    Dividend storage d = dividends[_dividendID];
-    require (!d.expired);
-    require (!d.claimed[_beneficiary]);
-    uint256 _value = balanceOfAt(_beneficiary, d.checkpoint).mul(d.amount).div(d.totalSupply);
-    d.claimed[_beneficiary] = true;
-    d.remaining = d.remaining.sub(_value);
-    _beneficiary.transfer(_value);
-    emit DividendClaimed(_dividendID, _beneficiary, _value);
-  }
-  
-  function closeDividend(uint256 _dividendID) public onlyIssuer {
-    Dividend storage d = dividends[_dividendID];
-    require (d.claimExpiration <= now);
-    require (d.remaining > 0);
-    require (!d.expired);
-    d.expired = true;
-    msg.sender.transfer(d.remaining);
-    emit DividendExpired(_dividendID, d.remaining);
-  }
-  
   function _setTotalSupply(uint256 _value) internal {
-    uint256 _idx = cpTimes[cpTimes.length.sub(1)] > now ? cpTimes.length.sub(1) : cpTimes.length;
-    if (tsIndex[tsIndex.length.sub(1)] != _idx) {
-      _totalSupply.push(_value);
-      tsIndex.push(_idx);
-    } else {
-      _totalSupply[_totalSupply.length.sub(1)] = _value;
+    for (uint256 i = 0; i < checkpoints.length; i++) {
+      if (address(checkpoints[i]) != 0) {
+        checkpoints[i].totalSupplyChanged(totalSupply, _value);
+      }
     }
+    totalSupply = _value;
   }
   
   function burnTokens(uint _value) public onlyIssuer {
     address _issuer = address(issuer);
-    uint256 _balance = _getBalance(_issuer);
-    _setBalance(_issuer, _balance.sub(_value));
-    _setTotalSupply(totalSupply().sub(_value));
+    _setBalance(_issuer, balances[_issuer], balances[_issuer].sub(_value));
+    _setTotalSupply(totalSupply.sub(_value));
     emit Transfer(_issuer, 0, _value);
     emit TokenBurn(_issuer, _value);
   }
   
   function mintTokens(uint _value) public onlyIssuer {
     address _issuer = address(issuer);
-    uint256 _balance = _getBalance(_issuer);
-    _setBalance(_issuer, _balance.sub(_value));
-    _setTotalSupply(totalSupply().add(_value));
+    _setBalance(_issuer, balances[_issuer], balances[issuer].add(_value));
+    _setTotalSupply(totalSupply.add(_value));
     emit Transfer(_issuer, 0, _value);
     emit TokenBurn(_issuer, _value);
   }
@@ -331,12 +202,10 @@ contract SecurityToken is STBase {
     return exchangeBalances[_owner].exchange[_exchangeID];
   }
   
-  
-  CheckpointModule[] checkpoints;
   function attachBalanceModule(address _module) public onlyIssuer {
     CheckpointModule b = CheckpointModule(_module);
-    bool set;
     require (b.token() == address(this));
+    bool set;
     for (uint256 i = 0; i < checkpoints.length; i++) {
       require (address(checkpoints[i]) != _module);
       if (address(checkpoints[i]) == 0) {
@@ -348,12 +217,9 @@ contract SecurityToken is STBase {
   }
 
   function detachBalanceModule(address _module) public returns (bool) {
-    if (_module != 0) {
+    if (_module != msg.sender) {
       require (registrar.idMap(msg.sender) == issuerID);
-    } else {
-      _module == msg.sender;
     }
-    
     for (uint256 i = 0; i < checkpoints.length; i++) {
       if (address(checkpoints[i]) == _module) {
         checkpoints[i] = CheckpointModule(0);

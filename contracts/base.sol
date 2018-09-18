@@ -18,11 +18,11 @@ contract STBase {
     require (!locked || registrar.idMap(msg.sender) == issuerID);
     _;
   }
-  
+    
   function lockTransfers () public onlyIssuer {
     locked = true;
   }
-  
+
   function unlockTransfers () public onlyIssuer {
     locked = false;
   }
