@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "./safemath.sol";
+import "./open-zeppelin/safemath.sol";
 
 contract InvestorRegistrar {
 

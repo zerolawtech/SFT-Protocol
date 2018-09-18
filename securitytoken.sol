@@ -1,16 +1,16 @@
 pragma solidity ^0.4.24;
 
 
-import "./safemath.sol";
+import "./open-zeppelin/safemath.sol";
 import "./company.sol";
 import "./base.sol";
+import "./modules/checkpoints/checkpoint-base.sol";
 
 contract SecurityToken is STBase {
 
   using SafeMath for uint256;
   
   IssuingEntity public issuer;
-  uint256 public tokenID;
   uint8 public constant decimals = 0;
   string public name;
   string public symbol;
@@ -329,6 +329,38 @@ contract SecurityToken is STBase {
   
   function dexBalanceOf(address _owner, bytes32 _exchangeID) public view returns (uint256) {
     return exchangeBalances[_owner].exchange[_exchangeID];
+  }
+  
+  
+  CheckpointModule[] checkpoints;
+  function attachBalanceModule(address _module) public onlyIssuer {
+    CheckpointModule b = CheckpointModule(_module);
+    bool set;
+    require (b.token() == address(this));
+    for (uint256 i = 0; i < checkpoints.length; i++) {
+      require (address(checkpoints[i]) != _module);
+      if (address(checkpoints[i]) == 0) {
+        checkpoints[i] = b;
+        set = true;
+      }
+    }
+    if (!set) checkpoints.push(b);
+  }
+
+  function detachBalanceModule(address _module) public returns (bool) {
+    if (_module != 0) {
+      require (registrar.idMap(msg.sender) == issuerID);
+    } else {
+      _module == msg.sender;
+    }
+    
+    for (uint256 i = 0; i < checkpoints.length; i++) {
+      if (address(checkpoints[i]) == _module) {
+        checkpoints[i] = CheckpointModule(0);
+        return true;
+      }
+    }
+    revert();
   }
 
 }
