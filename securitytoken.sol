@@ -51,17 +51,16 @@ contract SecurityToken is STBase {
   event DividendClaimed(uint256 dividendID, address beneficiary, uint256 amount);
   event DividendExpired(uint256 dividendID, uint256 unclaimedAmount);
   
-  constructor(string _name, string _symbol, uint256 _tokenID, uint256 _totalSupply) public {
+  constructor(string _name, string _symbol, uint256 _tS) public {
     issuer = IssuingEntity(msg.sender);
     issuerID = issuer.issuerID();
     registrar = InvestorRegistrar(issuer.registrar());
     name = _name;
     symbol = _symbol;
-    tokenID = _tokenID;
     cpTimes.push(0);
-    balances[msg.sender].push(_totalSupply);
+    balances[msg.sender].push(_tS);
     cpIndex[msg.sender].push(1);
-    totalSupply.push(_totalSupply);
+    _totalSupply.push(_tS);
     tsIndex.push(1);
   }
   
@@ -88,7 +87,7 @@ contract SecurityToken is STBase {
         return _totalSupply[i];
       }
     }
-    return balances[_owner][balances[_owner].length.sub(1)];
+    return _totalSupply[_totalSupply.length.sub(1)];
   }
   
   function balanceOf(address _owner) public view returns (uint256) {
@@ -123,7 +122,7 @@ contract SecurityToken is STBase {
     bytes32 _idTo = registrar.idMap(_to); 
     require (countryLock[registrar.getCountry(_idFrom)] < now);
     require (countryLock[registrar.getCountry(_idTo)] < now);
-    require (issuer.checkTransferValidity(_idFrom, idTo, _value, _tokenID));
+    require (issuer.checkTransferValidity(_idFrom, _idTo, _value));
     return true;
   }
   
@@ -289,9 +288,8 @@ contract SecurityToken is STBase {
   }
   
   function dexApprove(bytes32 _id, uint256 _value) public returns (bool) {
-    ExchangeLock storage e = exchangeLocks[msg.sender];
     require (registrar.getType(_id) == 3);
-    _lock(_id, msg.sender, _value);
+    _dexLock(_id, msg.sender, _value);
     return true;
   }
   
@@ -304,24 +302,24 @@ contract SecurityToken is STBase {
   
   function dexRelease(address _owner, uint256 _value) public returns (bool) {
     bytes32 _id = registrar.idMap(msg.sender);
-    _release(_id, _owner, _value);
+    _dexUnlock(_id, _owner, _value);
     return true;
   }
   
   function issuerDexRelease(bytes32 _id, address _owner, uint256 _value) public onlyIssuer returns (bool) {
-    _release(_id, _owner, _value);
+    _dexUnlock(_id, _owner, _value);
     return true;
   }
   
   function _dexUnlock(bytes32 _id, address _owner, uint256 _value) internal {
     ExchangeBalance storage e = exchangeBalances[_owner];
     e.exchange[_id] = e.exchange[_id].sub(_value);
-    e.totalAmount = e.totalAmount.sub(_value);
+    e.total = e.total.sub(_value);
   }
   
   function dexTransfer(address _from, address _to, uint256 _value, bool _locked) public onlyUnlocked returns (bool) {
     bytes32 _id = registrar.idMap(msg.sender);
-    _dexUnlock(_id, _owner, _value);
+    _dexUnlock(_id, _from, _value);
     _transfer(_from, _to, _value);
     if (_locked) {
       _dexLock(_id, _to, _value);
