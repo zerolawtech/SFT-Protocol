@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../modulebase.sol";
+import "./ModuleBase.sol";
 
 
 contract CheckpointModule is ModuleBase {
@@ -10,11 +10,8 @@ contract CheckpointModule is ModuleBase {
   mapping (address => uint256) balance;
   mapping (address => bool) zeroBalance;
   
-  constructor(address _token, uint256 _time) public {
+  constructor(address _token, uint256 _time) ModuleBase(_token) public {
     require (_time >= now);
-    token = SecurityToken(_token);
-    issuerID = token.issuerID();
-    registrar = InvestorRegistrar(token.registrar());
     totalSupply = token.totalSupply();
     time = _time;
   }
@@ -25,7 +22,7 @@ contract CheckpointModule is ModuleBase {
     return token.balanceOf(_owner);
   }
   
-  function balanceChanged(address _owner, uint256 _old, uint256 _new) external onlyToken returns (bool) {
+  function balanceChanged(address _owner, uint256 _old, uint256) external onlyToken returns (bool) {
     if (now < time) return true;
     if (balance[_owner] > 0) return true;
     if (zeroBalance[_owner]) return true;
@@ -37,11 +34,15 @@ contract CheckpointModule is ModuleBase {
     return true;
   }
   
-  function totalSupplyChanged(uint256 _old, uint256 _new) external onlyToken returns (bool) {
+  function totalSupplyChanged(uint256, uint256 _new) external onlyToken returns (bool) {
     if (now < time) {
       totalSupply = _new;
     }
     return true;
+  }
+
+  function getBindings() external view returns (bool, bool, bool) {
+    return (false, true, true);
   }
 
 }

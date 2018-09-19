@@ -9,6 +9,12 @@ contract ModuleBase {
   InvestorRegistrar public registrar;
   SecurityToken public token;
 
+  constructor(address _token) public {
+    token = SecurityToken(_token);
+    issuerID = token.issuerID();
+    registrar = InvestorRegistrar(token.registrar());
+  }
+
   modifier onlyIssuer () {
     require (registrar.idMap(msg.sender) == issuerID);
     require (!registrar.isRestricted(issuerID));

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "./checkpoint-base.sol";
-import "../../open-zeppelin/safemath.sol";
+import "./CheckpointBase.sol";
+import "../open-zeppelin/safemath.sol";
 
 contract DividendModule is CheckpointModule {
 
@@ -50,7 +50,7 @@ contract DividendModule is CheckpointModule {
     require (now > claimExpiration);
     emit DividendExpired(address(this).balance);
     msg.sender.transfer(address(this).balance);
-    require (token.detachBalanceModule(address(this)));
+    require (token.detachModule(address(this)));
   }
 
 }
