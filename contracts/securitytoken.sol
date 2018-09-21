@@ -147,13 +147,13 @@ contract SecurityToken is STBase {
 
   Module[] modules;
   function attachModule(address _module) public onlyIssuer returns (bool) {
+    require (!checkModuleAttached(_module));
     STModule m = STModule(_module);
     require (m.token() == address(this));
     (bool _ct, bool _bc, bool _ts) = m.getBindings();
     bool set;
     activeModules[_module] = true;
     for (uint256 i = 0; i < modules.length; i++) {
-      require (address(modules[i].module) != _module);
       if (address(modules[i].module) == 0) {
         modules[i].module = m;
         modules[i].checkTransfer = _ct;
@@ -180,6 +180,15 @@ contract SecurityToken is STBase {
       }
     }
     revert();
+  }
+
+  function checkModuleAttached(address _module) public view returns (bool) {
+    for (uint256 i = 0; i < modules.length; i++) {
+      if (address(modules[i].module) == _module) {
+        return true;
+      }
+    }
+    return false;
   }
 
 

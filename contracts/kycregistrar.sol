@@ -9,8 +9,8 @@ contract InvestorRegistrar {
   address owner;
 
   struct Investor {
-    uint40 accreditationExpires;
-    uint40 kycExpires;
+    uint8 rating;
+    uint40 expires;
   }
   
   struct Entity {
@@ -36,15 +36,15 @@ contract InvestorRegistrar {
   function addInvestor(
     bytes32 _id,
     uint16 _country,
-    uint40 _accreditation,
-    uint40 _kyc
+    uint8 _rating,
+    uint40 _expires
    )
     public
     onlyOwner
   {
     _addEntity(_id, 1, _country);
-    investorData[_id].accreditationExpires = _accreditation;
-    investorData[_id].kycExpires = _kyc; 
+    investorData[_id].rating = _rating;
+    investorData[_id].expires = _expires;
   }
   
   function addIssuer(bytes32 _id, uint16 _country) public onlyOwner {
@@ -62,21 +62,11 @@ contract InvestorRegistrar {
     e.country = _country;
   }
   
-  function modifyRestricted (bytes32 _id, bool _restricted)  public onlyOwner {
+  function setRestricted (bytes32 _id, bool _restricted)  public onlyOwner {
     require (registry[_id].type_ != 0);
     registry[_id].restricted = _restricted;
   }
 
-  function modifyAccreditation (bytes32 _id, uint40 _accreditation) public onlyOwner {
-    require (registry[_id].type_ == 1);
-    investorData[_id].accreditationExpires = _accreditation;
-  }
-  
-  function modifyKYC (bytes32 _id, uint40 _kycExpires) public onlyOwner {
-    require (registry[_id].type_ == 1);
-    investorData[_id].kycExpires = _kycExpires;
-  }
-  
   function registerAddress (address _addr, bytes32 _id) public onlyOwner {
     require (idMap[_addr] == 0);
     idMap[_addr] = _id;
@@ -94,19 +84,12 @@ contract InvestorRegistrar {
     return (registry[_id].type_ == 0 || registry[_id].restricted);
   }
 
-  function isKYC (bytes32 _id) public view returns (bool) {
-    if (registry[_id].type_ != 1 || registry[_id].restricted || investorData[_id].kycExpires < now) {
-      return false;
-    }
-    return false;
-  }
-
-  function isAccreditted (bytes32 _id) public view returns (bool) {
+  function getRating (bytes32 _id) public view returns (uint8) {
     Investor storage i = investorData[_id];
-    if (i.accreditationExpires < now || !isKYC(_id)) {
-      return false;
+    if (i.expires < now) {
+      return 0;
     }
-    return true;
+    return investorData[_id].rating;
   }
   
   function getCountry (bytes32 _id) public view returns (uint16) {

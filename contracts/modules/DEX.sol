@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 
 import "../open-zeppelin/safemath.sol";
-import "./ModuleBase.sol";
+import "./Base.sol";
 
 contract DEXModule is ModuleBase {
 

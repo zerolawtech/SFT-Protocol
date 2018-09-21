@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "./ModuleBase.sol";
+import "./Base.sol";
 
 
 contract CheckpointModule is ModuleBase {
@@ -41,7 +41,7 @@ contract CheckpointModule is ModuleBase {
     return true;
   }
 
-  function getBindings() external view returns (bool, bool, bool) {
+  function getBindings() external pure returns (bool, bool, bool) {
     return (false, true, true);
   }
 
