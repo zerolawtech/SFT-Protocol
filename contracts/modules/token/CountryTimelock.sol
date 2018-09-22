@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "./Base.sol";
 
 
-contract CountryLockModule is ModuleBase {
+contract CountryLockModule is STModuleBase {
 
   mapping (uint16 => uint256) public countryLock;
 

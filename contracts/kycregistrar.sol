@@ -42,6 +42,7 @@ contract InvestorRegistrar {
     public
     onlyOwner
   {
+    require (_rating > 0);
     _addEntity(_id, 1, _country);
     investorData[_id].rating = _rating;
     investorData[_id].expires = _expires;
@@ -86,9 +87,8 @@ contract InvestorRegistrar {
 
   function getRating (bytes32 _id) public view returns (uint8) {
     Investor storage i = investorData[_id];
-    if (i.expires < now) {
-      return 0;
-    }
+    require (i.expires >= now);
+    require (i.rating > 0);
     return investorData[_id].rating;
   }
   

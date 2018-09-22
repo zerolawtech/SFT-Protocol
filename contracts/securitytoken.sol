@@ -4,7 +4,6 @@ pragma solidity ^0.4.24;
 import "./open-zeppelin/safemath.sol";
 import "./company.sol";
 import "./base.sol";
-import "./interfaces/STModule.sol";
 
 contract SecurityToken is STBase {
 
@@ -19,6 +18,9 @@ contract SecurityToken is STBase {
   mapping (address => uint256) balances; 
   mapping (address => mapping (address => uint256)) allowed;
 
+  event Transfer(address indexed from, address indexed to, uint tokens);
+  event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
+
   constructor(string _name, string _symbol, uint256 _totalSupply) public {
     issuer = IssuingEntity(msg.sender);
     issuerID = issuer.issuerID();
@@ -27,10 +29,7 @@ contract SecurityToken is STBase {
     symbol = _symbol;
     balances[msg.sender] = _totalSupply;
     totalSupply = _totalSupply;
-  }
-
-  function() public payable {
-    revert();
+    emit Transfer(0, msg.sender, _totalSupply);
   }
   
   function circulatingSupply() public view returns (uint256) {
@@ -56,6 +55,25 @@ contract SecurityToken is STBase {
     return allowed[_owner][_spender];
   }
 
+  function checkTransfer(
+    address _from, 
+    address _to, 
+    uint256 _value
+  ) 
+    public 
+    view 
+    returns (bool) 
+  {
+    require (_value > 0);
+    for (uint256 i = 0; i < modules.length; i++) {
+      if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
+        require(STModule(modules[i].module).checkTransfer(_from, _to, _value));
+      }
+    }
+    require (issuer.checkTransfer(address(this), _from, _to, _value));
+    return true;
+  }
+
   function transfer(address _to, uint256 _value) public onlyUnlocked returns (bool) {
     _transfer(msg.sender, _to, _value);
     return true;
@@ -73,7 +91,7 @@ contract SecurityToken is STBase {
     if (
       registrar.idMap(_from) != registrar.idMap(msg.sender) &&
       registrar.idMap(msg.sender) != issuerID &&
-      !activeModules[msg.sender]
+      !isActiveModule(msg.sender)
     )
     {
       allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
@@ -82,114 +100,47 @@ contract SecurityToken is STBase {
     return true;
   }
 
-  function checkTransfer(
-    address _from, 
-    address _to, 
-    uint256 _value
-  ) 
-    public 
-    view 
-    returns (bool) 
-  {
-    for (uint256 i = 0; i < modules.length; i++) {
-      if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-        require(modules[i].module.checkTransfer(_from, _to, _value));
-      }
-    }
-    return true;
-  }
-
   function _transfer(address _from, address _to, uint256 _value) internal {
     if (registrar.idMap(_from) == issuerID) {
       _from = address(issuer);
-    } else {
-      require (checkTransfer(_from, _to, _value));
     }
-    _setBalance(_from, balances[_from].sub(_value));
-    _setBalance(_to, balances[_to].add(_value));
-  }
-
-  function _setBalance(address _owner, uint256 _value) internal {
-    uint256 _old = balances[_owner];
-    balances[_owner] = _value;
+    require (checkTransfer(_from, _to, _value));
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    
     for (uint256 i = 0; i < modules.length; i++) {
-      if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
-        require (modules[i].module.balanceChanged(_owner, _old, _value));
+      if (address(modules[i].module) != 0 && modules[i].transferTokens) {
+        require (STModule(modules[i].module).transferTokens(_from, _to, _value));
       }
     }
+    require (issuer.transferTokens(address(this), _from, _to, _value));
+    emit Transfer(_from, _to, _value);
   }
-
-
-  mapping (address => bool) activeModules;
+  
   function modifyBalance(address _owner, uint256 _value) public returns (bool) {
-    require (activeModules[msg.sender]);
+    require (isActiveModule(msg.sender));
     if (balances[_owner] == _value) return true;
-    uint256 _old = totalSupply;
     if (balances[_owner] > _value) {
       totalSupply = totalSupply.sub(balances[_owner].sub(_value));
     } else {
       totalSupply = totalSupply.add(_value.sub(balances[_owner]));
     }
-    _setBalance(_owner, _value);
+    
+    uint256 _old = balances[_owner];
+    balances[_owner] = _value;
     for (uint256 i = 0; i < modules.length; i++) {
       if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
-        require (modules[i].module.totalSupplyChanged(_old, totalSupply));
+        require (STModule(modules[i].module).balanceChanged(_owner, _old, _value));
       }
     }
+    require (issuer.balanceChanged(address(this), _owner, _old, _value));
   }
 
-  struct Module {
-    STModule module;
-    bool checkTransfer;
-    bool balanceChanged;
-    bool tsChanged;
-  } 
-
-  Module[] modules;
-  function attachModule(address _module) public onlyIssuer returns (bool) {
-    require (!checkModuleAttached(_module));
-    STModule m = STModule(_module);
-    require (m.token() == address(this));
-    (bool _ct, bool _bc, bool _ts) = m.getBindings();
-    bool set;
-    activeModules[_module] = true;
-    for (uint256 i = 0; i < modules.length; i++) {
-      if (address(modules[i].module) == 0) {
-        modules[i].module = m;
-        modules[i].checkTransfer = _ct;
-        modules[i].balanceChanged = _bc;
-        modules[i].tsChanged = _ts;
-        set = true;
-      }
-    }
-    if (!set) {
-      modules.push(Module(m, _ct, _ts, _bc));
-    }
-    return true;
+  function isActiveModule(address _module) public view returns (bool) {
+    if (activeModules[_module]) return true;
+    return issuer.isActiveModule(_module);
   }
-
-  function detachModule(address _module) public returns (bool) {
-    if (_module != msg.sender) {
-      require (registrar.idMap(msg.sender) == issuerID);
-    }
-    for (uint256 i = 0; i < modules.length; i++) {
-      if (address(modules[i].module) == _module) {
-        modules[i].module = STModule(0);
-        activeModules[_module] = false;
-        return true;
-      }
-    }
-    revert();
-  }
-
-  function checkModuleAttached(address _module) public view returns (bool) {
-    for (uint256 i = 0; i < modules.length; i++) {
-      if (address(modules[i].module) == _module) {
-        return true;
-      }
-    }
-    return false;
-  }
+  
 
 
 }

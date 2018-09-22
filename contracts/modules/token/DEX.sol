@@ -4,7 +4,7 @@ pragma solidity ^0.4.24;
 import "../open-zeppelin/safemath.sol";
 import "./Base.sol";
 
-contract DEXModule is ModuleBase {
+contract DEXModule is STModuleBase {
 
   using SafeMath for uint256;
   

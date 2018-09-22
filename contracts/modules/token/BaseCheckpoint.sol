@@ -3,14 +3,14 @@ pragma solidity ^0.4.24;
 import "./Base.sol";
 
 
-contract CheckpointModule is ModuleBase {
+contract CheckpointModule is STModuleBase {
 
   uint256 time;
   uint256 totalSupply;
   mapping (address => uint256) balance;
   mapping (address => bool) zeroBalance;
   
-  constructor(address _token, uint256 _time) ModuleBase(_token) public {
+  constructor(address _token, uint256 _time) STModuleBase(_token) public {
     require (_time >= now);
     totalSupply = token.totalSupply();
     time = _time;
