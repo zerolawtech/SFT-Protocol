@@ -12,7 +12,7 @@ contract DEXModule is STModuleBase {
     uint256 total;
     mapping (bytes32 => uint256) exchange;
   }
-  mapping (address => ExchangeBalance) exchangeBalances; 
+  mapping (address => ExchangeBalance) exchangeBalances;
   
 
   modifier onlyUnlocked() {

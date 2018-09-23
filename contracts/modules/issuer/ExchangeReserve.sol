@@ -81,7 +81,7 @@ contract ExchangeReserve is IssuerModuleBase {
           require (_limit.sub(_count) > countries[_countryTo].reserved[_rating]);
         }
       }
-    } else if (_typeFrom == 3) {
+    } else if (_typeFrom == 3  && _typeTo == 1) {
       require (approved[_idFrom]);
       uint8 _rating = registrar.getRating(_idTo);
       Exchange storage e = countries[_countryTo].exchanges[_idFrom];
@@ -138,7 +138,7 @@ contract ExchangeReserve is IssuerModuleBase {
     }
   }
 
-   function _min(uint64 a, uint64 b) internal pure returns (uint64) {
+  function _min(uint64 a, uint64 b) internal pure returns (uint64) {
     if (a <= b) return a;
     return b;
   }
