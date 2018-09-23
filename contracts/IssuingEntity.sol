@@ -188,17 +188,14 @@ contract IssuingEntity is STBase {
     require (!accounts[_idFrom].restricted);
     require (!accounts[_idTo].restricted);
     if (_idFrom != _idTo) {
-      /*
-        Exchange to exchange transfers are not permitted
-      */
+      /* Exchange to exchange transfers are not permitted */
       require (_typeFrom != 3 || _typeTo != 3);
       Country storage c = countries[_countryTo];
       require (c.allowed);
       if (_typeTo == 1) {
         uint8 _ratingTo = registrar.getRating(_idTo);
         require (_ratingTo >= c.minRating);
-        /*
-          If the receiving investor currently has a 0 balance, we must make sure a
+        /* If the receiving investor currently has a 0 balance, we must make sure a
           slot is available for allocation
         */
         if (accounts[_idTo].balance == 0) {
