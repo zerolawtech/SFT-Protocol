@@ -7,5 +7,3 @@ TODO:
 -shareholder voting
 
  -quorum
- 
- -make everything more modular
