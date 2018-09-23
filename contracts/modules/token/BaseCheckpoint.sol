@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../../open-zeppelin/SafeMath.sol";
-import "../Base.sol";
+import "../STBase.sol";
 
 
 contract CheckpointModule is STModuleBase {
@@ -12,27 +12,27 @@ contract CheckpointModule is STModuleBase {
   uint256 totalSupply;
   mapping (address => uint256) balance;
   mapping (address => bool) zeroBalance;
-  
+
   constructor(address _token, uint256 _time) STModuleBase(_token) public {
     require (_time >= now);
     totalSupply = token.totalSupply();
     time = _time;
   }
-  
+
   function _getBalance(address _owner) internal view returns (uint256) {
     if (balance[_owner] > 0) return balance[_owner];
     if (zeroBalance[_owner]) return 0;
     return token.balanceOf(_owner);
   }
-  
+
   function transferTokens(
     address _from,
-    address _to, 
+    address _to,
     uint256 _value
   )
-    external 
-    onlyParent 
-    returns (bool) 
+    external
+    onlyParent
+    returns (bool)
   {
     if (now < time) return true;
     if (balance[_from] == 0 && !zeroBalance[_from]) {
@@ -50,13 +50,13 @@ contract CheckpointModule is STModuleBase {
   }
 
   function balanceChanged(
-    address _owner, 
-    uint256 _old, 
+    address _owner,
+    uint256 _old,
     uint256 _new
   )
-    external 
-    onlyParent 
-    returns (bool) 
+    external
+    onlyParent
+    returns (bool)
   {
     if (now < time) {
       totalSupply = totalSupply.add(_new).sub(_old);
