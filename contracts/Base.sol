@@ -42,7 +42,7 @@ contract STBase {
   }
 
   function attachModule(address _module) public onlyIssuer returns (bool) {
-    require (!checkModuleAttached(_module));
+    require (!activeModules[_module]);
     require (BaseModule(_module).owner() == address(this));
     (bool _check, bool _transfer, bool _balance) = BaseModule(_module).getBindings();
     activeModules[_module] = true;
@@ -71,15 +71,6 @@ contract STBase {
       }
     }
     revert();
-  }
-
-  function checkModuleAttached(address _module) public view returns (bool) {
-    for (uint256 i = 0; i < modules.length; i++) {
-      if (address(modules[i].module) == _module) {
-        return true;
-      }
-    }
-    return false;
   }
 
 }

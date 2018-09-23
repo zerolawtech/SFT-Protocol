@@ -228,7 +228,7 @@ contract IssuingEntity is STBase {
     uint8 _type = registrar.getType(_id);
     if (a.balance == 0 && _type == 1) {
       c.count[0] = c.count[0].add(1);
-      c.limit[_rating] = c.limit[_rating].add(1);
+      c.count[_rating] = c.count[_rating].add(1);
     }
     if (_value == 0 && _type == 1) {
       c.count[0] = c.count[0].sub(1);
