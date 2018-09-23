@@ -3,6 +3,8 @@ pragma solidity ^0.4.24;
 import "./KYCRegistrar.sol";
 import "./interfaces/STModule.sol";
 
+
+/// @title Security Token Base
 contract STBase {
 
   bytes32 public issuerID;
@@ -15,6 +17,8 @@ contract STBase {
     bool transferTokens;
     bool balanceChanged;
   }
+
+  /* Modules are loaded on an as-needed basis to keep gas costs minimal. */
   Module[] modules;
   mapping (address => bool) activeModules;
 
@@ -23,24 +27,30 @@ contract STBase {
     require (!registrar.isRestricted(issuerID));
     _;
   }
-  
+
   modifier onlyUnlocked () {
     require (!locked || registrar.getId(msg.sender) == issuerID);
     _;
   }
-  
+
+  /// @notice Fallback function
   function () public payable {
     revert();
   }
 
+  /// @notice Lock all non-issuer transferTokens
   function lockTransfers () public onlyIssuer {
     locked = true;
   }
 
+  /// @notice Unlock all non-issuer transferTokens
   function unlockTransfers() public onlyIssuer {
     locked = false;
   }
 
+  /// @notice Attach a module to a token
+  /// @param Address of the deployed module
+  /// @return Returns true on success
   function attachModule(address _module) public onlyIssuer returns (bool) {
     require (!activeModules[_module]);
     require (BaseModule(_module).owner() == address(this));
@@ -59,6 +69,9 @@ contract STBase {
     return true;
   }
 
+  /// @notice Detach a module from a token
+  /// @param Address of the deployed module
+  /// @return Returns true on success
   function detachModule(address _module) public returns (bool) {
     if (_module != msg.sender) {
       require (registrar.getId(msg.sender) == issuerID);
@@ -72,5 +85,4 @@ contract STBase {
     }
     revert();
   }
-
 }
