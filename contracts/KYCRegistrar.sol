@@ -76,7 +76,15 @@ contract KYCRegistrar {
     delete idMap[_addr];
   }
 
-  function generateInvestorID (string _fullName, uint256 _ddmmyyyy, string _taxID) public pure returns (bytes32) {
+  function generateInvestorID (
+    string _fullName, 
+    uint256 _ddmmyyyy, 
+    string _taxID
+  )
+    public 
+    pure 
+    returns (bytes32) 
+  {
     return sha256(abi.encodePacked(_fullName, _ddmmyyyy, _taxID));
   }
 
@@ -105,7 +113,13 @@ contract KYCRegistrar {
   }
   
 
-  function getEntity(address _addr) public view returns (bytes32 _id, uint8 _type, uint16 _country) {
+  function getEntity(
+    address _addr
+  )
+    public 
+    view 
+    returns (bytes32 _id, uint8 _type, uint16 _country) 
+  {
     _id = idMap[_addr];
     return (_id, registry[_id].type_, registry[_id].country);
   }

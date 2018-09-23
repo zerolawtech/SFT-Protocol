@@ -54,15 +54,36 @@ contract IssuingEntity is STBase {
     return accounts[_id].balance;
   }
 
-  function getCountryInvestorCount(uint16 _country, uint8 _rating) public view returns (uint64) {
+  function getCountryInvestorCount(
+    uint16 _country, 
+    uint8 _rating
+  ) 
+    public 
+    view 
+    returns (uint64) 
+  {
     return countries[_country].count[_rating];
   }
 
-  function getCountryInvestorLimit(uint16 _country, uint8 _rating) public view returns (uint64) {
+  function getCountryInvestorLimit(
+    uint16 _country, 
+    uint8 _rating
+  )
+    public 
+    view 
+    returns (uint64) 
+  {
     return countries[_country].limit[_rating];
   }
 
-  function getCountryInfo(uint16 _country, uint8 _rating) public view returns (uint64 _count, uint64 _limit) {
+  function getCountryInfo(
+    uint16 _country, 
+    uint8 _rating
+  )
+    public 
+    view 
+    returns (uint64 _count, uint64 _limit) 
+  {
     return (countries[_country].count[_rating], countries[_country].limit[_rating]);
   }
 
@@ -152,7 +173,17 @@ contract IssuingEntity is STBase {
   }
 
 
-  function transferTokens(address _token, address _from, address _to, uint256 _value) external onlyUnlocked onlyToken returns (bool) {
+  function transferTokens(
+    address _token, 
+    address _from, 
+    address _to, 
+    uint256 _value
+  )
+    external 
+    onlyUnlocked 
+    onlyToken 
+    returns (bool) 
+  {
     bytes32 _idFrom = registrar.getId(_from);
     bytes32 _idTo = registrar.getId(_to);
     _setBalance(_idFrom, accounts[_idFrom].balance.sub(_value));
