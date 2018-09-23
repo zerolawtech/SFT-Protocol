@@ -12,7 +12,8 @@ contract DEXModule is STModuleBase {
     uint256 total;
     mapping (bytes32 => uint256) exchange;
   }
-  mapping (address => ExchangeBalance) exchangeBalances;
+  mapping (address => ExchangeBalance) balances;
+  mapping (bytes32 => bool) approved;
   
 
   modifier onlyUnlocked() {
@@ -33,22 +34,44 @@ contract DEXModule is STModuleBase {
     view 
     returns (bool) 
   {
-    ExchangeBalance storage e = exchangeBalances[_from];
+    ExchangeBalance storage e = balances[_from];
     require(token.balanceOf(_from).sub(_value) >= e.total);
     return true;
   }
 
-  function dexApprove(bytes32 _id, uint256 _value) public returns (bool) {
-    require (registrar.getType(_id) == 3);
-    _dexLock(_id, msg.sender, _value);
-    return true;
+  function dexBalanceOf(
+    address _owner, 
+    bytes32 _exchangeID
+  )
+    public 
+    view 
+    returns (uint256) 
+  {
+    return balances[_owner].exchange[_exchangeID];
   }
-  
+
   function _dexLock(bytes32 _id, address _owner, uint256 _value) internal {
-    ExchangeBalance storage e = exchangeBalances[_owner];
+    ExchangeBalance storage e = balances[_owner];
     require (token.balanceOf(msg.sender) > e.total.add(_value));
     e.total = e.total.add(_value);
     e.exchange[_id] = e.exchange[_id].add(_value);
+  }
+
+  function _dexUnlock(bytes32 _id, address _owner, uint256 _value) internal {
+    ExchangeBalance storage e = balances[_owner];
+    e.exchange[_id] = e.exchange[_id].sub(_value);
+    e.total = e.total.sub(_value);
+  }
+
+  function setApproved(bytes32 _id, bool _approved) public onlyIssuer {
+    approved[_id] = _approved;
+  }
+
+  function dexApprove(bytes32 _id, uint256 _value) public returns (bool) {
+    require (registrar.getType(_id) == 3);
+    require(approved[_id]);
+    _dexLock(_id, msg.sender, _value);
+    return true;
   }
   
   function dexRelease(address _owner, uint256 _value) public returns (bool) {
@@ -57,23 +80,17 @@ contract DEXModule is STModuleBase {
     return true;
   }
   
-  function issuerDexRelease(
+  function otherDexRelease(
     bytes32 _id, 
     address _owner, 
     uint256 _value
   ) 
-    public 
-    onlyIssuer 
+    public  
     returns (bool) 
   {
+    require(!approved[_id]);
     _dexUnlock(_id, _owner, _value);
     return true;
-  }
-  
-  function _dexUnlock(bytes32 _id, address _owner, uint256 _value) internal {
-    ExchangeBalance storage e = exchangeBalances[_owner];
-    e.exchange[_id] = e.exchange[_id].sub(_value);
-    e.total = e.total.sub(_value);
   }
   
   function dexTransfer(
@@ -87,6 +104,7 @@ contract DEXModule is STModuleBase {
     returns (bool) 
   {
     bytes32 _id = registrar.getId(msg.sender);
+    require(approved[_id]);
     _dexUnlock(_id, _from, _value);
     token.transferFrom(_from, _to, _value);
     if (_locked) {
@@ -95,8 +113,6 @@ contract DEXModule is STModuleBase {
     return true;
   }
   
-  function dexBalanceOf(address _owner, bytes32 _exchangeID) public view returns (uint256) {
-    return exchangeBalances[_owner].exchange[_exchangeID];
-  }
+  
 
 }
