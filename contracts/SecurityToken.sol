@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 
 import "./open-zeppelin/SafeMath.sol";
 import "./IssuingEntity.sol";
-import "./Base.sol";
+import "./STBase.sol";
 
 contract SecurityToken is STBase {
 
@@ -15,7 +15,7 @@ contract SecurityToken is STBase {
   string public symbol;
   uint256 public totalSupply;
 
-  mapping (address => uint256) balances; 
+  mapping (address => uint256) balances;
   mapping (address => mapping (address => uint256)) allowed;
 
   event Transfer(address indexed from, address indexed to, uint tokens);
@@ -31,11 +31,11 @@ contract SecurityToken is STBase {
     totalSupply = _totalSupply;
     emit Transfer(0, msg.sender, _totalSupply);
   }
-  
+
   function circulatingSupply() public view returns (uint256) {
     return totalSupply.sub(balanceOf(address(issuer)));
   }
-  
+
   function treasurySupply() public view returns (uint256) {
     return balanceOf(address(issuer));
   }
@@ -56,13 +56,13 @@ contract SecurityToken is STBase {
   }
 
   function checkTransfer(
-    address _from, 
-    address _to, 
+    address _from,
+    address _to,
     uint256 _value
-  ) 
-    public 
-    view 
-    returns (bool) 
+  )
+    public
+    view
+    returns (bool)
   {
     require (_value > 0);
     for (uint256 i = 0; i < modules.length; i++) {
@@ -107,7 +107,7 @@ contract SecurityToken is STBase {
     require (checkTransfer(_from, _to, _value));
     balances[_from] = balances[_from].sub(_value);
     balances[_to] = balances[_to].add(_value);
-    
+
     for (uint256 i = 0; i < modules.length; i++) {
       if (address(modules[i].module) != 0 && modules[i].transferTokens) {
         require (STModule(modules[i].module).transferTokens(_from, _to, _value));
@@ -116,7 +116,7 @@ contract SecurityToken is STBase {
     require (issuer.transferTokens(address(this), _from, _to, _value));
     emit Transfer(_from, _to, _value);
   }
-  
+
   function modifyBalance(address _owner, uint256 _value) public returns (bool) {
     require (isActiveModule(msg.sender));
     if (balances[_owner] == _value) return true;
@@ -125,7 +125,7 @@ contract SecurityToken is STBase {
     } else {
       totalSupply = totalSupply.add(_value.sub(balances[_owner]));
     }
-    
+
     uint256 _old = balances[_owner];
     balances[_owner] = _value;
     for (uint256 i = 0; i < modules.length; i++) {
@@ -140,7 +140,7 @@ contract SecurityToken is STBase {
     if (activeModules[_module]) return true;
     return issuer.isActiveModule(_module);
   }
-  
+
 
 
 }
