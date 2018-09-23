@@ -1,9 +1,12 @@
 pragma solidity ^0.4.24;
 
-import "./Base.sol";
+import "../../open-zeppelin/SafeMath.sol";
+import "../Base.sol";
 
 
 contract CheckpointModule is STModuleBase {
+
+  using SafeMath for uint256;
 
   uint256 time;
   uint256 totalSupply;
@@ -22,21 +25,49 @@ contract CheckpointModule is STModuleBase {
     return token.balanceOf(_owner);
   }
   
-  function balanceChanged(address _owner, uint256 _old, uint256) external onlyToken returns (bool) {
+  function transferTokens(
+    address _from,
+    address _to, 
+    uint256 _value
+  )
+    external 
+    onlyParent 
+    returns (bool) 
+  {
     if (now < time) return true;
+    if (balance[_from] == 0 && !zeroBalance[_from]) {
+      balance[_from] = token.balanceOf(_from).add(_value);
+    }
+    if (balance[_to] == 0 && !zeroBalance[_to]) {
+      uint256 _bal = token.balanceOf(_to).sub(_value);
+      if (_bal == 0) {
+        zeroBalance[_to] == true;
+      } else {
+        balance[_to] = _bal;
+      }
+    }
+    return true;
+  }
+
+  function balanceChanged(
+    address _owner, 
+    uint256 _old, 
+    uint256 _new
+  )
+    external 
+    onlyParent 
+    returns (bool) 
+  {
+    if (now < time) {
+      totalSupply = totalSupply.add(_new).sub(_old);
+      return true;
+    }
     if (balance[_owner] > 0) return true;
     if (zeroBalance[_owner]) return true;
     if (_old > 0) {
       balance[_owner] = _old;
     } else {
       zeroBalance[_owner] = true;
-    }
-    return true;
-  }
-  
-  function totalSupplyChanged(uint256, uint256 _new) external onlyToken returns (bool) {
-    if (now < time) {
-      totalSupply = _new;
     }
     return true;
   }

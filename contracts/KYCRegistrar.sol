@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "./open-zeppelin/safemath.sol";
+import "./open-zeppelin/SafeMath.sol";
 
-contract InvestorRegistrar {
+contract KYCRegistrar {
 
   using SafeMath for uint256;
 
@@ -20,8 +20,7 @@ contract InvestorRegistrar {
   }
   
   mapping (bytes32 => Entity) registry;
-
-  mapping (address => bytes32) public idMap;
+  mapping (address => bytes32) idMap;
   mapping (bytes32 => Investor) investorData;
   
   modifier onlyOwner () {
@@ -91,13 +90,24 @@ contract InvestorRegistrar {
     require (i.rating > 0);
     return investorData[_id].rating;
   }
-  
+
+  function getId(address _addr) public view returns (bytes32) {
+    return idMap[_addr];
+  }
+
+  function getType (bytes32 _id) public view returns (uint8) {
+    return registry[_id].type_;
+  }
+
+
   function getCountry (bytes32 _id) public view returns (uint16) {
     return registry[_id].country;
   }
   
-  function getType (bytes32 _id) public view returns (uint8) {
-    return registry[_id].type_;
+
+  function getEntity(address _addr) public view returns (bytes32 _id, uint8 _type, uint16 _country) {
+    _id = idMap[_addr];
+    return (_id, registry[_id].type_, registry[_id].country);
   }
 
 }

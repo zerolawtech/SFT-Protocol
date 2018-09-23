@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
 
-import "./open-zeppelin/safemath.sol";
-import "./company.sol";
-import "./base.sol";
+import "./open-zeppelin/SafeMath.sol";
+import "./IssuingEntity.sol";
+import "./Base.sol";
 
 contract SecurityToken is STBase {
 
@@ -24,7 +24,7 @@ contract SecurityToken is STBase {
   constructor(string _name, string _symbol, uint256 _totalSupply) public {
     issuer = IssuingEntity(msg.sender);
     issuerID = issuer.issuerID();
-    registrar = InvestorRegistrar(issuer.registrar());
+    registrar = KYCRegistrar(issuer.registrar());
     name = _name;
     symbol = _symbol;
     balances[msg.sender] = _totalSupply;
@@ -89,8 +89,8 @@ contract SecurityToken is STBase {
     returns (bool)
   {
     if (
-      registrar.idMap(_from) != registrar.idMap(msg.sender) &&
-      registrar.idMap(msg.sender) != issuerID &&
+      registrar.getId(_from) != registrar.getId(msg.sender) &&
+      registrar.getId(msg.sender) != issuerID &&
       !isActiveModule(msg.sender)
     )
     {
@@ -101,7 +101,7 @@ contract SecurityToken is STBase {
   }
 
   function _transfer(address _from, address _to, uint256 _value) internal {
-    if (registrar.idMap(_from) == issuerID) {
+    if (registrar.getId(_from) == issuerID) {
       _from = address(issuer);
     }
     require (checkTransfer(_from, _to, _value));

@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "./Base.sol";
+import "../Base.sol";
 
 
 contract CountryLockModule is STModuleBase {
@@ -11,9 +11,9 @@ contract CountryLockModule is STModuleBase {
     countryLock[_country] = _epochTime;
   }
 
-  function checkTransfer(address _from, address _to, uint256 _value) public view returns (bool) {
-    bytes32 _idFrom = registrar.idMap(_from);
-    bytes32 _idTo = registrar.idMap(_to);
+  function checkTransfer(address _from, address _to, uint256) external view returns (bool) {
+    bytes32 _idFrom = registrar.getId(_from);
+    bytes32 _idTo = registrar.getId(_to);
     require (countryLock[registrar.getCountry(_idFrom)] < now);
     require (countryLock[registrar.getCountry(_idTo)] < now);
   }

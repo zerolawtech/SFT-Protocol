@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "./open-zeppelin/safemath.sol";
-import "./securitytoken.sol";
-import "./base.sol";
+import "./open-zeppelin/SafeMath.sol";
+import "./SecurityToken.sol";
+import "./Base.sol";
 
 
 contract IssuingEntity is STBase {
@@ -27,7 +27,7 @@ contract IssuingEntity is STBase {
   mapping (uint16 => Country) countries;
   mapping (bytes32 => Account) accounts;
   mapping (address => bool) tokens;
-  mapping (string => bytes32) public documentHashes;
+  mapping (string => bytes32) documentHashes;
 
   event NewDocumentHash(string document, bytes32 hash);
 
@@ -37,13 +37,21 @@ contract IssuingEntity is STBase {
   }
 
   constructor(address _registrar) public {
-    registrar = InvestorRegistrar(_registrar);
-    issuerID = registrar.idMap(msg.sender);
+    registrar = KYCRegistrar(_registrar);
+    issuerID = registrar.getId(msg.sender);
     require (registrar.getType(issuerID) == 2);
   }
 
   function totalInvestors() public view returns (uint64) {
     return investorCount[0];
+  }
+
+  function totalInvestorLimit() public view returns (uint64) {
+    return investorLimit[0];
+  }
+
+  function balanceOf(bytes32 _id) public view returns (uint256) {
+    return accounts[_id].balance;
   }
 
   function getCountryInvestorCount(uint16 _country, uint8 _rating) public view returns (uint64) {
@@ -52,6 +60,10 @@ contract IssuingEntity is STBase {
 
   function getCountryInvestorLimit(uint16 _country, uint8 _rating) public view returns (uint64) {
     return countries[_country].limit[_rating];
+  }
+
+  function getCountryInfo(uint16 _country, uint8 _rating) public view returns (uint64 _count, uint64 _limit) {
+    return (countries[_country].count[_rating], countries[_country].limit[_rating]);
   }
 
   function setInvestorLimits(uint64[] _limits) public onlyIssuer {
@@ -100,8 +112,8 @@ contract IssuingEntity is STBase {
     returns (bool)
   {
     require (_value > 0);
-    bytes32 _idFrom = registrar.idMap(_from);
-    bytes32 _idTo = registrar.idMap(_to);
+    (bytes32 _idFrom, uint8 _typeFrom, uint16 _countryFrom) = registrar.getEntity(_from);
+    (bytes32 _idTo, uint8 _typeTo, uint16 _countryTo) = registrar.getEntity(_to);
     require (_idTo != issuerID);
     require (!registrar.isRestricted(issuerID));
     require (!registrar.isRestricted(_idFrom));
@@ -109,23 +121,23 @@ contract IssuingEntity is STBase {
     require (!accounts[_idFrom].restricted);
     require (!accounts[_idTo].restricted);
     if (_idFrom != _idTo) {
-      require (registrar.getType(_idTo) != 3 || registrar.getType(_idTo) != 3);
-      Country storage c = countries[registrar.getCountry(_idTo)];
+      require (_typeFrom != 3 || _typeTo != 3);
+      Country storage c = countries[_countryTo];
       require (c.allowed);
-      if (registrar.getType(_idTo) == 1) {
+      if (_typeTo == 1) {
         uint8 _rating = registrar.getRating(_idTo);
         require (_rating >= c.minRating);
         if (accounts[_idTo].balance == 0) {
-          if (accounts[_idFrom].balance > _value) {
+          if (accounts[_idFrom].balance > _value || _typeFrom != 1) {
             require (investorLimit[0] == 0 || investorCount[0] < investorLimit[0]);
           }
           if (registrar.getRating(_idFrom) != _rating || accounts[_idFrom].balance > _value) {
             require (investorLimit[_rating] == 0 || investorCount[_rating] < investorLimit[_rating]);
           }
-          if (registrar.getCountry(_idFrom) != registrar.getCountry(_idTo) || accounts[_idFrom].balance > _value) {
+          if (_countryFrom != _countryTo || accounts[_idFrom].balance > _value) {
             require (c.limit[0] == 0 || c.count[0] < c.limit[0]); 
           }
-          if (registrar.getCountry(_idFrom) != registrar.getCountry(_idTo) || registrar.getRating(_idFrom) != _rating || accounts[_idFrom].balance > _value) {
+          if (_countryFrom != _countryTo || registrar.getRating(_idFrom) != _rating || accounts[_idFrom].balance > _value) {
             require (c.limit[_rating] == 0 || c.count[_rating] < c.limit[_rating]);
           }
         }
@@ -141,8 +153,8 @@ contract IssuingEntity is STBase {
 
 
   function transferTokens(address _token, address _from, address _to, uint256 _value) external onlyUnlocked onlyToken returns (bool) {
-    bytes32 _idFrom = registrar.idMap(_from);
-    bytes32 _idTo = registrar.idMap(_to);
+    bytes32 _idFrom = registrar.getId(_from);
+    bytes32 _idTo = registrar.getId(_to);
     _setBalance(_idFrom, accounts[_idFrom].balance.sub(_value));
     _setBalance(_idTo, accounts[_idTo].balance.add(_value));
     for (uint256 i = 0; i < modules.length; i++) {
@@ -164,7 +176,7 @@ contract IssuingEntity is STBase {
     onlyToken
     returns (bool) 
   {
-    bytes32 _id = registrar.idMap(_owner);
+    bytes32 _id = registrar.getId(_owner);
     if (_new > _old) {
       _setBalance(_id, accounts[_id].balance.add(_new.sub(_old)));
     } else {
@@ -209,10 +221,14 @@ contract IssuingEntity is STBase {
     return _token;
   }
   
-  function setDocumentHash(string _document, bytes32 _hash) public onlyIssuer {
-    require (documentHashes[_document] == 0);
-    documentHashes[_document] = _hash;
-    emit NewDocumentHash(_document, _hash);
+  function setDocumentHash(string _documentId, bytes32 _hash) public onlyIssuer {
+    require (documentHashes[_documentId] == 0);
+    documentHashes[_documentId] = _hash;
+    emit NewDocumentHash(_documentId, _hash);
+  }
+
+  function getDocumentHash(string _documentId) public view returns (bytes32) {
+    return documentHashes[_documentId];
   }
 
   function isActiveModule(address _module) public view returns (bool) {

@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 
-import "./kycregistrar.sol";
+import "./KYCRegistrar.sol";
 import "./interfaces/STModule.sol";
 
 contract STBase {
 
   bytes32 public issuerID;
-  InvestorRegistrar public registrar;
+  KYCRegistrar public registrar;
   bool public locked;
 
   struct Module {
@@ -19,13 +19,13 @@ contract STBase {
   mapping (address => bool) activeModules;
 
   modifier onlyIssuer () {
-    require (registrar.idMap(msg.sender) == issuerID);
+    require (registrar.getId(msg.sender) == issuerID);
     require (!registrar.isRestricted(issuerID));
     _;
   }
   
   modifier onlyUnlocked () {
-    require (!locked || registrar.idMap(msg.sender) == issuerID);
+    require (!locked || registrar.getId(msg.sender) == issuerID);
     _;
   }
   
@@ -61,7 +61,7 @@ contract STBase {
 
   function detachModule(address _module) public returns (bool) {
     if (_module != msg.sender) {
-      require (registrar.idMap(msg.sender) == issuerID);
+      require (registrar.getId(msg.sender) == issuerID);
     }
     for (uint256 i = 0; i < modules.length; i++) {
       if (modules[i].module == _module) {

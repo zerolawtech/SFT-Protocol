@@ -1,7 +1,8 @@
 pragma solidity ^0.4.24;
 
+import "../../open-zeppelin/SafeMath.sol";
 import "./BaseCheckpoint.sol";
-import "../open-zeppelin/safemath.sol";
+
 
 contract DividendModule is CheckpointModule {
 
