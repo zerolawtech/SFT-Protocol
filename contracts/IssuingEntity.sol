@@ -44,6 +44,8 @@ contract IssuingEntity is STBase {
     _;
   }
 
+  /// @notice Issuing entity constructor
+  /// @param _registrar Address of the registrar
   constructor(address _registrar) public {
     registrar = KYCRegistrar(_registrar);
     issuerID = registrar.getId(msg.sender);
@@ -51,20 +53,20 @@ contract IssuingEntity is STBase {
   }
 
   /// @notice Fetch count of all investors, regardless of rating
-  /// @return Returns integer
+  /// @return integer
   function totalInvestors() public view returns (uint64) {
     return investorCount[0];
   }
 
   /// @notice Fetch limit of all investors, regardless of rating
-  /// @return Returns integer
+  /// @return integer
   function totalInvestorLimit() public view returns (uint64) {
     return investorLimit[0];
   }
 
   /// @notice Fetch balance of issuer
   /// @param _id Account to query
-  /// @return Returns integer
+  /// @return integer
   function balanceOf(bytes32 _id) public view returns (uint256) {
     return accounts[_id].balance;
   }
@@ -72,7 +74,7 @@ contract IssuingEntity is STBase {
   /// @notice Fetch count of investors by country and rating
   /// @param _country Country to query
   /// @param _rating Rating to query
-  /// @return Returns integer
+  /// @return integer
   function getCountryInvestorCount(
     uint16 _country,
     uint8 _rating
@@ -87,7 +89,7 @@ contract IssuingEntity is STBase {
   /// @notice Fetch limit of investors by country and rating
   /// @param _country Country to query
   /// @param _rating Rating to query
-  /// @return Returns integer
+  /// @return integer
   function getCountryInvestorLimit(
     uint16 _country,
     uint8 _rating
@@ -103,7 +105,7 @@ contract IssuingEntity is STBase {
   /// in one call to preserve gas
   /// @param _country Country to query
   /// @param _rating Rating to query
-  /// @return Returns integer
+  /// @return integer
   function getCountryInfo(
     uint16 _country,
     uint8 _rating
@@ -167,7 +169,7 @@ contract IssuingEntity is STBase {
   /// @param _from Sender
   /// @param _to Recipient
   /// @param _value Amount being transferred
-  /// @return Returns true on success
+  /// @return boolean
   function checkTransfer(
     address _token,
     address _from,
@@ -243,7 +245,7 @@ contract IssuingEntity is STBase {
   /// @param _from Sender
   /// @param _to Recipient
   /// @param _value Amount being transferred
-  /// @return Returns true on success
+  /// @return boolean
   function transferTokens(
     address _token,
     address _from,
@@ -272,7 +274,7 @@ contract IssuingEntity is STBase {
   /// @param _owner Token owner
   /// @param _old Old balance
   /// @param _new New balance
-  /// @return Returns true on success
+  /// @return boolean
   function balanceChanged(
     address _token,
     address _owner,
@@ -301,7 +303,7 @@ contract IssuingEntity is STBase {
   /// @notice Directly set a balance at the issuing entity level
   /// @param _id Account to modify
   /// @param _value New balance
-  /// @return Returns true on success
+  /// @return boolean
   function _setBalance(bytes32 _id, uint256 _value) internal {
     Account storage a = accounts[_id];
     Country storage c = countries[registrar.getCountry(_id)];
@@ -322,7 +324,7 @@ contract IssuingEntity is STBase {
   /// @param string _name Name of the token
   /// @param _symbol Unique ticker symbol
   /// @param _totalSupply Total supply
-  /// @return Returns address of created token
+  /// @return Address of created token
   function issueNewToken(
     string _name,
     string _symbol,
@@ -349,14 +351,14 @@ contract IssuingEntity is STBase {
 
   /// @notice Fetch document hash
   /// @param _documentId Document ID to fetch
-  /// @return Returns string
+  /// @return string
   function getDocumentHash(string _documentId) public view returns (bytes32) {
     return documentHashes[_documentId];
   }
 
   /// @notice Determines if a module active on this issuing entity
   /// @param address Deployed module address
-  /// @return Returns boolean
+  /// @return boolean
   function isActiveModule(address _module) public view returns (bool) {
     return activeModules[_module];
   }
