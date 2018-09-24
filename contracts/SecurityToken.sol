@@ -18,8 +18,9 @@ contract SecurityToken is STBase {
   mapping (address => uint256) balances; 
   mapping (address => mapping (address => uint256)) allowed;
 
-  event Transfer(address indexed from, address indexed to, uint tokens);
-  event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
+  event Transfer(address from, address to, uint tokens);
+  event Approval(address tokenOwner, address spender, uint tokens);
+  event BalanceChanged(address owner, uint256 oldBalance, uint256 newBalance);
 
   constructor(string _name, string _symbol, uint256 _totalSupply) public {
     issuer = IssuingEntity(msg.sender);
@@ -139,6 +140,7 @@ contract SecurityToken is STBase {
       }
     }
     require (issuer.balanceChanged(address(this), _owner, _old, _value));
+    emit BalanceChanged(_owner, _old, _value);
   }
 
   function isActiveModule(address _module) public view returns (bool) {
