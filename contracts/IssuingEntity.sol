@@ -172,10 +172,16 @@ contract IssuingEntity is STBase {
             _check = registrar.getRating(_idFrom) != _rating;
           }
           if (_check) {
-            require (investorLimit[_rating] == 0 || investorCount[_rating] < investorLimit[_rating]);
+            require (
+              investorLimit[_rating] == 0 || 
+              investorCount[_rating] < investorLimit[_rating]
+            );
           }
           if (_check || _countryFrom != _countryTo) {
-            require (c.limit[_rating] == 0 || c.count[_rating] < c.limit[_rating]);
+            require (
+              c.limit[_rating] == 0 || 
+              c.count[_rating] < c.limit[_rating]
+            );
           }
         }
       }
@@ -184,7 +190,15 @@ contract IssuingEntity is STBase {
     return true;
   }
 
-  function _moduleCheckTransfer(address _token, address _from, address _to, uint256 _value) internal view {
+  function _moduleCheckTransfer(
+    address _token,
+    address _from,
+    address _to,
+    uint256 _value
+  )
+    internal
+    view
+  {
     for (uint256 i = 0; i < modules.length; i++) {
       if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
         require(IssuerModule(modules[i].module).checkTransfer(_token, _from, _to, _value));
