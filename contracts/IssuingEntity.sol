@@ -150,43 +150,47 @@ contract IssuingEntity is STBase {
     require (_value > 0);
     (bytes32 _idFrom, uint8 _typeFrom, uint16 _countryFrom) = registrar.getEntity(_from);
     (bytes32 _idTo, uint8 _typeTo, uint16 _countryTo) = registrar.getEntity(_to);
-    require (_idTo != issuerID);
-    require (registrar.isPermitted(issuerID));
-    require (registrar.isPermitted(_idFrom));
-    require (registrar.isPermitted(_idTo));
+    require (registrar.arePermitted(issuerID, _idFrom, _idTo));
     require (!accounts[_idFrom].restricted);
     require (!accounts[_idTo].restricted);
     if (_idFrom != _idTo) {
       require (_typeFrom != 3 || _typeTo != 3);
-      Country storage c = countries[_countryTo];
-      require (c.allowed);
       if (_typeTo == 1) {
+        Country storage c = countries[_countryTo];
         uint8 _rating = registrar.getRating(_idTo);
+        require (c.allowed);
         require (_rating >= c.minRating);
         if (accounts[_idTo].balance == 0) {
-          if (accounts[_idFrom].balance > _value || _typeFrom != 1) {
+          bool _check = _typeFrom != 1 || accounts[_idFrom].balance > _value;
+          if (_check) {
             require (investorLimit[0] == 0 || investorCount[0] < investorLimit[0]);
           }
-          if (registrar.getRating(_idFrom) != _rating || accounts[_idFrom].balance > _value) {
-            require (investorLimit[_rating] == 0 || investorCount[_rating] < investorLimit[_rating]);
-          }
-          if (_countryFrom != _countryTo || accounts[_idFrom].balance > _value) {
+          if (_check || _countryFrom != _countryTo) {
             require (c.limit[0] == 0 || c.count[0] < c.limit[0]); 
           }
-          if (_countryFrom != _countryTo || registrar.getRating(_idFrom) != _rating || accounts[_idFrom].balance > _value) {
+          if (!_check) {
+            _check = registrar.getRating(_idFrom) != _rating;
+          }
+          if (_check) {
+            require (investorLimit[_rating] == 0 || investorCount[_rating] < investorLimit[_rating]);
+          }
+          if (_check || _countryFrom != _countryTo) {
             require (c.limit[_rating] == 0 || c.count[_rating] < c.limit[_rating]);
           }
         }
       }
     }
+    _moduleCheckTransfer(_token, _from, _to, _value);
+    return true;
+  }
+
+  function _moduleCheckTransfer(address _token, address _from, address _to, uint256 _value) internal view {
     for (uint256 i = 0; i < modules.length; i++) {
       if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
         require(IssuerModule(modules[i].module).checkTransfer(_token, _from, _to, _value));
       }
     }
-    return true;
   }
-
 
   function transferTokens(
     address _token, 

@@ -156,6 +156,21 @@ contract KYCRegistrar {
     return true;
   }
 
+  function arePermitted(
+    bytes32 _issuer,
+    bytes32 _from,
+    bytes32 _to
+  )
+    external 
+    view 
+    returns (bool)
+  {
+    isPermitted(_issuer);
+    isPermitted(_from);
+    isPermitted(_to);
+    return true;
+  }
+
   function getRating(bytes32 _id) public view returns (uint8) {
     Investor storage i = investorData[_id];
     require (i.expires >= now);
