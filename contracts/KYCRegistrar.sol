@@ -24,16 +24,22 @@ contract KYCRegistrar {
   mapping (address => bytes32) idMap;
   mapping (bytes32 => Investor) investorData;
 
-  event NewInvestor (
+  event NewInvestor(
     bytes32 id, 
     uint16 country, 
     uint16 region, 
     uint8 rating, 
     uint40 expires
   );
-  event NewIssuer (bytes32 id, uint16 country);
-  event NewExchange (bytes32 id, uint16 country);
-  event EntityRestriction (bytes32 id, uint8 type_, bool restricted);
+  event UpdatedInvestor(
+    bytes32 id, 
+    uint16 region, 
+    uint8 rating, 
+    uint40 expires
+  );
+  event NewIssuer(bytes32 id, uint16 country);
+  event NewExchange(bytes32 id, uint16 country);
+  event EntityRestriction(bytes32 id, uint8 type_, bool restricted);
   event NewRegisteredAddress(bytes32 id, uint8 type_, address addr);
   event UnregisteredAddress(bytes32 id, uint8 type_, address addr);
   
@@ -80,21 +86,37 @@ contract KYCRegistrar {
     e.type_ = _type;
     e.country = _country;
   }
+
+  function updateInvestor(
+    bytes32 _id, 
+    uint16 _region, 
+    uint8 _rating, 
+    uint40 _expires
+  )
+    public
+    onlyOwner
+  {
+    require (registry[_id].type_ == 1);
+    investorData[_id].region = _region;
+    investorData[_id].rating = _rating;
+    investorData[_id].expires = _expires;
+    emit UpdatedInvestor(_id, _region, _rating, _expires);
+  }
   
-  function setRestricted (bytes32 _id, bool _restricted)  public onlyOwner {
+  function setRestricted(bytes32 _id, bool _restricted)  public onlyOwner {
     require (registry[_id].type_ != 0);
     registry[_id].restricted = _restricted;
     emit EntityRestriction(_id, registry[_id].type_, _restricted);
   }
 
-  function registerAddress (address _addr, bytes32 _id) public onlyOwner {
+  function registerAddress(address _addr, bytes32 _id) public onlyOwner {
     require (idMap[_addr] == 0);
     require (registry[_id].type_ != 0);
     idMap[_addr] = _id;
     emit NewRegisteredAddress(_id, registry[_id].type_, _addr);
   }
   
-  function unregisterAddress (address _addr) public onlyOwner {
+  function unregisterAddress(address _addr) public onlyOwner {
     require (idMap[_addr] != 0);
     emit UnregisteredAddress(
       idMap[_addr], 
@@ -104,7 +126,7 @@ contract KYCRegistrar {
     delete idMap[_addr];
   }
 
-  function generateInvestorID (
+  function generateInvestorID(
     string _fullName, 
     uint256 _ddmmyyyy, 
     string _taxID
@@ -116,11 +138,11 @@ contract KYCRegistrar {
     return sha256(abi.encodePacked(_fullName, _ddmmyyyy, _taxID));
   }
 
-  function isRestricted (bytes32 _id) public view returns (bool) {
+  function isRestricted(bytes32 _id) public view returns (bool) {
     return (registry[_id].type_ == 0 || registry[_id].restricted);
   }
 
-  function getRating (bytes32 _id) public view returns (uint8) {
+  function getRating(bytes32 _id) public view returns (uint8) {
     Investor storage i = investorData[_id];
     require (i.expires >= now);
     require (i.rating > 0);
@@ -131,16 +153,16 @@ contract KYCRegistrar {
     return idMap[_addr];
   }
 
-  function getType (bytes32 _id) public view returns (uint8) {
+  function getType(bytes32 _id) public view returns (uint8) {
     return registry[_id].type_;
   }
 
 
-  function getCountry (bytes32 _id) public view returns (uint16) {
+  function getCountry(bytes32 _id) public view returns (uint16) {
     return registry[_id].country;
   }
   
-  function getEntity (
+  function getEntity(
     address _addr
   )
     public 
@@ -159,11 +181,11 @@ contract KYCRegistrar {
     );
   }
 
-  function getRegion (bytes32 _id) public view returns (uint16) {
+  function getRegion(bytes32 _id) public view returns (uint16) {
     return investorData[_id].region;
   }
 
-  function getInvestor (
+  function getInvestor(
     bytes32 _id
   )
     public 
