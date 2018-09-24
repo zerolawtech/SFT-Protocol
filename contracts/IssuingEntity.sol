@@ -35,6 +35,8 @@ contract IssuingEntity is STBase {
     bytes32 to, 
     uint256 value
   );
+  event CountryApproved(uint16 country, uint8 minRating, uint64 limit);
+  event CountryBlocked(uint16 country);
   event NewDocumentHash(string document, bytes32 hash);
 
   modifier onlyToken() {
@@ -101,23 +103,29 @@ contract IssuingEntity is STBase {
     }
   }
 
-  function setCountry(
-    uint16 _country, 
-    uint8 _minRating, 
-    uint64 _limit
+  function setCountries(
+    uint16[] _country, 
+    uint8[] _minRating, 
+    uint64[] _limit
   ) 
     public 
     onlyIssuer 
   {
-    require (_minRating != 0);
-    Country storage c = countries[_country];
-    c.allowed = true;
-    c.minRating = _minRating;
-    c.limit[0] = _limit;
+    require (_country.length == _minRating.length);
+    require (_country.length == _limit.length);
+    for (uint256 i = 0; i < _country.length; i++) {
+      require (_minRating[i] != 0);
+      Country storage c = countries[_country[i]];
+      c.allowed = true;
+      c.minRating = _minRating[i];
+      c.limit[0] = _limit[i];
+      emit CountryApproved(_country[i], _minRating[i], _limit[i]);
+    }
   }
 
   function blockCountry(uint16 _country) public onlyIssuer {
     countries[_country].allowed = false;
+    emit CountryBlocked(_country);
   }
 
   function setCountryInvestorLimits(
