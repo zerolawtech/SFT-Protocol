@@ -136,9 +136,9 @@ contract IssuingEntity is STBase {
     (bytes32 _idFrom, uint8 _typeFrom, uint16 _countryFrom) = registrar.getEntity(_from);
     (bytes32 _idTo, uint8 _typeTo, uint16 _countryTo) = registrar.getEntity(_to);
     require (_idTo != issuerID);
-    require (!registrar.isRestricted(issuerID));
-    require (!registrar.isRestricted(_idFrom));
-    require (!registrar.isRestricted(_idTo));
+    require (registrar.isPermitted(issuerID));
+    require (registrar.isPermitted(_idFrom));
+    require (registrar.isPermitted(_idTo));
     require (!accounts[_idFrom].restricted);
     require (!accounts[_idTo].restricted);
     if (_idFrom != _idTo) {

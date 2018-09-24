@@ -75,6 +75,7 @@ contract SecurityToken is STBase {
   }
 
   function transfer(address _to, uint256 _value) public onlyUnlocked returns (bool) {
+    require (registrar.isPermittedAddress(msg.sender));
     _transfer(msg.sender, _to, _value);
     return true;
   }
@@ -88,13 +89,17 @@ contract SecurityToken is STBase {
     onlyUnlocked
     returns (bool)
   {
+    bytes32 _sendId = registrar.getId(msg.sender);
+    bytes32 _fromId = registrar.getId(_from);
     if (
-      registrar.getId(_from) != registrar.getId(msg.sender) &&
-      registrar.getId(msg.sender) != issuerID &&
+      _sendId != _fromId &&
+      _sendId != issuerID &&
       !isActiveModule(msg.sender)
     )
     {
       allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    } else if (_sendId == _fromId) {
+      require (registrar.isPermittedAddress(msg.sender));
     }
     _transfer(_from, _to, _value);
     return true;
