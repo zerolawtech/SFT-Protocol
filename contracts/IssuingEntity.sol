@@ -29,6 +29,12 @@ contract IssuingEntity is STBase {
   mapping (address => bool) tokens;
   mapping (string => bytes32) documentHashes;
 
+  event TransferOwnership(
+    address token, 
+    bytes32 from, 
+    bytes32 to, 
+    uint256 value
+  );
   event NewDocumentHash(string document, bytes32 hash);
 
   modifier onlyToken() {
@@ -84,7 +90,9 @@ contract IssuingEntity is STBase {
     view 
     returns (uint64 _count, uint64 _limit) 
   {
-    return (countries[_country].count[_rating], countries[_country].limit[_rating]);
+    return (
+      countries[_country].count[_rating], 
+      countries[_country].limit[_rating]);
   }
 
   function setInvestorLimits(uint64[] _limits) public onlyIssuer {
@@ -93,7 +101,14 @@ contract IssuingEntity is STBase {
     }
   }
 
-  function setCountry(uint16 _country, uint8 _minRating, uint64 _limit) public onlyIssuer {
+  function setCountry(
+    uint16 _country, 
+    uint8 _minRating, 
+    uint64 _limit
+  ) 
+    public 
+    onlyIssuer 
+  {
     require (_minRating != 0);
     Country storage c = countries[_country];
     c.allowed = true;
@@ -186,6 +201,7 @@ contract IssuingEntity is STBase {
   {
     bytes32 _idFrom = registrar.getId(_from);
     bytes32 _idTo = registrar.getId(_to);
+    if (_idFrom == _idTo) return true;
     _setBalance(_idFrom, accounts[_idFrom].balance.sub(_value));
     _setBalance(_idTo, accounts[_idTo].balance.add(_value));
     for (uint256 i = 0; i < modules.length; i++) {
@@ -193,6 +209,7 @@ contract IssuingEntity is STBase {
         require (IssuerModule(modules[i].module).transferTokens(_token, _from, _to, _value));
       }
     }
+    emit TransferOwnership(_token, _idFrom, _idTo, _value);
     return true;
   }
 
