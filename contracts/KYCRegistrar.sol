@@ -20,8 +20,14 @@ contract KYCRegistrar {
     uint16 country;
   }
   
+  struct Address {
+    bytes32 id;
+    bool restricted;
+
+  }
+
   mapping (bytes32 => Entity) registry;
-  mapping (address => bytes32) idMap;
+  mapping (address => Address) idMap;
   mapping (bytes32 => Investor) investorData;
 
   event NewInvestor(
@@ -110,20 +116,20 @@ contract KYCRegistrar {
   }
 
   function registerAddress(address _addr, bytes32 _id) public onlyOwner {
-    require (idMap[_addr] == 0);
+    require (idMap[_addr].id == 0);
     require (registry[_id].type_ != 0);
-    idMap[_addr] = _id;
+    idMap[_addr].id = _id;
     emit NewRegisteredAddress(_id, registry[_id].type_, _addr);
   }
   
   function unregisterAddress(address _addr) public onlyOwner {
-    require (idMap[_addr] != 0);
+    require (idMap[_addr].id != 0);
+    idMap[_addr].restricted = true;
     emit UnregisteredAddress(
-      idMap[_addr], 
-      registry[idMap[_addr]].type_, 
+      idMap[_addr].id, 
+      registry[idMap[_addr].id].type_, 
       _addr
     );
-    delete idMap[_addr];
   }
 
   function generateInvestorID(
@@ -138,8 +144,16 @@ contract KYCRegistrar {
     return sha256(abi.encodePacked(_fullName, _ddmmyyyy, _taxID));
   }
 
-  function isRestricted(bytes32 _id) public view returns (bool) {
-    return (registry[_id].type_ == 0 || registry[_id].restricted);
+  function isPermitted(bytes32 _id) public view returns (bool) {
+    require (registry[_id].type_ != 0);
+    require (!registry[_id].restricted);
+    return true;
+  }
+
+  function isPermittedAddress(address _addr) public view returns (bool) {
+    isPermitted(idMap[_addr].id);
+    require (!idMap[_addr].restricted);
+    return true;
   }
 
   function getRating(bytes32 _id) public view returns (uint8) {
@@ -149,8 +163,8 @@ contract KYCRegistrar {
     return investorData[_id].rating;
   }
 
-  function getId(address _addr) public view returns (bytes32) {
-    return idMap[_addr];
+  function getId(address _addr) public view returns (bytes32) { 
+    return idMap[_addr].id;
   }
 
   function getType(bytes32 _id) public view returns (uint8) {
@@ -173,7 +187,7 @@ contract KYCRegistrar {
       uint16 _country
     ) 
   {
-    _id = idMap[_addr];
+    _id = idMap[_addr].id;
     return (
       _id, 
       registry[_id].type_, 

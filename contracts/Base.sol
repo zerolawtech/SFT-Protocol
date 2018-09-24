@@ -20,7 +20,7 @@ contract STBase {
 
   modifier onlyIssuer () {
     require (registrar.getId(msg.sender) == issuerID);
-    require (!registrar.isRestricted(issuerID));
+    require (registrar.isPermittedAddress(msg.sender));
     _;
   }
   
