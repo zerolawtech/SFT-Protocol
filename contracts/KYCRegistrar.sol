@@ -9,6 +9,7 @@ contract KYCRegistrar {
   address owner;
 
   struct Investor {
+    uint16 region;
     uint8 rating;
     uint40 expires;
   }
@@ -23,7 +24,13 @@ contract KYCRegistrar {
   mapping (address => bytes32) idMap;
   mapping (bytes32 => Investor) investorData;
 
-  event NewInvestor (bytes32 id, uint16 country, uint8 rating, uint40 expires);
+  event NewInvestor (
+    bytes32 id, 
+    uint16 country, 
+    uint16 region, 
+    uint8 rating, 
+    uint40 expires
+  );
   event NewIssuer (bytes32 id, uint16 country);
   event NewExchange (bytes32 id, uint16 country);
   event EntityRestriction (bytes32 id, uint8 type_, bool restricted);
@@ -42,6 +49,7 @@ contract KYCRegistrar {
   function addInvestor(
     bytes32 _id,
     uint16 _country,
+    uint16 _region,
     uint8 _rating,
     uint40 _expires
    )
@@ -50,9 +58,10 @@ contract KYCRegistrar {
   {
     require (_rating > 0);
     _addEntity(_id, 1, _country);
+    investorData[_id].region = _region;
     investorData[_id].rating = _rating;
     investorData[_id].expires = _expires;
-    emit NewInvestor(_id, _country, _rating, _expires);
+    emit NewInvestor(_id, _country, _region, _rating, _expires);
   }
   
   function addIssuer(bytes32 _id, uint16 _country) public onlyOwner {
@@ -87,7 +96,11 @@ contract KYCRegistrar {
   
   function unregisterAddress (address _addr) public onlyOwner {
     require (idMap[_addr] != 0);
-    emit UnregisteredAddress(idMap[_addr], registry[idMap[_addr]].type_, _addr);
+    emit UnregisteredAddress(
+      idMap[_addr], 
+      registry[idMap[_addr]].type_, 
+      _addr
+    );
     delete idMap[_addr];
   }
 
@@ -127,16 +140,48 @@ contract KYCRegistrar {
     return registry[_id].country;
   }
   
-
-  function getEntity(
+  function getEntity (
     address _addr
   )
     public 
     view 
-    returns (bytes32 _id, uint8 _type, uint16 _country) 
+    returns (
+      bytes32 _id, 
+      uint8 _type, 
+      uint16 _country
+    ) 
   {
     _id = idMap[_addr];
-    return (_id, registry[_id].type_, registry[_id].country);
+    return (
+      _id, 
+      registry[_id].type_, 
+      registry[_id].country
+    );
+  }
+
+  function getRegion (bytes32 _id) public view returns (uint16) {
+    return investorData[_id].region;
+  }
+
+  function getInvestor (
+    bytes32 _id
+  )
+    public 
+    view 
+    returns (
+      uint16 _country, 
+      uint16 _region, 
+      uint8 _rating, 
+      uint40 _expires
+    )
+  {
+    require (registry[_id].type_ == 1);
+    return (
+      registry[_id].country,
+      investorData[_id].region,
+      investorData[_id].rating,
+      investorData[_id].expires
+    );
   }
 
 }
