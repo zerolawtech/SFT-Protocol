@@ -6,55 +6,55 @@ import "../IssuingEntity.sol";
 
 contract _ModuleBase {
 
-  bytes32 public issuerID;
-  KYCRegistrar public registrar;
-  
-  modifier onlyIssuer () {
-    require (registrar.getId(msg.sender) == issuerID);
-    require (!registrar.isPermittedAddress(msg.sender));
-    _;
-  }
+	bytes32 public issuerID;
+	KYCRegistrar public registrar;
+
+	modifier onlyIssuer () {
+		require (registrar.getId(msg.sender) == issuerID);
+		require (!registrar.isPermittedAddress(msg.sender));
+		_;
+	}
 
 }
 
 contract STModuleBase is _ModuleBase {
 
-  SecurityToken public token;
+	SecurityToken public token;
 
-  constructor(address _token) public {
-    token = SecurityToken(_token);
-    issuerID = token.issuerID();
-    registrar = KYCRegistrar(token.registrar());
-  }
-  
-  modifier onlyParent() {
-    require (msg.sender == address(token) || msg.sender == address(token.issuer()));
-    _;
-  }
+	constructor(address _token) public {
+		token = SecurityToken(_token);
+		issuerID = token.issuerID();
+		registrar = KYCRegistrar(token.registrar());
+	}
 
-  function owner() public view returns (address) {
-    return address(token);
-  }
+	modifier onlyParent() {
+		require (msg.sender == address(token) || msg.sender == address(token.issuer()));
+		_;
+	}
+
+	function owner() public view returns (address) {
+		return address(token);
+	}
 
 }
 
 contract IssuerModuleBase is _ModuleBase {
 
-  IssuingEntity public issuer;
+	IssuingEntity public issuer;
 
-  constructor(address _issuer) public {
-    issuer = IssuingEntity(_issuer);
-    issuerID = issuer.issuerID();
-    registrar = KYCRegistrar(issuer.registrar());
-  }
+	constructor(address _issuer) public {
+		issuer = IssuingEntity(_issuer);
+		issuerID = issuer.issuerID();
+		registrar = KYCRegistrar(issuer.registrar());
+	}
 
-  modifier onlyParent() {
-    require (msg.sender == address(issuer));
-    _;
-  }
+	modifier onlyParent() {
+		require (msg.sender == address(issuer));
+		_;
+	}
 
-  function owner() public view returns (address) {
-    return address(issuer);
-  }
+	function owner() public view returns (address) {
+		return address(issuer);
+	}
 
 }
