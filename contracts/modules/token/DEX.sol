@@ -68,7 +68,7 @@ contract DEXModule is STModuleBase {
   }
 
   function dexApprove(bytes32 _id, uint256 _value) public returns (bool) {
-    require (registrar.getType(_id) == 3);
+    require (registrar.getClass(_id) == 3);
     require(approved[_id]);
     _dexLock(_id, msg.sender, _value);
     return true;

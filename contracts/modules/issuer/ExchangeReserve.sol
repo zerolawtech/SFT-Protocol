@@ -63,25 +63,25 @@ contract ExchangeReserve is IssuerModuleBase {
     view
     returns (bool)
   {
-    (bytes32 _idFrom, uint8 _typeFrom, uint16 _countryFrom) = registrar.getEntity(_from);
-    (bytes32 _idTo, uint8 _typeTo, uint16 _countryTo) = registrar.getEntity(_to);
-    if (_typeFrom != 3 && _typeTo == 1 && issuer.balanceOf(_idTo) == 0) {
+    (bytes32 _idFrom, uint8 _classFrom, uint16 _countryFrom) = registrar.getEntity(_from);
+    (bytes32 _idTo, uint8 _classTo, uint16 _countryTo) = registrar.getEntity(_to);
+    if (_classFrom != 3 && _classTo == 1 && issuer.balanceOf(_idTo) == 0) {
       uint8 _ratingFrom = registrar.getRating(_idFrom);
       uint8 _ratingTo = registrar.getRating(_idTo);
       bool _remains = issuer.balanceOf(_idFrom) > _value;
-      if (_countryFrom != _countryTo || _typeFrom != 1 || _remains) {
+      if (_countryFrom != _countryTo || _classFrom != 1 || _remains) {
         (uint64 _count, uint64 _limit) = issuer.getCountryInfo(_countryTo, 0);
         if (_limit > 0) {
           require (_limit.sub(_count) > countries[_countryTo].reserved[0]);
         }
       }
-      if (_countryFrom != _countryTo || _typeFrom != 1 || _remains || _ratingFrom != _ratingTo) {
+      if (_countryFrom != _countryTo || _classFrom != 1 || _remains || _ratingFrom != _ratingTo) {
         (_count, _limit) = issuer.getCountryInfo(_countryTo, _ratingTo);
         if (_limit > 0) {
           require (_limit.sub(_count) > countries[_countryTo].reserved[_rating]);
         }
       }
-    } else if (_typeFrom == 3  && _typeTo == 1) {
+    } else if (_classFrom == 3  && _classTo == 1) {
       require (approved[_idFrom]);
       uint8 _rating = registrar.getRating(_idTo);
       Exchange storage e = countries[_countryTo].exchanges[_idFrom];
@@ -91,7 +91,7 @@ contract ExchangeReserve is IssuerModuleBase {
       if (issuer.getCountryInvestorLimit(_countryTo, 0) > 0) {
         require (e.reserved[0] > 0);
       }
-    } else if (_typeTo == 3) {
+    } else if (_classTo == 3) {
       require (approved[_idTo]);
     }
     return true;
@@ -107,10 +107,10 @@ contract ExchangeReserve is IssuerModuleBase {
     onlyParent
     returns (bool)
   {
-    (bytes32 _idFrom, uint8 _typeFrom, uint16 _countryFrom) = registrar.getEntity(_from);
-    (bytes32 _idTo, uint8 _typeTo, uint16 _countryTo) = registrar.getEntity(_to);
-    if (_typeFrom != 3 && _typeTo != 3) return true;
-    if (_typeFrom == 1 && _typeTo == 3 && issuer.balanceOf(_idFrom) == 0) {
+    (bytes32 _idFrom, uint8 _classFrom, uint16 _countryFrom) = registrar.getEntity(_from);
+    (bytes32 _idTo, uint8 _classTo, uint16 _countryTo) = registrar.getEntity(_to);
+    if (_classFrom != 3 && _classTo != 3) return true;
+    if (_classFrom == 1 && _classTo == 3 && issuer.balanceOf(_idFrom) == 0) {
       uint8 _rating = registrar.getRating(_idFrom);
       Country storage c = countries[_countryFrom];
       Exchange storage e = c.exchanges[_idTo];
@@ -123,7 +123,7 @@ contract ExchangeReserve is IssuerModuleBase {
         c.reserved[0] = c.reserved[0].add(1);
       }
     }
-    if (_typeFrom == 3 && _typeTo == 1 && issuer.balanceOf(_idTo) == _value) {
+    if (_classFrom == 3 && _classTo == 1 && issuer.balanceOf(_idTo) == _value) {
       _rating = registrar.getRating(_idTo);
       c = countries[_countryTo];
       e = c.exchanges[_idTo];

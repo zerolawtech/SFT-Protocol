@@ -29,7 +29,7 @@ contract KYCRegistrar {
       3 - exchange
   */
   struct Entity {
-    uint8 type_;
+    uint8 class;
     bool restricted;
     uint16 country;
   }
@@ -59,9 +59,9 @@ contract KYCRegistrar {
   );
   event NewIssuer(bytes32 id, uint16 country);
   event NewExchange(bytes32 id, uint16 country);
-  event EntityRestriction(bytes32 id, uint8 type_, bool restricted);
-  event NewRegisteredAddress(bytes32 id, uint8 type_, address addr);
-  event UnregisteredAddress(bytes32 id, uint8 type_, address addr);
+  event EntityRestriction(bytes32 id, uint8 class, bool restricted);
+  event NewRegisteredAddress(bytes32 id, uint8 class, address addr);
+  event UnregisteredAddress(bytes32 id, uint8 class, address addr);
 
   modifier onlyOwner () {
     require (msg.sender == owner);
@@ -117,10 +117,10 @@ contract KYCRegistrar {
   /// @param _id Entity ID
   /// @param _class Entity's class
   /// @param _country Entity's country
-  function _addEntity(bytes32 _id, uint8 _type, uint16 _country) internal {
+  function _addEntity(bytes32 _id, uint8 _class, uint16 _country) internal {
     Entity storage e = registry[_id];
-    require (e.type_ == 0);
-    e.type_ = _type;
+    require (e.class == 0);
+    e.class = _class;
     e.country = _country;
   }
 
@@ -138,7 +138,7 @@ contract KYCRegistrar {
     public
     onlyOwner
   {
-    require (registry[_id].type_ == 1);
+    require (registry[_id].class == 1);
     investorData[_id].region = _region;
     investorData[_id].rating = _rating;
     investorData[_id].expires = _expires;
@@ -150,9 +150,9 @@ contract KYCRegistrar {
   /// @param _id Entity's ID
   /// @param _restricted boolean
   function setRestricted(bytes32 _id, bool _restricted)  public onlyOwner {
-    require (registry[_id].type_ != 0);
+    require (registry[_id].class != 0);
     registry[_id].restricted = _restricted;
-    emit EntityRestriction(_id, registry[_id].type_, _restricted);
+    emit EntityRestriction(_id, registry[_id].class, _restricted);
   }
 
   /// @notice Register an address to an investor, issuer, or exchange
@@ -160,9 +160,9 @@ contract KYCRegistrar {
   /// @param _id Entity's ID
   function registerAddress(address _addr, bytes32 _id) public onlyOwner {
     require (idMap[_addr].id == 0);
-    require (registry[_id].type_ != 0);
+    require (registry[_id].class != 0);
     idMap[_addr].id = _id;
-    emit NewRegisteredAddress(_id, registry[_id].type_, _addr);
+    emit NewRegisteredAddress(_id, registry[_id].class, _addr);
   }
 
   /// @notice Flags an address as restricted instead of removing it
@@ -173,7 +173,7 @@ contract KYCRegistrar {
     idMap[_addr].restricted = true;
     emit UnregisteredAddress(
       idMap[_addr].id,
-      registry[idMap[_addr].id].type_,
+      registry[idMap[_addr].id].class,
       _addr
     );
   }
@@ -200,7 +200,7 @@ contract KYCRegistrar {
   /// @param _id Entity's ID
   /// @return boolean
   function isPermitted(bytes32 _id) public view returns (bool) {
-    require (registry[_id].type_ != 0);
+    require (registry[_id].class != 0);
     require (!registry[_id].restricted);
     return true;
   }
@@ -222,8 +222,8 @@ contract KYCRegistrar {
     bytes32 _from,
     bytes32 _to
   )
-    external 
-    view 
+    external
+    view
     returns (bool)
   {
     isPermitted(_issuer);
@@ -252,14 +252,14 @@ contract KYCRegistrar {
   /// @notice Fetch class from an entity
   /// @param _id Entity's ID
   /// @return integer
-  function getType(bytes32 _id) public view returns (uint8) {
+  function getClass(bytes32 _id) public view returns (uint8) {
     /*
       Entity classes:
         1 - investor
         2 - issuer
         3 - exchange
     */
-    return registry[_id].type_;
+    return registry[_id].class;
   }
 
   /// @notice Fetch country from an entity
@@ -278,7 +278,7 @@ contract KYCRegistrar {
 
   /// @notice Fetch entity from an address
   /// @param _addr Address to query
-  /// @return Array of (id, type, country)
+  /// @return Array of (id, class, country)
   function getEntity(
     address _addr
   )
@@ -286,14 +286,14 @@ contract KYCRegistrar {
     view
     returns (
       bytes32 _id,
-      uint8 _type,
+      uint8 _class,
       uint16 _country
     )
   {
     _id = idMap[_addr].id;
     return (
       _id,
-      registry[_id].type_,
+      registry[_id].class,
       registry[_id].country
     );
   }
@@ -313,7 +313,7 @@ contract KYCRegistrar {
       uint40 _expires
     )
   {
-    require (registry[_id].type_ == 1);
+    require (registry[_id].class == 1);
     return (
       registry[_id].country,
       investorData[_id].region,
