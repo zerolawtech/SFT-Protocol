@@ -25,9 +25,10 @@ contract SecurityToken is STBase {
   event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
 
   /// @notice Security token constructor
+  /// @dev Initially the total supply is credited to the issuer
   /// @param _name Name of the token
   /// @param _symbol Unique ticker symbol
-  /// @param _totalSupply Total supply of the token, including issuer's reserve
+  /// @param _totalSupply Total supply of the token
   constructor(string _name, string _symbol, uint256 _totalSupply) public {
     issuer = IssuingEntity(msg.sender);
     issuerID = issuer.issuerID();
@@ -52,7 +53,7 @@ contract SecurityToken is STBase {
     return balanceOf(address(issuer));
   }
 
-  /// @notice Fetch the amount retained by issuer
+  /// @notice Fetch the current balance at an address
   /// @return integer
   function balanceOf(address _owner) public view returns (uint256) {
     return balances[_owner];
@@ -161,6 +162,7 @@ contract SecurityToken is STBase {
 
   /// @notice Directly modify the balance of an account
   /// @notice May be used for minting, redemption, split, dilution, etc
+  /// @dev This function is only callable via module
   /// @param _owner Owner of the tokens
   /// @param _value Balance to set
   function modifyBalance(address _owner, uint256 _value) public returns (bool) {
@@ -182,7 +184,9 @@ contract SecurityToken is STBase {
     require (issuer.balanceChanged(address(this), _owner, _old, _value));
   }
 
-  /// @notice Determines if a module active on this token
+  /// @notice Determines if a module is active on this token
+  /// @dev If a module is active on the issuer level, it will apply to all tokens
+  /// under that issuer
   /// @param address Deployed module address
   /// @return boolean
   function isActiveModule(address _module) public view returns (bool) {

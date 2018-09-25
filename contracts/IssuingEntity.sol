@@ -64,7 +64,7 @@ contract IssuingEntity is STBase {
     return investorLimit[0];
   }
 
-  /// @notice Fetch balance of issuer
+  /// @notice Fetch balance of an investor, issuer, or exchange
   /// @param _id Account to query
   /// @return integer
   function balanceOf(bytes32 _id) public view returns (uint256) {
@@ -118,9 +118,17 @@ contract IssuingEntity is STBase {
   }
 
   /// @notice Set investor limits
+  /// @dev The first array entry (0) corresponds to the total investor limit,
+  /// regardless of rating
   /// @param _limits Array of limits per rating
   function setInvestorLimits(uint64[] _limits) public onlyIssuer {
     for (uint8 i = 0; i < _limits.length; i++) {
+      /*
+        investorLimit[0] = combined sum of investorLimit[1] [2] and [3]
+        investorLimit[1] = unaccredited
+        investorLimit[2] = accredited
+        investorLimit[3] = qualified
+      */
       investorLimit[i] = _limits[i];
     }
   }
@@ -309,10 +317,12 @@ contract IssuingEntity is STBase {
     Country storage c = countries[registrar.getCountry(_id)];
     uint8 _rating = registrar.getRating(_id);
     uint8 _type = registrar.getType(_id);
+    /* If this sets an investor account balance > 0, take an available slot */
     if (a.balance == 0 && _type == 1) {
       c.count[0] = c.count[0].add(1);
       c.count[_rating] = c.count[_rating].add(1);
     }
+    /* If this sets an investor account balance to 0, add another available slot */
     if (_value == 0 && _type == 1) {
       c.count[0] = c.count[0].sub(1);
       c.count[_rating] = c.count[_rating].sub(1);
@@ -356,7 +366,7 @@ contract IssuingEntity is STBase {
     return documentHashes[_documentId];
   }
 
-  /// @notice Determines if a module active on this issuing entity
+  /// @notice Determines if a module is active on this issuing entity
   /// @param address Deployed module address
   /// @return boolean
   function isActiveModule(address _module) public view returns (bool) {

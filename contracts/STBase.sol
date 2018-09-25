@@ -38,12 +38,14 @@ contract STBase {
     revert();
   }
 
-  /// @notice Lock all non-issuer tokens
+  /// @notice Lock all tokens
+  /// @dev Issuer can transfer tokens regardless of lock status
   function lockTransfers () public onlyIssuer {
     locked = true;
   }
 
-  /// @notice Unlock all non-issuer tokens
+  /// @notice Unlock all tokens
+  /// @dev Issuer can transfer tokens regardless of lock status
   function unlockTransfers() public onlyIssuer {
     locked = false;
   }

@@ -78,7 +78,7 @@ contract KYCRegistrar {
   /// @param _country Investor's country
   /// @param _region Specific region in investor's country
   /// @param _rating Unaccredited, accredited, qualified
-  /// @param _expires Registry expiration
+  /// @param _expires Registry expiration, epoch time
   function addInvestor(
     bytes32 _id,
     uint16 _country,
@@ -105,9 +105,9 @@ contract KYCRegistrar {
     emit NewIssuer(_id, _country);
   }
 
-  /// @notice Add a new issuer to this registrar
-  /// @param _id Issuer ID
-  /// @param _country Issuer's country
+  /// @notice Add a new exchange to this registrar
+  /// @param _id Exchange ID
+  /// @param _country Exchange's country
   function addExchange(bytes32 _id, uint16 _country) public onlyOwner {
     _addEntity(_id, 3, _country);
     emit NewExchange(_id, _country);
@@ -221,12 +221,6 @@ contract KYCRegistrar {
     Investor storage i = investorData[_id];
     require (i.expires >= now);
     require (i.rating > 0);
-    /*
-      Investor accreditation levels:
-        1 - unaccredited
-        2 - accredited
-        3 - qualified
-    */
     return investorData[_id].rating;
   }
 
