@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../../open-zeppelin/SafeMath.sol";
-import "../Base.sol";
+import "../STBase.sol";
 
 
 contract ExchangeReserve is IssuerModuleBase {
@@ -18,7 +18,7 @@ contract ExchangeReserve is IssuerModuleBase {
     mapping (uint8 => uint64) reserved;
     mapping (uint8 => uint64) max;
   }
-  
+
   mapping (bytes32 => bool) approved;
   mapping (uint16 => Country) countries;
 
@@ -41,12 +41,12 @@ contract ExchangeReserve is IssuerModuleBase {
   }
 
   function getExchangeReserved(
-    bytes32 _id, 
-    uint16 _country, 
+    bytes32 _id,
+    uint16 _country,
     uint8 _rating
   )
-    public 
-    view 
+    public
+    view
     returns (uint64 _reserved, uint64 _max)
   {
     Exchange storage e = countries[_country].exchanges[_id];
@@ -160,25 +160,25 @@ contract ExchangeReserve is IssuerModuleBase {
   }
 
   function exchangeRelease(
-    uint16 _country, 
-    uint8 _rating, 
+    uint16 _country,
+    uint8 _rating,
     uint64 _value
   )
-    public 
+    public
     onlyExchange
-    returns (bool) 
-  { 
+    returns (bool)
+  {
     return _releaseExchange(registrar.getId(msg.sender), _country, _rating, _value);
   }
 
   function exchangeReleaseMany(
-    uint16[] _country, 
-    uint8[] _rating, 
+    uint16[] _country,
+    uint8[] _rating,
     uint64[] _value
   )
     public
-    onlyExchange 
-    returns (bool) 
+    onlyExchange
+    returns (bool)
   {
     require (_country.length == _rating.length && _country.length == _value.length);
     bytes32 _id = registrar.getId(msg.sender);
@@ -189,27 +189,27 @@ contract ExchangeReserve is IssuerModuleBase {
   }
 
   function issuerRelease(
-    bytes32 _id, 
-    uint16 _country, 
-    uint8 _rating, 
+    bytes32 _id,
+    uint16 _country,
+    uint8 _rating,
     uint64 _value
   )
-    public 
-    onlyIssuer 
-    returns (bool) 
+    public
+    onlyIssuer
+    returns (bool)
   {
     return _releaseExchange(_id, _country, _rating, _value);
   }
 
   function issuerReleaseMany(
-    bytes32 _id, 
-    uint16[] _country, 
-    uint8[] _rating, 
+    bytes32 _id,
+    uint16[] _country,
+    uint8[] _rating,
     uint64[] _value
   )
-    public 
-    onlyIssuer 
-    returns (bool) 
+    public
+    onlyIssuer
+    returns (bool)
   {
     require (_country.length == _rating.length && _country.length == _value.length);
     for (uint256 i = 0; i < _country.length; i++) {
@@ -218,13 +218,13 @@ contract ExchangeReserve is IssuerModuleBase {
   }
 
   function _releaseExchange(
-    bytes32 _id, 
-    uint16 _country, 
-    uint8 _rating, 
+    bytes32 _id,
+    uint16 _country,
+    uint8 _rating,
     uint64 _value
-  ) 
-    internal 
-    returns (bool) 
+  )
+    internal
+    returns (bool)
   {
     Country storage c = countries[_country];
     Exchange storage e = c.exchanges[_id];
