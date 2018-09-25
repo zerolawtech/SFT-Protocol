@@ -21,8 +21,9 @@ contract SecurityToken is STBase {
   mapping (address => uint256) balances;
   mapping (address => mapping (address => uint256)) allowed;
 
-  event Transfer(address indexed from, address indexed to, uint tokens);
-  event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
+  event Transfer(address from, address to, uint tokens);
+  event Approval(address tokenOwner, address spender, uint tokens);
+  event BalanceChanged(address owner, uint256 oldBalance, uint256 newBalance);
 
   /// @notice Security token constructor
   /// @dev Initially the total supply is credited to the issuer
@@ -182,6 +183,7 @@ contract SecurityToken is STBase {
       }
     }
     require (issuer.balanceChanged(address(this), _owner, _old, _value));
+    emit BalanceChanged(_owner, _old, _value);
   }
 
   /// @notice Determines if a module is active on this token

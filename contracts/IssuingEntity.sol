@@ -37,6 +37,14 @@ contract IssuingEntity is STBase {
   mapping (address => bool) tokens;
   mapping (string => bytes32) documentHashes;
 
+  event TransferOwnership(
+    address token, 
+    bytes32 from, 
+    bytes32 to, 
+    uint256 value
+  );
+  event CountryApproved(uint16 country, uint8 minRating, uint64 limit);
+  event CountryBlocked(uint16 country);
   event NewDocumentHash(string document, bytes32 hash);
 
   modifier onlyToken() {
@@ -114,7 +122,9 @@ contract IssuingEntity is STBase {
     view
     returns (uint64 _count, uint64 _limit)
   {
-    return (countries[_country].count[_rating], countries[_country].limit[_rating]);
+    return (
+      countries[_country].count[_rating], 
+      countries[_country].limit[_rating]);
   }
 
   /// @notice Set investor limits
@@ -132,23 +142,36 @@ contract IssuingEntity is STBase {
       investorLimit[i] = _limits[i];
     }
   }
-
-  /// @notice Initialize a country so it can accept investors
-  /// @param _country Country to create
-  /// @param _minRating Minimum rating necessary to participate from this country
-  /// @param _limit Number of investors allowed overall from this country
-  function setCountry(uint16 _country, uint8 _minRating, uint64 _limit) public onlyIssuer {
-    require (_minRating != 0);
-    Country storage c = countries[_country];
-    c.allowed = true;
-    c.minRating = _minRating;
-    c.limit[0] = _limit;
+  
+  /// @notice Initialize countries so they can accept investors
+  /// @param _country[] Array of counties to add
+  /// @param _minRating[] Array of minimum investor ratings necessary for each country
+  /// @param _limit[] Array of maximum mumber of investors allowed from this country
+  function setCountries(
+    uint16[] _country, 
+    uint8[] _minRating, 
+    uint64[] _limit
+  ) 
+    public 
+    onlyIssuer 
+  {
+    require (_country.length == _minRating.length);
+    require (_country.length == _limit.length);
+    for (uint256 i = 0; i < _country.length; i++) {
+      require (_minRating[i] != 0);
+      Country storage c = countries[_country[i]];
+      c.allowed = true;
+      c.minRating = _minRating[i];
+      c.limit[0] = _limit[i];
+      emit CountryApproved(_country[i], _minRating[i], _limit[i]);
+    }
   }
 
   /// @notice Block a country from all transactions
   /// @param _country Country to modify
   function blockCountry(uint16 _country) public onlyIssuer {
     countries[_country].allowed = false;
+    emit CountryBlocked(_country);
   }
 
   /// @notice Set country investor limits after creation
@@ -191,62 +214,83 @@ contract IssuingEntity is STBase {
     require (_value > 0);
     (bytes32 _idFrom, uint8 _typeFrom, uint16 _countryFrom) = registrar.getEntity(_from);
     (bytes32 _idTo, uint8 _typeTo, uint16 _countryTo) = registrar.getEntity(_to);
-    require (_idTo != issuerID);
-    require (registrar.isPermitted(issuerID));
-    require (registrar.isPermitted(_idFrom));
-    require (registrar.isPermitted(_idTo));
+    require (registrar.arePermitted(issuerID, _idFrom, _idTo));
     require (!accounts[_idFrom].restricted);
     require (!accounts[_idTo].restricted);
     if (_idFrom != _idTo) {
       /* Exchange to exchange transfers are not permitted */
       require (_typeFrom != 3 || _typeTo != 3);
-      Country storage c = countries[_countryTo];
-      require (c.allowed);
       if (_typeTo == 1) {
-        uint8 _ratingTo = registrar.getRating(_idTo);
-        require (_ratingTo >= c.minRating);
+        Country storage c = countries[_countryTo];
+        uint8 _rating = registrar.getRating(_idTo);
+        require (c.allowed);
         /* If the receiving investor currently has a 0 balance, we must make sure a
           slot is available for allocation
         */
+        require (_rating >= c.minRating);
         if (accounts[_idTo].balance == 0) {
           /*
             If the sender is an investor and still retains a balance, a new slot
             must be available
           */
-          if (_typeFrom != 1 || accounts[_idFrom].balance > _value) {
+          bool _check = _typeFrom != 1 || accounts[_idFrom].balance > _value;
+          if (_check) {
             require (investorLimit[0] == 0 || investorCount[0] < investorLimit[0]);
-          }
-          /*
-            If the investors are of different ratings, make sure a slot is available in the
-            receiver's rating in the overall count
-          */
-          if (registrar.getRating(_idFrom) != _ratingTo || accounts[_idFrom].balance > _value) {
-            require (investorLimit[_ratingTo] == 0 || investorCount[_ratingTo] < investorLimit[_ratingTo]);
           }
           /*
             If the investors are from different countries, make sure a slot is available
             in the overall country limit
           */
-          if (_countryFrom != _countryTo || accounts[_idFrom].balance > _value) {
-            require (c.limit[0] == 0 || c.count[0] < c.limit[0]);
+          if (_check || _countryFrom != _countryTo) {
+            require (c.limit[0] == 0 || c.count[0] < c.limit[0]); 
+          }
+          if (!_check) {
+            _check = registrar.getRating(_idFrom) != _rating;
+          }
+          /*
+            If the investors are of different ratings, make sure a slot is available in the
+            receiver's rating in the overall count
+          */
+          if (_check) {
+            require (
+              investorLimit[_rating] == 0 || 
+              investorCount[_rating] < investorLimit[_rating]
+            );
           }
           /*
             If the investors don't match in country or rating, make sure a slot is available
             in both the specific country and rating for the receiver
           */
-          if (_countryFrom != _countryTo || registrar.getRating(_idFrom) != _ratingTo || accounts[_idFrom].balance > _value) {
-            require (c.limit[_ratingTo] == 0 || c.count[_ratingTo] < c.limit[_ratingTo]);
+          if (_check || _countryFrom != _countryTo) {
+            require (
+              c.limit[_rating] == 0 || 
+              c.count[_rating] < c.limit[_rating]
+            );
           }
         }
       }
     }
+    _moduleCheckTransfer(_token, _from, _to, _value);
+    return true;
+  }
+
+  function _moduleCheckTransfer(
+    address _token,
+    address _from,
+    address _to,
+    uint256 _value
+  )
+    internal
+    view
+  {
     for (uint256 i = 0; i < modules.length; i++) {
       if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
         require(IssuerModule(modules[i].module).checkTransfer(_token, _from, _to, _value));
       }
     }
-    return true;
   }
+
+
 
   /// @notice Transfer tokens through the issuing entity level
   /// @param _token Token being transferred
@@ -267,6 +311,7 @@ contract IssuingEntity is STBase {
   {
     bytes32 _idFrom = registrar.getId(_from);
     bytes32 _idTo = registrar.getId(_to);
+    if (_idFrom == _idTo) return true;
     _setBalance(_idFrom, accounts[_idFrom].balance.sub(_value));
     _setBalance(_idTo, accounts[_idTo].balance.add(_value));
     for (uint256 i = 0; i < modules.length; i++) {
@@ -274,6 +319,7 @@ contract IssuingEntity is STBase {
         require (IssuerModule(modules[i].module).transferTokens(_token, _from, _to, _value));
       }
     }
+    emit TransferOwnership(_token, _idFrom, _idTo, _value);
     return true;
   }
 

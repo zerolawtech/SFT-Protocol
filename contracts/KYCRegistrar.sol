@@ -214,6 +214,24 @@ contract KYCRegistrar {
     return true;
   }
 
+  /// @notice Checks restricted flag for three entities in one call
+  /// @param _addr Address to query
+  /// @return boolean
+  function arePermitted(
+    bytes32 _issuer,
+    bytes32 _from,
+    bytes32 _to
+  )
+    external 
+    view 
+    returns (bool)
+  {
+    isPermitted(_issuer);
+    isPermitted(_from);
+    isPermitted(_to);
+    return true;
+  }
+
   /// @notice Fetch rating of an entity
   /// @param _id Entity's ID
   /// @return integer
