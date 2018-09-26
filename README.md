@@ -9,6 +9,13 @@ SFT expands upon the ERC20 token standard.  Tokens are transferred via the `tran
 
 
 ## Components
- - [KYCRegistrar](contracts/KYCRegistrar.sol): does stuff
- - [IssuingEntity](contracts/IssuingEntity.sol): does other stuff
- - [SecurityToken](contracts/SecurityToken.sol): does even more stuff
+ - [SecurityToken](contracts/SecurityToken.sol)
+   - An ERC20 compliant token that represents a claim to ownership of a security
+   - Modules may be applied to each security token to add additional permissioning or functionality
+ - [IssuingEntity](contracts/IssuingEntity.sol)
+   - Represents the company that issues one or more security tokens
+   - Modules may be applied at this level that introduce permissioning / functionality to every security token created by the issuer
+ - [KYCRegistrar](contracts/KYCRegistrar.sol)
+   - The top level permission authority that grants permission for investors, issuers, and exchanges based on off-chain KYC/AML verification
+   
+
