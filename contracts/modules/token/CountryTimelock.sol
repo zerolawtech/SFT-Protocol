@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../STBase.sol";
+import "../Base.sol";
 
 
 contract CountryLockModule is STModuleBase {

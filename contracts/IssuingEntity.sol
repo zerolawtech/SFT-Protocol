@@ -144,9 +144,9 @@ contract IssuingEntity is STBase {
 	}
 
 	/// @notice Initialize countries so they can accept investors
-	/// @param _country[] Array of counties to add
-	/// @param _minRating[] Array of minimum investor ratings necessary for each country
-	/// @param _limit[] Array of maximum mumber of investors allowed from this country
+	/// @param _country Array of counties to add
+	/// @param _minRating Array of minimum investor ratings necessary for each country
+	/// @param _limit Array of maximum mumber of investors allowed from this country
 	function setCountries(
 		uint16[] _country,
 		uint8[] _minRating,
@@ -377,10 +377,10 @@ contract IssuingEntity is STBase {
 	}
 
 	/// @notice Issue a new token
-	/// @param string _name Name of the token
+	/// @param _name Name of the token
 	/// @param _symbol Unique ticker symbol
 	/// @param _totalSupply Total supply
-	/// @return Address of created token
+	/// return Address of created token
 	function issueNewToken(
 		string _name,
 		string _symbol,
@@ -413,7 +413,7 @@ contract IssuingEntity is STBase {
 	}
 
 	/// @notice Determines if a module is active on this issuing entity
-	/// @param address Deployed module address
+	/// @param _module Deployed module address
 	/// @return boolean
 	function isActiveModule(address _module) public view returns (bool) {
 		return activeModules[_module];
