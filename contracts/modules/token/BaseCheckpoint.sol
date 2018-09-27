@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../../open-zeppelin/SafeMath.sol";
-import "../Base.sol";
+import "../ModuleBase.sol";
 
 
 contract CheckpointModule is STModuleBase {
