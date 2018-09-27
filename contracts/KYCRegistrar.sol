@@ -86,8 +86,7 @@ contract KYCRegistrar {
 	}
 
 	modifier onlyAuthorityByID(bytes32 _id) {
-		_authorityCheck(idMap[msg.sender].id, registry[_id].country);
-		
+		_authorityCheck(idMap[msg.sender].id, registry[_id].country);	
 		_;
 	}
 
@@ -102,7 +101,7 @@ contract KYCRegistrar {
 
 	/// @notice KYC registrar constructor
 	constructor (address[] _owners, uint8 _threshold) public {
-		require (_threshold < _owners.length);
+		require (_threshold <= _owners.length);
 		ownerID = keccak256(abi.encodePacked(msg.sender));
 		_addEntity(ownerID, 255, 0);
 		Authority storage a = authorityData[ownerID];
@@ -118,7 +117,7 @@ contract KYCRegistrar {
 	/// @param _rating Unaccredited, accredited, qualified
 	/// @param _expires Registry expiration, epoch time
 	/// @param _addr Array of addresses to register as investor
-	/// @return Boolean to indicate success
+	/// @return bool
 	function addInvestor(
 		bytes32 _id,
 		uint16 _country,
@@ -132,6 +131,7 @@ contract KYCRegistrar {
 		returns (bool)
 	{
 		require (_rating > 0);
+		require (_expires > now);
 		if (!_checkMultiSig()) return false;
 		_addEntity(_id, 1, _country);
 		investorData[_id].region = _region;
@@ -154,7 +154,7 @@ contract KYCRegistrar {
 	/// @param _id Issuer ID
 	/// @param _country Issuer's country
 	/// @param _addr Array of addressses to register as issuer
-	/// @return Boolean to indicate success
+	/// @return bool
 	function addIssuer(
 		bytes32 _id, 
 		uint16 _country,
@@ -174,7 +174,8 @@ contract KYCRegistrar {
 	/// @notice Add a new exchange to this registrar
 	/// @param _id Exchange ID
 	/// @param _country Exchange's country
-	/// @return Boolean to indicate success
+	/// @param _addr Array of addressses to register as exchange
+	/// @return bool
 	function addExchange(
 		bytes32 _id,
 		uint16 _country,
@@ -191,6 +192,11 @@ contract KYCRegistrar {
 		return true;
 	}
 
+	/// @notice Add a new authority to this registrar
+	/// @param _id Authority ID
+	/// @param _addr Array of addressses to register as authority
+	/// @param _threshold Minimum number of calls to a method for multisigk
+	/// @return bool
 	function addAuthority(
 		bytes32 _id,
 		address[] _addr,
@@ -210,6 +216,10 @@ contract KYCRegistrar {
 		return true;
 	}
 
+	/// @notice Modifies the number of calls needed by a multisig authority
+	/// @param _id Authority ID
+	/// @param _threshold Minimum number of calls to a method for multisigk
+	/// @return bool
 	function setAuthorityThreshold(
 		bytes32 _id,
 		uint8 _threshold
@@ -220,11 +230,16 @@ contract KYCRegistrar {
 	{
 		if (!_checkMultiSig()) return false;
 		require (registry[_id].class == 255);
-		require (_threshold < authorityData[_id].addressCount);
+		require (_threshold <= authorityData[_id].addressCount);
 		authorityData[_id].multiSigThreshold = _threshold;
 		return true;
 	}
 
+	/// @notice Sets approval of an authority to register entities in a country
+	/// @param _id Authority ID
+	/// @param _countries Array of country IDs
+	/// @param _auth boolean to set or restrict countries
+	/// @return bool
 	function setAuthorityCountries(
 		bytes32 _id,
 		uint16[] _countries,
@@ -254,7 +269,6 @@ contract KYCRegistrar {
 		}
 		for (uint256 i = 0; i < a.multiSigAuth[_callHash].length; i++) {
 			if (a.multiSigAuth[_callHash][i] == msg.sender) {
-				delete a.multiSigAuth[_callHash];
 				return false;
 			}
 		}
@@ -269,6 +283,8 @@ contract KYCRegistrar {
 	/// @param _class Entity's class
 	/// @param _country Entity's country
 	function _addEntity(bytes32 _id, uint8 _class, uint16 _country) internal {
+		require (_country > 0);
+		require (_id != 0);
 		Entity storage e = registry[_id];
 		require (e.class == 0);
 		e.class = _class;
@@ -280,7 +296,7 @@ contract KYCRegistrar {
 	/// @param _region Investor's region
 	/// @param _rating Investor's rating
 	/// @param _expires Registry expiration
-	/// @return Boolean to indicate success
+	/// @return bool
 	function updateInvestor(
 		bytes32 _id,
 		uint16 _region,
@@ -306,11 +322,11 @@ contract KYCRegistrar {
 		return true;
 	}
 
-	/// @notice Set or remove an investor, issuer, or exchange's restricted status
+	/// @notice Set or remove an entity's restricted status
 	/// @dev Investors are restricted at the investor level, not address
 	/// @param _id Entity's ID
 	/// @param _restricted boolean
-	/// @return Boolean to indicate success
+	/// @return bool
 	function setRestricted(
 		bytes32 _id,
 		bool _restricted
@@ -319,6 +335,9 @@ contract KYCRegistrar {
 		onlyAuthorityByID(_id)
 		returns (bool)
 	{
+		/*
+			Only the owner can modify the restricted status of an authority.
+		*/
 		if (registry[_id].class == 255) {
 			require (idMap[msg.sender].id == ownerID);
 			require (_id != ownerID);
@@ -335,22 +354,28 @@ contract KYCRegistrar {
 		return true;
 	}
 
-	/// @notice Register an address to an investor, issuer, or exchange
+	/// @notice Register addresses to an entity
 	/// @param _id Entity's ID
-	/// @param _addr Entity's address
-	/// @return Boolean to indicate success
+	/// @param _addr Entity's addresses
+	/// @return bool
 	function registerAddresses(
 		bytes32 _id,
 		address[] _addr
 	)
 		public
-		onlyAuthority(0)
+		onlyAuthorityByID(_id)
 		returns (bool)
 	{
 		if (!_checkMultiSig()) return false;
 		if (registry[_id].class == 255) {
+			/*
+				Only the owner can register addresses for an authority.
+			*/
 			require (idMap[msg.sender].id == ownerID);
-			require (authorityData[_id].addressCount + _addr.length > authorityData[_id].addressCount);
+			require (
+				authorityData[_id].addressCount + _addr.length >
+				authorityData[_id].addressCount
+			);
 			authorityData[_id].addressCount += uint8(_addr.length);
 		}
 		_addAddresses(_id, _addr);
@@ -359,8 +384,14 @@ contract KYCRegistrar {
 
 	/// @notice Flags an address as restricted instead of removing it
 	/// @param _addr Entity's address
-	function unregisterAddress(address _addr) public onlyOwner {
+	/// @return bool
+	function unregisterAddress(address _addr) public returns (bool) {
 		require (idMap[_addr].id != 0);
+		_authorityCheck(
+			idMap[msg.sender].id,
+			registry[idMap[_addr].id].country
+		);
+		if (!_checkMultiSig()) return false;
 		if (idMap[_addr].id == 255) {
 			/*
 				If the address is associated with an authority, only the
@@ -369,7 +400,10 @@ contract KYCRegistrar {
 			require (idMap[msg.sender].id == ownerID);
 			bytes32 _id = idMap[_addr].id;
 			require (authorityData[_id].addressCount > 1);
-			require (authorityData[_id].addressCount > authorityData[_id].multiSigThreshold);
+			require (
+				authorityData[_id].addressCount > 
+				authorityData[_id].multiSigThreshold
+			);
 			authorityData[_id].addressCount -= 1;
 		}
 		idMap[_addr].restricted = true;
@@ -379,6 +413,7 @@ contract KYCRegistrar {
 			_addr,
 			idMap[msg.sender].id
 		);
+		return true;
 	}
 
 	function _addAddresses(bytes32 _id, address[] _addr) internal {
@@ -418,6 +453,7 @@ contract KYCRegistrar {
 	/// @return boolean
 	function isPermitted(bytes32 _id) public view returns (bool) {
 		require (registry[_id].class != 0);
+		require (registry[_id].class != 255);
 		require (!registry[_id].restricted);
 		return true;
 	}
