@@ -27,6 +27,7 @@ contract KYCRegistrar {
 			1 - investor
 			2 - issuer
 			3 - exchange
+			255 - authority
 	*/
 	struct Entity {
 		uint8 class;
