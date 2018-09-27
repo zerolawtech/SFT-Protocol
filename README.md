@@ -22,13 +22,17 @@ SFT expands upon the ERC20 token standard.  Tokens are transferred via the `tran
    - The top level permission authority that grants permission for investors, issuers, and exchanges based on off-chain KYC/AML verification
 
 ### KYCRegistrar
-KYCRegistrar is a central registry contract that establishes the identity, class, and permissions of every address allowed to interact with security tokens. Each permitted address has a bytes32 hash attached to it, that denotes the entity associated to the address.  More than one address may be associated to a single entity.
+KYCRegistrar is a central registry contract that establishes the identity, class, and permissions of every address allowed to interact with security tokens. Each permitted address has a hash attached to it, that denotes the entity controlling the address.  More than one address may be associated to a single entity.
 
-There are three types of entities:
+There are four types of entities:
  1. Investor: Legal persons that have cleared KYC/AML checks and are authorised to hold security tokens. Stored data includes the country, state/province/territory, rating (accreditted, qualified, etc), and expiry date of the authorisation.
- 2. Issuers: Legal persons that are authrorised to issue security tokens.
- 3. Exchanges: Platforms authorised to facilitate secondary trading of security tokens.
+ 2. Issuer: Legal persons that are authrorised to issue security tokens.
+ 3. Exchange: Platforms authorised to facilitate secondary trading of security tokens.
+ 4. Authority: Entities that can add, modify, and remove other entities from the KYC registry. Each authority is only able to do so in countries where it has been granted permission.  Authorities are given their permission by the contract owner.
+ 
+The registrar contract employs a multisig system such that authorities must call each method from several approved addresses before the code will execute. This is important, as permissions granted or revoked at the registry contract will affect every security token in the network.
 
+ 
 ### IssuingEntity
 Before an issuer can create security tokens they must deploy an IssuingEntity contract. This contract has several key purposes:
 
