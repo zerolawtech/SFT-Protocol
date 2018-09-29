@@ -224,22 +224,28 @@ contract IssuingEntity is STBase {
 				Country storage c = countries[_countryTo];
 				uint8 _rating = registrar.getRating(_idTo);
 				require (c.allowed);
-				/* If the receiving investor currently has a 0 balance, we must make sure a
-					slot is available for allocation
+				/*  If the receiving investor currently has a 0 balance,
+					we must make sure a slot is available for allocation
 				*/
 				require (_rating >= c.minRating);
 				if (accounts[_idTo].balance == 0) {
 					/*
-						If the sender is an investor and still retains a balance, a new slot
-						must be available
+						If the sender is an investor and still retains a balance,
+						a new slot must be available
 					*/
-					bool _check = _classFrom != 1 || accounts[_idFrom].balance > _value;
+					bool _check = (
+						_classFrom != 1 ||
+						accounts[_idFrom].balance > _value
+					);
 					if (_check) {
-						require (investorLimit[0] == 0 || investorCount[0] < investorLimit[0]);
+						require (
+							investorLimit[0] == 0 ||
+							investorCount[0] < investorLimit[0]
+						);
 					}
 					/*
-						If the investors are from different countries, make sure a slot is available
-						in the overall country limit
+						If the investors are from different countries, make sure
+						a slot is available in the overall country limit
 					*/
 					if (_check || _countryFrom != _countryTo) {
 						require (c.limit[0] == 0 || c.count[0] < c.limit[0]);
@@ -248,8 +254,9 @@ contract IssuingEntity is STBase {
 						_check = registrar.getRating(_idFrom) != _rating;
 					}
 					/*
-						If the investors are of different ratings, make sure a slot is available in the
-						receiver's rating in the overall count
+						If the investors are of different ratings, make sure a
+						slot is available in the receiver's rating in the overall
+						count
 					*/
 					if (_check) {
 						require (
@@ -258,8 +265,9 @@ contract IssuingEntity is STBase {
 						);
 					}
 					/*
-						If the investors don't match in country or rating, make sure a slot is available
-						in both the specific country and rating for the receiver
+						If the investors don't match in country or rating, make
+						sure a slot is available in both the specific country
+						and rating for the receiver
 					*/
 					if (_check || _countryFrom != _countryTo) {
 						require (
@@ -285,7 +293,8 @@ contract IssuingEntity is STBase {
 	{
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				require(IssuerModule(modules[i].module).checkTransfer(_token, _from, _to, _value));
+				IssuerModule m = IssuerModule(modules[i].module);
+				require(m.checkTransfer(_token, _from, _to, _value));
 			}
 		}
 	}
@@ -316,7 +325,8 @@ contract IssuingEntity is STBase {
 		_setBalance(_idTo, accounts[_idTo].balance.add(_value));
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
-				require (IssuerModule(modules[i].module).transferTokens(_token, _from, _to, _value));
+				IssuerModule m = IssuerModule(modules[i].module);
+				require (m.transferTokens(_token, _from, _to, _value));
 			}
 		}
 		emit TransferOwnership(_token, _idFrom, _idTo, _value);
@@ -348,7 +358,8 @@ contract IssuingEntity is STBase {
 		}
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
-				require (IssuerModule(modules[i].module).balanceChanged(_token, _owner, _old, _new));
+				IssuerModule m = IssuerModule(modules[i].module);
+				require (m.balanceChanged(_token, _owner, _old, _new));
 			}
 		}
 		return true;
