@@ -143,7 +143,6 @@ contract SecurityToken is STBase {
 	/// @param _from Sender
 	/// @param _to Recipient
 	/// @param _value Amount being transferred
-	/// @return boolean
 	function _transfer(address _from, address _to, uint256 _value) internal {
 		if (registrar.getId(_from) == issuerID) {
 			_from = address(issuer);
@@ -189,8 +188,7 @@ contract SecurityToken is STBase {
 	/// @notice Determines if a module is active on this token
 	/// @dev If a module is active on the issuer level, it will apply to all tokens
 	/// under that issuer
-	/// @param address Deployed module address
-	/// @return boolean
+	/// @param _module Deployed module address
 	function isActiveModule(address _module) public view returns (bool) {
 		if (activeModules[_module]) return true;
 		return issuer.isActiveModule(_module);

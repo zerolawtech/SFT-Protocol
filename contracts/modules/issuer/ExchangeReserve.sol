@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../../open-zeppelin/SafeMath.sol";
-import "../STBase.sol";
+import "../ModuleBase.sol";
 
 
 contract ExchangeReserve is IssuerModuleBase {

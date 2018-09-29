@@ -51,7 +51,7 @@ contract STBase {
 	}
 
 	/// @notice Attach a module to a token
-	/// @param Address of the deployed module
+	/// @param _module Address of the deployed module
 	/// @return boolean
 	function attachModule(address _module) public onlyIssuer returns (bool) {
 		require (!activeModules[_module]);
@@ -72,8 +72,8 @@ contract STBase {
 	}
 
 	/// @notice Detach a module from a token
-	/// @param Address of the deployed module
-	/// @return, boolean
+	/// @param _module of the deployed module
+	/// @return boolean
 	function detachModule(address _module) public returns (bool) {
 		if (_module != msg.sender) {
 			require (registrar.getId(msg.sender) == issuerID);
