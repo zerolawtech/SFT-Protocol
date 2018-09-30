@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./open-zeppelin/SafeMath.sol";
-
+import "./interfaces/Factory.sol";
 
 /// @title KYC Registrar
 contract KYCRegistrar {
@@ -10,16 +10,13 @@ contract KYCRegistrar {
 
 	bytes32 ownerID;
 
-	/*
-		Investor accreditation levels:
-			1 - unaccredited
-			2 - accredited
-			3 - qualified
-	*/
-	struct Investor {
-		uint16 region;
-		uint8 rating;
-		uint40 expires;
+	IssuerFactoryInterface issuerFactory;
+	TokenFactoryInterface tokenFactory;
+
+
+	struct Address {
+		bytes32 id;
+		bool restricted;
 	}
 
 	/*
@@ -35,9 +32,21 @@ contract KYCRegistrar {
 		bool restricted;
 	}
 
-	struct Address {
-		bytes32 id;
-		bool restricted;
+	/*
+		Investor accreditation levels:
+			1 - unaccredited
+			2 - accredited
+			3 - qualified
+	*/
+	struct Investor {
+		uint16 region;
+		uint8 rating;
+		uint40 expires;
+	}
+
+	struct Issuer {
+		address issuerContract;
+		mapping (address => bool) allowed;
 	}
 
 	struct Authority {
@@ -48,8 +57,9 @@ contract KYCRegistrar {
 	}
 
 	mapping (address => Address) idMap;
-	mapping (bytes32 => Entity) registry;
+	mapping (bytes32 => Entity) entityData;
 	mapping (bytes32 => Investor) investorData;
+	mapping (bytes32 => Issuer) issuerData;
 	mapping (bytes32 => Authority) authorityData;
 
 	event NewInvestor(
@@ -68,7 +78,7 @@ contract KYCRegistrar {
 		uint40 expires,
 		bytes32 authority
 	);
-	event NewIssuer(bytes32 id, uint16 country, address[] addr, bytes32 authority);
+	event NewIssuer(bytes32 id, uint16 country, address[] addr, address issuerContract, bytes32 authority);
 	event NewExchange(bytes32 id, uint16 country, address[] addr, bytes32 authority);
 	event NewAuthority(bytes32 id, address[] addr);
 	event EntityRestriction(bytes32 id, uint8 class, bool restricted, bytes32 authority);
@@ -87,13 +97,13 @@ contract KYCRegistrar {
 	}
 
 	modifier onlyAuthorityByID(bytes32 _id) {
-		_authorityCheck(idMap[msg.sender].id, registry[_id].country);	
+		_authorityCheck(idMap[msg.sender].id, entityData[_id].country);	
 		_;
 	}
 
 	function _authorityCheck(bytes32 _id, uint16 _country) internal view {
 		require (_country != 0);
-		require (registry[_id].class == 255);
+		require (entityData[_id].class == 255);
 		require (!idMap[msg.sender].restricted);
 		if (_id != ownerID) {
 			require (authorityData[_id].countries[_country]);
@@ -168,7 +178,8 @@ contract KYCRegistrar {
 		if (!_checkMultiSig()) return false;
 		_addEntity(_id, 2, _country);
 		_addAddresses(_id, _addr);
-		emit NewIssuer(_id, _country, _addr, idMap[msg.sender].id);
+		issuerData[_id].issuerContract = issuerFactory.newIssuer(_id);
+		emit NewIssuer(_id, _country, _addr, issuerData[_id].issuerContract, idMap[msg.sender].id);
 		return true;
 	}
 
@@ -230,7 +241,7 @@ contract KYCRegistrar {
 		returns (bool)
 	{
 		if (!_checkMultiSig()) return false;
-		require (registry[_id].class == 255);
+		require (entityData[_id].class == 255);
 		require (_threshold <= authorityData[_id].addressCount);
 		authorityData[_id].multiSigThreshold = _threshold;
 		return true;
@@ -251,7 +262,7 @@ contract KYCRegistrar {
 		returns (bool)
 	{
 		if (!_checkMultiSig()) return false;
-		require (registry[_id].class == 255);
+		require (entityData[_id].class == 255);
 		Authority storage a = authorityData[_id];
 		for (uint256 i = 0; i < _countries.length; i++) {
 			a.countries[_countries[i]] = _auth;
@@ -261,7 +272,7 @@ contract KYCRegistrar {
 
 	function _checkMultiSig() internal returns (bool) {
 		bytes32 _id = idMap[msg.sender].id;
-		require (registry[_id].class == 255);
+		require (entityData[_id].class == 255);
 		Authority storage a = authorityData[_id];
 		bytes32 _callHash = keccak256(msg.data);
 		if (a.multiSigAuth[_callHash].length.add(1) >= a.multiSigThreshold) {
@@ -286,7 +297,7 @@ contract KYCRegistrar {
 	function _addEntity(bytes32 _id, uint8 _class, uint16 _country) internal {
 		require (_country > 0);
 		require (_id != 0);
-		Entity storage e = registry[_id];
+		Entity storage e = entityData[_id];
 		require (e.class == 0);
 		e.class = _class;
 		e.country = _country;
@@ -308,7 +319,7 @@ contract KYCRegistrar {
 		onlyAuthorityByID(_id)
 		returns (bool)
 	{
-		require (registry[_id].class == 1);
+		require (entityData[_id].class == 1);
 		if (!_checkMultiSig()) return false;
 		investorData[_id].region = _region;
 		investorData[_id].rating = _rating;
@@ -339,16 +350,16 @@ contract KYCRegistrar {
 		/*
 			Only the owner can modify the restricted status of an authority.
 		*/
-		if (registry[_id].class == 255) {
+		if (entityData[_id].class == 255) {
 			require (idMap[msg.sender].id == ownerID);
 			require (_id != ownerID);
 		}
-		require (registry[_id].class != 0);
+		require (entityData[_id].class != 0);
 		if (!_checkMultiSig()) return false;
-		registry[_id].restricted = _restricted;
+		entityData[_id].restricted = _restricted;
 		emit EntityRestriction(
 			_id,
-			registry[_id].class,
+			entityData[_id].class,
 			_restricted,
 			idMap[msg.sender].id
 		);
@@ -368,7 +379,7 @@ contract KYCRegistrar {
 		returns (bool)
 	{
 		if (!_checkMultiSig()) return false;
-		if (registry[_id].class == 255) {
+		if (entityData[_id].class == 255) {
 			/*
 				Only the owner can register addresses for an authority.
 			*/
@@ -390,7 +401,7 @@ contract KYCRegistrar {
 		require (idMap[_addr].id != 0);
 		_authorityCheck(
 			idMap[msg.sender].id,
-			registry[idMap[_addr].id].country
+			entityData[idMap[_addr].id].country
 		);
 		if (!_checkMultiSig()) return false;
 		if (idMap[_addr].id == 255) {
@@ -410,7 +421,7 @@ contract KYCRegistrar {
 		idMap[_addr].restricted = true;
 		emit UnregisteredAddress(
 			idMap[_addr].id,
-			registry[idMap[_addr].id].class,
+			entityData[idMap[_addr].id].class,
 			_addr,
 			idMap[msg.sender].id
 		);
@@ -418,13 +429,13 @@ contract KYCRegistrar {
 	}
 
 	function _addAddresses(bytes32 _id, address[] _addr) internal {
-		require (registry[_id].class != 0);
+		require (entityData[_id].class != 0);
 		for (uint256 i = 0; i < _addr.length; i++) {
 			require (idMap[_addr[i]].id == 0);
 			idMap[_addr[i]].id = _id;
 			emit NewRegisteredAddress(
 				_id,
-				registry[_id].class,
+				entityData[_id].class,
 				_addr[i],
 				idMap[msg.sender].id
 			);
@@ -453,9 +464,9 @@ contract KYCRegistrar {
 	/// @param _id Entity's ID
 	/// @return boolean
 	function isPermitted(bytes32 _id) public view returns (bool) {
-		require (registry[_id].class != 0);
-		require (registry[_id].class != 255);
-		require (!registry[_id].restricted);
+		require (entityData[_id].class != 0);
+		require (entityData[_id].class != 255);
+		require (!entityData[_id].restricted);
 		return true;
 	}
 
@@ -515,14 +526,14 @@ contract KYCRegistrar {
 				2 - issuer
 				3 - exchange
 		*/
-		return registry[_id].class;
+		return entityData[_id].class;
 	}
 
 	/// @notice Fetch country from an entity
 	/// @param _id Entity's ID
 	/// @return string
 	function getCountry(bytes32 _id) public view returns (uint16) {
-		return registry[_id].country;
+		return entityData[_id].country;
 	}
 
 	/// @notice Fetch region from an entity
@@ -549,8 +560,8 @@ contract KYCRegistrar {
 		_id = idMap[_addr].id;
 		return (
 			_id,
-			registry[_id].class,
-			registry[_id].country
+			entityData[_id].class,
+			entityData[_id].country
 		);
 	}
 
@@ -569,13 +580,25 @@ contract KYCRegistrar {
 			uint40 _expires
 		)
 	{
-		require (registry[_id].class == 1);
+		require (entityData[_id].class == 1);
 		return (
-			registry[_id].country,
+			entityData[_id].country,
 			investorData[_id].region,
 			investorData[_id].rating,
 			investorData[_id].expires
 		);
+	}
+
+	function checkTransferPermitted(
+		address _token,
+		address _auth,
+		address _from,
+		address _to
+	)
+		external
+		returns (bool)
+	{
+
 	}
 
 }

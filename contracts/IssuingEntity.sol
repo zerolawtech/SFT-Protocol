@@ -5,6 +5,21 @@ import "./SecurityToken.sol";
 import "./STBase.sol";
 
 
+contract IssuerFactory {
+
+	address registrar;
+
+	constructor(address _registrar) public {
+		registrar = _registrar;
+	}
+
+	function newIssuer(bytes32 _id) external returns (address) {
+		require (msg.sender == registrar);
+		return new IssuingEntity(registrar, _id);
+	}
+}
+
+
 /// @title Issuing Entity
 contract IssuingEntity is STBase {
 
@@ -54,10 +69,9 @@ contract IssuingEntity is STBase {
 
 	/// @notice Issuing entity constructor
 	/// @param _registrar Address of the registrar
-	constructor(address _registrar) public {
+	constructor(address _registrar, bytes32 _id) public {
 		registrar = KYCRegistrar(_registrar);
-		issuerID = registrar.getId(msg.sender);
-		require (registrar.getClass(issuerID) == 2);
+		issuerID = _id;
 	}
 
 	/// @notice Fetch count of all investors, regardless of rating
@@ -203,6 +217,7 @@ contract IssuingEntity is STBase {
 	/// @return boolean
 	function checkTransfer(
 		address _token,
+		address _auth,
 		address _from,
 		address _to,
 		uint256 _value
@@ -211,11 +226,27 @@ contract IssuingEntity is STBase {
 		view
 		returns (bool)
 	{
-		require (_value > 0);
-		(bytes32 _idFrom, uint8 _classFrom, uint16 _countryFrom) = registrar.getEntity(_from);
+		
+		require(registrar.isPermitted(issuerID)); // issuer must ALWAYS be permitted
+		require (registrar.isPermittedAddress(_to)); // receiving address must always be permitted
+
+		bytes32 _idAuth = registrar.getId(_auth);
+		bytes32 _idFrom = registrar.getId(_from);
+		// if authority is not issuer, and sending address is restricted,
+		// the authority id must be the same as the sending address id,
+		// and that id must not be restricted
+		if (_idAuth != issuerID) {
+			require (!accounts[_idFrom].restricted);
+			if (!registrar.isPermittedAddress(_from)) {
+				require (_idAuth == _idFrom && registrar.isPermitted(_idFrom));
+			}
+			
+		}
+
+		
+		(bytes32 _aidFrom, uint8 _classFrom, uint16 _countryFrom) = registrar.getEntity(_from);
 		(bytes32 _idTo, uint8 _classTo, uint16 _countryTo) = registrar.getEntity(_to);
-		require (registrar.arePermitted(issuerID, _idFrom, _idTo));
-		require (!accounts[_idFrom].restricted);
+		
 		require (!accounts[_idTo].restricted);
 		if (_idFrom != _idTo) {
 			/* Exchange to exchange transfers are not permitted */

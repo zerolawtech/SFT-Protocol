@@ -5,6 +5,29 @@ import "./IssuingEntity.sol";
 import "./STBase.sol";
 
 
+contract TokenFactory {
+
+	address registrar;
+
+	constructor(address _registrar) public {
+		registrar = _registrar;
+	}
+
+	function newToken(
+		address _issuer,
+		string _name,
+		string _symbol,
+		uint256 _totalSupply
+	)
+		external
+		returns (address)
+	{
+		require (msg.sender == registrar);
+		return new SecurityToken(_issuer, _name, _symbol, _totalSupply);
+	}
+}
+
+
 /// @title Security Token
 contract SecurityToken is STBase {
 
@@ -30,8 +53,8 @@ contract SecurityToken is STBase {
 	/// @param _name Name of the token
 	/// @param _symbol Unique ticker symbol
 	/// @param _totalSupply Total supply of the token
-	constructor(string _name, string _symbol, uint256 _totalSupply) public {
-		issuer = IssuingEntity(msg.sender);
+	constructor(address _issuer, string _name, string _symbol, uint256 _totalSupply) public {
+		issuer = IssuingEntity(_issuer);
 		issuerID = issuer.issuerID();
 		registrar = KYCRegistrar(issuer.registrar());
 		name = _name;
@@ -81,6 +104,7 @@ contract SecurityToken is STBase {
 	/// @param _value Amount being transferred
 	/// @return boolean
 	function checkTransfer(
+		address _auth,
 		address _from,
 		address _to,
 		uint256 _value
@@ -95,7 +119,7 @@ contract SecurityToken is STBase {
 				require(STModule(modules[i].module).checkTransfer(_from, _to, _value));
 			}
 		}
-		require (issuer.checkTransfer(address(this), _from, _to, _value));
+		require (issuer.checkTransfer(address(this), _auth, _from, _to, _value));
 		return true;
 	}
 
@@ -104,8 +128,7 @@ contract SecurityToken is STBase {
 	/// @param _value Amount being transferred
 	/// @return boolean
 	function transfer(address _to, uint256 _value) public onlyUnlocked returns (bool) {
-		require (registrar.isPermittedAddress(msg.sender));
-		_transfer(msg.sender, _to, _value);
+		_transfer(msg.sender, msg.sender, _to, _value);
 		return true;
 	}
 
@@ -135,7 +158,7 @@ contract SecurityToken is STBase {
 		} else if (_sendId == _fromId) {
 			require (registrar.isPermittedAddress(msg.sender));
 		}
-		_transfer(_from, _to, _value);
+		_transfer(msg.sender, _from, _to, _value);
 		return true;
 	}
 
@@ -143,11 +166,14 @@ contract SecurityToken is STBase {
 	/// @param _from Sender
 	/// @param _to Recipient
 	/// @param _value Amount being transferred
-	function _transfer(address _from, address _to, uint256 _value) internal {
+	function _transfer(address _auth, address _from, address _to, uint256 _value) internal {
 		if (registrar.getId(_from) == issuerID) {
 			_from = address(issuer);
 		}
-		require (checkTransfer(_from, _to, _value));
+		if (registrar.getId(_to) == issuerID) {
+			_to = address(issuer);
+		}
+		require (checkTransfer(_auth, _from, _to, _value));
 		balances[_from] = balances[_from].sub(_value);
 		balances[_to] = balances[_to].add(_value);
 
@@ -193,4 +219,7 @@ contract SecurityToken is STBase {
 		if (activeModules[_module]) return true;
 		return issuer.isActiveModule(_module);
 	}
+
+
+
 }
