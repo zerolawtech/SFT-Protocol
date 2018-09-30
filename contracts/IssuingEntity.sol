@@ -433,7 +433,7 @@ contract IssuingEntity is STBase {
 		returns (address)
 	{
 		accounts[issuerID].balance = accounts[issuerID].balance.add(_totalSupply);
-		address _token = new SecurityToken(_name, _symbol, _totalSupply);
+		address _token = registrar.issueNewToken(issuerID, _name, _symbol, _totalSupply);
 		tokens[_token] = true;
 		return _token;
 	}

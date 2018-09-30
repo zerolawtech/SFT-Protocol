@@ -612,4 +612,14 @@ contract KYCRegistrar {
 		return true;
 	}
 
+	function issueNewToken(bytes32 _id, string _name, string _symbol, uint256 _totalSupply) external returns (address) {
+		Issuer storage i = issuerData[_id];
+		require (msg.sender == i.issuerContract);
+		address _token = tokenFactory.newToken(msg.sender, _name, _symbol, _totalSupply);
+		i.allowed[_token] = true;
+		return _token;
+	}
+
+
+
 }
