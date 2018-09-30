@@ -67,19 +67,19 @@ contract SecurityToken is STBase {
 	/// @notice Fetch circulating supply
 	/// @dev Circulating supply = total supply - amount retained by issuer
 	/// @return integer
-	function circulatingSupply() public view returns (uint256) {
-		return totalSupply.sub(balanceOf(address(issuer)));
+	function circulatingSupply() external view returns (uint256) {
+		return totalSupply.sub(balances[address(issuer)]);
 	}
 
 	/// @notice Fetch the amount retained by issuer
 	/// @return integer
-	function treasurySupply() public view returns (uint256) {
-		return balanceOf(address(issuer));
+	function treasurySupply() external view returns (uint256) {
+		return balances[address(issuer)];
 	}
 
 	/// @notice Fetch the current balance at an address
 	/// @return integer
-	function balanceOf(address _owner) public view returns (uint256) {
+	function balanceOf(address _owner) external view returns (uint256) {
 		return balances[_owner];
 	}
 
@@ -124,14 +124,19 @@ contract SecurityToken is STBase {
 		uint256 _value
 	)
 		internal
-		returns (bytes32, bytes32[2], address[2])
+		returns (
+			bytes32 _authId,
+			bytes32[2] _id,
+			address[2] _addr,
+			uint8[2] _class,
+			uint16[2] _country)
 	{
 		require (_value > 0);
 		(
-			bytes32 _authId,
-			bytes32[2] memory _id,
-			uint8[2] memory _class,
-			uint16[2] memory _country
+			_authId,
+			_id,
+			_class,
+			_country
 		) = registrar.checkTransfer(issuerID, address(this), _auth, _from, _to);		
 		if (_id[0] == issuerID) {
 			_from = address(issuer);
@@ -148,7 +153,9 @@ contract SecurityToken is STBase {
 		return (
 			_authId,
 			_id,
-			address[2]([_from, _to])
+			address[2]([_from, _to]),
+			_class,
+			_country
 		);
 	}
 
@@ -160,9 +167,11 @@ contract SecurityToken is STBase {
 		(
 			bytes32 _authId,
 			bytes32[2] memory _id,
-			address[2] memory _addr
+			address[2] memory _addr,
+			uint8[2] memory _class,
+			uint16[2] memory _country
 		) = _checkTransfer(msg.sender, msg.sender, _to, _value);
-		_transfer(_addr[0], _addr[1], _value);
+		_transfer(_addr, _id, _class, _country, _value);
 		return true;
 	}
 
@@ -189,7 +198,9 @@ contract SecurityToken is STBase {
 		(
 			bytes32 _authId,
 			bytes32[2] memory _id,
-			address[2] memory _addr
+			address[2] memory _addr,
+			uint8[2] memory _class,
+			uint16[2] memory _country
 		) = _checkTransfer(_auth, _from, _to, _value);
 
 		if (_id[0] != _id[1] && _authId != issuerID) {
@@ -199,7 +210,7 @@ contract SecurityToken is STBase {
 			*/
 			allowed[_from][_auth] = allowed[_from][_auth].sub(_value);
 		}
-		_transfer(_addr[0], _addr[1], _value);
+		_transfer(_addr, _id, _class, _country, _value);
 		return true;
 	}
 
@@ -207,16 +218,21 @@ contract SecurityToken is STBase {
 	/// @param _from Sender
 	/// @param _to Recipient
 	/// @param _value Amount being transferred
-	function _transfer(address _from, address _to, uint256 _value) internal {
-		balances[_from] = balances[_from].sub(_value);
-		balances[_to] = balances[_to].add(_value);
+	function _transfer(
+		address[2] _addr,
+		bytes32[2] _id,
+		uint8[2] _class,
+		uint16[2] _country,		
+		uint256 _value) internal {
+		balances[_addr[0]] = balances[_addr[0]].sub(_value);
+		balances[_addr[1]] = balances[_addr[1]].add(_value);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
-				require (STModule(modules[i].module).transferTokens(_from, _to, _value));
+				require (STModule(modules[i].module).transferTokens(_addr[0], _addr[1], _value));
 			}
 		}
-		require (issuer.transferTokens(address(this), _from, _to, _value));
-		emit Transfer(_from, _to, _value);
+		require (issuer.transferTokens(_id, _class, _country, _value));
+		emit Transfer(_addr[0], _addr[1], _value);
 	}
 
 	/// @notice Directly modify the balance of an account
@@ -224,7 +240,7 @@ contract SecurityToken is STBase {
 	/// @dev This function is only callable via module
 	/// @param _owner Owner of the tokens
 	/// @param _value Balance to set
-	function modifyBalance(address _owner, uint256 _value) public returns (bool) {
+	function modifyBalance(address _owner, uint256 _value) external returns (bool) {
 		require (isActiveModule(msg.sender));
 		if (balances[_owner] == _value) return true;
 		if (balances[_owner] > _value) {
@@ -240,7 +256,7 @@ contract SecurityToken is STBase {
 				require (STModule(modules[i].module).balanceChanged(_owner, _old, _value));
 			}
 		}
-		require (issuer.balanceChanged(address(this), _owner, _old, _value));
+		require (issuer.balanceChanged(_owner, _old, _value));
 		emit BalanceChanged(_owner, _old, _value);
 	}
 

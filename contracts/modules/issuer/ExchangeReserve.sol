@@ -32,7 +32,7 @@ contract ExchangeReserve is IssuerModuleBase {
 		uint16 _country,
 		uint8 _rating
 	)
-		public
+		external
 		view
 		returns (uint64 _reserved, uint64 _max)
 	{
@@ -45,7 +45,7 @@ contract ExchangeReserve is IssuerModuleBase {
 		uint16 _country,
 		uint8 _rating
 	)
-		public
+		external
 		view
 		returns (uint64 _reserved, uint64 _max)
 	{
@@ -98,6 +98,18 @@ contract ExchangeReserve is IssuerModuleBase {
 	}
 
 	function transferTokens(
+		address _token,
+		bytes32[2] _id,
+		uint8[2] _class,
+		uint16[2] _country,
+		uint256 _value
+	)
+		external
+		onlyParent
+		returns (bool)
+	{
+	
+	/* function transferTokens(
 		address,
 		address _from,
 		address _to,
@@ -106,32 +118,30 @@ contract ExchangeReserve is IssuerModuleBase {
 		external
 		onlyParent
 		returns (bool)
-	{
-		(bytes32 _idFrom, uint8 _classFrom, uint16 _countryFrom) = registrar.getEntity(_from);
-		(bytes32 _idTo, uint8 _classTo, uint16 _countryTo) = registrar.getEntity(_to);
-		if (_classFrom != 3 && _classTo != 3) return true;
-		if (_classFrom == 1 && _classTo == 3 && issuer.balanceOf(_idFrom) == 0) {
-			uint8 _rating = registrar.getRating(_idFrom);
-			Country storage c = countries[_countryFrom];
-			Exchange storage e = c.exchanges[_idTo];
-			if (issuer.getCountryInvestorLimit(_countryFrom, _rating) > 0) {
+	{ */
+		if (_class[0] != 3 && _class[1] != 3) return true;
+		if (_class[0] == 1 && _class[1] == 3 && issuer.balanceOf(_id[0]) == 0) {
+			uint8 _rating = registrar.getRating(_id[0]);
+			Country storage c = countries[_country[0]];
+			Exchange storage e = c.exchanges[_id[1]];
+			if (issuer.getCountryInvestorLimit(_country[0], _rating) > 0) {
 				e.reserved[_rating] = e.reserved[_rating].add(1);
 				c.reserved[_rating] = c.reserved[_rating].add(1);
 			}
-			if (issuer.getCountryInvestorLimit(_countryFrom, 0) > 0) {
+			if (issuer.getCountryInvestorLimit(_country[0], 0) > 0) {
 				e.reserved[0] = e.reserved[0].add(1);
 				c.reserved[0] = c.reserved[0].add(1);
 			}
 		}
-		if (_classFrom == 3 && _classTo == 1 && issuer.balanceOf(_idTo) == _value) {
-			_rating = registrar.getRating(_idTo);
-			c = countries[_countryTo];
-			e = c.exchanges[_idTo];
-			if (issuer.getCountryInvestorLimit(_countryTo, _rating) > 0) {
+		if (_class[0] == 3 && _class[1] == 1 && issuer.balanceOf(_id[1]) == _value) {
+			_rating = registrar.getRating(_id[1]);
+			c = countries[_country[1]];
+			e = c.exchanges[_id[1]];
+			if (issuer.getCountryInvestorLimit(_country[1], _rating) > 0) {
 				e.reserved[_rating] = e.reserved[_rating].sub(1);
 				c.reserved[_rating] = c.reserved[_rating].sub(1);
 			}
-			if (issuer.getCountryInvestorLimit(_countryTo, 0) > 0) {
+			if (issuer.getCountryInvestorLimit(_country[1], 0) > 0) {
 				e.reserved[0] = e.reserved[0].sub(1);
 				c.reserved[0] = c.reserved[0].sub(1);
 			}
@@ -143,7 +153,7 @@ contract ExchangeReserve is IssuerModuleBase {
 		return b;
 	}
 
-	function exchangeReserve(uint16 _country, uint8 _rating) public onlyExchange returns (uint64) {
+	function exchangeReserve(uint16 _country, uint8 _rating) external onlyExchange returns (uint64) {
 		bytes32 _id = registrar.getId(msg.sender);
 		Country storage c = countries[_country];
 		Exchange storage e = c.exchanges[_id];
@@ -176,7 +186,7 @@ contract ExchangeReserve is IssuerModuleBase {
 		uint8[] _rating,
 		uint64[] _value
 	)
-		public
+		external
 		onlyExchange
 		returns (bool)
 	{
@@ -194,7 +204,7 @@ contract ExchangeReserve is IssuerModuleBase {
 		uint8 _rating,
 		uint64 _value
 	)
-		public
+		external
 		onlyIssuer
 		returns (bool)
 	{
@@ -207,7 +217,7 @@ contract ExchangeReserve is IssuerModuleBase {
 		uint8[] _rating,
 		uint64[] _value
 	)
-		public
+		external
 		onlyIssuer
 		returns (bool)
 	{

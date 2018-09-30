@@ -312,9 +312,9 @@ contract IssuingEntity is STBase {
 	/// @param _value Amount being transferred
 	/// @return boolean
 	function transferTokens(
-		address _token,
-		address _from,
-		address _to,
+		bytes32[2] _id,
+		uint8[2] _class,
+		uint16[2] _country,
 		uint256 _value
 	)
 		external
@@ -322,18 +322,18 @@ contract IssuingEntity is STBase {
 		onlyToken
 		returns (bool)
 	{
-		bytes32 _idFrom = registrar.getId(_from);
-		bytes32 _idTo = registrar.getId(_to);
-		if (_idFrom == _idTo) return true;
-		_setBalance(_idFrom, accounts[_idFrom].balance.sub(_value));
-		_setBalance(_idTo, accounts[_idTo].balance.add(_value));
+		if (_id[0] == _id[1]) return true;
+		uint _balance = accounts[_id[0]].balance.sub(_value);
+		_setBalance(_id[0], _class[0], _country[0], _balance);
+		_balance = accounts[_id[1]].balance.add(_value);
+		_setBalance(_id[1], _class[1], _country[1], _balance);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
 				IssuerModule m = IssuerModule(modules[i].module);
-				require (m.transferTokens(_token, _from, _to, _value));
+				require (m.transferTokens(msg.sender, _id, _class, _country, _value));
 			}
 		}
-		emit TransferOwnership(_token, _idFrom, _idTo, _value);
+		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
 		return true;
 	}
 
@@ -344,7 +344,6 @@ contract IssuingEntity is STBase {
 	/// @param _new New balance
 	/// @return boolean
 	function balanceChanged(
-		address _token,
 		address _owner,
 		uint256 _old,
 		uint256 _new
@@ -354,16 +353,18 @@ contract IssuingEntity is STBase {
 		onlyToken
 		returns (bool)
 	{
-		bytes32 _id = registrar.getId(_owner);
+		(bytes32 _id, uint8 _class, uint16 _country) = registrar.getEntity(_owner);
+		uint256 _oldTotal = accounts[_id].balance;
 		if (_new > _old) {
-			_setBalance(_id, accounts[_id].balance.add(_new.sub(_old)));
+			uint256 _newTotal = accounts[_id].balance.add(_new.sub(_old));
 		} else {
-			_setBalance(_id, accounts[_id].balance.sub(_old.sub(_new)));
+			_newTotal = accounts[_id].balance.sub(_old.sub(_new));
 		}
+		_setBalance(_id, _class, _country, _newTotal);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
 				IssuerModule m = IssuerModule(modules[i].module);
-				require (m.balanceChanged(_token, _owner, _old, _new));
+				require (m.balanceChanged(msg.sender, _id, _class, _country, _oldTotal, _newTotal));
 			}
 		}
 		return true;
@@ -373,20 +374,20 @@ contract IssuingEntity is STBase {
 	/// @param _id Account to modify
 	/// @param _value New balance
 	/// @return boolean
-	function _setBalance(bytes32 _id, uint256 _value) internal {
+	function _setBalance(bytes32 _id, uint8 _class, uint16 _country, uint256 _value) internal {
 		Account storage a = accounts[_id];
-		Country storage c = countries[registrar.getCountry(_id)];
-		uint8 _rating = registrar.getRating(_id);
-		uint8 _class = registrar.getClass(_id);
-		/* If this sets an investor account balance > 0, take an available slot */
-		if (a.balance == 0 && _class == 1) {
-			c.count[0] = c.count[0].add(1);
-			c.count[_rating] = c.count[_rating].add(1);
-		}
-		/* If this sets an investor account balance to 0, add another available slot */
-		if (_value == 0 && _class == 1) {
-			c.count[0] = c.count[0].sub(1);
-			c.count[_rating] = c.count[_rating].sub(1);
+		Country storage c = countries[_country];
+		if (_class == 1) {
+			uint8 _rating = registrar.getRating(_id);
+			/* If this sets an investor account balance > 0, take an available slot */
+			if (a.balance == 0) {
+				c.count[0] = c.count[0].add(1);
+				c.count[_rating] = c.count[_rating].add(1);
+			/* If this sets an investor account balance to 0, add another available slot */
+			} else if (_value == 0) {
+				c.count[0] = c.count[0].sub(1);
+				c.count[_rating] = c.count[_rating].sub(1);
+			}
 		}
 		a.balance = _value;
 	}
@@ -401,7 +402,7 @@ contract IssuingEntity is STBase {
 		string _symbol,
 		uint256 _totalSupply
 	)
-		public
+		external
 		onlyIssuer
 		returns (address)
 	{
