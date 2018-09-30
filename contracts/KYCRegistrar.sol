@@ -13,7 +13,6 @@ contract KYCRegistrar {
 	IssuerFactoryInterface issuerFactory;
 	TokenFactoryInterface tokenFactory;
 
-
 	struct Address {
 		bytes32 id;
 		bool restricted;
@@ -599,6 +598,18 @@ contract KYCRegistrar {
 		returns (bool)
 	{
 
+	}
+
+	function setIssuerFactory(address _factory) external onlyOwner returns (bool) {
+		if (!_checkMultiSig()) return false;
+		issuerFactory = IssuerFactoryInterface(_factory);
+		return true;
+	}
+
+	function setTokenFactory(address _factory) external onlyOwner returns (bool) {
+		if (!_checkMultiSig()) return false;
+		tokenFactory = TokenFactoryInterface(_factory);
+		return true;
 	}
 
 }
