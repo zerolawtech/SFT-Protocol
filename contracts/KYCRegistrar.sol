@@ -60,6 +60,7 @@ contract KYCRegistrar {
 	mapping (bytes32 => Investor) investorData;
 	mapping (bytes32 => Issuer) issuerData;
 	mapping (bytes32 => Authority) authorityData;
+	mapping (string => address) tickerRegistry;
 
 	event NewInvestor(
 		bytes32 id,
@@ -84,6 +85,8 @@ contract KYCRegistrar {
 	);
 	event NewExchange(bytes32 id, uint16 country, bytes32 authority);
 	event NewAuthority(bytes32 id);
+	event NewIssuerFactory(address factory);
+	event NewTokenFactory(address factory);
 	event EntityRestriction(
 		bytes32 id,
 		uint8 class,
@@ -129,9 +132,12 @@ contract KYCRegistrar {
 	}
 
 	/// @notice KYC registrar constructor
-	constructor (address[] _owners, uint8 _threshold) public {
+	/// @param _owners Array of addresses for owning authority
+	/// @param _id ID of owning authority
+	/// @param _threshold multisig threshold for owning authority
+	constructor (address[] _owners, bytes32 _id, uint8 _threshold) public {
 		require (_threshold <= _owners.length);
-		ownerID = keccak256(abi.encodePacked(msg.sender));
+		ownerID = _id;
 		_addEntity(ownerID, 255, 0);
 		Authority storage a = authorityData[ownerID];
 		a.multiSigThreshold = _threshold;
@@ -464,6 +470,38 @@ contract KYCRegistrar {
 		}
 	}
 
+	function setIssuerFactory(address _factory) external onlyOwner returns (bool) {
+		if (!_checkMultiSig()) return false;
+		issuerFactory = IssuerFactoryInterface(_factory);
+		emit NewIssuerFactory(_factory);
+		return true;
+	}
+
+	function setTokenFactory(address _factory) external onlyOwner returns (bool) {
+		if (!_checkMultiSig()) return false;
+		tokenFactory = TokenFactoryInterface(_factory);
+		emit NewTokenFactory(_factory);
+		return true;
+	}
+
+	function issueNewToken(
+		bytes32 _id,
+		string _name,
+		string _symbol,
+		uint256 _totalSupply
+	)
+		external
+		returns (address)
+	{
+		require (msg.sender == issuerData[_id].issuerContract);
+		require (!entityData[_id].restricted);
+		require (tickerRegistry[_symbol] == 0);
+		address _token = tokenFactory.newToken(msg.sender, _name, _symbol, _totalSupply);
+		issuerData[_id].allowed[_token] = true;
+		tickerRegistry[_symbol] = _token;
+		return _token;
+	}
+
 	/// @notice Generate a unique investor ID
 	/// @dev Hash returned == sha256(abi.encodePacked(_fullName, _ddmmyyyy, _taxID));
 	/// @param _fullName Investor's full name
@@ -646,6 +684,7 @@ contract KYCRegistrar {
 		bytes32 _id = idMap[_addr].id;
 		require (entityData[_id].class != 0);
 		require (entityData[_id].class != 255);
+		/* Issuers can only hold their own tokens. */
 		if (entityData[_id].class == 2) {
 			require (_id == _issuer);
 		}
@@ -653,34 +692,8 @@ contract KYCRegistrar {
 		require (!idMap[_addr].restricted);
 	}
 
-	function setIssuerFactory(address _factory) external onlyOwner returns (bool) {
-		if (!_checkMultiSig()) return false;
-		issuerFactory = IssuerFactoryInterface(_factory);
-		return true;
-	}
+	
 
-	function setTokenFactory(address _factory) external onlyOwner returns (bool) {
-		if (!_checkMultiSig()) return false;
-		tokenFactory = TokenFactoryInterface(_factory);
-		return true;
-	}
-
-	function issueNewToken(
-		bytes32 _id,
-		string _name,
-		string _symbol,
-		uint256 _totalSupply
-	)
-		external
-		returns (address)
-	{
-		require (msg.sender == issuerData[_id].issuerContract);
-		require (!entityData[_id].restricted);
-		address _token = tokenFactory.newToken(msg.sender, _name, _symbol, _totalSupply);
-		issuerData[_id].allowed[_token] = true;
-		return _token;
-	}
-
-
+	
 
 }
