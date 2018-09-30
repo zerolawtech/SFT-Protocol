@@ -55,44 +55,44 @@ contract ExchangeReserve is IssuerModuleBase {
 
 	function checkTransfer(
 		address,
-		address _from,
-		address _to,
+		bytes32,
+		bytes32[2] _id,
+		uint8[2] _class,
+		uint16[2] _country,
 		uint256 _value
 	)
-		public
+		external
 		view
 		returns (bool)
 	{
-		(bytes32 _idFrom, uint8 _classFrom, uint16 _countryFrom) = registrar.getEntity(_from);
-		(bytes32 _idTo, uint8 _classTo, uint16 _countryTo) = registrar.getEntity(_to);
-		if (_classFrom != 3 && _classTo == 1 && issuer.balanceOf(_idTo) == 0) {
-			uint8 _ratingFrom = registrar.getRating(_idFrom);
-			uint8 _ratingTo = registrar.getRating(_idTo);
-			bool _remains = issuer.balanceOf(_idFrom) > _value;
-			if (_countryFrom != _countryTo || _classFrom != 1 || _remains) {
-				(uint64 _count, uint64 _limit) = issuer.getCountryInfo(_countryTo, 0);
+		if (_class[0] != 3 && _class[1] == 1 && issuer.balanceOf(_id[1]) == 0) {
+			uint8 _ratingFrom = registrar.getRating(_id[0]);
+			uint8 _ratingTo = registrar.getRating(_id[1]);
+			bool _remains = issuer.balanceOf(_id[0]) > _value;
+			if (_country[0] != _country[1] || _class[0] != 1 || _remains) {
+				(uint64 _count, uint64 _limit) = issuer.getCountryInfo(_country[1], 0);
 				if (_limit > 0) {
-					require (_limit.sub(_count) > countries[_countryTo].reserved[0]);
+					require (_limit.sub(_count) > countries[_country[1]].reserved[0]);
 				}
 			}
-			if (_countryFrom != _countryTo || _classFrom != 1 || _remains || _ratingFrom != _ratingTo) {
-				(_count, _limit) = issuer.getCountryInfo(_countryTo, _ratingTo);
+			if (_country[0] != _country[1] || _class[0] != 1 || _remains || _ratingFrom != _ratingTo) {
+				(_count, _limit) = issuer.getCountryInfo(_country[1], _ratingTo);
 				if (_limit > 0) {
-					require (_limit.sub(_count) > countries[_countryTo].reserved[_rating]);
+					require (_limit.sub(_count) > countries[_country[1]].reserved[_rating]);
 				}
 			}
-		} else if (_classFrom == 3    && _classTo == 1) {
-			require (approved[_idFrom]);
-			uint8 _rating = registrar.getRating(_idTo);
-			Exchange storage e = countries[_countryTo].exchanges[_idFrom];
-			if (issuer.getCountryInvestorLimit(_countryTo, _rating) > 0) {
+		} else if (_class[0] == 3    && _class[1] == 1) {
+			require (approved[_id[0]]);
+			uint8 _rating = registrar.getRating(_id[1]);
+			Exchange storage e = countries[_country[1]].exchanges[_id[0]];
+			if (issuer.getCountryInvestorLimit(_country[1], _rating) > 0) {
 				require (e.reserved[_rating] > 0);
 			}
-			if (issuer.getCountryInvestorLimit(_countryTo, 0) > 0) {
+			if (issuer.getCountryInvestorLimit(_country[1], 0) > 0) {
 				require (e.reserved[0] > 0);
 			}
-		} else if (_classTo == 3) {
-			require (approved[_idTo]);
+		} else if (_class[1] == 3) {
+			require (approved[_id[1]]);
 		}
 		return true;
 	}
