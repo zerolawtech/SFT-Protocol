@@ -363,7 +363,7 @@ contract KYCRegistrar {
 	}
 
 	/// @notice Set or remove an entity's restricted status
-	/// @dev Investors are restricted at the investor level, not address
+	/// @dev This modifes restriction on the entire entity, not a single address
 	/// @param _id Entity's ID
 	/// @param _restricted boolean
 	/// @return bool
@@ -394,9 +394,9 @@ contract KYCRegistrar {
 		return true;
 	}
 
-	/// @notice Register addresses to an entity
+	/// @notice Register addresseses to an entity
 	/// @param _id Entity's ID
-	/// @param _addr Entity's addresses
+	/// @param _addr Array of addresses
 	/// @return bool
 	function registerAddresses(
 		bytes32 _id,
@@ -423,6 +423,8 @@ contract KYCRegistrar {
 	}
 
 	/// @notice Flags an address as restricted instead of removing it
+	/// @dev Address associations can never be fully removed, only restricted.
+	/// This action cannot be reversed.
 	/// @param _addr Entity's address
 	/// @return bool
 	function unregisterAddress(address _addr) external returns (bool) {
@@ -520,6 +522,11 @@ contract KYCRegistrar {
 		return sha256(abi.encodePacked(_fullName, _ddmmyyyy, _taxID));
 	}
 
+	/// @notice Check that an address is associated to an ID and not restricted
+	/// @dev Used for modifier onlyIssuer
+	/// @param _id ID that should be associated with address
+	/// @param _addr address to check against ID
+	/// @return bool
 	function isPermittedIssuer(bytes32 _id, address _addr) external view returns (bool) {
 		require (idMap[_addr].id == _id);
 		require (!idMap[_addr].restricted);
@@ -548,12 +555,6 @@ contract KYCRegistrar {
 	/// @param _id Entity's ID
 	/// @return integer
 	function getClass(bytes32 _id) external view returns (uint8) {
-		/*
-			Entity classes:
-				1 - investor
-				2 - issuer
-				3 - exchange
-		*/
 		return entityData[_id].class;
 	}
 
@@ -691,9 +692,5 @@ contract KYCRegistrar {
 		require (!entityData[_id].restricted);
 		require (!idMap[_addr].restricted);
 	}
-
-	
-
-	
 
 }

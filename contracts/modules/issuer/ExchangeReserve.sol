@@ -98,7 +98,7 @@ contract ExchangeReserve is IssuerModuleBase {
 	}
 
 	function transferTokens(
-		address _token,
+		address,
 		bytes32[2] _id,
 		uint8[2] _class,
 		uint16[2] _country,
@@ -108,17 +108,6 @@ contract ExchangeReserve is IssuerModuleBase {
 		onlyParent
 		returns (bool)
 	{
-	
-	/* function transferTokens(
-		address,
-		address _from,
-		address _to,
-		uint256 _value
-	)
-		external
-		onlyParent
-		returns (bool)
-	{ */
 		if (_class[0] != 3 && _class[1] != 3) return true;
 		if (_class[0] == 1 && _class[1] == 3 && issuer.balanceOf(_id[0]) == 0) {
 			uint8 _rating = registrar.getRating(_id[0]);

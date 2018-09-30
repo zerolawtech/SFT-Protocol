@@ -69,6 +69,7 @@ contract IssuingEntity is STBase {
 
 	/// @notice Issuing entity constructor
 	/// @param _registrar Address of the registrar
+	/// @param _id ID of Issuer
 	constructor(address _registrar, bytes32 _id) public {
 		registrar = KYCRegistrar(_registrar);
 		issuerID = _id;
@@ -211,9 +212,11 @@ contract IssuingEntity is STBase {
 
 	/// @notice Check if a transfer is possible at the issuing entity level
 	/// @param _token Token being transferred
-	/// @param _from Sender
-	/// @param _to Recipient
-	/// @param _value Amount being transferred
+	/// @param _authId ID of the caller attempting the transfer
+	/// @param _id Array of sender/receiver IDs
+	/// @param _class Arracy of sender/receiver classes
+	/// @param _country Array of sender/receiver countries
+	/// @param _value Number of tokens being transferred
 	/// @return boolean
 	function checkTransfer(
 		address _token,
@@ -240,7 +243,8 @@ contract IssuingEntity is STBase {
 				Country storage c = countries[_country[1]];
 				uint8 _rating = registrar.getRating(_id[1]);
 				require (c.allowed);
-				/*  If the receiving investor currently has a 0 balance,
+				/*  
+					If the receiving investor currently has a 0 balance,
 					we must make sure a slot is available for allocation
 				*/
 				require (_rating >= c.minRating);
@@ -306,10 +310,10 @@ contract IssuingEntity is STBase {
 
 
 	/// @notice Transfer tokens through the issuing entity level
-	/// @param _token Token being transferred
-	/// @param _from Sender
-	/// @param _to Recipient
-	/// @param _value Amount being transferred
+	/// @param _id Array of sender/receiver IDs
+	/// @param _class Arracy of sender/receiver classes
+	/// @param _country Array of sender/receiver countries
+	/// @param _value Number of tokens being transferred
 	/// @return boolean
 	function transferTokens(
 		bytes32[2] _id,
@@ -338,7 +342,6 @@ contract IssuingEntity is STBase {
 	}
 
 	/// @notice Affect a direct balance change (burn/mint) at the issuing entity level
-	/// @param _token Token being changed
 	/// @param _owner Token owner
 	/// @param _old Old balance
 	/// @param _new New balance
@@ -371,7 +374,9 @@ contract IssuingEntity is STBase {
 	}
 
 	/// @notice Directly set a balance at the issuing entity level
-	/// @param _id Account to modify
+	/// @param _id ID of affected entity
+	/// @param _class Class of affected entity
+	/// @param _country Country of affected entity
 	/// @param _value New balance
 	/// @return boolean
 	function _setBalance(bytes32 _id, uint8 _class, uint16 _country, uint256 _value) internal {

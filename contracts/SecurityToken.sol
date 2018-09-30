@@ -124,12 +124,14 @@ contract SecurityToken is STBase {
 		uint256 _value
 	)
 		internal
+		view
 		returns (
 			bytes32 _authId,
 			bytes32[2] _id,
 			address[2] _addr,
 			uint8[2] _class,
-			uint16[2] _country)
+			uint16[2] _country
+		)
 	{
 		require (_value > 0);
 		(
@@ -215,15 +217,20 @@ contract SecurityToken is STBase {
 	}
 
 	/// @notice Internal transfer function
-	/// @param _from Sender
-	/// @param _to Recipient
-	/// @param _value Amount being transferred
+	/// @param _addr Array of sender/receiver addresses
+	/// @param _id Array of sender/receiver IDs
+	/// @param _class Array of sender/receiver classes
+	/// @param _country Array of sender/receiver countries
+	/// @param _value Amount to transfer
 	function _transfer(
 		address[2] _addr,
 		bytes32[2] _id,
 		uint8[2] _class,
 		uint16[2] _country,		
-		uint256 _value) internal {
+		uint256 _value
+	)
+		internal
+	{
 		balances[_addr[0]] = balances[_addr[0]].sub(_value);
 		balances[_addr[1]] = balances[_addr[1]].add(_value);
 		for (uint256 i = 0; i < modules.length; i++) {
@@ -240,6 +247,7 @@ contract SecurityToken is STBase {
 	/// @dev This function is only callable via module
 	/// @param _owner Owner of the tokens
 	/// @param _value Balance to set
+	/// @return bool
 	function modifyBalance(address _owner, uint256 _value) external returns (bool) {
 		require (isActiveModule(msg.sender));
 		if (balances[_owner] == _value) return true;
@@ -248,7 +256,6 @@ contract SecurityToken is STBase {
 		} else {
 			totalSupply = totalSupply.add(_value.sub(balances[_owner]));
 		}
-
 		uint256 _old = balances[_owner];
 		balances[_owner] = _value;
 		for (uint256 i = 0; i < modules.length; i++) {
@@ -269,6 +276,10 @@ contract SecurityToken is STBase {
 		return issuer.isActiveModule(_module);
 	}
 
+	/// @notice ERC-20 approve standard
+	/// @param _spender Address being approved to transfer tokens
+	/// @param _value Amount approved for transfer
+	/// @return boolean
 	function approve(address _spender, uint256 _value) external returns (bool) {
 		require (_spender != address(this));
 		require (_value == 0 || allowed[msg.sender][_spender] == 0);
