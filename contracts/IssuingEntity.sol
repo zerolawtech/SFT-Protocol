@@ -217,56 +217,41 @@ contract IssuingEntity is STBase {
 	/// @return boolean
 	function checkTransfer(
 		address _token,
-		address _auth,
-		address _from,
-		address _to,
+		bytes32 _authId,
+		bytes32[2] _id,
+		uint8[2] _class,
+		uint16[2] _country,
 		uint256 _value
 	)
-		public
+		external
 		view
 		returns (bool)
 	{
 		
-		require(registrar.isPermitted(issuerID)); // issuer must ALWAYS be permitted
-		require (registrar.isPermittedAddress(_to)); // receiving address must always be permitted
-
-		bytes32 _idAuth = registrar.getId(_auth);
-		bytes32 _idFrom = registrar.getId(_from);
-		// if authority is not issuer, and sending address is restricted,
-		// the authority id must be the same as the sending address id,
-		// and that id must not be restricted
-		if (_idAuth != issuerID) {
-			require (!accounts[_idFrom].restricted);
-			if (!registrar.isPermittedAddress(_from)) {
-				require (_idAuth == _idFrom && registrar.isPermitted(_idFrom));
-			}
-			
+		
+		if (_authId != issuerID) {
+			require (!accounts[_id[0]].restricted);	
 		}
-
-		
-		(bytes32 _aidFrom, uint8 _classFrom, uint16 _countryFrom) = registrar.getEntity(_from);
-		(bytes32 _idTo, uint8 _classTo, uint16 _countryTo) = registrar.getEntity(_to);
-		
-		require (!accounts[_idTo].restricted);
-		if (_idFrom != _idTo) {
+		require (!accounts[_id[1]].restricted);
+		if (_id[0] != _id[1]) {
 			/* Exchange to exchange transfers are not permitted */
-			require (_classFrom != 3 || _classTo != 3);
-			if (_classTo == 1) {
-				Country storage c = countries[_countryTo];
-				uint8 _rating = registrar.getRating(_idTo);
+			require (_class[0] != 3 || _class[1] != 3);
+			if (_class[1] == 1) {
+				Country storage c = countries[_country[1]];
+				uint8 _rating = registrar.getRating(_id[1]);
 				require (c.allowed);
 				/*  If the receiving investor currently has a 0 balance,
 					we must make sure a slot is available for allocation
 				*/
 				require (_rating >= c.minRating);
-				if (accounts[_idTo].balance == 0) {
+				if (accounts[_id[1]].balance == 0) {
 					/*
 						If the sender is an investor and still retains a balance,
 						a new slot must be available
 					*/
 					bool _check = (
-						_classFrom != 1 ||
-						accounts[_idFrom].balance > _value
+						_class[0] != 1 ||
+						accounts[_id[0]].balance > _value
 					);
 					if (_check) {
 						require (
@@ -278,11 +263,11 @@ contract IssuingEntity is STBase {
 						If the investors are from different countries, make sure
 						a slot is available in the overall country limit
 					*/
-					if (_check || _countryFrom != _countryTo) {
+					if (_check || _country[0] != _country[1]) {
 						require (c.limit[0] == 0 || c.count[0] < c.limit[0]);
 					}
 					if (!_check) {
-						_check = registrar.getRating(_idFrom) != _rating;
+						_check = registrar.getRating(_id[0]) != _rating;
 					}
 					/*
 						If the investors are of different ratings, make sure a
@@ -300,7 +285,7 @@ contract IssuingEntity is STBase {
 						sure a slot is available in both the specific country
 						and rating for the receiver
 					*/
-					if (_check || _countryFrom != _countryTo) {
+					if (_check || _country[0] != _country[1]) {
 						require (
 							c.limit[_rating] == 0 ||
 							c.count[_rating] < c.limit[_rating]
@@ -309,26 +294,14 @@ contract IssuingEntity is STBase {
 				}
 			}
 		}
-		_moduleCheckTransfer(_token, _from, _to, _value);
+		for (uint256 i = 0; i < modules.length; i++) {
+			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
+				require(IssuerModule(modules[i].module).checkTransfer(_token, _authId, _id, _class, _country, _value));
+			}
+		}
 		return true;
 	}
 
-	function _moduleCheckTransfer(
-		address _token,
-		address _from,
-		address _to,
-		uint256 _value
-	)
-		internal
-		view
-	{
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				IssuerModule m = IssuerModule(modules[i].module);
-				require(m.checkTransfer(_token, _from, _to, _value));
-			}
-		}
-	}
 
 
 

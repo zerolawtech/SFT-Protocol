@@ -588,16 +588,54 @@ contract KYCRegistrar {
 		);
 	}
 
-	function checkTransferPermitted(
+	function checkTransfer(
+		bytes32 _issuer,
 		address _token,
 		address _auth,
 		address _from,
 		address _to
 	)
 		external
-		returns (bool)
+		view
+		returns (
+			bytes32,
+			bytes32[2],
+			uint8[2],
+			uint16[2]
+		)
 	{
+		require (!entityData[_issuer].restricted); // issuer is restricted
+		require (issuerData[_issuer].allowed[_token]); // token is restricted
+		require (!idMap[_auth].restricted); // authority address is restricted
+		_checkAddress(_issuer, _to); // receiver is restricted
+		bytes32 _authId = idMap[_auth].id;
+		if (_authId == _issuer) {
+			require (!idMap[_auth].restricted); // issuer is authority, only check that specific address is not restricted
+		}
+		else if (issuerData[_issuer].issuerContract == _auth) {
+			_authId = _issuer; // issuer contract is the authority, set authority as issuer
+		} else {
+			_checkAddress(_issuer, _from); // check that sender is not restricted
+		}
+		bytes32 _fromId = idMap[_from].id;
+		bytes32 _toId = idMap[_to].id;
+		return (
+			_authId,
+			bytes32[2]([_fromId, _toId]),
+			uint8[2]([entityData[_fromId].class, entityData[_toId].class]),
+			uint16[2]([entityData[_fromId].country, entityData[_toId].country])
+		);
+	}
 
+	function _checkAddress(bytes32 _issuer, address _addr) internal view {
+		bytes32 _id = idMap[_addr].id;
+		require (entityData[_id].class != 0);
+		require (entityData[_id].class != 255);
+		if (entityData[_id].class == 2) {
+			require (_id == _issuer);
+		}
+		require (!entityData[_id].restricted);
+		require (!idMap[_addr].restricted);
 	}
 
 	function setIssuerFactory(address _factory) external onlyOwner returns (bool) {
@@ -613,10 +651,10 @@ contract KYCRegistrar {
 	}
 
 	function issueNewToken(bytes32 _id, string _name, string _symbol, uint256 _totalSupply) external returns (address) {
-		Issuer storage i = issuerData[_id];
-		require (msg.sender == i.issuerContract);
+		require (msg.sender == issuerData[_id].issuerContract);
+		require (!entityData[_id].restricted);
 		address _token = tokenFactory.newToken(msg.sender, _name, _symbol, _totalSupply);
-		i.allowed[_token] = true;
+		issuerData[_id].allowed[_token] = true;
 		return _token;
 	}
 

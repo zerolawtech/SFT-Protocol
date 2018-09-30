@@ -104,31 +104,65 @@ contract SecurityToken is STBase {
 	/// @param _value Amount being transferred
 	/// @return boolean
 	function checkTransfer(
+		address _from,
+		address _to, 
+		uint256 _value
+	)
+		external
+		view
+		returns (bool)
+	{
+		_checkTransfer(_from, _from, _to, _value);
+		return true;
+	}
+
+	
+	function _checkTransfer(
 		address _auth,
 		address _from,
 		address _to,
 		uint256 _value
 	)
-		public
-		view
-		returns (bool)
+		internal
+		returns (bytes32, bytes32[2], address[2])
 	{
 		require (_value > 0);
+		(
+			bytes32 _authId,
+			bytes32[2] memory _id,
+			uint8[2] memory _class,
+			uint16[2] memory _country
+		) = registrar.checkTransfer(issuerID, address(this), _auth, _from, _to);		
+		if (_id[0] == issuerID) {
+			_from = address(issuer);
+		}
+		if (_id[1] == issuerID) {
+			_to = address(issuer);
+		}
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
 				require(STModule(modules[i].module).checkTransfer(_from, _to, _value));
 			}
 		}
-		require (issuer.checkTransfer(address(this), _auth, _from, _to, _value));
-		return true;
+		require (issuer.checkTransfer(address(this), _authId, _id, _class, _country, _value));
+		return (
+			_authId,
+			_id,
+			address[2]([_from, _to])
+		);
 	}
 
 	/// @notice ERC-20 transfer standard
 	/// @param _to Recipient
 	/// @param _value Amount being transferred
 	/// @return boolean
-	function transfer(address _to, uint256 _value) public onlyUnlocked returns (bool) {
-		_transfer(msg.sender, msg.sender, _to, _value);
+	function transfer(address _to, uint256 _value) external onlyUnlocked returns (bool) {
+		(
+			bytes32 _authId,
+			bytes32[2] memory _id,
+			address[2] memory _addr
+		) = _checkTransfer(msg.sender, msg.sender, _to, _value);
+		_transfer(_addr[0], _addr[1], _value);
 		return true;
 	}
 
@@ -142,23 +176,30 @@ contract SecurityToken is STBase {
 		address _to,
 		uint256 _value
 	)
-		public
+		external
 		onlyUnlocked
 		returns (bool)
 	{
-		bytes32 _sendId = registrar.getId(msg.sender);
-		bytes32 _fromId = registrar.getId(_from);
-		if (
-			_sendId != _fromId &&
-			_sendId != issuerID &&
-			!isActiveModule(msg.sender)
-		)
-		{
-			allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-		} else if (_sendId == _fromId) {
-			require (registrar.isPermittedAddress(msg.sender));
+		/* If called by a module, the authority becomes the issuing contract. */
+		if (isActiveModule(msg.sender)) {
+			address _auth = address(issuer);
+		} else {
+			_auth = msg.sender;
 		}
-		_transfer(msg.sender, _from, _to, _value);
+		(
+			bytes32 _authId,
+			bytes32[2] memory _id,
+			address[2] memory _addr
+		) = _checkTransfer(_auth, _from, _to, _value);
+
+		if (_id[0] != _id[1] && _authId != issuerID) {
+			/*
+				If the call was not made by the issuer and involves a change
+				in ownership, subtract from the allowed mapping.
+			*/
+			allowed[_from][_auth] = allowed[_from][_auth].sub(_value);
+		}
+		_transfer(_addr[0], _addr[1], _value);
 		return true;
 	}
 
@@ -166,17 +207,9 @@ contract SecurityToken is STBase {
 	/// @param _from Sender
 	/// @param _to Recipient
 	/// @param _value Amount being transferred
-	function _transfer(address _auth, address _from, address _to, uint256 _value) internal {
-		if (registrar.getId(_from) == issuerID) {
-			_from = address(issuer);
-		}
-		if (registrar.getId(_to) == issuerID) {
-			_to = address(issuer);
-		}
-		require (checkTransfer(_auth, _from, _to, _value));
+	function _transfer(address _from, address _to, uint256 _value) internal {
 		balances[_from] = balances[_from].sub(_value);
 		balances[_to] = balances[_to].add(_value);
-
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
 				require (STModule(modules[i].module).transferTokens(_from, _to, _value));
@@ -215,11 +248,18 @@ contract SecurityToken is STBase {
 	/// @dev If a module is active on the issuer level, it will apply to all tokens
 	/// under that issuer
 	/// @param _module Deployed module address
-	function isActiveModule(address _module) public view returns (bool) {
+	function isActiveModule(address _module) internal view returns (bool) {
 		if (activeModules[_module]) return true;
 		return issuer.isActiveModule(_module);
 	}
 
+	function approve(address _spender, uint256 _value) external returns (bool) {
+		require (_spender != address(this));
+		require (_value == 0 || allowed[msg.sender][_spender] == 0);
+		allowed[msg.sender][_spender] = _value;
+		emit Approval(msg.sender, _spender, _value);
+		return true;
+	}
 
 
 }
