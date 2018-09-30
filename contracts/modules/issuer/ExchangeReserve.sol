@@ -142,13 +142,27 @@ contract ExchangeReserve is IssuerModuleBase {
 		return b;
 	}
 
-	function exchangeReserve(uint16 _country, uint8 _rating) external onlyExchange returns (uint64) {
+	function exchangeReserve(
+		uint16 _country,
+		uint8 _rating
+	)
+		external
+		onlyExchange
+		returns (uint64)
+	{
 		bytes32 _id = registrar.getId(msg.sender);
 		Country storage c = countries[_country];
 		Exchange storage e = c.exchanges[_id];
-		if (c.max[_rating] > 0 && c.max[_rating] > c.reserved[_rating] && e.max[_rating] > e.reserved[_rating]) {
+		if (
+			c.max[_rating] > 0 &&
+			c.max[_rating] > c.reserved[_rating] &&
+			e.max[_rating] > e.reserved[_rating]
+		) {
 			(uint64 _count, uint64 _limit) = issuer.getCountryInfo(_country, _rating);
-			uint64 _avail = _min(_limit.sub(_count).sub(c.reserved[_rating]), c.max[_rating].sub(c.reserved[_rating]));
+			uint64 _avail = _min(
+				_limit.sub(_count).sub(c.reserved[_rating]),
+				c.max[_rating].sub(c.reserved[_rating])
+			);
 			if (_avail > e.reserved[_rating]) {
 				uint64 _inc = _min(_avail, e.max[_rating]).sub(e.reserved[_rating]);
 				e.reserved[_rating] = e.reserved[_rating].add(_inc);
@@ -167,7 +181,12 @@ contract ExchangeReserve is IssuerModuleBase {
 		onlyExchange
 		returns (bool)
 	{
-		return _releaseExchange(registrar.getId(msg.sender), _country, _rating, _value);
+		return _releaseExchange(
+			registrar.getId(msg.sender),
+			_country,
+			_rating,
+			_value
+		);
 	}
 
 	function exchangeReleaseMany(
@@ -179,7 +198,10 @@ contract ExchangeReserve is IssuerModuleBase {
 		onlyExchange
 		returns (bool)
 	{
-		require (_country.length == _rating.length && _country.length == _value.length);
+		require (
+			_country.length == _rating.length &&
+			_country.length == _value.length
+		);
 		bytes32 _id = registrar.getId(msg.sender);
 		for (uint256 i = 0; i < _country.length; i++) {
 			_releaseExchange(_id, _country[i], _rating[i], _value[i]);
@@ -210,7 +232,10 @@ contract ExchangeReserve is IssuerModuleBase {
 		onlyIssuer
 		returns (bool)
 	{
-		require (_country.length == _rating.length && _country.length == _value.length);
+		require (
+			_country.length == _rating.length &&
+			_country.length == _value.length
+		);
 		for (uint256 i = 0; i < _country.length; i++) {
 			_releaseExchange(_id, _country[i], _rating[i], _value[i]);
 		}
