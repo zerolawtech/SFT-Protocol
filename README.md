@@ -9,8 +9,6 @@ SFT expands upon the ERC20 token standard.  Tokens are transferred via the `tran
 
 ## Components
 
-![](diagram1.png)
-
  - [SecurityToken](contracts/SecurityToken.sol)
    - An ERC20 compliant token that represents a claim to ownership of a security
    - Modules may be applied to each security token to add additional permissioning or functionality
