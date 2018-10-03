@@ -10,8 +10,7 @@ contract _ModuleBase {
 	KYCRegistrar public registrar;
 
 	modifier onlyIssuer () {
-		require (registrar.getId(msg.sender) == issuerID);
-		require (!registrar.isPermittedAddress(msg.sender));
+		require (registrar.isPermittedIssuer(issuerID, msg.sender));
 		_;
 	}
 

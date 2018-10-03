@@ -32,7 +32,7 @@ contract ExchangeReserve is IssuerModuleBase {
 		uint16 _country,
 		uint8 _rating
 	)
-		public
+		external
 		view
 		returns (uint64 _reserved, uint64 _max)
 	{
@@ -45,7 +45,7 @@ contract ExchangeReserve is IssuerModuleBase {
 		uint16 _country,
 		uint8 _rating
 	)
-		public
+		external
 		view
 		returns (uint64 _reserved, uint64 _max)
 	{
@@ -55,83 +55,82 @@ contract ExchangeReserve is IssuerModuleBase {
 
 	function checkTransfer(
 		address,
-		address _from,
-		address _to,
+		bytes32,
+		bytes32[2] _id,
+		uint8[2] _class,
+		uint16[2] _country,
 		uint256 _value
 	)
-		public
+		external
 		view
 		returns (bool)
 	{
-		(bytes32 _idFrom, uint8 _classFrom, uint16 _countryFrom) = registrar.getEntity(_from);
-		(bytes32 _idTo, uint8 _classTo, uint16 _countryTo) = registrar.getEntity(_to);
-		if (_classFrom != 3 && _classTo == 1 && issuer.balanceOf(_idTo) == 0) {
-			uint8 _ratingFrom = registrar.getRating(_idFrom);
-			uint8 _ratingTo = registrar.getRating(_idTo);
-			bool _remains = issuer.balanceOf(_idFrom) > _value;
-			if (_countryFrom != _countryTo || _classFrom != 1 || _remains) {
-				(uint64 _count, uint64 _limit) = issuer.getCountryInfo(_countryTo, 0);
+		if (_class[0] != 3 && _class[1] == 1 && issuer.balanceOf(_id[1]) == 0) {
+			uint8 _ratingFrom = registrar.getRating(_id[0]);
+			uint8 _ratingTo = registrar.getRating(_id[1]);
+			bool _remains = issuer.balanceOf(_id[0]) > _value;
+			if (_country[0] != _country[1] || _class[0] != 1 || _remains) {
+				(uint64 _count, uint64 _limit) = issuer.getCountryInfo(_country[1], 0);
 				if (_limit > 0) {
-					require (_limit.sub(_count) > countries[_countryTo].reserved[0]);
+					require (_limit.sub(_count) > countries[_country[1]].reserved[0]);
 				}
 			}
-			if (_countryFrom != _countryTo || _classFrom != 1 || _remains || _ratingFrom != _ratingTo) {
-				(_count, _limit) = issuer.getCountryInfo(_countryTo, _ratingTo);
+			if (_country[0] != _country[1] || _class[0] != 1 || _remains || _ratingFrom != _ratingTo) {
+				(_count, _limit) = issuer.getCountryInfo(_country[1], _ratingTo);
 				if (_limit > 0) {
-					require (_limit.sub(_count) > countries[_countryTo].reserved[_rating]);
+					require (_limit.sub(_count) > countries[_country[1]].reserved[_rating]);
 				}
 			}
-		} else if (_classFrom == 3    && _classTo == 1) {
-			require (approved[_idFrom]);
-			uint8 _rating = registrar.getRating(_idTo);
-			Exchange storage e = countries[_countryTo].exchanges[_idFrom];
-			if (issuer.getCountryInvestorLimit(_countryTo, _rating) > 0) {
+		} else if (_class[0] == 3    && _class[1] == 1) {
+			require (approved[_id[0]]);
+			uint8 _rating = registrar.getRating(_id[1]);
+			Exchange storage e = countries[_country[1]].exchanges[_id[0]];
+			if (issuer.getCountryInvestorLimit(_country[1], _rating) > 0) {
 				require (e.reserved[_rating] > 0);
 			}
-			if (issuer.getCountryInvestorLimit(_countryTo, 0) > 0) {
+			if (issuer.getCountryInvestorLimit(_country[1], 0) > 0) {
 				require (e.reserved[0] > 0);
 			}
-		} else if (_classTo == 3) {
-			require (approved[_idTo]);
+		} else if (_class[1] == 3) {
+			require (approved[_id[1]]);
 		}
 		return true;
 	}
 
 	function transferTokens(
 		address,
-		address _from,
-		address _to,
+		bytes32[2] _id,
+		uint8[2] _class,
+		uint16[2] _country,
 		uint256 _value
 	)
 		external
 		onlyParent
 		returns (bool)
 	{
-		(bytes32 _idFrom, uint8 _classFrom, uint16 _countryFrom) = registrar.getEntity(_from);
-		(bytes32 _idTo, uint8 _classTo, uint16 _countryTo) = registrar.getEntity(_to);
-		if (_classFrom != 3 && _classTo != 3) return true;
-		if (_classFrom == 1 && _classTo == 3 && issuer.balanceOf(_idFrom) == 0) {
-			uint8 _rating = registrar.getRating(_idFrom);
-			Country storage c = countries[_countryFrom];
-			Exchange storage e = c.exchanges[_idTo];
-			if (issuer.getCountryInvestorLimit(_countryFrom, _rating) > 0) {
+		if (_class[0] != 3 && _class[1] != 3) return true;
+		if (_class[0] == 1 && _class[1] == 3 && issuer.balanceOf(_id[0]) == 0) {
+			uint8 _rating = registrar.getRating(_id[0]);
+			Country storage c = countries[_country[0]];
+			Exchange storage e = c.exchanges[_id[1]];
+			if (issuer.getCountryInvestorLimit(_country[0], _rating) > 0) {
 				e.reserved[_rating] = e.reserved[_rating].add(1);
 				c.reserved[_rating] = c.reserved[_rating].add(1);
 			}
-			if (issuer.getCountryInvestorLimit(_countryFrom, 0) > 0) {
+			if (issuer.getCountryInvestorLimit(_country[0], 0) > 0) {
 				e.reserved[0] = e.reserved[0].add(1);
 				c.reserved[0] = c.reserved[0].add(1);
 			}
 		}
-		if (_classFrom == 3 && _classTo == 1 && issuer.balanceOf(_idTo) == _value) {
-			_rating = registrar.getRating(_idTo);
-			c = countries[_countryTo];
-			e = c.exchanges[_idTo];
-			if (issuer.getCountryInvestorLimit(_countryTo, _rating) > 0) {
+		if (_class[0] == 3 && _class[1] == 1 && issuer.balanceOf(_id[1]) == _value) {
+			_rating = registrar.getRating(_id[1]);
+			c = countries[_country[1]];
+			e = c.exchanges[_id[1]];
+			if (issuer.getCountryInvestorLimit(_country[1], _rating) > 0) {
 				e.reserved[_rating] = e.reserved[_rating].sub(1);
 				c.reserved[_rating] = c.reserved[_rating].sub(1);
 			}
-			if (issuer.getCountryInvestorLimit(_countryTo, 0) > 0) {
+			if (issuer.getCountryInvestorLimit(_country[1], 0) > 0) {
 				e.reserved[0] = e.reserved[0].sub(1);
 				c.reserved[0] = c.reserved[0].sub(1);
 			}
@@ -143,13 +142,27 @@ contract ExchangeReserve is IssuerModuleBase {
 		return b;
 	}
 
-	function exchangeReserve(uint16 _country, uint8 _rating) public onlyExchange returns (uint64) {
+	function exchangeReserve(
+		uint16 _country,
+		uint8 _rating
+	)
+		external
+		onlyExchange
+		returns (uint64)
+	{
 		bytes32 _id = registrar.getId(msg.sender);
 		Country storage c = countries[_country];
 		Exchange storage e = c.exchanges[_id];
-		if (c.max[_rating] > 0 && c.max[_rating] > c.reserved[_rating] && e.max[_rating] > e.reserved[_rating]) {
+		if (
+			c.max[_rating] > 0 &&
+			c.max[_rating] > c.reserved[_rating] &&
+			e.max[_rating] > e.reserved[_rating]
+		) {
 			(uint64 _count, uint64 _limit) = issuer.getCountryInfo(_country, _rating);
-			uint64 _avail = _min(_limit.sub(_count).sub(c.reserved[_rating]), c.max[_rating].sub(c.reserved[_rating]));
+			uint64 _avail = _min(
+				_limit.sub(_count).sub(c.reserved[_rating]),
+				c.max[_rating].sub(c.reserved[_rating])
+			);
 			if (_avail > e.reserved[_rating]) {
 				uint64 _inc = _min(_avail, e.max[_rating]).sub(e.reserved[_rating]);
 				e.reserved[_rating] = e.reserved[_rating].add(_inc);
@@ -168,7 +181,12 @@ contract ExchangeReserve is IssuerModuleBase {
 		onlyExchange
 		returns (bool)
 	{
-		return _releaseExchange(registrar.getId(msg.sender), _country, _rating, _value);
+		return _releaseExchange(
+			registrar.getId(msg.sender),
+			_country,
+			_rating,
+			_value
+		);
 	}
 
 	function exchangeReleaseMany(
@@ -176,11 +194,14 @@ contract ExchangeReserve is IssuerModuleBase {
 		uint8[] _rating,
 		uint64[] _value
 	)
-		public
+		external
 		onlyExchange
 		returns (bool)
 	{
-		require (_country.length == _rating.length && _country.length == _value.length);
+		require (
+			_country.length == _rating.length &&
+			_country.length == _value.length
+		);
 		bytes32 _id = registrar.getId(msg.sender);
 		for (uint256 i = 0; i < _country.length; i++) {
 			_releaseExchange(_id, _country[i], _rating[i], _value[i]);
@@ -194,7 +215,7 @@ contract ExchangeReserve is IssuerModuleBase {
 		uint8 _rating,
 		uint64 _value
 	)
-		public
+		external
 		onlyIssuer
 		returns (bool)
 	{
@@ -207,11 +228,14 @@ contract ExchangeReserve is IssuerModuleBase {
 		uint8[] _rating,
 		uint64[] _value
 	)
-		public
+		external
 		onlyIssuer
 		returns (bool)
 	{
-		require (_country.length == _rating.length && _country.length == _value.length);
+		require (
+			_country.length == _rating.length &&
+			_country.length == _value.length
+		);
 		for (uint256 i = 0; i < _country.length; i++) {
 			_releaseExchange(_id, _country[i], _rating[i], _value[i]);
 		}

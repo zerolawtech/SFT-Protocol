@@ -23,8 +23,7 @@ contract STBase {
 	mapping (address => bool) activeModules;
 
 	modifier onlyIssuer () {
-		require (registrar.getId(msg.sender) == issuerID);
-		require (registrar.isPermittedAddress(msg.sender));
+		require (registrar.isPermittedIssuer(issuerID, msg.sender));
 		_;
 	}
 
@@ -40,23 +39,24 @@ contract STBase {
 
 	/// @notice Lock all tokens
 	/// @dev Issuer can transfer tokens regardless of lock status
-	function lockTransfers () public onlyIssuer {
+	function lockTransfers () external onlyIssuer {
 		locked = true;
 	}
 
 	/// @notice Unlock all tokens
 	/// @dev Issuer can transfer tokens regardless of lock status
-	function unlockTransfers() public onlyIssuer {
+	function unlockTransfers() external onlyIssuer {
 		locked = false;
 	}
 
 	/// @notice Attach a module to a token
 	/// @param _module Address of the deployed module
 	/// @return boolean
-	function attachModule(address _module) public onlyIssuer returns (bool) {
+	function attachModule(address _module) external onlyIssuer returns (bool) {
 		require (!activeModules[_module]);
-		require (BaseModule(_module).owner() == address(this));
-		(bool _check, bool _transfer, bool _balance) = BaseModule(_module).getBindings();
+		BaseModule b = BaseModule(_module);
+		require (b.owner() == address(this));
+		(bool _check, bool _transfer, bool _balance) = b.getBindings();
 		activeModules[_module] = true;
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (modules[i].module == 0) {
@@ -74,7 +74,7 @@ contract STBase {
 	/// @notice Detach a module from a token
 	/// @param _module of the deployed module
 	/// @return boolean
-	function detachModule(address _module) public returns (bool) {
+	function detachModule(address _module) external returns (bool) {
 		if (_module != msg.sender) {
 			require (registrar.getId(msg.sender) == issuerID);
 		}

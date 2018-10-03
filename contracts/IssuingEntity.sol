@@ -5,6 +5,21 @@ import "./SecurityToken.sol";
 import "./STBase.sol";
 
 
+contract IssuerFactory {
+
+	address registrar;
+
+	constructor(address _registrar) public {
+		registrar = _registrar;
+	}
+
+	function newIssuer(bytes32 _id) external returns (address) {
+		require (msg.sender == registrar);
+		return new IssuingEntity(registrar, _id);
+	}
+}
+
+
 /// @title Issuing Entity
 contract IssuingEntity is STBase {
 
@@ -54,10 +69,10 @@ contract IssuingEntity is STBase {
 
 	/// @notice Issuing entity constructor
 	/// @param _registrar Address of the registrar
-	constructor(address _registrar) public {
+	/// @param _id ID of Issuer
+	constructor(address _registrar, bytes32 _id) public {
 		registrar = KYCRegistrar(_registrar);
-		issuerID = registrar.getId(msg.sender);
-		require (registrar.getClass(issuerID) == 2);
+		issuerID = _id;
 	}
 
 	/// @notice Fetch count of all investors, regardless of rating
@@ -197,59 +212,71 @@ contract IssuingEntity is STBase {
 
 	/// @notice Check if a transfer is possible at the issuing entity level
 	/// @param _token Token being transferred
-	/// @param _from Sender
-	/// @param _to Recipient
-	/// @param _value Amount being transferred
+	/// @param _authId ID of the caller attempting the transfer
+	/// @param _id Array of sender/receiver IDs
+	/// @param _class Arracy of sender/receiver classes
+	/// @param _country Array of sender/receiver countries
+	/// @param _value Number of tokens being transferred
 	/// @return boolean
 	function checkTransfer(
 		address _token,
-		address _from,
-		address _to,
+		bytes32 _authId,
+		bytes32[2] _id,
+		uint8[2] _class,
+		uint16[2] _country,
 		uint256 _value
 	)
-		public
+		external
 		view
 		returns (bool)
 	{
-		require (_value > 0);
-		(bytes32 _idFrom, uint8 _classFrom, uint16 _countryFrom) = registrar.getEntity(_from);
-		(bytes32 _idTo, uint8 _classTo, uint16 _countryTo) = registrar.getEntity(_to);
-		require (registrar.arePermitted(issuerID, _idFrom, _idTo));
-		require (!accounts[_idFrom].restricted);
-		require (!accounts[_idTo].restricted);
-		if (_idFrom != _idTo) {
+		
+		
+		if (_authId != issuerID) {
+			require (!accounts[_id[0]].restricted);	
+		}
+		require (!accounts[_id[1]].restricted);
+		if (_id[0] != _id[1]) {
 			/* Exchange to exchange transfers are not permitted */
-			require (_classFrom != 3 || _classTo != 3);
-			if (_classTo == 1) {
-				Country storage c = countries[_countryTo];
-				uint8 _rating = registrar.getRating(_idTo);
+			require (_class[0] != 3 || _class[1] != 3);
+			if (_class[1] == 1) {
+				Country storage c = countries[_country[1]];
+				uint8 _rating = registrar.getRating(_id[1]);
 				require (c.allowed);
-				/* If the receiving investor currently has a 0 balance, we must make sure a
-					slot is available for allocation
+				/*  
+					If the receiving investor currently has a 0 balance,
+					we must make sure a slot is available for allocation
 				*/
 				require (_rating >= c.minRating);
-				if (accounts[_idTo].balance == 0) {
+				if (accounts[_id[1]].balance == 0) {
 					/*
-						If the sender is an investor and still retains a balance, a new slot
-						must be available
+						If the sender is an investor and still retains a balance,
+						a new slot must be available
 					*/
-					bool _check = _classFrom != 1 || accounts[_idFrom].balance > _value;
+					bool _check = (
+						_class[0] != 1 ||
+						accounts[_id[0]].balance > _value
+					);
 					if (_check) {
-						require (investorLimit[0] == 0 || investorCount[0] < investorLimit[0]);
+						require (
+							investorLimit[0] == 0 ||
+							investorCount[0] < investorLimit[0]
+						);
 					}
 					/*
-						If the investors are from different countries, make sure a slot is available
-						in the overall country limit
+						If the investors are from different countries, make sure
+						a slot is available in the overall country limit
 					*/
-					if (_check || _countryFrom != _countryTo) {
+					if (_check || _country[0] != _country[1]) {
 						require (c.limit[0] == 0 || c.count[0] < c.limit[0]);
 					}
 					if (!_check) {
-						_check = registrar.getRating(_idFrom) != _rating;
+						_check = registrar.getRating(_id[0]) != _rating;
 					}
 					/*
-						If the investors are of different ratings, make sure a slot is available in the
-						receiver's rating in the overall count
+						If the investors are of different ratings, make sure a
+						slot is available in the receiver's rating in the overall
+						count
 					*/
 					if (_check) {
 						require (
@@ -258,10 +285,11 @@ contract IssuingEntity is STBase {
 						);
 					}
 					/*
-						If the investors don't match in country or rating, make sure a slot is available
-						in both the specific country and rating for the receiver
+						If the investors don't match in country or rating, make
+						sure a slot is available in both the specific country
+						and rating for the receiver
 					*/
-					if (_check || _countryFrom != _countryTo) {
+					if (_check || _country[0] != _country[1]) {
 						require (
 							c.limit[_rating] == 0 ||
 							c.count[_rating] < c.limit[_rating]
@@ -270,38 +298,27 @@ contract IssuingEntity is STBase {
 				}
 			}
 		}
-		_moduleCheckTransfer(_token, _from, _to, _value);
+		for (uint256 i = 0; i < modules.length; i++) {
+			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
+				require(IssuerModule(modules[i].module).checkTransfer(_token, _authId, _id, _class, _country, _value));
+			}
+		}
 		return true;
 	}
 
-	function _moduleCheckTransfer(
-		address _token,
-		address _from,
-		address _to,
-		uint256 _value
-	)
-		internal
-		view
-	{
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				require(IssuerModule(modules[i].module).checkTransfer(_token, _from, _to, _value));
-			}
-		}
-	}
 
 
 
 	/// @notice Transfer tokens through the issuing entity level
-	/// @param _token Token being transferred
-	/// @param _from Sender
-	/// @param _to Recipient
-	/// @param _value Amount being transferred
+	/// @param _id Array of sender/receiver IDs
+	/// @param _class Arracy of sender/receiver classes
+	/// @param _country Array of sender/receiver countries
+	/// @param _value Number of tokens being transferred
 	/// @return boolean
 	function transferTokens(
-		address _token,
-		address _from,
-		address _to,
+		bytes32[2] _id,
+		uint8[2] _class,
+		uint16[2] _country,
 		uint256 _value
 	)
 		external
@@ -309,28 +326,27 @@ contract IssuingEntity is STBase {
 		onlyToken
 		returns (bool)
 	{
-		bytes32 _idFrom = registrar.getId(_from);
-		bytes32 _idTo = registrar.getId(_to);
-		if (_idFrom == _idTo) return true;
-		_setBalance(_idFrom, accounts[_idFrom].balance.sub(_value));
-		_setBalance(_idTo, accounts[_idTo].balance.add(_value));
+		if (_id[0] == _id[1]) return true;
+		uint _balance = accounts[_id[0]].balance.sub(_value);
+		_setBalance(_id[0], _class[0], _country[0], _balance);
+		_balance = accounts[_id[1]].balance.add(_value);
+		_setBalance(_id[1], _class[1], _country[1], _balance);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
-				require (IssuerModule(modules[i].module).transferTokens(_token, _from, _to, _value));
+				IssuerModule m = IssuerModule(modules[i].module);
+				require (m.transferTokens(msg.sender, _id, _class, _country, _value));
 			}
 		}
-		emit TransferOwnership(_token, _idFrom, _idTo, _value);
+		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
 		return true;
 	}
 
 	/// @notice Affect a direct balance change (burn/mint) at the issuing entity level
-	/// @param _token Token being changed
 	/// @param _owner Token owner
 	/// @param _old Old balance
 	/// @param _new New balance
 	/// @return boolean
 	function balanceChanged(
-		address _token,
 		address _owner,
 		uint256 _old,
 		uint256 _new
@@ -340,38 +356,43 @@ contract IssuingEntity is STBase {
 		onlyToken
 		returns (bool)
 	{
-		bytes32 _id = registrar.getId(_owner);
+		(bytes32 _id, uint8 _class, uint16 _country) = registrar.getEntity(_owner);
+		uint256 _oldTotal = accounts[_id].balance;
 		if (_new > _old) {
-			_setBalance(_id, accounts[_id].balance.add(_new.sub(_old)));
+			uint256 _newTotal = accounts[_id].balance.add(_new.sub(_old));
 		} else {
-			_setBalance(_id, accounts[_id].balance.sub(_old.sub(_new)));
+			_newTotal = accounts[_id].balance.sub(_old.sub(_new));
 		}
+		_setBalance(_id, _class, _country, _newTotal);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
-				require (IssuerModule(modules[i].module).balanceChanged(_token, _owner, _old, _new));
+				IssuerModule m = IssuerModule(modules[i].module);
+				require (m.balanceChanged(msg.sender, _id, _class, _country, _oldTotal, _newTotal));
 			}
 		}
 		return true;
 	}
 
 	/// @notice Directly set a balance at the issuing entity level
-	/// @param _id Account to modify
+	/// @param _id ID of affected entity
+	/// @param _class Class of affected entity
+	/// @param _country Country of affected entity
 	/// @param _value New balance
 	/// @return boolean
-	function _setBalance(bytes32 _id, uint256 _value) internal {
+	function _setBalance(bytes32 _id, uint8 _class, uint16 _country, uint256 _value) internal {
 		Account storage a = accounts[_id];
-		Country storage c = countries[registrar.getCountry(_id)];
-		uint8 _rating = registrar.getRating(_id);
-		uint8 _class = registrar.getClass(_id);
-		/* If this sets an investor account balance > 0, take an available slot */
-		if (a.balance == 0 && _class == 1) {
-			c.count[0] = c.count[0].add(1);
-			c.count[_rating] = c.count[_rating].add(1);
-		}
-		/* If this sets an investor account balance to 0, add another available slot */
-		if (_value == 0 && _class == 1) {
-			c.count[0] = c.count[0].sub(1);
-			c.count[_rating] = c.count[_rating].sub(1);
+		Country storage c = countries[_country];
+		if (_class == 1) {
+			uint8 _rating = registrar.getRating(_id);
+			/* If this sets an investor account balance > 0, take an available slot */
+			if (a.balance == 0) {
+				c.count[0] = c.count[0].add(1);
+				c.count[_rating] = c.count[_rating].add(1);
+			/* If this sets an investor account balance to 0, add another available slot */
+			} else if (_value == 0) {
+				c.count[0] = c.count[0].sub(1);
+				c.count[_rating] = c.count[_rating].sub(1);
+			}
 		}
 		a.balance = _value;
 	}
@@ -386,12 +407,12 @@ contract IssuingEntity is STBase {
 		string _symbol,
 		uint256 _totalSupply
 	)
-		public
+		external
 		onlyIssuer
 		returns (address)
 	{
 		accounts[issuerID].balance = accounts[issuerID].balance.add(_totalSupply);
-		address _token = new SecurityToken(_name, _symbol, _totalSupply);
+		address _token = registrar.issueNewToken(issuerID, _name, _symbol, _totalSupply);
 		tokens[_token] = true;
 		return _token;
 	}
