@@ -505,21 +505,10 @@ contract KYCRegistrar {
 	}
 
 	/// @notice Generate a unique investor ID
-	/// @dev Hash returned == sha256(abi.encodePacked(_fullName, _ddmmyyyy, _taxID));
-	/// @param _fullName Investor's full name
-	/// @param _ddmmyyyy Investor's birth date
-	/// @param _taxID Investor's tax ID
-	/// @return string
-	function generateInvestorID(
-		string _fullName,
-		uint256 _ddmmyyyy,
-		string _taxID
-	)
-		external
-		pure
-		returns (bytes32)
-	{
-		return sha256(abi.encodePacked(_fullName, _ddmmyyyy, _taxID));
+	/// @param _idString ID string that hash is generated from
+	/// @return bytes32
+	function generateId(string _idString) external pure returns (bytes32) {
+		return keccak256(abi.encodePacked(_idString));
 	}
 
 	/// @notice Check that an address is associated to an ID and not restricted
@@ -570,6 +559,10 @@ contract KYCRegistrar {
 	/// @return string
 	function getRegion(bytes32 _id) external view returns (uint16) {
 		return investorData[_id].region;
+	}
+
+	function getExpires(bytes32 _id) external view returns (uint40) {
+		return investorData[_id].expires;
 	}
 
 	/// @notice Fetch entity from an address
