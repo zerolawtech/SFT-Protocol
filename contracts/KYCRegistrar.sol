@@ -60,7 +60,6 @@ contract KYCRegistrar {
 	mapping (bytes32 => Investor) investorData;
 	mapping (bytes32 => Issuer) issuerData;
 	mapping (bytes32 => Authority) authorityData;
-	mapping (string => address) tickerRegistry;
 
 	event NewInvestor(
 		bytes32 id,
@@ -497,10 +496,8 @@ contract KYCRegistrar {
 	{
 		require (msg.sender == issuerData[_id].issuerContract);
 		require (!entityData[_id].restricted);
-		require (tickerRegistry[_symbol] == 0);
 		address _token = tokenFactory.newToken(msg.sender, _name, _symbol, _totalSupply);
 		issuerData[_id].allowed[_token] = true;
-		tickerRegistry[_symbol] = _token;
 		return _token;
 	}
 
@@ -509,60 +506,6 @@ contract KYCRegistrar {
 	/// @return bytes32
 	function generateId(string _idString) external pure returns (bytes32) {
 		return keccak256(abi.encodePacked(_idString));
-	}
-
-	/// @notice Check that an address is associated to an ID and not restricted
-	/// @dev Used for modifier onlyIssuer
-	/// @param _id ID that should be associated with address
-	/// @param _addr address to check against ID
-	/// @return bool
-	function isPermittedIssuer(bytes32 _id, address _addr) external view returns (bool) {
-		require (idMap[_addr].id == _id);
-		require (!idMap[_addr].restricted);
-		require (!entityData[_id].restricted);
-		return true;
-	}
-
-	/// @notice Fetch rating of an entity
-	/// @param _id Entity's ID
-	/// @return integer
-	function getRating(bytes32 _id) external view returns (uint8) {
-		Investor storage i = investorData[_id];
-		require (i.expires >= now);
-		require (i.rating > 0);
-		return investorData[_id].rating;
-	}
-
-	/// @notice Fetch ID from an address
-	/// @param _addr Address to query
-	/// @return string
-	function getId(address _addr) external view returns (bytes32) {
-		return idMap[_addr].id;
-	}
-
-	/// @notice Fetch class from an entity
-	/// @param _id Entity's ID
-	/// @return integer
-	function getClass(bytes32 _id) external view returns (uint8) {
-		return entityData[_id].class;
-	}
-
-	/// @notice Fetch country from an entity
-	/// @param _id Entity's ID
-	/// @return string
-	function getCountry(bytes32 _id) external view returns (uint16) {
-		return entityData[_id].country;
-	}
-
-	/// @notice Fetch region from an entity
-	/// @param _id Entity's ID
-	/// @return string
-	function getRegion(bytes32 _id) external view returns (uint16) {
-		return investorData[_id].region;
-	}
-
-	function getExpires(bytes32 _id) external view returns (uint40) {
-		return investorData[_id].expires;
 	}
 
 	/// @notice Fetch entity from an address
@@ -587,6 +530,27 @@ contract KYCRegistrar {
 		);
 	}
 
+	/// @notice Fetch ID from an address
+	/// @param _addr Address to query
+	/// @return string
+	function getId(address _addr) external view returns (bytes32) {
+		return idMap[_addr].id;
+	}
+
+	/// @notice Fetch class from an entity
+	/// @param _id Entity's ID
+	/// @return integer
+	function getClass(bytes32 _id) external view returns (uint8) {
+		return entityData[_id].class;
+	}
+
+	/// @notice Fetch country from an entity
+	/// @param _id Entity's ID
+	/// @return string
+	function getCountry(bytes32 _id) external view returns (uint16) {
+		return entityData[_id].country;
+	}
+
 	/// @notice Fetch investor from an ID
 	/// @param _id Investor's ID
 	/// @return Array of (country, region, rating, expires)
@@ -609,6 +573,51 @@ contract KYCRegistrar {
 			investorData[_id].rating,
 			investorData[_id].expires
 		);
+	}
+
+	/// @notice Fetch rating of an entity
+	/// @param _id Entity's ID
+	/// @return integer
+	function getRating(bytes32 _id) external view returns (uint8) {
+		Investor storage i = investorData[_id];
+		require (i.expires >= now);
+		require (i.rating > 0);
+		return investorData[_id].rating;
+	}
+
+	/// @notice Fetch region from an entity
+	/// @param _id Entity's ID
+	/// @return string
+	function getRegion(bytes32 _id) external view returns (uint16) {
+		return investorData[_id].region;
+	}
+
+	/// @notice Fetch KYC expiry date of an entity
+	/// @param _id Entity's ID
+	/// @return integer
+	function getExpires(bytes32 _id) external view returns (uint40) {
+		return investorData[_id].expires;
+	}
+
+	/// @notice Check if an ID is permitted
+	/// @param _id Entity's ID
+	/// @return bool
+	function isPermitted(bytes32 _id) external view returns (bool) {
+		require (entityData[_id].class > 0);
+		require (!entityData[_id].restricted);
+		return true; 
+	}
+
+	/// @notice Check that an address is associated to an ID and not restricted
+	/// @dev Used for modifier onlyIssuer
+	/// @param _id ID that should be associated with address
+	/// @param _addr address to check against ID
+	/// @return bool
+	function isPermittedIssuer(bytes32 _id, address _addr) external view returns (bool) {
+		require (idMap[_addr].id == _id);
+		require (!idMap[_addr].restricted);
+		require (!entityData[_id].restricted);
+		return true;
 	}
 
 	/// @notice Check registrar level permissions around a token transfer
