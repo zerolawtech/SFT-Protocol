@@ -131,7 +131,7 @@ contract KYCRegistrar {
 	constructor (address[] _owners, bytes32 _id, uint8 _threshold) public {
 		require (_threshold <= _owners.length);
 		ownerID = _id;
-		_addEntity(ownerID, 255, 0);
+		_addEntity(ownerID, 255, 65535);
 		Authority storage a = authorityData[ownerID];
 		a.multiSigThreshold = _threshold;
 		a.addressCount = uint8(_owners.length);
@@ -306,9 +306,7 @@ contract KYCRegistrar {
 			return true;
 		}
 		for (uint256 i = 0; i < a.multiSigAuth[_callHash].length; i++) {
-			if (a.multiSigAuth[_callHash][i] == msg.sender) {
-				return false;
-			}
+			require (a.multiSigAuth[_callHash][i] != msg.sender);
 		}
 		a.multiSigAuth[_callHash].push(msg.sender);
 		return false;

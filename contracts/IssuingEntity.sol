@@ -5,21 +5,6 @@ import "./SecurityToken.sol";
 import "./STBase.sol";
 
 
-contract IssuerFactory {
-
-	address registrar;
-
-	constructor(address _registrar) public {
-		registrar = _registrar;
-	}
-
-	function newIssuer(bytes32 _id) external returns (address) {
-		require (msg.sender == registrar);
-		return new IssuingEntity(registrar, _id);
-	}
-}
-
-
 /// @title Issuing Entity
 contract IssuingEntity is STBase {
 
@@ -379,7 +364,14 @@ contract IssuingEntity is STBase {
 	/// @param _country Country of affected entity
 	/// @param _value New balance
 	/// @return boolean
-	function _setBalance(bytes32 _id, uint8 _class, uint16 _country, uint256 _value) internal {
+	function _setBalance(
+		bytes32 _id,
+		uint8 _class,
+		uint16 _country,
+		uint256 _value
+	)
+		internal
+	{
 		Account storage a = accounts[_id];
 		Country storage c = countries[_country];
 		if (_class == 1) {

@@ -36,9 +36,9 @@ contract SecurityToken is STBase {
 		registrar = KYCRegistrar(issuer.registrar());
 		name = _name;
 		symbol = _symbol;
-		balances[msg.sender] = _totalSupply;
+		balances[_issuer] = _totalSupply;
 		totalSupply = _totalSupply;
-		emit Transfer(0, msg.sender, _totalSupply);
+		emit Transfer(0, _issuer, _totalSupply);
 	}
 
 	/// @notice Fetch circulating supply
