@@ -22,12 +22,12 @@ contract STBase {
 	Module[] modules;
 	mapping (address => bool) activeModules;
 
-	modifier onlyIssuer () {
+	modifier onlyIssuer() {
 		require (registrar.isPermittedIssuer(issuerID, msg.sender));
 		_;
 	}
 
-	modifier onlyUnlocked () {
+	modifier onlyUnlocked() {
 		require (!locked || registrar.getId(msg.sender) == issuerID);
 		_;
 	}
@@ -39,7 +39,7 @@ contract STBase {
 
 	/// @notice Lock all tokens
 	/// @dev Issuer can transfer tokens regardless of lock status
-	function lockTransfers () external onlyIssuer {
+	function lockTransfers() external onlyIssuer {
 		locked = true;
 	}
 

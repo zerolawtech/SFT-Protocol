@@ -26,7 +26,8 @@ contract IssuingEntity is STBase {
 	}
 
 	struct Account {
-		uint256 balance;
+		uint248 balance;
+		uint8 rating;
 		bool restricted;
 	}
 
@@ -76,7 +77,7 @@ contract IssuingEntity is STBase {
 	/// @param _id Account to query
 	/// @return integer
 	function balanceOf(bytes32 _id) public view returns (uint256) {
-		return accounts[_id].balance;
+		return uint256(accounts[_id].balance);
 	}
 
 	/// @notice Fetch count of investors by country and rating
@@ -291,9 +292,6 @@ contract IssuingEntity is STBase {
 		return true;
 	}
 
-
-
-
 	/// @notice Transfer tokens through the issuing entity level
 	/// @param _id Array of sender/receiver IDs
 	/// @param _class Arracy of sender/receiver classes
@@ -312,9 +310,9 @@ contract IssuingEntity is STBase {
 		returns (bool)
 	{
 		if (_id[0] == _id[1]) return true;
-		uint _balance = accounts[_id[0]].balance.sub(_value);
+		uint _balance = uint256(accounts[_id[0]].balance).sub(_value);
 		_setBalance(_id[0], _class[0], _country[0], _balance);
-		_balance = accounts[_id[1]].balance.add(_value);
+		_balance = uint256(accounts[_id[1]].balance).add(_value);
 		_setBalance(_id[1], _class[1], _country[1], _balance);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
@@ -344,9 +342,9 @@ contract IssuingEntity is STBase {
 		(bytes32 _id, uint8 _class, uint16 _country) = registrar.getEntity(_owner);
 		uint256 _oldTotal = accounts[_id].balance;
 		if (_new > _old) {
-			uint256 _newTotal = accounts[_id].balance.add(_new.sub(_old));
+			uint256 _newTotal = uint256(accounts[_id].balance).add(_new.sub(_old));
 		} else {
-			_newTotal = accounts[_id].balance.sub(_old.sub(_new));
+			_newTotal = uint256(accounts[_id].balance).sub(_old.sub(_new));
 		}
 		_setBalance(_id, _class, _country, _newTotal);
 		for (uint256 i = 0; i < modules.length; i++) {
@@ -376,17 +374,28 @@ contract IssuingEntity is STBase {
 		Country storage c = countries[_country];
 		if (_class == 1) {
 			uint8 _rating = registrar.getRating(_id);
+			if (_rating != a.rating) {
+				if (a.rating > 0) {
+					c.count[_rating] = c.count[_rating].sub(1);
+					c.count[a.rating] = c.count[a.rating].add(1);
+				}
+				a.rating = _rating;
+			}
 			/* If this sets an investor account balance > 0, take an available slot */
 			if (a.balance == 0) {
+				investorCount[0] = investorCount[0].add(1);
+				investorCount[_rating] = investorCount[_rating].add(1);
 				c.count[0] = c.count[0].add(1);
 				c.count[_rating] = c.count[_rating].add(1);
 			/* If this sets an investor account balance to 0, add another available slot */
 			} else if (_value == 0) {
+				investorCount[0] = investorCount[0].sub(1);
+				investorCount[_rating] = investorCount[_rating].sub(1);
 				c.count[0] = c.count[0].sub(1);
 				c.count[_rating] = c.count[_rating].sub(1);
 			}
 		}
-		a.balance = _value;
+		a.balance = uint248(_value);
 	}
 
 	
@@ -399,7 +408,8 @@ contract IssuingEntity is STBase {
 		require (token.issuerID() == issuerID);
 		require (token.circulatingSupply() == 0);
 		tokens[_token] = true;
-		accounts[issuerID].balance = accounts[issuerID].balance.add(token.treasurySupply());
+		uint256 _balance = uint256(accounts[issuerID].balance).add(token.treasurySupply());
+		accounts[issuerID].balance = uint248(_balance);
 		return true;
 	}
 
