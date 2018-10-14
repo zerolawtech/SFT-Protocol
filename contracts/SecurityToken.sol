@@ -5,29 +5,6 @@ import "./IssuingEntity.sol";
 import "./STBase.sol";
 
 
-contract TokenFactory {
-
-	address registrar;
-
-	constructor(address _registrar) public {
-		registrar = _registrar;
-	}
-
-	function newToken(
-		address _issuer,
-		string _name,
-		string _symbol,
-		uint256 _totalSupply
-	)
-		external
-		returns (address)
-	{
-		require (msg.sender == registrar);
-		return new SecurityToken(_issuer, _name, _symbol, _totalSupply);
-	}
-}
-
-
 /// @title Security Token
 contract SecurityToken is STBase {
 
@@ -91,7 +68,7 @@ contract SecurityToken is STBase {
 		address _owner,
 		address _spender
 	 )
-		public
+		external
 		view
 		returns (uint256)
 	{

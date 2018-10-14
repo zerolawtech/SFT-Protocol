@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
 import "./open-zeppelin/SafeMath.sol";
-import "./interfaces/Factory.sol";
 
 /// @title KYC Registrar
 contract KYCRegistrar {
@@ -9,9 +8,6 @@ contract KYCRegistrar {
 	using SafeMath for uint256;
 
 	bytes32 ownerID;
-
-	IssuerFactoryInterface issuerFactory;
-	TokenFactoryInterface tokenFactory;
 
 	struct Address {
 		bytes32 id;
@@ -45,7 +41,7 @@ contract KYCRegistrar {
 
 	struct Issuer {
 		address issuerContract;
-		mapping (address => bool) allowed;
+		mapping (address => bool) tokenContracts;
 	}
 
 	struct Authority {
@@ -84,8 +80,6 @@ contract KYCRegistrar {
 	);
 	event NewExchange(bytes32 id, uint16 country, bytes32 authority);
 	event NewAuthority(bytes32 id);
-	event NewIssuerFactory(address factory);
-	event NewTokenFactory(address factory);
 	event EntityRestriction(
 		bytes32 id,
 		uint8 class,
@@ -191,7 +185,9 @@ contract KYCRegistrar {
 	function addIssuer(
 		bytes32 _id, 
 		uint16 _country,
-		address[] _addr
+		address _contract,
+		address[] _addr,
+		address[] _tokens
 	)
 		external
 		onlyAuthority(_country)
@@ -199,11 +195,14 @@ contract KYCRegistrar {
 	{
 		if (!_checkMultiSig()) return false;
 		_addEntity(_id, 2, _country);
-		issuerData[_id].issuerContract = issuerFactory.newIssuer(_id);
+		issuerData[_id].issuerContract = _contract;
+		for (uint256 i = 0; i < _tokens.length; i++) {
+			issuerData[_id].tokenContracts[_tokens[i]] = true;
+		}
 		emit NewIssuer(
 			_id,
 			_country,
-			issuerData[_id].issuerContract,
+			_contract,
 			idMap[msg.sender].id
 		);
 		_addAddresses(_id, _addr);
@@ -393,6 +392,25 @@ contract KYCRegistrar {
 		return true;
 	}
 
+	/// @notice allow or restrict an issuer's security token contract
+	/// @param _id Issuer ID
+	/// @param _token Token contract address
+	/// @param _allowed Permission boolean
+	/// @return bool
+	function setIssuerToken(
+		bytes32 _id,
+		address _token,
+		 bool _allowed
+	)
+		external
+		onlyAuthorityByID(_id)
+		returns (bool)
+	{
+		require (entityData[_id].class == 2);
+		issuerData[_id].tokenContracts[_token] = _allowed;
+		return true;
+	}
+
 	/// @notice Register addresseses to an entity
 	/// @param _id Entity's ID
 	/// @param _addr Array of addresses
@@ -469,36 +487,6 @@ contract KYCRegistrar {
 				idMap[msg.sender].id
 			);
 		}
-	}
-
-	function setIssuerFactory(address _factory) external onlyOwner returns (bool) {
-		if (!_checkMultiSig()) return false;
-		issuerFactory = IssuerFactoryInterface(_factory);
-		emit NewIssuerFactory(_factory);
-		return true;
-	}
-
-	function setTokenFactory(address _factory) external onlyOwner returns (bool) {
-		if (!_checkMultiSig()) return false;
-		tokenFactory = TokenFactoryInterface(_factory);
-		emit NewTokenFactory(_factory);
-		return true;
-	}
-
-	function issueNewToken(
-		bytes32 _id,
-		string _name,
-		string _symbol,
-		uint256 _totalSupply
-	)
-		external
-		returns (address)
-	{
-		require (msg.sender == issuerData[_id].issuerContract);
-		require (!entityData[_id].restricted);
-		address _token = tokenFactory.newToken(msg.sender, _name, _symbol, _totalSupply);
-		issuerData[_id].allowed[_token] = true;
-		return _token;
 	}
 
 	/// @notice Generate a unique investor ID
@@ -648,7 +636,7 @@ contract KYCRegistrar {
 			the transfer is blocked.
 		*/
 		require (!entityData[_issuer].restricted);
-		require (issuerData[_issuer].allowed[_token]);
+		require (issuerData[_issuer].tokenContracts[_token]);
 		require (!idMap[_auth].restricted);
 		_checkAddress(_issuer, _to);
 		bytes32 _authId = idMap[_auth].id;

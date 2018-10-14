@@ -397,24 +397,18 @@ contract IssuingEntity is STBase {
 		a.balance = _value;
 	}
 
-	/// @notice Issue a new token
-	/// @param _name Name of the token
-	/// @param _symbol Unique ticker symbol
-	/// @param _totalSupply Total supply
-	/// return Address of created token
-	function issueNewToken(
-		string _name,
-		string _symbol,
-		uint256 _totalSupply
-	)
-		external
-		onlyIssuer
-		returns (address)
-	{
-		accounts[issuerID].balance = accounts[issuerID].balance.add(_totalSupply);
-		address _token = registrar.issueNewToken(issuerID, _name, _symbol, _totalSupply);
+	
+	/// @notice Add a new security token contract
+	/// @param _token Token contract address
+	/// @return bool
+	function addToken(address _token) external onlyIssuer returns (bool) {
+		SecurityToken token = SecurityToken(_token);
+		require (!tokens[_token]);
+		require (token.issuerID() == issuerID);
+		require (token.circulatingSupply() == 0);
 		tokens[_token] = true;
-		return _token;
+		accounts[issuerID].balance = accounts[issuerID].balance.add(token.treasurySupply());
+		return true;
 	}
 
 	/// @notice Set document hash
