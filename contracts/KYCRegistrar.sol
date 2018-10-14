@@ -298,7 +298,6 @@ contract KYCRegistrar {
 
 	function _checkMultiSig() internal returns (bool) {
 		bytes32 _id = idMap[msg.sender].id;
-		require (entityData[_id].class == 255);
 		Authority storage a = authorityData[_id];
 		bytes32 _callHash = keccak256(msg.data);
 		if (a.multiSigAuth[_callHash].length.add(1) >= a.multiSigThreshold) {
