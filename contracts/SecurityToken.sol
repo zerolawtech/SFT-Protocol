@@ -116,7 +116,7 @@ contract SecurityToken is STBase {
 			_id,
 			_class,
 			_country
-		) = registrar.checkTransfer(issuerID, address(this), _auth, _from, _to);		
+		) = registrar.checkTransfer(issuerID, _auth, _from, _to);		
 		if (_id[0] == issuerID) {
 			_from = address(issuer);
 		}

@@ -39,11 +39,6 @@ contract KYCRegistrar {
 		uint40 expires;
 	}
 
-	struct Issuer {
-		address issuerContract;
-		mapping (address => bool) tokenContracts;
-	}
-
 	struct Authority {
 		mapping (uint16 => bool) countries;
 		mapping (bytes32 => address[]) multiSigAuth;
@@ -54,7 +49,7 @@ contract KYCRegistrar {
 	mapping (address => Address) idMap;
 	mapping (bytes32 => Entity) entityData;
 	mapping (bytes32 => Investor) investorData;
-	mapping (bytes32 => Issuer) issuerData;
+	mapping (bytes32 => address) issuerContract;
 	mapping (bytes32 => Authority) authorityData;
 
 	event NewInvestor(
@@ -186,8 +181,7 @@ contract KYCRegistrar {
 		bytes32 _id, 
 		uint16 _country,
 		address _contract,
-		address[] _addr,
-		address[] _tokens
+		address[] _addr
 	)
 		external
 		onlyAuthority(_country)
@@ -195,10 +189,7 @@ contract KYCRegistrar {
 	{
 		if (!_checkMultiSig()) return false;
 		_addEntity(_id, 2, _country);
-		issuerData[_id].issuerContract = _contract;
-		for (uint256 i = 0; i < _tokens.length; i++) {
-			issuerData[_id].tokenContracts[_tokens[i]] = true;
-		}
+		issuerContract[_id] = _contract;
 		emit NewIssuer(
 			_id,
 			_country,
@@ -386,25 +377,6 @@ contract KYCRegistrar {
 			_restricted,
 			idMap[msg.sender].id
 		);
-		return true;
-	}
-
-	/// @notice allow or restrict an issuer's security token contract
-	/// @param _id Issuer ID
-	/// @param _token Token contract address
-	/// @param _allowed Permission boolean
-	/// @return bool
-	function setIssuerToken(
-		bytes32 _id,
-		address _token,
-		 bool _allowed
-	)
-		external
-		onlyAuthorityByID(_id)
-		returns (bool)
-	{
-		require (entityData[_id].class == 2);
-		issuerData[_id].tokenContracts[_token] = _allowed;
 		return true;
 	}
 
@@ -601,7 +573,6 @@ contract KYCRegistrar {
 	function isPermittedIssuer(bytes32 _id, address _addr) external view returns (bool) {
 		require (idMap[_addr].id == _id);
 		require (!idMap[_addr].restricted);
-		require (!entityData[_id].restricted);
 		return true;
 	}
 
@@ -614,7 +585,6 @@ contract KYCRegistrar {
 	/// @return ID of caller, arrays of ID, class, country of sender/recipient
 	function checkTransfer(
 		bytes32 _issuer,
-		address _token,
 		address _auth,
 		address _from,
 		address _to
@@ -628,12 +598,7 @@ contract KYCRegistrar {
 			uint16[2]
 		)
 	{
-		/*
-			If the issuer, token, authority, or receiver are restricted
-			the transfer is blocked.
-		*/
-		require (!entityData[_issuer].restricted);
-		require (issuerData[_issuer].tokenContracts[_token]);
+		/* If authority or receiver are restricted the transfer is blocked. */
 		require (!idMap[_auth].restricted);
 		_checkAddress(_issuer, _to);
 		bytes32 _authId = idMap[_auth].id;
@@ -648,7 +613,7 @@ contract KYCRegistrar {
 			If the authority is the issuer's IssuingEntity contract, the call
 			is being sent by a module. Set the authority to be the issuer.
 		*/
-		else if (issuerData[_issuer].issuerContract == _auth) {
+		else if (issuerContract[_issuer] == _auth) {
 			_authId = _issuer;
 		/* In all other cases, check that the sender is not restricted. */
 		} else {
