@@ -429,6 +429,13 @@ contract IssuingEntity is STBase {
 		return documentHashes[_documentId];
 	}
 
+	function setRegistrar(address _registrar) external onlyIssuer returns (bool) {
+		KYCRegistrar kyc = KYCRegistrar(_registrar);
+		require (kyc.isPermittedIssuer(issuerID, msg.sender));
+		registrar = kyc;
+		return true;
+	}
+
 	/// @notice Determines if a module is active on this issuing entity
 	/// @param _module Deployed module address
 	/// @return boolean

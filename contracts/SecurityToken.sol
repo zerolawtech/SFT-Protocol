@@ -93,7 +93,6 @@ contract SecurityToken is STBase {
 		return true;
 	}
 
-	
 	function _checkTransfer(
 		address _auth,
 		address _from,
@@ -136,6 +135,18 @@ contract SecurityToken is STBase {
 			_class,
 			_country
 		);
+	}
+
+	/// @notice ERC-20 approve standard
+	/// @param _spender Address being approved to transfer tokens
+	/// @param _value Amount approved for transfer
+	/// @return boolean
+	function approve(address _spender, uint256 _value) external returns (bool) {
+		require (_spender != address(this));
+		require (_value == 0 || allowed[msg.sender][_spender] == 0);
+		allowed[msg.sender][_spender] = _value;
+		emit Approval(msg.sender, _spender, _value);
+		return true;
 	}
 
 	/// @notice ERC-20 transfer standard
@@ -244,6 +255,13 @@ contract SecurityToken is STBase {
 		emit BalanceChanged(_owner, _old, _value);
 	}
 
+	function setRegistrar(address _registrar) external onlyIssuer returns (bool) {
+		KYCRegistrar kyc = KYCRegistrar(_registrar);
+		require (kyc.isPermittedIssuer(issuerID, msg.sender));
+		registrar = kyc;
+		return true;
+	}
+
 	/// @notice Determines if a module is active on this token
 	/// @dev If a module is active on the issuer level, it will apply to all tokens
 	/// under that issuer
@@ -252,18 +270,4 @@ contract SecurityToken is STBase {
 		if (activeModules[_module]) return true;
 		return issuer.isActiveModule(_module);
 	}
-
-	/// @notice ERC-20 approve standard
-	/// @param _spender Address being approved to transfer tokens
-	/// @param _value Amount approved for transfer
-	/// @return boolean
-	function approve(address _spender, uint256 _value) external returns (bool) {
-		require (_spender != address(this));
-		require (_value == 0 || allowed[msg.sender][_spender] == 0);
-		allowed[msg.sender][_spender] = _value;
-		emit Approval(msg.sender, _spender, _value);
-		return true;
-	}
-
-
 }
