@@ -38,6 +38,10 @@ contract IssuingEntity is STBase {
 	mapping (address => bool) tokens;
 	mapping (string => bytes32) documentHashes;
 
+	mapping (address => bool) public issuerAddr;
+	mapping (bytes32 => address[]) multiSigAuth;
+	uint256 multiSigThreshold;
+
 	event TransferOwnership(
 		address token,
 		bytes32 from,
@@ -53,12 +57,30 @@ contract IssuingEntity is STBase {
 		_;
 	}
 
+	modifier onlyIssuer() {
+		require (issuerAddr[msg.sender]);
+		_;
+	}
+
 	/// @notice Issuing entity constructor
 	/// @param _registrar Address of the registrar
 	/// @param _id ID of Issuer
 	constructor(address _registrar, bytes32 _id) public {
 		registrar = KYCRegistrar(_registrar);
 		issuerID = _id;
+	}
+
+	function _checkMultiSig() internal returns (bool) {
+		bytes32 _callHash = keccak256(msg.data);
+		if (multiSigAuth[_callHash].length.add(1) >= multiSigThreshold) {
+			delete multiSigAuth[_callHash];
+			return true;
+		}
+		for (uint256 i = 0; i < multiSigAuth[_callHash].length; i++) {
+			require (multiSigAuth[_callHash][i] != msg.sender);
+		}
+		multiSigAuth[_callHash].push(msg.sender);
+		return false;
 	}
 
 	/// @notice Fetch count of all investors, regardless of rating
@@ -429,17 +451,38 @@ contract IssuingEntity is STBase {
 		return documentHashes[_documentId];
 	}
 
-	function setRegistrar(address _registrar) external onlyIssuer returns (bool) {
-		KYCRegistrar kyc = KYCRegistrar(_registrar);
-		require (kyc.isPermittedIssuer(issuerID, msg.sender));
-		registrar = kyc;
-		return true;
-	}
-
 	/// @notice Determines if a module is active on this issuing entity
 	/// @param _module Deployed module address
 	/// @return boolean
 	function isActiveModule(address _module) public view returns (bool) {
 		return activeModules[_module];
 	}
+
+	KYCRegistrar[] KycContracts;
+	struct Registrar {
+		KYCRegistrar registrar;
+		bool restricted;
+	}
+
+	function addRegistrar(address _registrar) public onlyIssuer returns (bool) {
+		for (uint256 i = 0; i < KycContracts.length; i++) {
+			if (address(KycContracts[i].registrar) == _registrar) {
+				KycContracts[i].restricted = false;
+				return true;
+			}
+		}
+		KycContracts.push(Registrar(KYCRegistrar(_registrar), false));
+		return true;
+	}
+
+	function removeRegistrar(address _registrar) public onlyIssuer returns (bool) {
+		for (uint256 i = 0; i < KycContracts.length; i++) {
+			if (address(KycContracts[i].registrar) == _registrar) {
+				KycContracts[i].restricted = true;
+				return true;
+			}
+		}
+		revert();
+	}
+
 }

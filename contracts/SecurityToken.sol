@@ -110,6 +110,12 @@ contract SecurityToken is STBase {
 		)
 	{
 		require (_value > 0);
+		if (issuerAddr[_from]) {
+			_from = address(issuer);
+		}
+		if (issuerAddr[_to]) {
+			_to = address(issuer);
+		}
 		(
 			_authId,
 			_id,
@@ -255,7 +261,8 @@ contract SecurityToken is STBase {
 		emit BalanceChanged(_owner, _old, _value);
 	}
 
-	function setRegistrar(address _registrar) external onlyIssuer returns (bool) {
+	function setRegistrar(address _registrar) external returns (bool) {
+		require (issuer.issuerAddr(msg.sender));
 		KYCRegistrar kyc = KYCRegistrar(_registrar);
 		require (kyc.isPermittedIssuer(issuerID, msg.sender));
 		registrar = kyc;

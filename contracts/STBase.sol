@@ -22,11 +22,6 @@ contract STBase {
 	Module[] modules;
 	mapping (address => bool) activeModules;
 
-	modifier onlyIssuer() {
-		require (registrar.isPermittedIssuer(issuerID, msg.sender));
-		_;
-	}
-
 	modifier onlyUnlocked() {
 		require (!locked || registrar.getId(msg.sender) == issuerID);
 		_;
