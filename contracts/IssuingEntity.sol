@@ -31,6 +31,12 @@ contract IssuingEntity is STBase {
 		bool restricted;
 	}
 
+	struct Registrar {
+		KYCRegistrar registrar;
+		bool restricted;
+	}
+
+	KYCRegistrar[] KycContracts;
 	mapping (uint8 => uint64) investorCount;
 	mapping (uint8 => uint64) investorLimit;
 	mapping (uint16 => Country) countries;
@@ -456,12 +462,6 @@ contract IssuingEntity is STBase {
 	/// @return boolean
 	function isActiveModule(address _module) public view returns (bool) {
 		return activeModules[_module];
-	}
-
-	KYCRegistrar[] KycContracts;
-	struct Registrar {
-		KYCRegistrar registrar;
-		bool restricted;
 	}
 
 	function addRegistrar(address _registrar) public onlyIssuer returns (bool) {
