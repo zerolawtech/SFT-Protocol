@@ -349,7 +349,6 @@ contract KYCRegistrar {
 		idMap[_addr].restricted = true;
 		emit UnregisteredAddress(
 			idMap[_addr].id,
-			investorData[idMap[_addr].id].class,
 			_addr,
 			idMap[msg.sender].id
 		);
@@ -357,7 +356,7 @@ contract KYCRegistrar {
 	}
 
 	function _addAddresses(bytes32 _id, address[] _addr) internal {
-		require (investorData[_id].country != 0 || authorityData[_id].allowed);
+		require (investorData[_id].country != 0 || authorityData[_id].approved);
 		for (uint256 i = 0; i < _addr.length; i++) {
 			require (idMap[_addr[i]].id == 0);
 			idMap[_addr[i]].id = _id;
@@ -438,73 +437,115 @@ contract KYCRegistrar {
 		return investorData[_id].country;
 	}
 
-	/// @notice Check registrar level permissions around a token transfer
-	/// @param _issuer ID of the issuer that created the token
-	/// @param _token address of the token contract
-	/// @param _auth address of the caller attempting the transfer (authority)
-	/// @param _from address that the tokens are to be sent from
-	/// @param _to address that the tokens are to be sent to
-	/// @return ID of caller, arrays of ID, class, country of sender/recipient
-	function checkTransfer(
-		bytes32 _issuer,
-		address _auth,
-		address _from,
-		address _to
-	)
-		external
-		view
-		returns (
-			bytes32,
-			bytes32[2],
-			uint8[2],
-			uint16[2]
-		)
-	{
-		/* If authority or receiver are restricted the transfer is blocked. */
-		require (!idMap[_auth].restricted);
-		_checkAddress(_issuer, _to);
-		bytes32 _authId = idMap[_auth].id;
-		/*
-			If the authority is the issuer, check that the calling addresss
-			is not restricted.
-		*/
-		if (_authId == _issuer) {
-			require (!idMap[_auth].restricted);
-		}
-		/*
-			If the authority is the issuer's IssuingEntity contract, the call
-			is being sent by a module. Set the authority to be the issuer.
-		*/
-		else if (issuerContract[_issuer] == _auth) {
-			_authId = _issuer;
-		/* In all other cases, check that the sender is not restricted. */
-		} else {
-			_checkAddress(_issuer, _from);
-		}
-		bytes32 _fromId = idMap[_from].id;
-		bytes32 _toId = idMap[_to].id;
-		/*
-			Data about the involved entities is returned to prevent repetetive
-			calls to the registrar contract during the token transfer.
-		*/
+	// /// @notice Check registrar level permissions around a token transfer
+	// /// @param _issuer ID of the issuer that created the token
+	// /// @param _token address of the token contract
+	// /// @param _auth address of the caller attempting the transfer (authority)
+	// /// @param _from address that the tokens are to be sent from
+	// /// @param _to address that the tokens are to be sent to
+	// /// @return ID of caller, arrays of ID, class, country of sender/recipient
+	// function checkTransfer(
+	// 	bytes32 _issuer,
+	// 	address _auth,
+	// 	address _from,
+	// 	address _to
+	// )
+	// 	external
+	// 	view
+	// 	returns (
+	// 		bytes32,
+	// 		bytes32[2],
+	// 		uint8[2],
+	// 		uint16[2]
+	// 	)
+	// {
+	// 	/* If authority or receiver are restricted the transfer is blocked. */
+	// 	require (!idMap[_auth].restricted);
+	// 	_checkAddress(_issuer, _to);
+	// 	bytes32 _authId = idMap[_auth].id;
+	// 	/*
+	// 		If the authority is the issuer, check that the calling addresss
+	// 		is not restricted.
+	// 	*/
+	// 	if (_authId == _issuer) {
+	// 		require (!idMap[_auth].restricted);
+	// 	}
+	// 	/*
+	// 		If the authority is the issuer's IssuingEntity contract, the call
+	// 		is being sent by a module. Set the authority to be the issuer.
+	// 	*/
+	// 	else if (issuerContract[_issuer] == _auth) {
+	// 		_authId = _issuer;
+	// 	/* In all other cases, check that the sender is not restricted. */
+	// 	} else {
+	// 		_checkAddress(_issuer, _from);
+	// 	}
+	// 	bytes32 _fromId = idMap[_from].id;
+	// 	bytes32 _toId = idMap[_to].id;
+	// 	/*
+	// 		Data about the involved entities is returned to prevent repetetive
+	// 		calls to the registrar contract during the token transfer.
+	// 	*/
+	// 	return (
+	// 		_authId,
+	// 		bytes32[2]([_fromId, _toId]),
+	// 		uint8[2]([entityData[_fromId].class, entityData[_toId].class]),
+	// 		uint16[2]([entityData[_fromId].country, entityData[_toId].country])
+	// 	);
+	// }
+
+	// function _checkAddress(bytes32 _issuer, address _addr) internal view {
+	// 	bytes32 _id = idMap[_addr].id;
+	// 	require (entityData[_id].class != 0);
+	// 	require (entityData[_id].class != 255);
+	// 	/* Issuers can only hold their own tokens. */
+	// 	if (entityData[_id].class == 2) {
+	// 		require (_id == _issuer);
+	// 	}
+	// 	require (!entityData[_id].restricted);
+	// 	require (!idMap[_addr].restricted);
+	// }
+
+
+
+	function __getInvestor(address _addr) external view returns (bytes32, bool, bool, uint8, uint16) {
+		bytes32 _id = idMap[_addr].id;
+		Investor storage i = investorData[_id];
+		require (i.country != 0);
 		return (
-			_authId,
-			bytes32[2]([_fromId, _toId]),
-			uint8[2]([entityData[_fromId].class, entityData[_toId].class]),
-			uint16[2]([entityData[_fromId].country, entityData[_toId].country])
+			_id,
+			!i.restricted && i.expires > now,
+			!idMap[_addr].restricted,
+			i.rating,
+			i.country
 		);
 	}
 
-	function _checkAddress(bytes32 _issuer, address _addr) internal view {
-		bytes32 _id = idMap[_addr].id;
-		require (entityData[_id].class != 0);
-		require (entityData[_id].class != 255);
-		/* Issuers can only hold their own tokens. */
-		if (entityData[_id].class == 2) {
-			require (_id == _issuer);
-		}
-		require (!entityData[_id].restricted);
+	function __getInvestors(address _auth, address _from, address _to) external view returns (bytes32, bytes32[2], uint8[2], uint16[2]) {
+		require (!idMap[_auth].restricted);
+		require (!idMap[_from].restricted);
+		bytes32 _idFrom = idMap[_from].id;
+		Investor storage f = investorData[_idFrom];
+		require (!f.restricted);
+		require (f.expires > now);
+		require (!idMap[_to].restricted);
+		bytes32 _idTo = idMap[_to].id;
+		Investor storage t = investorData[_idTo];
+		require (!t.restricted);
+		require (t.expires > now);
+		return (
+			idMap[_auth].id,
+			bytes32[2]([_idFrom, _idTo]),
+			uint8[2]([f.rating,t.rating]),
+			uint16[2]([f.country, t.country])
+		);
+	}
+
+	function isPermitted(address _addr) external view returns (bool) {
 		require (!idMap[_addr].restricted);
+		require (!investorData[idMap[_addr].id].restricted);
+		require (investorData[idMap[_addr].id].country != 0);
+		return true;
 	}
 
 }

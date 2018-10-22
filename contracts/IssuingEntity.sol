@@ -26,17 +26,20 @@ contract IssuingEntity is STBase {
 	}
 
 	struct Account {
-		uint248 balance;
+		uint240 balance;
 		uint8 rating;
+		uint8 regKey;
 		bool restricted;
 	}
+
+	mapping (address => bytes32) idMap;
 
 	struct Registrar {
 		KYCRegistrar registrar;
 		bool restricted;
 	}
 
-	KYCRegistrar[] KycContracts;
+	Registrar[] regArray;
 	mapping (uint8 => uint64) investorCount;
 	mapping (uint8 => uint64) investorLimit;
 	mapping (uint16 => Country) countries;
@@ -234,23 +237,29 @@ contract IssuingEntity is STBase {
 	/// @return boolean
 	function checkTransfer(
 		address _token,
-		bytes32 _authId,
-		bytes32[2] _id,
-		uint8[2] _class,
-		uint16[2] _country,
+		address _auth,
+		address _from,
+		address _to,
 		uint256 _value
 	)
 		external
 		view
 		returns (bool)
 	{
-		
-		
-		if (_authId != issuerID) {
-			require (!accounts[_id[0]].restricted);	
+		bytes32 _idFrom = _getId(_from);
+		bytes32 _idTo = _getId(_to);
+		if (!issuerAddr[_auth]) {
+			bytes32 _idAuth = _getId(_auth);
+			require(!accounts[_idFrom].restricted);
+			if (_auth == _from) {
+				require(regArray[accounts[_idAuth].regKey].registrar.isPermitted(_auth));
+			} else {
+				require(regArray[accounts[_idFrom].regKey].registrar.isPermitted(_from));
+			}
 		}
-		require (!accounts[_id[1]].restricted);
-		if (_id[0] != _id[1]) {
+		require(!accounts[_idTo].restricted);
+		require(regArray[accounts[_idTo].regKey].registrar.isPermitted(_to));
+		if (_idFrom != _idTo) {
 			/* Exchange to exchange transfers are not permitted */
 			require (_class[0] != 3 || _class[1] != 3);
 			if (_class[1] == 1) {
@@ -319,6 +328,48 @@ contract IssuingEntity is STBase {
 		}
 		return true;
 	}
+
+
+	function __checkTransfer(address _auth, address _from, address _to, uint256 _value) external {
+		
+
+	}
+
+	function _getId(address _addr) internal returns (bytes32) {
+		bytes32 _id = idMap[_addr];
+		if (_id == 0) {
+			for (uint256 i = 0; i < Registrar.length; i++) {
+				if (address(regArray[i].registrar) == 0) {
+					continue;
+				}
+				_id = regArry[i].registrar.getId(_addr);
+				if (_id == 0) {
+					continue;
+				}
+				idMap[_addr] = _id;
+				accounts[_id].regKey = uint8(i);
+				return _id;
+			}
+			return 0;
+		}
+		if (address(regArray[accounts[_id].regKey].registrar) == 0)  {
+			for (i = 0; i < Registrar.length; i++) {
+				if (
+					address(regArray[i].registrar) == 0 || 
+					_id != regArray[i].registrar.getId(_addr)
+				) {
+					continue;
+				}
+				accounts[_id].regKey = uint8(i);
+				return _id;
+			}
+			return 0;
+		}
+		return _id;
+	}
+
+
+
 
 	/// @notice Transfer tokens through the issuing entity level
 	/// @param _id Array of sender/receiver IDs
@@ -465,20 +516,20 @@ contract IssuingEntity is STBase {
 	}
 
 	function addRegistrar(address _registrar) public onlyIssuer returns (bool) {
-		for (uint256 i = 0; i < KycContracts.length; i++) {
-			if (address(KycContracts[i].registrar) == _registrar) {
-				KycContracts[i].restricted = false;
+		for (uint256 i = 0; i < regArray.length; i++) {
+			if (address(regArray[i].registrar) == _registrar) {
+				regArray[i].restricted = false;
 				return true;
 			}
 		}
-		KycContracts.push(Registrar(KYCRegistrar(_registrar), false));
+		regArray.push(Registrar(KYCRegistrar(_registrar), false));
 		return true;
 	}
 
 	function removeRegistrar(address _registrar) public onlyIssuer returns (bool) {
 		for (uint256 i = 0; i < KycContracts.length; i++) {
-			if (address(KycContracts[i].registrar) == _registrar) {
-				KycContracts[i].restricted = true;
+			if (address(regArray[i].registrar) == _registrar) {
+				regArray[i].restricted = true;
 				return true;
 			}
 		}
