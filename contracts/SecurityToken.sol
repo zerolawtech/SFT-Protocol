@@ -110,18 +110,21 @@ contract SecurityToken is STBase {
 		)
 	{
 		require (_value > 0);
-		if (issuerAddr[_from]) {
-			_from = address(issuer);
-		}
-		if (issuerAddr[_to]) {
-			_to = address(issuer);
-		}
-		(
-			_authId,
-			_id,
-			_class,
-			_country
-		) = registrar.checkTransfer(issuerID, _auth, _from, _to);		
+		// if (issuerAddr[_from]) {
+		// 	_from = address(issuer);
+		// }
+		// if (issuerAddr[_to]) {
+		// 	_to = address(issuer);
+		// }
+		// (
+		// 	_authId,
+		// 	_id,
+		// 	_class,
+		// 	_country
+		// ) = registrar.checkTransfer(issuerID, _auth, _from, _to);
+
+		issuer.checkTransfer(_auth, _from, _to, _value);
+
 		if (_id[0] == issuerID) {
 			_from = address(issuer);
 		}

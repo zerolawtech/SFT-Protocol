@@ -508,34 +508,53 @@ contract KYCRegistrar {
 
 
 
-	function __getInvestor(address _addr) external view returns (bytes32, bool, bool, uint8, uint16) {
-		bytes32 _id = idMap[_addr].id;
+	function __getInvestor(
+		address _addr
+	)
+		external
+		view
+		returns
+	(
+		bytes32 _id,
+		bool _allowed,
+		uint8 _rating,
+		uint16 _country
+	) {
+		_id = idMap[_addr].id;
 		Investor storage i = investorData[_id];
 		require (i.country != 0);
 		return (
 			_id,
-			!i.restricted && i.expires > now,
-			!idMap[_addr].restricted,
+			!i.restricted && i.expires > now && !idMap[_addr].restricted,
 			i.rating,
 			i.country
 		);
 	}
 
-	function __getInvestors(address _auth, address _from, address _to) external view returns (bytes32, bytes32[2], uint8[2], uint16[2]) {
-		require (!idMap[_auth].restricted);
-		require (!idMap[_from].restricted);
-		bytes32 _idFrom = idMap[_from].id;
-		Investor storage f = investorData[_idFrom];
-		require (!f.restricted);
-		require (f.expires > now);
-		require (!idMap[_to].restricted);
-		bytes32 _idTo = idMap[_to].id;
-		Investor storage t = investorData[_idTo];
-		require (!t.restricted);
-		require (t.expires > now);
+	function getInvestors(
+		address _from,
+		address _to
+	)
+		external
+		view
+		returns
+	(
+		
+		bytes32[2] _id,
+		bool[2] _allowed,
+		uint8[2] _rating,
+		uint16[2] _country
+	) {
+		Investor storage f = investorData[idMap[_from].id];
+		require (f.country != 0);
+		Investor storage t = investorData[idMap[_to].id];
+		require (t.country != 0);
 		return (
-			idMap[_auth].id,
-			bytes32[2]([_idFrom, _idTo]),
+			bytes32[2]([idMap[_from].id, idMap[_to].id]),
+			bool[2]([
+				!f.restricted && f.expires > now && !idMap[_from].restricted,
+				!t.restricted && t.expires > now && !idMap[_to].restricted
+			]),
 			uint8[2]([f.rating,t.rating]),
 			uint16[2]([f.country, t.country])
 		);

@@ -246,39 +246,48 @@ contract IssuingEntity is STBase {
 		view
 		returns (bool)
 	{
+		if (issuerAddr[_auth]) {
+			bytes32 _idAuth = issuerID;
+		} else {
+			_idAuth = _getId(_auth);
+		}
 		bytes32 _idFrom = _getId(_from);
 		bytes32 _idTo = _getId(_to);
+		
+		(
+			bool[2] _allowed,
+			uint8[2] _rating,
+			uint16[2] _country
+		/*
+			If authority is equal to from, check investor information of
+			authority.  Otherwise, check for from
+		*/
+		) = _getInvestors((_idAuth == _idFrom ? _auth : _from), _to);
 		if (!issuerAddr[_auth]) {
-			bytes32 _idAuth = _getId(_auth);
 			require(!accounts[_idFrom].restricted);
-			if (_auth == _from) {
-				require(regArray[accounts[_idAuth].regKey].registrar.isPermitted(_auth));
-			} else {
-				require(regArray[accounts[_idFrom].regKey].registrar.isPermitted(_from));
-			}
+			require(_allowed[0]);	
 		}
 		require(!accounts[_idTo].restricted);
-		require(regArray[accounts[_idTo].regKey].registrar.isPermitted(_to));
+		require(_allowed[1]);
 		if (_idFrom != _idTo) {
-			/* Exchange to exchange transfers are not permitted */
-			require (_class[0] != 3 || _class[1] != 3);
-			if (_class[1] == 1) {
+			/* TODO Exchange to exchange transfers are not permitted */
+			if (_idTo != 0) {
 				Country storage c = countries[_country[1]];
-				uint8 _rating = registrar.getRating(_id[1]);
+			//	uint8 _rating = registrar.getRating(_id[1]);
 				require (c.allowed);
 				/*  
 					If the receiving investor currently has a 0 balance,
 					we must make sure a slot is available for allocation
 				*/
-				require (_rating >= c.minRating);
-				if (accounts[_id[1]].balance == 0) {
+				require (_rating[1] >= c.minRating);
+				if (accounts[_idTo].balance == 0) {
 					/*
 						If the sender is an investor and still retains a balance,
 						a new slot must be available
 					*/
 					bool _check = (
-						_class[0] != 1 ||
-						accounts[_id[0]].balance > _value
+						_idTo != 0 ||
+						accounts[_idTo].balance > _value
 					);
 					if (_check) {
 						require (
@@ -294,7 +303,7 @@ contract IssuingEntity is STBase {
 						require (c.limit[0] == 0 || c.count[0] < c.limit[0]);
 					}
 					if (!_check) {
-						_check = registrar.getRating(_id[0]) != _rating;
+						_check = _rating[0] != _rating[1];
 					}
 					/*
 						If the investors are of different ratings, make sure a
@@ -303,8 +312,8 @@ contract IssuingEntity is STBase {
 					*/
 					if (_check) {
 						require (
-							investorLimit[_rating] == 0 ||
-							investorCount[_rating] < investorLimit[_rating]
+							investorLimit[_rating[1]] == 0 ||
+							investorCount[_rating[1]] < investorLimit[_rating[1]]
 						);
 					}
 					/*
@@ -314,8 +323,8 @@ contract IssuingEntity is STBase {
 					*/
 					if (_check || _country[0] != _country[1]) {
 						require (
-							c.limit[_rating] == 0 ||
-							c.count[_rating] < c.limit[_rating]
+							c.limit[_rating[1]] == 0 ||
+							c.count[_rating[1]] < c.limit[_rating[1]]
 						);
 					}
 				}
@@ -323,16 +332,32 @@ contract IssuingEntity is STBase {
 		}
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				require(IssuerModule(modules[i].module).checkTransfer(_token, _authId, _id, _class, _country, _value));
+				require(IssuerModule(modules[i].module).checkTransfer(_token, _idAuth, bytes32[2]([_idFrom, _idTo]), _country, _rating, _value));
 			}
 		}
 		return true;
 	}
 
 
-	function __checkTransfer(address _auth, address _from, address _to, uint256 _value) external {
-		
-
+	function _getInvestors(
+		address _from,
+		address _to
+	)
+		internal
+		returns 
+	(
+		bool[2] _allowed,
+		uint8[2] _rating,
+		uint16[2] _country
+	) {
+		bytes32[2] _id;
+		if (accounts[idMap[_from]].regKey == accounts[idMap[_to]].regKey) {
+			(_id, _allowed, _rating, _country) = accounts[idMap[_from]].registrar.getInvestors(_from, _to);
+		} else {
+			(_id[0], _allowed[0], _rating[0], _country[0]) = accounts[idMap[_from]].registrar.getInvestor(_from);
+			(_id[0], _allowed[1], _rating[1], _country[1]) = accounts[idMap[_from]].registrar.getInvestor(_to);
+		}
+		return (_allowed, _rating, _country);
 	}
 
 	function _getId(address _addr) internal returns (bytes32) {
