@@ -8,7 +8,6 @@ import "./interfaces/STModule.sol";
 contract STBase {
 
 	bytes32 public issuerID;
-	KYCRegistrar public registrar;
 	bool public locked;
 
 	struct Module {

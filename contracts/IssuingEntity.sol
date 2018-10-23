@@ -29,10 +29,13 @@ contract IssuingEntity is STBase {
 		uint240 balance;
 		uint8 rating;
 		uint8 regKey;
+		address registrar;
 		bool restricted;
 	}
 
 	mapping (address => bytes32) idMap;
+	mapping (address => bool) public issuerAddr;
+	mapping (address => bool) tokens;
 
 	struct Registrar {
 		KYCRegistrar registrar;
@@ -44,10 +47,7 @@ contract IssuingEntity is STBase {
 	mapping (uint8 => uint64) investorLimit;
 	mapping (uint16 => Country) countries;
 	mapping (bytes32 => Account) accounts;
-	mapping (address => bool) tokens;
 	mapping (string => bytes32) documentHashes;
-
-	mapping (address => bool) public issuerAddr;
 	mapping (bytes32 => address[]) multiSigAuth;
 	uint256 multiSigThreshold;
 
@@ -79,10 +79,8 @@ contract IssuingEntity is STBase {
 
 	/// @notice Issuing entity constructor
 	/// @param _registrar Address of the registrar
-	/// @param _id ID of Issuer
-	constructor(address _registrar, bytes32 _id) public {
-		registrar = KYCRegistrar(_registrar);
-		issuerID = _id;
+	constructor(address _registrar) public {
+		issuerID = keccack256(address(this));
 	}
 
 	function _checkMultiSig() internal returns (bool) {
