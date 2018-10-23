@@ -25,6 +25,16 @@ contract SecurityToken is STBase {
 	event Approval(address tokenOwner, address spender, uint tokens);
 	event BalanceChanged(address owner, uint256 oldBalance, uint256 newBalance);
 
+	modifier onlyIssuer() {
+		require (issuer.issuerAddr(msg.sender));
+		_;
+	}
+
+	modifier onlyUnlocked() {
+		require (!locked || issuer.issuerAddr(msg.sender));
+		_;
+	}
+
 	/// @notice Security token constructor
 	/// @dev Initially the total supply is credited to the issuer
 	/// @param _name Name of the token
@@ -89,60 +99,58 @@ contract SecurityToken is STBase {
 		view
 		returns (bool)
 	{
-		_checkTransfer(_from, _from, _to, _value);
+		require (_value > 0);
+		(bytes32[2] memory _id, uint8[2] memory _rating, uint16[2] memory _country) = issuer.checkTransferView(address(this), _from, _to, _value);
+		_checkTransfer(_id, address[2]([_from, _to]), _value);
 		return true;
 	}
 
-	function _checkTransfer(
+
+	function _checkToSend(
 		address _auth,
 		address _from,
 		address _to,
 		uint256 _value
 	)
 		internal
+		returns
+	(
+		bytes32 _authId,
+		bytes32[2] _id,
+		address[2] _addr,
+		uint8[2] _rating,
+		uint16[2] _country
+	) {
+		require (_value > 0);
+		(_authId, _id, _rating, _country) = issuer.checkTransfer(address(this), _auth, _from, _to, _value);
+		_addr = _checkTransfer(_id, address[2]([_from, _to]), _value);
+		return(_authId, _id, _addr, _rating, _country);
+	}
+
+	function _checkTransfer(
+		bytes32[2] _id,
+		address[2] _addr,
+		uint256 _value
+	)
+		internal
 		view
 		returns (
-			bytes32 _authId,
-			bytes32[2] _id,
-			address[2] _addr,
-			uint8[2] _class,
-			uint16[2] _country
+			address[2]
 		)
 	{
-		require (_value > 0);
-		// if (issuerAddr[_from]) {
-		// 	_from = address(issuer);
-		// }
-		// if (issuerAddr[_to]) {
-		// 	_to = address(issuer);
-		// }
-		// (
-		// 	_authId,
-		// 	_id,
-		// 	_class,
-		// 	_country
-		// ) = registrar.checkTransfer(issuerID, _auth, _from, _to);
-
-		issuer.checkTransfer(_auth, _from, _to, _value);
-
 		if (_id[0] == issuerID) {
-			_from = address(issuer);
+			_addr[0] = address(issuer);
 		}
 		if (_id[1] == issuerID) {
-			_to = address(issuer);
+			_addr[1] = address(issuer);
 		}
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				require(STModule(modules[i].module).checkTransfer(_from, _to, _value));
+				require(STModule(modules[i].module).checkTransfer(_addr[0], _addr[1], _value));
 			}
 		}
-		require (issuer.checkTransfer(address(this), _authId, _id, _class, _country, _value));
 		return (
-			_authId,
-			_id,
-			address[2]([_from, _to]),
-			_class,
-			_country
+			_addr
 		);
 	}
 
@@ -167,10 +175,10 @@ contract SecurityToken is STBase {
 			bytes32 _authId,
 			bytes32[2] memory _id,
 			address[2] memory _addr,
-			uint8[2] memory _class,
+			uint8[2] memory _rating,
 			uint16[2] memory _country
-		) = _checkTransfer(msg.sender, msg.sender, _to, _value);
-		_transfer(_addr, _id, _class, _country, _value);
+		) = _checkToSend(msg.sender, msg.sender, _to, _value);
+		_transfer(_addr, _id, _rating, _country, _value);
 		return true;
 	}
 
@@ -198,9 +206,9 @@ contract SecurityToken is STBase {
 			bytes32 _authId,
 			bytes32[2] memory _id,
 			address[2] memory _addr,
-			uint8[2] memory _class,
+			uint8[2] memory _rating,
 			uint16[2] memory _country
-		) = _checkTransfer(_auth, _from, _to, _value);
+		) = _checkToSend(_auth, _from, _to, _value);
 
 		if (_id[0] != _id[1] && _authId != issuerID) {
 			/*
@@ -209,20 +217,20 @@ contract SecurityToken is STBase {
 			*/
 			allowed[_from][_auth] = allowed[_from][_auth].sub(_value);
 		}
-		_transfer(_addr, _id, _class, _country, _value);
+		_transfer(_addr, _id, _rating, _country, _value);
 		return true;
 	}
 
 	/// @notice Internal transfer function
 	/// @param _addr Array of sender/receiver addresses
 	/// @param _id Array of sender/receiver IDs
-	/// @param _class Array of sender/receiver classes
+	/// @param _rating Array of sender/receiver ratings
 	/// @param _country Array of sender/receiver countries
 	/// @param _value Amount to transfer
 	function _transfer(
 		address[2] _addr,
 		bytes32[2] _id,
-		uint8[2] _class,
+		uint8[2] _rating,
 		uint16[2] _country,		
 		uint256 _value
 	)
@@ -235,7 +243,7 @@ contract SecurityToken is STBase {
 				require (STModule(modules[i].module).transferTokens(_addr[0], _addr[1], _value));
 			}
 		}
-		require (issuer.transferTokens(_id, _class, _country, _value));
+		require (issuer.transferTokens(_id, _rating, _country, _value));
 		emit Transfer(_addr[0], _addr[1], _value);
 	}
 
@@ -264,11 +272,11 @@ contract SecurityToken is STBase {
 		emit BalanceChanged(_owner, _old, _value);
 	}
 
-	function setRegistrar(address _registrar) external returns (bool) {
-		require (issuer.issuerAddr(msg.sender));
-		KYCRegistrar kyc = KYCRegistrar(_registrar);
-		require (kyc.isPermittedIssuer(issuerID, msg.sender));
-		registrar = kyc;
+	function detachModule(address _module) external returns (bool) {
+		if (_module != msg.sender) {
+			require (issuer.issuerAddr(msg.sender));
+		}
+		_detachModule(_module);
 		return true;
 	}
 

@@ -437,78 +437,7 @@ contract KYCRegistrar {
 		return investorData[_id].country;
 	}
 
-	// /// @notice Check registrar level permissions around a token transfer
-	// /// @param _issuer ID of the issuer that created the token
-	// /// @param _token address of the token contract
-	// /// @param _auth address of the caller attempting the transfer (authority)
-	// /// @param _from address that the tokens are to be sent from
-	// /// @param _to address that the tokens are to be sent to
-	// /// @return ID of caller, arrays of ID, class, country of sender/recipient
-	// function checkTransfer(
-	// 	bytes32 _issuer,
-	// 	address _auth,
-	// 	address _from,
-	// 	address _to
-	// )
-	// 	external
-	// 	view
-	// 	returns (
-	// 		bytes32,
-	// 		bytes32[2],
-	// 		uint8[2],
-	// 		uint16[2]
-	// 	)
-	// {
-	// 	/* If authority or receiver are restricted the transfer is blocked. */
-	// 	require (!idMap[_auth].restricted);
-	// 	_checkAddress(_issuer, _to);
-	// 	bytes32 _authId = idMap[_auth].id;
-	// 	/*
-	// 		If the authority is the issuer, check that the calling addresss
-	// 		is not restricted.
-	// 	*/
-	// 	if (_authId == _issuer) {
-	// 		require (!idMap[_auth].restricted);
-	// 	}
-	// 	/*
-	// 		If the authority is the issuer's IssuingEntity contract, the call
-	// 		is being sent by a module. Set the authority to be the issuer.
-	// 	*/
-	// 	else if (issuerContract[_issuer] == _auth) {
-	// 		_authId = _issuer;
-	// 	/* In all other cases, check that the sender is not restricted. */
-	// 	} else {
-	// 		_checkAddress(_issuer, _from);
-	// 	}
-	// 	bytes32 _fromId = idMap[_from].id;
-	// 	bytes32 _toId = idMap[_to].id;
-	// 	/*
-	// 		Data about the involved entities is returned to prevent repetetive
-	// 		calls to the registrar contract during the token transfer.
-	// 	*/
-	// 	return (
-	// 		_authId,
-	// 		bytes32[2]([_fromId, _toId]),
-	// 		uint8[2]([entityData[_fromId].class, entityData[_toId].class]),
-	// 		uint16[2]([entityData[_fromId].country, entityData[_toId].country])
-	// 	);
-	// }
-
-	// function _checkAddress(bytes32 _issuer, address _addr) internal view {
-	// 	bytes32 _id = idMap[_addr].id;
-	// 	require (entityData[_id].class != 0);
-	// 	require (entityData[_id].class != 255);
-	// 	/* Issuers can only hold their own tokens. */
-	// 	if (entityData[_id].class == 2) {
-	// 		require (_id == _issuer);
-	// 	}
-	// 	require (!entityData[_id].restricted);
-	// 	require (!idMap[_addr].restricted);
-	// }
-
-
-
-	function __getInvestor(
+	function getInvestor(
 		address _addr
 	)
 		external

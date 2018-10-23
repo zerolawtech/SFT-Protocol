@@ -22,8 +22,7 @@ contract STBase {
 	Module[] modules;
 	mapping (address => bool) activeModules;
 
-	modifier onlyUnlocked() {
-		require (!locked || registrar.getId(msg.sender) == issuerID);
+	modifier onlyIssuer() {
 		_;
 	}
 
@@ -69,15 +68,11 @@ contract STBase {
 	/// @notice Detach a module from a token
 	/// @param _module of the deployed module
 	/// @return boolean
-	function detachModule(address _module) external returns (bool) {
-		if (_module != msg.sender) {
-			require (registrar.getId(msg.sender) == issuerID);
-		}
+	function _detachModule(address _module) internal {
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (modules[i].module == _module) {
 				modules[i].module = 0;
 				activeModules[_module] = false;
-				return true;
 			}
 		}
 		revert();

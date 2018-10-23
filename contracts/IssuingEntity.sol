@@ -70,6 +70,12 @@ contract IssuingEntity is STBase {
 		require (issuerAddr[msg.sender]);
 		_;
 	}
+	
+	modifier onlyUnlocked() {
+		require (!locked || issuerAddr[msg.sender]);
+		_;
+	}
+
 
 	/// @notice Issuing entity constructor
 	/// @param _registrar Address of the registrar
@@ -227,12 +233,13 @@ contract IssuingEntity is STBase {
 		}
 	}
 
+	
+
 	/// @notice Check if a transfer is possible at the issuing entity level
 	/// @param _token Token being transferred
-	/// @param _authId ID of the caller attempting the transfer
-	/// @param _id Array of sender/receiver IDs
-	/// @param _class Arracy of sender/receiver classes
-	/// @param _country Array of sender/receiver countries
+	/// @param _auth address of the caller attempting the transfer
+	/// @param _from address of the sender
+	/// @param _to address of the receiver
 	/// @param _value Number of tokens being transferred
 	/// @return boolean
 	function checkTransfer(
@@ -243,35 +250,83 @@ contract IssuingEntity is STBase {
 		uint256 _value
 	)
 		external
-		view
-		returns (bool)
-	{
-		if (issuerAddr[_auth]) {
-			bytes32 _idAuth = issuerID;
-		} else {
-			_idAuth = _getId(_auth);
-		}
-		bytes32 _idFrom = _getId(_from);
-		bytes32 _idTo = _getId(_to);
+		returns
+	(
+		bytes32 _idAuth,
+		bytes32[2] _id,
+		uint8[2] _rating,
+		uint16[2] _country
+	) {
+		_idAuth = _getId(_auth);
+		_id[0] = _getId(_from);
+		_id[1] = _getId(_to);
 		
-		(
-			bool[2] _allowed,
-			uint8[2] _rating,
-			uint16[2] _country
+		address _addr = (_idAuth == _id[0] ? _auth : _from);
+		bool[2] memory _allowed;
+
+		(_allowed, _rating, _country) = _getInvestors(
+			address[2]([_addr, _to]),
+			uint8[2]([accounts[idMap[_addr]].regKey, accounts[idMap[_to]].regKey])
+		);
+		_checkTransfer(_token, _idAuth, _id, _allowed, _rating, _country, _value);
+		return (_idAuth, _id, _rating, _country);
+	}	
+		
+	function checkTransferView(
+		address _token,
+		address _from,
+		address _to,
+		uint256 _value
+	)
+		external
+		view
+		returns
+	(
+		bytes32[2] _id,
+		uint8[2] _rating,
+		uint16[2] _country
+	)
+	{
+		uint8[2] memory _key;
+		(_id[0], _key[0]) = _getIdView(_from);
+		(_id[1], _key[1]) = _getIdView(_to);
+
+		address[2] memory _addr = [_from, _to];
+		bool[2] memory _allowed;
+
+		(_allowed, _rating, _country) = _getInvestors(_addr, _key);
+		_checkTransfer(_token, _id[0], _id, _allowed, _rating, _country, _value);
+		return (_id, _rating, _country);
+	}
+
+	function _checkTransfer(
+		address _token,
+		bytes32 _idAuth,
+		bytes32[2] _id,
+		bool[2] _allowed,
+		uint8[2] _rating,
+		uint16[2] _country,
+		uint256 _value
+	)
+		internal
+		view
+	{	
 		/*
-			If authority is equal to from, check investor information of
-			authority.  Otherwise, check for from
+			If authority ID is the same as from ID, check registrar
+			information of the authority. Otherwise, check the from.
 		*/
-		) = _getInvestors((_idAuth == _idFrom ? _auth : _from), _to);
-		if (!issuerAddr[_auth]) {
-			require(!accounts[_idFrom].restricted);
+		
+		/* If issuer is not the authority, check the sender is not restricted */
+		if (_idAuth != issuerID) {
+			require(!accounts[_id[0]].restricted);
 			require(_allowed[0]);	
 		}
-		require(!accounts[_idTo].restricted);
+		/* Always check the receiver is not restricted. */
+		require(!accounts[_id[1]].restricted);
 		require(_allowed[1]);
-		if (_idFrom != _idTo) {
+		if (_id[0] != _id[1]) {
 			/* TODO Exchange to exchange transfers are not permitted */
-			if (_idTo != 0) {
+			if (_id[1] != issuerID) {
 				Country storage c = countries[_country[1]];
 			//	uint8 _rating = registrar.getRating(_id[1]);
 				require (c.allowed);
@@ -280,14 +335,14 @@ contract IssuingEntity is STBase {
 					we must make sure a slot is available for allocation
 				*/
 				require (_rating[1] >= c.minRating);
-				if (accounts[_idTo].balance == 0) {
+				if (accounts[_id[1]].balance == 0) {
 					/*
 						If the sender is an investor and still retains a balance,
 						a new slot must be available
 					*/
 					bool _check = (
-						_idTo != 0 ||
-						accounts[_idTo].balance > _value
+						_id[0] != issuerID ||
+						accounts[_id[1]].balance > _value
 					);
 					if (_check) {
 						require (
@@ -332,79 +387,91 @@ contract IssuingEntity is STBase {
 		}
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				require(IssuerModule(modules[i].module).checkTransfer(_token, _idAuth, bytes32[2]([_idFrom, _idTo]), _country, _rating, _value));
+				require(IssuerModule(modules[i].module).checkTransfer(_token, _idAuth, _id, _rating, _country, _value));
 			}
 		}
-		return true;
 	}
 
-
 	function _getInvestors(
-		address _from,
-		address _to
+		address[2] _addr,
+		uint8[2] _key
 	)
+	//function _getInvestors(
+	//	address _from,
+	//	address _to
+	//)
 		internal
+		view
 		returns 
 	(
 		bool[2] _allowed,
 		uint8[2] _rating,
 		uint16[2] _country
 	) {
-		bytes32[2] _id;
-		if (accounts[idMap[_from]].regKey == accounts[idMap[_to]].regKey) {
-			(_id, _allowed, _rating, _country) = accounts[idMap[_from]].registrar.getInvestors(_from, _to);
+		bytes32[2] memory _id;
+		if (_key[0] != _key[1]) {
+			(_id, _allowed, _rating, _country) = _getRegistrar(_addr[0]).getInvestors(_addr[0], _addr[1]);
 		} else {
-			(_id[0], _allowed[0], _rating[0], _country[0]) = accounts[idMap[_from]].registrar.getInvestor(_from);
-			(_id[0], _allowed[1], _rating[1], _country[1]) = accounts[idMap[_from]].registrar.getInvestor(_to);
+			(_id[0], _allowed[0], _rating[0], _country[0]) = _getRegistrar(_addr[0]).getInvestor(_addr[0]);
+			(_id[0], _allowed[1], _rating[1], _country[1]) = _getRegistrar(_addr[1]).getInvestor(_addr[1]);
 		}
 		return (_allowed, _rating, _country);
 	}
 
 	function _getId(address _addr) internal returns (bytes32) {
-		bytes32 _id = idMap[_addr];
-		if (_id == 0) {
-			for (uint256 i = 0; i < Registrar.length; i++) {
-				if (address(regArray[i].registrar) == 0) {
-					continue;
-				}
-				_id = regArry[i].registrar.getId(_addr);
-				if (_id == 0) {
-					continue;
-				}
-				idMap[_addr] = _id;
-				accounts[_id].regKey = uint8(i);
-				return _id;
-			}
-			return 0;
+		(bytes32 _id, uint8 _key) = _getIdView(_addr);
+		if (idMap[_addr] == 0) {
+			idMap[_addr] = _id;
 		}
-		if (address(regArray[accounts[_id].regKey].registrar) == 0)  {
-			for (i = 0; i < Registrar.length; i++) {
-				if (
-					address(regArray[i].registrar) == 0 || 
-					_id != regArray[i].registrar.getId(_addr)
-				) {
-					continue;
-				}
-				accounts[_id].regKey = uint8(i);
-				return _id;
-			}
-			return 0;
+		if (accounts[_id].regKey != _key) {
+			accounts[_id].regKey = _key;
 		}
 		return _id;
 	}
 
+	function _getIdView(address _addr) internal view returns (bytes32, uint8) {
+		if (issuerAddr[_addr]) {
+			return (issuerID,0);
+		}
+		bytes32 _id = idMap[_addr];
+		if (_id == 0) {
+			for (uint256 i = 0; i < regArray.length; i++) {
+				if (address(regArray[i].registrar) == 0) {
+					continue;
+				}
+				_id = regArray[i].registrar.getId(_addr);
+				if (_id != 0) {
+					return (_id, uint8(i));
+				}
+				
+			}
+			revert();
+		}
+		if (address(regArray[accounts[_id].regKey].registrar) == 0)  {
+			for (i = 0; i < regArray.length; i++) {
+				if (
+					address(regArray[i].registrar) != 0 && 
+					_id == regArray[i].registrar.getId(_addr)
+				) {
+					return (_id, uint8(i));
+				}
+			}
+			revert();
+		}
+		return (_id, accounts[_id].regKey);
+	}
 
 
 
 	/// @notice Transfer tokens through the issuing entity level
 	/// @param _id Array of sender/receiver IDs
-	/// @param _class Arracy of sender/receiver classes
+	/// @param _rating Arracy of sender/receiver ratings
 	/// @param _country Array of sender/receiver countries
 	/// @param _value Number of tokens being transferred
 	/// @return boolean
 	function transferTokens(
 		bytes32[2] _id,
-		uint8[2] _class,
+		uint8[2] _rating,
 		uint16[2] _country,
 		uint256 _value
 	)
@@ -415,13 +482,13 @@ contract IssuingEntity is STBase {
 	{
 		if (_id[0] == _id[1]) return true;
 		uint _balance = uint256(accounts[_id[0]].balance).sub(_value);
-		_setBalance(_id[0], _class[0], _country[0], _balance);
+		_setBalance(_id[0], _country[0], _balance);
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
-		_setBalance(_id[1], _class[1], _country[1], _balance);
+		_setBalance(_id[1], _country[1], _balance);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
 				IssuerModule m = IssuerModule(modules[i].module);
-				require (m.transferTokens(msg.sender, _id, _class, _country, _value));
+				require (m.transferTokens(msg.sender, _id, _rating, _country, _value));
 			}
 		}
 		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
@@ -443,18 +510,20 @@ contract IssuingEntity is STBase {
 		onlyToken
 		returns (bool)
 	{
-		(bytes32 _id, uint8 _class, uint16 _country) = registrar.getEntity(_owner);
+		_getId(_owner);
+
+		(bytes32 _id, bool _allowed, uint8 _rating, uint16 _country) = _getRegistrar(_owner).getInvestor(_owner);
 		uint256 _oldTotal = accounts[_id].balance;
 		if (_new > _old) {
 			uint256 _newTotal = uint256(accounts[_id].balance).add(_new.sub(_old));
 		} else {
 			_newTotal = uint256(accounts[_id].balance).sub(_old.sub(_new));
 		}
-		_setBalance(_id, _class, _country, _newTotal);
+		_setBalance(_id, _country, _newTotal);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
 				IssuerModule m = IssuerModule(modules[i].module);
-				require (m.balanceChanged(msg.sender, _id, _class, _country, _oldTotal, _newTotal));
+				require (m.balanceChanged(msg.sender, _id, _rating, _country, _oldTotal, _newTotal));
 			}
 		}
 		return true;
@@ -462,13 +531,11 @@ contract IssuingEntity is STBase {
 
 	/// @notice Directly set a balance at the issuing entity level
 	/// @param _id ID of affected entity
-	/// @param _class Class of affected entity
 	/// @param _country Country of affected entity
 	/// @param _value New balance
 	/// @return boolean
 	function _setBalance(
 		bytes32 _id,
-		uint8 _class,
 		uint16 _country,
 		uint256 _value
 	)
@@ -476,7 +543,7 @@ contract IssuingEntity is STBase {
 	{
 		Account storage a = accounts[_id];
 		Country storage c = countries[_country];
-		if (_class == 1) {
+		if (_id != issuerID) {
 			uint8 _rating = registrar.getRating(_id);
 			if (_rating != a.rating) {
 				if (a.rating > 0) {
@@ -499,7 +566,7 @@ contract IssuingEntity is STBase {
 				c.count[_rating] = c.count[_rating].sub(1);
 			}
 		}
-		a.balance = uint248(_value);
+		a.balance = uint240(_value);
 	}
 
 	
@@ -513,14 +580,14 @@ contract IssuingEntity is STBase {
 		require (token.circulatingSupply() == 0);
 		tokens[_token] = true;
 		uint256 _balance = uint256(accounts[issuerID].balance).add(token.treasurySupply());
-		accounts[issuerID].balance = uint248(_balance);
+		accounts[issuerID].balance = uint240(_balance);
 		return true;
 	}
 
 	/// @notice Set document hash
 	/// @param _documentId Document ID being hashed
 	/// @param _hash Hash of the document
-	function setDocumentHash(string _documentId, bytes32 _hash) public onlyIssuer {
+	function setDocumentHash(string _documentId, bytes32 _hash) external onlyIssuer {
 		require (documentHashes[_documentId] == 0);
 		documentHashes[_documentId] = _hash;
 		emit NewDocumentHash(_documentId, _hash);
@@ -529,18 +596,18 @@ contract IssuingEntity is STBase {
 	/// @notice Fetch document hash
 	/// @param _documentId Document ID to fetch
 	/// @return string
-	function getDocumentHash(string _documentId) public view returns (bytes32) {
+	function getDocumentHash(string _documentId) external view returns (bytes32) {
 		return documentHashes[_documentId];
 	}
 
 	/// @notice Determines if a module is active on this issuing entity
 	/// @param _module Deployed module address
 	/// @return boolean
-	function isActiveModule(address _module) public view returns (bool) {
+	function isActiveModule(address _module) external view returns (bool) {
 		return activeModules[_module];
 	}
 
-	function addRegistrar(address _registrar) public onlyIssuer returns (bool) {
+	function addRegistrar(address _registrar) external onlyIssuer returns (bool) {
 		for (uint256 i = 0; i < regArray.length; i++) {
 			if (address(regArray[i].registrar) == _registrar) {
 				regArray[i].restricted = false;
@@ -551,14 +618,26 @@ contract IssuingEntity is STBase {
 		return true;
 	}
 
-	function removeRegistrar(address _registrar) public onlyIssuer returns (bool) {
-		for (uint256 i = 0; i < KycContracts.length; i++) {
+	function removeRegistrar(address _registrar) external onlyIssuer returns (bool) {
+		for (uint256 i = 0; i < regArray.length; i++) {
 			if (address(regArray[i].registrar) == _registrar) {
 				regArray[i].restricted = true;
 				return true;
 			}
 		}
 		revert();
+	}
+
+	function detachModule(address _module) external returns (bool) {
+		if (_module != msg.sender) {
+			require (issuerAddr[msg.sender]);
+		}
+		_detachModule(_module);
+		return true;
+	}
+
+	function _getRegistrar(address _addr) internal view returns (KYCRegistrar) {
+		return regArray[accounts[idMap[_addr]].regKey].registrar;
 	}
 
 }
