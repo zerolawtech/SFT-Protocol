@@ -68,14 +68,13 @@ contract DEXModule is STModuleBase {
 	}
 
 	function dexApprove(bytes32 _id, uint256 _value) public returns (bool) {
-		require (registrar.getClass(_id) == 3);
 		require(approved[_id]);
 		_dexLock(_id, msg.sender, _value);
 		return true;
 	}
 
 	function dexRelease(address _owner, uint256 _value) public returns (bool) {
-		bytes32 _id = registrar.getId(msg.sender);
+		bytes32 _id = issuer.getId(msg.sender);
 		_dexUnlock(_id, _owner, _value);
 		return true;
 	}
@@ -103,7 +102,7 @@ contract DEXModule is STModuleBase {
 		onlyUnlocked
 		returns (bool)
 	{
-		bytes32 _id = registrar.getId(msg.sender);
+		bytes32 _id = issuer.getId(msg.sender);
 		require(approved[_id]);
 		_dexUnlock(_id, _from, _value);
 		token.transferFrom(_from, _to, _value);

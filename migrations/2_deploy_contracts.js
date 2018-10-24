@@ -17,8 +17,6 @@ module.exports = function(deployer, network, accounts) {
     kyc = i;
     return deployer.deploy(
       IssuingEntity,
-      KYCRegistrar.address,
-      "issuer",
       {from: accounts[1]}
     );
   }).then(() => {
@@ -37,16 +35,6 @@ module.exports = function(deployer, network, accounts) {
     return SecurityToken.deployed();
   }).then((i) => {
     token = i;
-    console.log("Adding Issuer to KYCRegistrar...");
-    return kyc.addIssuer(
-      "issuer",
-      1,
-      IssuingEntity.address,
-      [accounts[1]],
-      [SecurityToken.address],
-      {from: accounts[0]}
-    );
-  }).then(() => {
     console.log("Adding Token to IssuingEntity...");
     return issuer.addToken(
       SecurityToken.address,

@@ -42,7 +42,7 @@ contract IssuingEntity is STBase {
 		bool restricted;
 	}
 
-	Registrar[] regArray = [Registrar(KYCRegistrar(0),false)];
+	Registrar[] regArray;
 	mapping (uint8 => uint64) investorCount;
 	mapping (uint8 => uint64) investorLimit;
 	mapping (uint16 => Country) countries;
@@ -78,9 +78,10 @@ contract IssuingEntity is STBase {
 
 
 	/// @notice Issuing entity constructor
-	/// @param _registrar Address of the registrar
-	constructor(address _registrar) public {
+	constructor() public {
 		issuerID = keccak256(abi.encodePacked(address(this)));
+		regArray.push(Registrar(KYCRegistrar(0),false));
+		issuerMap[msg.sender] = Address.Issuer;
 	}
 
 	function _checkMultiSig() internal returns (bool) {
@@ -428,6 +429,11 @@ contract IssuingEntity is STBase {
 			}	
 		}
 		return (_allowed, _rating, _country);
+	}
+
+	function getId(address _addr) external view returns (bytes32) {
+		(bytes32 _id, uint8 _key) = _getIdView(_addr);
+		return _id;
 	}
 
 	function _getId(address _addr) internal returns (bytes32) {

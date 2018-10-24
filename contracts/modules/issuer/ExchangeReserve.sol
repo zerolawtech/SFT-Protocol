@@ -4,7 +4,7 @@ import "../../open-zeppelin/SafeMath.sol";
 import "../ModuleBase.sol";
 import "../../Custodian.sol";
 
-contract ExchangeReserve is IssuerModuleBase {
+/* contract ExchangeReserve is IssuerModuleBase {
 
 	using SafeMath64 for uint64;
 
@@ -258,4 +258,4 @@ contract ExchangeReserve is IssuerModuleBase {
 		return true;
 	}
 
-}
+} */
