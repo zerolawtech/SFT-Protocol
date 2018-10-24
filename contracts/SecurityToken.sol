@@ -292,4 +292,5 @@ contract SecurityToken is STBase {
 		if (activeModules[_module]) return true;
 		return issuer.isActiveModule(_module);
 	}
+
 }
