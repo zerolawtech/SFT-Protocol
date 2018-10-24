@@ -25,13 +25,15 @@ contract SecurityToken is STBase {
 	event Approval(address tokenOwner, address spender, uint tokens);
 	event BalanceChanged(address owner, uint256 oldBalance, uint256 newBalance);
 
+	
+	
 	modifier onlyIssuer() {
-		require (issuer.issuerAddr(msg.sender));
+		require (uint8(issuer.issuerMap(msg.sender)) == 1);
 		_;
 	}
 
 	modifier onlyUnlocked() {
-		require (!locked || issuer.issuerAddr(msg.sender));
+		require (!locked || uint8(issuer.issuerMap(msg.sender)) == 1);
 		_;
 	}
 
@@ -43,7 +45,6 @@ contract SecurityToken is STBase {
 	constructor(address _issuer, string _name, string _symbol, uint256 _totalSupply) public {
 		issuer = IssuingEntity(_issuer);
 		issuerID = issuer.issuerID();
-		registrar = KYCRegistrar(issuer.registrar());
 		name = _name;
 		symbol = _symbol;
 		balances[_issuer] = _totalSupply;
@@ -101,7 +102,7 @@ contract SecurityToken is STBase {
 	{
 		require (_value > 0);
 		(bytes32[2] memory _id, uint8[2] memory _rating, uint16[2] memory _country) = issuer.checkTransferView(address(this), _from, _to, _value);
-		_checkTransfer(_id, address[2]([_from, _to]), _value);
+		_checkTransfer(address[2]([_from, _to]), _id[0], _id, _rating, _country, _value);
 		return true;
 	}
 
@@ -123,13 +124,16 @@ contract SecurityToken is STBase {
 	) {
 		require (_value > 0);
 		(_authId, _id, _rating, _country) = issuer.checkTransfer(address(this), _auth, _from, _to, _value);
-		_addr = _checkTransfer(_id, address[2]([_from, _to]), _value);
+		_addr = _checkTransfer(address[2]([_from, _to]), _authId, _id, _rating, _country, _value);
 		return(_authId, _id, _addr, _rating, _country);
 	}
 
 	function _checkTransfer(
-		bytes32[2] _id,
 		address[2] _addr,
+		bytes32 _authId,
+		bytes32[2] _id,
+		uint8[2] _rating,
+		uint16[2] _country,
 		uint256 _value
 	)
 		internal
@@ -146,7 +150,7 @@ contract SecurityToken is STBase {
 		}
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				require(STModule(modules[i].module).checkTransfer(_addr[0], _addr[1], _value));
+				require(STModule(modules[i].module).checkTransfer(_addr, _authId, _id, _rating, _country, _value));
 			}
 		}
 		return (
@@ -238,12 +242,12 @@ contract SecurityToken is STBase {
 	{
 		balances[_addr[0]] = balances[_addr[0]].sub(_value);
 		balances[_addr[1]] = balances[_addr[1]].add(_value);
+		require (issuer.transferTokens(_id, _rating, _country, _value));
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
-				require (STModule(modules[i].module).transferTokens(_addr[0], _addr[1], _value));
+				require (STModule(modules[i].module).transferTokens(_addr, _id, _rating, _country, _value));
 			}
 		}
-		require (issuer.transferTokens(_id, _rating, _country, _value));
 		emit Transfer(_addr[0], _addr[1], _value);
 	}
 
@@ -263,18 +267,18 @@ contract SecurityToken is STBase {
 		}
 		uint256 _old = balances[_owner];
 		balances[_owner] = _value;
+		(bytes32 _id, uint8 _rating, uint16 _country) = issuer.balanceChanged(_owner, _old, _value);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
-				require (STModule(modules[i].module).balanceChanged(_owner, _old, _value));
+				require (STModule(modules[i].module).balanceChanged(_owner, _id, _rating, _country, _old, _value));
 			}
 		}
-		require (issuer.balanceChanged(_owner, _old, _value));
 		emit BalanceChanged(_owner, _old, _value);
 	}
 
 	function detachModule(address _module) external returns (bool) {
 		if (_module != msg.sender) {
-			require (issuer.issuerAddr(msg.sender));
+			require (uint8(issuer.issuerMap(msg.sender)) == 1);
 		}
 		_detachModule(_module);
 		return true;

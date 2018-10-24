@@ -7,9 +7,9 @@ interface BaseModule {
 }
 
 interface STModule {
-	function checkTransfer(address _from, address _to, uint256 _value) external view returns (bool);
-	function transferTokens(address _from, address _to, uint256 _value) external view returns (bool);
-	function balanceChanged(address _owner, uint256 _old, uint256 _new) external returns (bool);
+	function checkTransfer(address[2] _addr, bytes32 _authId, bytes32[2] _id, uint8[2] _rating, uint16[2] _country, uint256 _value) external view returns (bool);
+	function transferTokens(address[2] _addr, bytes32[2] _id, uint8[2] _rating, uint16[2] _country, uint256 _value) external view returns (bool);
+	function balanceChanged(address _addr, bytes32 _id, uint8 _rating, uint16 _country, uint256 _old, uint256 _new) external returns (bool);
 	function getBindings() external view returns (bool, bool, bool);
 	function token() external returns (address);
 	function owner() external view returns (address);

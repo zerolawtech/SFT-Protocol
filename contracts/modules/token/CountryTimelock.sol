@@ -11,11 +11,20 @@ contract CountryLockModule is STModuleBase {
 		countryLock[_country] = _epochTime;
 	}
 
-	function checkTransfer(address _from, address _to, uint256) external view returns (bool) {
-		bytes32 _idFrom = registrar.getId(_from);
-		bytes32 _idTo = registrar.getId(_to);
-		require (countryLock[registrar.getCountry(_idFrom)] < now);
-		require (countryLock[registrar.getCountry(_idTo)] < now);
+	function checkTransfer(
+		address[2],
+		bytes32,
+		bytes32[2],
+		uint8[2],
+		uint16[2] _country,
+		uint256
+	)
+		external
+		view
+		returns (bool)
+	{
+		require (countryLock[_country[0]] < now);
+		require (countryLock[_country[1]] < now);
 	}
 
 	function getBindings() external pure returns (bool, bool, bool) {

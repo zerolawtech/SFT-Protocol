@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "./open-zeppelin/SafeMath.sol";
 import "./SecurityToken.sol";
 import "./STBase.sol";
-
+import "./Custodian.sol";
 
 /// @title Issuing Entity
 contract IssuingEntity is STBase {
@@ -29,20 +29,20 @@ contract IssuingEntity is STBase {
 		uint240 balance;
 		uint8 rating;
 		uint8 regKey;
-		address registrar;
 		bool restricted;
+		address registrar;
 	}
 
+	enum Address { Unused, Issuer, Token }
 	mapping (address => bytes32) idMap;
-	mapping (address => bool) public issuerAddr;
-	mapping (address => bool) tokens;
+	mapping (address => Address) public issuerMap;
 
 	struct Registrar {
 		KYCRegistrar registrar;
 		bool restricted;
 	}
 
-	Registrar[] regArray;
+	Registrar[] regArray = [Registrar(KYCRegistrar(0),false)];
 	mapping (uint8 => uint64) investorCount;
 	mapping (uint8 => uint64) investorLimit;
 	mapping (uint16 => Country) countries;
@@ -62,17 +62,17 @@ contract IssuingEntity is STBase {
 	event NewDocumentHash(string document, bytes32 hash);
 
 	modifier onlyToken() {
-		require (tokens[msg.sender]);
+		require (issuerMap[msg.sender] == Address.Token);
 		_;
 	}
 
 	modifier onlyIssuer() {
-		require (issuerAddr[msg.sender]);
+		require (issuerMap[msg.sender] == Address.Issuer);
 		_;
 	}
 	
 	modifier onlyUnlocked() {
-		require (!locked || issuerAddr[msg.sender]);
+		require (!locked || issuerMap[msg.sender] == Address.Issuer);
 		_;
 	}
 
@@ -80,7 +80,7 @@ contract IssuingEntity is STBase {
 	/// @notice Issuing entity constructor
 	/// @param _registrar Address of the registrar
 	constructor(address _registrar) public {
-		issuerID = keccack256(address(this));
+		issuerID = keccak256(abi.encodePacked(address(this)));
 	}
 
 	function _checkMultiSig() internal returns (bool) {
@@ -324,9 +324,8 @@ contract IssuingEntity is STBase {
 		require(_allowed[1]);
 		if (_id[0] != _id[1]) {
 			/* TODO Exchange to exchange transfers are not permitted */
-			if (_id[1] != issuerID) {
+			if (_rating[1] != 0) {
 				Country storage c = countries[_country[1]];
-			//	uint8 _rating = registrar.getRating(_id[1]);
 				require (c.allowed);
 				/*  
 					If the receiving investor currently has a 0 balance,
@@ -339,7 +338,7 @@ contract IssuingEntity is STBase {
 						a new slot must be available
 					*/
 					bool _check = (
-						_id[0] != issuerID ||
+						_rating[0] != 0 ||
 						accounts[_id[1]].balance > _value
 					);
 					if (_check) {
@@ -407,11 +406,26 @@ contract IssuingEntity is STBase {
 		uint16[2] _country
 	) {
 		bytes32[2] memory _id;
-		if (_key[0] != _key[1]) {
+		if (_key[0] == 0) {
+			_allowed[0] = true;
+			_rating[0] = 0;
+			_country[0] = 0;
+		}
+		if (_key[1] == 0) {
+			_allowed[1] = true;
+			_rating[1] = 0;
+			_country[1] = 0;
+		}
+		
+		if (_key[0] == _key[1] && _key[0] != 0) {
 			(_id, _allowed, _rating, _country) = _getRegistrar(_addr[0]).getInvestors(_addr[0], _addr[1]);
 		} else {
-			(_id[0], _allowed[0], _rating[0], _country[0]) = _getRegistrar(_addr[0]).getInvestor(_addr[0]);
-			(_id[0], _allowed[1], _rating[1], _country[1]) = _getRegistrar(_addr[1]).getInvestor(_addr[1]);
+			if (_key[0] != 0) {
+				(_id[0], _allowed[0], _rating[0], _country[0]) = _getRegistrar(_addr[0]).getInvestor(_addr[0]);
+			}
+			if (_key[1] != 0) {
+				(_id[0], _allowed[1], _rating[1], _country[1]) = _getRegistrar(_addr[1]).getInvestor(_addr[1]);
+			}	
 		}
 		return (_allowed, _rating, _country);
 	}
@@ -428,12 +442,12 @@ contract IssuingEntity is STBase {
 	}
 
 	function _getIdView(address _addr) internal view returns (bytes32, uint8) {
-		if (issuerAddr[_addr]) {
-			return (issuerID,0);
+		if (issuerMap[_addr] == Address.Issuer) {
+			return (issuerID, 0);
 		}
 		bytes32 _id = idMap[_addr];
 		if (_id == 0) {
-			for (uint256 i = 0; i < regArray.length; i++) {
+			for (uint256 i = 1; i < regArray.length; i++) {
 				if (address(regArray[i].registrar) == 0) {
 					continue;
 				}
@@ -445,8 +459,11 @@ contract IssuingEntity is STBase {
 			}
 			revert();
 		}
+		if (accounts[_id].registrar != 0) {
+			return (_id, 0);
+		}
 		if (address(regArray[accounts[_id].regKey].registrar) == 0)  {
-			for (i = 0; i < regArray.length; i++) {
+			for (i = 1; i < regArray.length; i++) {
 				if (
 					address(regArray[i].registrar) != 0 && 
 					_id == regArray[i].registrar.getId(_addr)
@@ -480,9 +497,9 @@ contract IssuingEntity is STBase {
 	{
 		if (_id[0] == _id[1]) return true;
 		uint _balance = uint256(accounts[_id[0]].balance).sub(_value);
-		_setBalance(_id[0], _country[0], _balance);
+		_setBalance(_id[0], _rating[0], _country[0], _balance);
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
-		_setBalance(_id[1], _country[1], _balance);
+		_setBalance(_id[1], _rating[1], _country[1], _balance);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
 				IssuerModule m = IssuerModule(modules[i].module);
@@ -506,25 +523,29 @@ contract IssuingEntity is STBase {
 		external
 		onlyUnlocked
 		onlyToken
-		returns (bool)
-	{
+		returns
+	(
+		bytes32 _id,
+		uint8 _rating,
+		uint16 _country
+	) {
 		_getId(_owner);
-
-		(bytes32 _id, bool _allowed, uint8 _rating, uint16 _country) = _getRegistrar(_owner).getInvestor(_owner);
+		bool _allowed;
+		(_id, _allowed, _rating, _country) = _getRegistrar(_owner).getInvestor(_owner);
 		uint256 _oldTotal = accounts[_id].balance;
 		if (_new > _old) {
 			uint256 _newTotal = uint256(accounts[_id].balance).add(_new.sub(_old));
 		} else {
 			_newTotal = uint256(accounts[_id].balance).sub(_old.sub(_new));
 		}
-		_setBalance(_id, _country, _newTotal);
+		_setBalance(_id, _rating, _country, _newTotal);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
 				IssuerModule m = IssuerModule(modules[i].module);
 				require (m.balanceChanged(msg.sender, _id, _rating, _country, _oldTotal, _newTotal));
 			}
 		}
-		return true;
+		return (_id, _rating, _country);
 	}
 
 	/// @notice Directly set a balance at the issuing entity level
@@ -534,6 +555,7 @@ contract IssuingEntity is STBase {
 	/// @return boolean
 	function _setBalance(
 		bytes32 _id,
+		uint8 _rating,
 		uint16 _country,
 		uint256 _value
 	)
@@ -542,7 +564,6 @@ contract IssuingEntity is STBase {
 		Account storage a = accounts[_id];
 		Country storage c = countries[_country];
 		if (_id != issuerID) {
-			uint8 _rating = registrar.getRating(_id);
 			if (_rating != a.rating) {
 				if (a.rating > 0) {
 					c.count[_rating] = c.count[_rating].sub(1);
@@ -573,10 +594,10 @@ contract IssuingEntity is STBase {
 	/// @return bool
 	function addToken(address _token) external onlyIssuer returns (bool) {
 		SecurityToken token = SecurityToken(_token);
-		require (!tokens[_token]);
+		require (issuerMap[_token] == Address.Unused);
 		require (token.issuerID() == issuerID);
 		require (token.circulatingSupply() == 0);
-		tokens[_token] = true;
+		issuerMap[_token] = Address.Token;
 		uint256 _balance = uint256(accounts[issuerID].balance).add(token.treasurySupply());
 		accounts[issuerID].balance = uint240(_balance);
 		return true;
@@ -606,7 +627,7 @@ contract IssuingEntity is STBase {
 	}
 
 	function addRegistrar(address _registrar) external onlyIssuer returns (bool) {
-		for (uint256 i = 0; i < regArray.length; i++) {
+		for (uint256 i = 1; i < regArray.length; i++) {
 			if (address(regArray[i].registrar) == _registrar) {
 				regArray[i].restricted = false;
 				return true;
@@ -617,7 +638,7 @@ contract IssuingEntity is STBase {
 	}
 
 	function removeRegistrar(address _registrar) external onlyIssuer returns (bool) {
-		for (uint256 i = 0; i < regArray.length; i++) {
+		for (uint256 i = 1; i < regArray.length; i++) {
 			if (address(regArray[i].registrar) == _registrar) {
 				regArray[i].restricted = true;
 				return true;
@@ -628,7 +649,7 @@ contract IssuingEntity is STBase {
 
 	function detachModule(address _module) external returns (bool) {
 		if (_module != msg.sender) {
-			require (issuerAddr[msg.sender]);
+			require (issuerMap[msg.sender] == Address.Issuer);
 		}
 		_detachModule(_module);
 		return true;
@@ -636,6 +657,12 @@ contract IssuingEntity is STBase {
 
 	function _getRegistrar(address _addr) internal view returns (KYCRegistrar) {
 		return regArray[accounts[idMap[_addr]].regKey].registrar;
+	}
+
+	function addCustodian(address _addr) external returns (bool) {
+		bytes32 _id = Custodian(_addr).id();
+		idMap[_addr] = _id;
+		accounts[_id].registrar = _addr;
 	}
 
 }
