@@ -21,7 +21,7 @@ contract STBase {
 	Module[] modules;
 	mapping (address => bool) activeModules;
 
-	modifier onlyIssuer() {
+	modifier onlyOwner() {
 		_;
 	}
 
@@ -30,22 +30,10 @@ contract STBase {
 		revert();
 	}
 
-	/// @notice Lock all tokens
-	/// @dev Issuer can transfer tokens regardless of lock status
-	function lockTransfers() external onlyIssuer {
-		locked = true;
-	}
-
-	/// @notice Unlock all tokens
-	/// @dev Issuer can transfer tokens regardless of lock status
-	function unlockTransfers() external onlyIssuer {
-		locked = false;
-	}
-
 	/// @notice Attach a module to a token
 	/// @param _module Address of the deployed module
 	/// @return boolean
-	function attachModule(address _module) external onlyIssuer returns (bool) {
+	function _attachModule(address _module) internal {
 		require (!activeModules[_module]);
 		BaseModule b = BaseModule(_module);
 		require (b.owner() == address(this));
@@ -57,11 +45,11 @@ contract STBase {
 				modules[i].checkTransfer = _check;
 				modules[i].transferTokens = _transfer;
 				modules[i].balanceChanged = _balance;
-				return true;
+				return;
 			}
 		}
 		modules.push(Module(_module, _check, _transfer, _balance));
-		return true;
+		return;
 	}
 
 	/// @notice Detach a module from a token

@@ -17,6 +17,8 @@ module.exports = function(deployer, network, accounts) {
     kyc = i;
     return deployer.deploy(
       IssuingEntity,
+      [accounts[1]],
+      1,
       {from: accounts[1]}
     );
   }).then(() => {

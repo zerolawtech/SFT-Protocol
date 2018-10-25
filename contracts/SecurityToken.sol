@@ -25,15 +25,8 @@ contract SecurityToken is STBase {
 	event Approval(address tokenOwner, address spender, uint tokens);
 	event BalanceChanged(address owner, uint256 oldBalance, uint256 newBalance);
 
-	
-	
-	modifier onlyIssuer() {
-		require (uint8(issuer.issuerMap(msg.sender)) == 1);
-		_;
-	}
-
 	modifier onlyUnlocked() {
-		require (!locked || uint8(issuer.issuerMap(msg.sender)) == 1);
+		require (!locked || issuer.owners(msg.sender));
 		_;
 	}
 
@@ -276,9 +269,15 @@ contract SecurityToken is STBase {
 		emit BalanceChanged(_owner, _old, _value);
 	}
 
+	function attachModule(address _module) external returns (bool) {
+		require(msg.sender == address(issuer));
+		_attachModule(_module);
+		return true;
+	}
+
 	function detachModule(address _module) external returns (bool) {
 		if (_module != msg.sender) {
-			require (uint8(issuer.issuerMap(msg.sender)) == 1);
+			require(msg.sender == address(issuer));
 		}
 		_detachModule(_module);
 		return true;

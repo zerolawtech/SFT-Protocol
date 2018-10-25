@@ -15,7 +15,7 @@ contract _ModuleBase {
 	}
 
 	modifier onlyIssuer () {
-		require (uint8(issuer.issuerMap(msg.sender)) == 1);
+		require (issuer.owners(msg.sender));
 		_;
 	}
 
