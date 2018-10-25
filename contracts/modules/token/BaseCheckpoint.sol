@@ -13,7 +13,7 @@ contract CheckpointModule is STModuleBase {
 	mapping (address => uint256) balance;
 	mapping (address => bool) zeroBalance;
 
-	constructor(address _token, uint256 _time) STModuleBase(_token) public {
+	constructor(address _token, address _issuer, uint256 _time) STModuleBase(_token, _issuer) public {
 		require (_time >= now);
 		totalSupply = token.totalSupply();
 		time = _time;

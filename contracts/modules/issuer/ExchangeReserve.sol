@@ -2,9 +2,9 @@ pragma solidity ^0.4.24;
 
 import "../../open-zeppelin/SafeMath.sol";
 import "../ModuleBase.sol";
+import "../../Custodian.sol";
 
-
-contract ExchangeReserve is IssuerModuleBase {
+/* contract ExchangeReserve is IssuerModuleBase {
 
 	using SafeMath64 for uint64;
 
@@ -23,7 +23,7 @@ contract ExchangeReserve is IssuerModuleBase {
 	mapping (uint16 => Country) countries;
 
 	modifier onlyExchange() {
-		bytes32 _id = registrar.getId(msg.sender);
+		bytes32 _id = Custodian(msg.sender).id();
 		require (approved[_id]);
 		_;
 	}
@@ -258,4 +258,4 @@ contract ExchangeReserve is IssuerModuleBase {
 		return true;
 	}
 
-}
+} */

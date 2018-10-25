@@ -5,6 +5,7 @@ const SecurityToken = artifacts.require("SecurityToken");
 module.exports = function(deployer, network, accounts) {
 
   var kyc,issuer,token;
+  console.log("Deploying KYCRegistrar...");
   deployer.deploy(
     KYCRegistrar,
     [accounts[0]],
@@ -15,16 +16,18 @@ module.exports = function(deployer, network, accounts) {
     return KYCRegistrar.deployed();
   }).then((i) => {
     kyc = i;
+    console.log("Deploying IssuingEntity...");
     return deployer.deploy(
       IssuingEntity,
-      KYCRegistrar.address,
-      "issuer",
+      [accounts[1]],
+      1,
       {from: accounts[1]}
     );
   }).then(() => {
     return IssuingEntity.deployed();
   }).then((i) => {
     issuer = i;
+    console.log("Deploying SecurityToken...");
     return deployer.deploy(
       SecurityToken,
       IssuingEntity.address,
@@ -37,16 +40,6 @@ module.exports = function(deployer, network, accounts) {
     return SecurityToken.deployed();
   }).then((i) => {
     token = i;
-    console.log("Adding Issuer to KYCRegistrar...");
-    return kyc.addIssuer(
-      "issuer",
-      1,
-      IssuingEntity.address,
-      [accounts[1]],
-      [SecurityToken.address],
-      {from: accounts[0]}
-    );
-  }).then(() => {
     console.log("Adding Token to IssuingEntity...");
     return issuer.addToken(
       SecurityToken.address,

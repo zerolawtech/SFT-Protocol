@@ -7,10 +7,15 @@ import "../IssuingEntity.sol";
 contract _ModuleBase {
 
 	bytes32 public issuerID;
-	KYCRegistrar public registrar;
+	IssuingEntity public issuer;
+
+	constructor(address _issuer) public {
+		issuer = IssuingEntity(_issuer);
+		issuerID = issuer.issuerID();
+	}
 
 	modifier onlyIssuer () {
-		require (registrar.isPermittedIssuer(issuerID, msg.sender));
+		require (issuer.owners(msg.sender));
 		_;
 	}
 
@@ -20,10 +25,8 @@ contract STModuleBase is _ModuleBase {
 
 	SecurityToken public token;
 
-	constructor(address _token) public {
+	constructor(address _token, address _issuer) _ModuleBase(_issuer) public {
 		token = SecurityToken(_token);
-		issuerID = token.issuerID();
-		registrar = KYCRegistrar(token.registrar());
 	}
 
 	modifier onlyParent() {
@@ -40,12 +43,6 @@ contract STModuleBase is _ModuleBase {
 contract IssuerModuleBase is _ModuleBase {
 
 	IssuingEntity public issuer;
-
-	constructor(address _issuer) public {
-		issuer = IssuingEntity(_issuer);
-		issuerID = issuer.issuerID();
-		registrar = KYCRegistrar(issuer.registrar());
-	}
 
 	modifier onlyParent() {
 		require (msg.sender == address(issuer));
