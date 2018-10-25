@@ -35,7 +35,7 @@ contract STBase {
 	/// @return boolean
 	function _attachModule(address _module) internal {
 		require (!activeModules[_module]);
-		BaseModule b = BaseModule(_module);
+		IBaseModule b = IBaseModule(_module);
 		require (b.owner() == address(this));
 		(bool _check, bool _transfer, bool _balance) = b.getBindings();
 		activeModules[_module] = true;

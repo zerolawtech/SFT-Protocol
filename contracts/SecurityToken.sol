@@ -143,7 +143,7 @@ contract SecurityToken is STBase {
 		}
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				require(STModule(modules[i].module).checkTransfer(_addr, _authId, _id, _rating, _country, _value));
+				require(ISTModule(modules[i].module).checkTransfer(_addr, _authId, _id, _rating, _country, _value));
 			}
 		}
 		return (
@@ -238,7 +238,7 @@ contract SecurityToken is STBase {
 		require (issuer.transferTokens(_id, _rating, _country, _value));
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
-				require (STModule(modules[i].module).transferTokens(_addr, _id, _rating, _country, _value));
+				require (ISTModule(modules[i].module).transferTokens(_addr, _id, _rating, _country, _value));
 			}
 		}
 		emit Transfer(_addr[0], _addr[1], _value);
@@ -263,7 +263,7 @@ contract SecurityToken is STBase {
 		(bytes32 _id, uint8 _rating, uint16 _country) = issuer.balanceChanged(_owner, _old, _value);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
-				require (STModule(modules[i].module).balanceChanged(_owner, _id, _rating, _country, _old, _value));
+				require (ISTModule(modules[i].module).balanceChanged(_owner, _id, _rating, _country, _old, _value));
 			}
 		}
 		emit BalanceChanged(_owner, _old, _value);
