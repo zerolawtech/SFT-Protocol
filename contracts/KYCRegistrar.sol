@@ -382,30 +382,6 @@ contract KYCRegistrar {
 		return idMap[_addr].id;
 	}
 
-	/// @notice Fetch investor from an ID
-	/// @param _id Investor's ID
-	/// @return Array of (country, region, rating, expires)
-	function getInvestor(
-		bytes32 _id
-	)
-		external
-		view
-		returns (
-			uint16 _country,
-			uint16 _region,
-			uint8 _rating,
-			uint40 _expires
-		)
-	{
-		require (investorData[_id].country != 0);
-		return (
-			investorData[_id].country,
-			investorData[_id].region,
-			investorData[_id].rating,
-			investorData[_id].expires
-		);
-	}
-
 	/// @notice Fetch rating of an entity
 	/// @param _id Entity's ID
 	/// @return integer

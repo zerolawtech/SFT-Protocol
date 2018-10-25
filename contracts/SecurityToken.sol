@@ -25,11 +25,6 @@ contract SecurityToken is STBase {
 	event Approval(address tokenOwner, address spender, uint tokens);
 	event BalanceChanged(address owner, uint256 oldBalance, uint256 newBalance);
 
-	modifier onlyUnlocked() {
-		require (!locked || issuer.owners(msg.sender));
-		_;
-	}
-
 	/// @notice Security token constructor
 	/// @dev Initially the total supply is credited to the issuer
 	/// @param _name Name of the token
@@ -167,7 +162,7 @@ contract SecurityToken is STBase {
 	/// @param _to Recipient
 	/// @param _value Amount being transferred
 	/// @return boolean
-	function transfer(address _to, uint256 _value) external onlyUnlocked returns (bool) {
+	function transfer(address _to, uint256 _value) external returns (bool) {
 		(
 			bytes32 _authId,
 			bytes32[2] memory _id,
@@ -190,7 +185,6 @@ contract SecurityToken is STBase {
 		uint256 _value
 	)
 		external
-		onlyUnlocked
 		returns (bool)
 	{
 		/* If called by a module, the authority becomes the issuing contract. */

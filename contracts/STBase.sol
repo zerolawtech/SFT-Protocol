@@ -8,7 +8,6 @@ import "./interfaces/STModule.sol";
 contract STBase {
 
 	bytes32 public issuerID;
-	bool public locked;
 
 	struct Module {
 		address module;

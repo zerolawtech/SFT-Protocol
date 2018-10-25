@@ -48,6 +48,7 @@ contract IssuingEntity is STBase, MultiSig {
 		bool restricted;
 	}
 
+	bool locked;
 	Registrar[] regArray;
 	mapping (uint8 => InvestorCount) counts;
 	mapping (uint16 => Country) countries;
@@ -326,13 +327,11 @@ contract IssuingEntity is STBase, MultiSig {
 		internal
 		view
 	{	
-		/*
-			If authority ID is the same as from ID, check registrar
-			information of the authority. Otherwise, check the from.
-		*/
-		
+		require(tokens[_token].set);
 		/* If issuer is not the authority, check the sender is not restricted */
 		if (_idAuth != issuerID) {
+			require(!tokens[_token].restricted);
+			require(!locked);
 			require(!accounts[_id[0]].restricted);
 			require(_allowed[0]);	
 		}
@@ -516,7 +515,6 @@ contract IssuingEntity is STBase, MultiSig {
 		uint256 _value
 	)
 		external
-		onlyUnlocked
 		onlyToken
 		returns (bool)
 	{
@@ -546,7 +544,6 @@ contract IssuingEntity is STBase, MultiSig {
 		uint256 _new
 	)
 		external
-		onlyUnlocked
 		onlyToken
 		returns
 	(
@@ -702,6 +699,17 @@ contract IssuingEntity is STBase, MultiSig {
 		tokens[_token].set = true;
 		uint256 _balance = uint256(accounts[issuerID].balance).add(token.treasurySupply());
 		accounts[issuerID].balance = uint240(_balance);
+		return true;
+	}
+
+	function setGlobalTokenRestriction(
+		bool _restricted
+	)
+		external
+		onlyOwner
+		returns (bool)
+	{
+		locked = _restricted;
 		return true;
 	}
 
