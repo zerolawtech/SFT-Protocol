@@ -20,6 +20,9 @@ contract STBase {
 	Module[] modules;
 	mapping (address => bool) activeModules;
 
+	event ModuleAttached(address module, bool check, bool transfer, bool balance);
+	event ModuleDetached(address module);
+
 	modifier onlyOwner() {
 		_;
 	}
@@ -44,10 +47,12 @@ contract STBase {
 				modules[i].checkTransfer = _check;
 				modules[i].transferTokens = _transfer;
 				modules[i].balanceChanged = _balance;
+				emit ModuleAttached(_module, _check, _transfer, _balance);
 				return;
 			}
 		}
 		modules.push(Module(_module, _check, _transfer, _balance));
+		emit ModuleAttached(_module, _check, _transfer, _balance);
 		return;
 	}
 
@@ -59,6 +64,8 @@ contract STBase {
 			if (modules[i].module == _module) {
 				modules[i].module = 0;
 				activeModules[_module] = false;
+				emit ModuleDetached(_module);
+				return;
 			}
 		}
 		revert();

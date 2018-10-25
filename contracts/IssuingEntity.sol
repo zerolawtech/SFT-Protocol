@@ -65,7 +65,15 @@ contract IssuingEntity is STBase, MultiSig {
 	);
 	event CountryApproved(uint16 country, uint8 minRating, uint64 limit);
 	event CountryBlocked(uint16 country);
+	event InvestorLimitSet(uint16 country, uint8 rating, uint64 limit);
 	event NewDocumentHash(string document, bytes32 hash);
+	event RegistrarAdded(address registrar);
+	event RegistrarRemoved(address registrar);
+	event CustodianAdded(address custodian);
+	event CustodianRemoved(address custodian);
+	event TokenAdded(address token);
+	event TokenRestricted(address token, bool restricted);
+	event GloballyRestricted(bool restricted);
 
 	modifier onlyToken() {
 		require (tokens[msg.sender].set && !tokens[msg.sender].restricted);
@@ -160,31 +168,7 @@ contract IssuingEntity is STBase, MultiSig {
 			countries[_country].counts[_rating].limit);
 	}
 
-	/// @notice Set investor limits
-	/// @dev The first array entry (0) corresponds to the total investor limit,
-	/// regardless of rating
-	/// @param _limits Array of limits per rating
-	function setInvestorLimits(
-		uint64[] _limits
-	)
-		external
-		onlyOwner
-		returns (bool)
-	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
-		for (uint8 i = 0; i < _limits.length; i++) {
-			/*
-				investorLimit[0] = combined sum of investorLimit[1] [2] and [3]
-				investorLimit[1] = unaccredited
-				investorLimit[2] = accredited
-				investorLimit[3] = qualified
-			*/
-			counts[i].limit = _limits[i];
-		}
-		return true;
-	}
+	
 
 	/// @notice Initialize countries so they can accept investors
 	/// @param _country Array of counties to add
@@ -211,6 +195,7 @@ contract IssuingEntity is STBase, MultiSig {
 			c.minRating = _minRating[i];
 			c.counts[0].limit = _limit[i];
 			emit CountryApproved(_country[i], _minRating[i], _limit[i]);
+
 		}
 	}
 
@@ -222,6 +207,33 @@ contract IssuingEntity is STBase, MultiSig {
 		}
 		countries[_country].allowed = false;
 		emit CountryBlocked(_country);
+		return true;
+	}
+
+	/// @notice Set investor limits
+	/// @dev The first array entry (0) corresponds to the total investor limit,
+	/// regardless of rating
+	/// @param _limits Array of limits per rating
+	function setInvestorLimits(
+		uint64[] _limits
+	)
+		external
+		onlyOwner
+		returns (bool)
+	{
+		if (!_checkMultiSig()) {
+			return false;
+		}
+		for (uint8 i = 0; i < _limits.length; i++) {
+			/*
+				investorLimit[0] = combined sum of investorLimit[1] [2] and [3]
+				investorLimit[1] = unaccredited
+				investorLimit[2] = accredited
+				investorLimit[3] = qualified
+			*/
+			counts[i].limit = _limits[i];
+			emit InvestorLimitSet(0, i, _limits[i]);
+		}
 		return true;
 	}
 
@@ -247,6 +259,7 @@ contract IssuingEntity is STBase, MultiSig {
 		for (uint256 i = 0; i < _ratings.length; i++) {
 			require (_ratings[i] != 0);
 			c.counts[_ratings[i]].limit = _limits[i];
+			emit InvestorLimitSet(_country, uint8(i), _limits[i]);
 		}
 		return true;
 	}
@@ -644,10 +657,12 @@ contract IssuingEntity is STBase, MultiSig {
 		for (uint256 i = 1; i < regArray.length; i++) {
 			if (address(regArray[i].registrar) == _registrar) {
 				regArray[i].restricted = false;
+				emit RegistrarAdded(_registrar);
 				return true;
 			}
 		}
 		regArray.push(Registrar(KYCRegistrar(_registrar), false));
+		emit RegistrarAdded(_registrar);
 		return true;
 	}
 
@@ -658,6 +673,7 @@ contract IssuingEntity is STBase, MultiSig {
 		for (uint256 i = 1; i < regArray.length; i++) {
 			if (address(regArray[i].registrar) == _registrar) {
 				regArray[i].restricted = true;
+				emit RegistrarRemoved(_registrar);
 				return true;
 			}
 		}
@@ -671,6 +687,7 @@ contract IssuingEntity is STBase, MultiSig {
 		bytes32 _id = ICustodian(_addr).id();
 		idMap[_addr] = _id;
 		accounts[_id].registrar = _addr;
+		emit CustodianAdded(_addr);
 	}
 
 	function setCustodianRestriction(
@@ -681,8 +698,12 @@ contract IssuingEntity is STBase, MultiSig {
 		onlyOwner
 		returns (bool)
 	{
+		if (!_checkMultiSig()) {
+			return false;
+		}
 		bytes32 _id = ICustodian(_addr).id();
 		accounts[_id].restricted = _restricted;
+		emit CustodianRemoved(_addr);
 	}
 
 	/// @notice Add a new security token contract
@@ -699,10 +720,11 @@ contract IssuingEntity is STBase, MultiSig {
 		tokens[_token].set = true;
 		uint256 _balance = uint256(accounts[issuerID].balance).add(token.treasurySupply());
 		accounts[issuerID].balance = uint240(_balance);
+		emit TokenAdded(_token);
 		return true;
 	}
 
-	function setGlobalTokenRestriction(
+	function setGlobalRestriction(
 		bool _restricted
 	)
 		external
@@ -710,6 +732,7 @@ contract IssuingEntity is STBase, MultiSig {
 		returns (bool)
 	{
 		locked = _restricted;
+		emit GloballyRestricted(_restricted);
 		return true;
 	}
 
@@ -726,6 +749,7 @@ contract IssuingEntity is STBase, MultiSig {
 		}
 		require (tokens[_token].set);
 		tokens[_token].restricted = _restricted;
+		emit TokenRestricted(_token, _restricted);
 		return true;
 	}
 
