@@ -35,7 +35,7 @@ module.exports = {
           mnemonic,
           "https://ropsten.infura.io/2wxAHRhp93rceOy6mAN0",
           0,
-          10
+          20
         )
       },
       network_id: "3",

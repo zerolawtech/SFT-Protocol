@@ -41,5 +41,8 @@ module.exports = function(deployer, network, accounts) {
   }).then(() => {
     console.log("Restricting account 8...");
     return kyc.setRestricted("investor8", true, {from: accounts[0]});
+  }).then(() => {
+    console.log("Attaching account 10 to same ID as account 3");
+    return kyc.registerAddresses("investor2", [accounts[10]], {from: accounts[0]});
   });
 };
