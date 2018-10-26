@@ -31,7 +31,12 @@ module.exports = {
     },
     ropsten: {
       provider: function() {
-        return new HDWalletProvider(mnemonic, "https://ropsten.infura.io/2wxAHRhp93rceOy6mAN0",0,10)
+        return new HDWalletProvider(
+          mnemonic,
+          "https://ropsten.infura.io/2wxAHRhp93rceOy6mAN0",
+          0,
+          10
+        )
       },
       network_id: "3",
       gasPrice: 30000000000 // 30 gwei

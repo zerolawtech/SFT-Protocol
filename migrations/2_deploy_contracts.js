@@ -3,8 +3,6 @@ const IssuingEntity = artifacts.require("IssuingEntity");
 const SecurityToken = artifacts.require("SecurityToken");
 
 module.exports = function(deployer, network, accounts) {
-
-  console.log(accounts);
   var issuer;
   console.log("Deploying KYCRegistrar...");
   deployer.deploy(
