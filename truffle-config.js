@@ -27,11 +27,11 @@ module.exports = {
     development: {
       host: "127.0.0.1",
       port: 7545,
-      network_id: "*"
+      network_id: "5777"
     },
     ropsten: {
       provider: function() {
-        return new HDWalletProvider(mnemonic, "https://ropsten.infura.io/2wxAHRhp93rceOy6mAN0",0,5)
+        return new HDWalletProvider(mnemonic, "https://ropsten.infura.io/2wxAHRhp93rceOy6mAN0",0,10)
       },
       network_id: "3",
       gasPrice: 30000000000 // 30 gwei
