@@ -4,6 +4,7 @@ const SecurityToken = artifacts.require("SecurityToken");
 
 module.exports = function(deployer, network, accounts) {
 
+  console.log(accounts);
   var kyc,issuer,token;
   console.log("Deploying KYCRegistrar...");
   deployer.deploy(

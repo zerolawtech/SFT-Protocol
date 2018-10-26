@@ -12,9 +12,11 @@
  *   },
  */
 
+var HDWalletProvider = require("truffle-hdwallet-provider");
+
+var mnemonic = "catch walk shiver";
+
 module.exports = {
-  // See <http://truffleframework.com/docs/advanced/configuration>
-  // to customize your Truffle configuration!
   solc: {
     optimizer: {
       enabled: true,
@@ -26,6 +28,13 @@ module.exports = {
       host: "127.0.0.1",
       port: 7545,
       network_id: "*"
+    },
+    ropsten: {
+      provider: function() {
+        return new HDWalletProvider(mnemonic, "https://ropsten.infura.io/2wxAHRhp93rceOy6mAN0",0,5)
+      },
+      network_id: "3",
+      gasPrice: 30000000000 // 30 gwei
     }
   }
 };
