@@ -41,35 +41,35 @@ contract KYCRegistrar {
 	mapping (bytes32 => Authority) authorityData;
 
 	event NewInvestor(
-		bytes32 id,
-		uint16 country,
+		bytes32 indexed id,
+		uint16 indexed country,
 		uint16 region,
 		uint8 rating,
 		uint40 expires,
-		bytes32 authority
+		bytes32 indexed authority
 	);
 	event UpdatedInvestor(
-		bytes32 id,
+		bytes32 indexed id,
 		uint16 region,
 		uint8 rating,
 		uint40 expires,
-		bytes32 authority
+		bytes32 indexed authority
 	);
-	event NewAuthority(bytes32 id);
+	event NewAuthority(bytes32 indexed id);
 	event InvestorRestriction(
-		bytes32 id,
+		bytes32 indexed id,
 		bool restricted,
-		bytes32 authority
+		bytes32 indexed authority
 	);
 	event NewRegisteredAddress(
-		bytes32 id,
-		address addr,
-		bytes32 authority
+		bytes32 indexed id,
+		address indexed addr,
+		bytes32 indexed authority
 	);
 	event UnregisteredAddress(
-		bytes32 id,
-		address addr,
-		bytes32 authority
+		bytes32 indexed id,
+		address indexed addr,
+		bytes32 indexed authority
 	);
 
 	modifier onlyOwner() {

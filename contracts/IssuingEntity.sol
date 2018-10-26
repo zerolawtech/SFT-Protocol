@@ -58,21 +58,21 @@ contract IssuingEntity is STBase, MultiSig {
 	mapping (string => bytes32) documentHashes;
 
 	event TransferOwnership(
-		address token,
-		bytes32 from,
-		bytes32 to,
+		address indexed token,
+		bytes32 indexed from,
+		bytes32 indexed to,
 		uint256 value
 	);
-	event CountryApproved(uint16 country, uint8 minRating, uint64 limit);
-	event CountryBlocked(uint16 country);
-	event InvestorLimitSet(uint16 country, uint8 rating, uint64 limit);
-	event NewDocumentHash(string document, bytes32 hash);
-	event RegistrarAdded(address registrar);
-	event RegistrarRemoved(address registrar);
-	event CustodianAdded(address custodian);
-	event CustodianRemoved(address custodian);
-	event TokenAdded(address token);
-	event TokenRestricted(address token, bool restricted);
+	event CountryApproved(uint16 indexed country, uint8 minRating, uint64 limit);
+	event CountryBlocked(uint16 indexed country);
+	event InvestorLimitSet(uint16 indexed country, uint8 rating, uint64 limit);
+	event NewDocumentHash(string indexed document, bytes32 documentHash);
+	event RegistrarAdded(address indexed registrar);
+	event RegistrarRemoved(address indexed registrar);
+	event CustodianAdded(address indexed custodian);
+	event CustodianRemoved(address indexed custodian);
+	event TokenAdded(address indexed token);
+	event TokenRestricted(address indexed token, bool restricted);
 	event GloballyRestricted(bool restricted);
 
 	modifier onlyToken() {
