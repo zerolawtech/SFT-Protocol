@@ -57,6 +57,7 @@ contract IssuingEntity is STBase, MultiSig {
 	mapping (address => Token) tokens;
 	mapping (string => bytes32) documentHashes;
 
+	event NewIssuingEntity(address creator, address contractAddr, bytes32 id);
 	event TransferOwnership(
 		address indexed token,
 		bytes32 indexed from,
@@ -99,6 +100,7 @@ contract IssuingEntity is STBase, MultiSig {
 	{
 		issuerID = keccak256(abi.encodePacked(address(this)));
 		regArray.push(Registrar(KYCRegistrar(0),false));
+		emit NewIssuingEntity(msg.sender, address(this), issuerID);
 	}
 
 	/// @notice Fetch count of all investors, regardless of rating

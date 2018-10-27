@@ -21,6 +21,7 @@ contract SecurityToken is STBase {
 	mapping (address => uint256) balances;
 	mapping (address => mapping (address => uint256)) allowed;
 
+	event NewSecurityToken(address creator, address contractAddr, bytes32 id);
 	event Transfer(address indexed from, address indexed to, uint tokens);
 	event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
 	event BalanceChanged(address indexed owner, uint256 oldBalance, uint256 newBalance);
@@ -37,6 +38,7 @@ contract SecurityToken is STBase {
 		symbol = _symbol;
 		balances[_issuer] = _totalSupply;
 		totalSupply = _totalSupply;
+		emit NewSecurityToken(msg.sender, address(this), issuerID);
 		emit Transfer(0, _issuer, _totalSupply);
 	}
 
