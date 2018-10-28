@@ -1,37 +1,36 @@
 pragma solidity ^0.4.24;
 
 import "../SecurityToken.sol";
-import "../KYCRegistrar.sol";
 import "../IssuingEntity.sol";
 
-contract _ModuleBase {
+contract ModuleBase {
 
 	bytes32 public issuerID;
 	IssuingEntity public issuer;
-
-	constructor(address _issuer) public {
-		issuer = IssuingEntity(_issuer);
-		issuerID = issuer.issuerID();
-	}
 
 	modifier onlyIssuer () {
 		require (issuer.owners(msg.sender));
 		_;
 	}
 
+	constructor(address _issuer) public {
+		issuer = IssuingEntity(_issuer);
+		issuerID = issuer.issuerID();
+	}
+
 }
 
-contract STModuleBase is _ModuleBase {
+contract STModuleBase is ModuleBase {
 
 	SecurityToken public token;
-
-	constructor(address _token, address _issuer) _ModuleBase(_issuer) public {
-		token = SecurityToken(_token);
-	}
 
 	modifier onlyParent() {
 		require (msg.sender == address(token) || msg.sender == address(token.issuer()));
 		_;
+	}
+
+	constructor(address _token, address _issuer) ModuleBase(_issuer) public {
+		token = SecurityToken(_token);
 	}
 
 	function owner() public view returns (address) {
@@ -40,13 +39,17 @@ contract STModuleBase is _ModuleBase {
 
 }
 
-contract IssuerModuleBase is _ModuleBase {
+contract IssuerModuleBase is ModuleBase {
 
 	IssuingEntity public issuer;
 
 	modifier onlyParent() {
 		require (msg.sender == address(issuer));
 		_;
+	}
+
+	constructor(address _issuer) ModuleBase(_issuer) public {
+		
 	}
 
 	function owner() public view returns (address) {

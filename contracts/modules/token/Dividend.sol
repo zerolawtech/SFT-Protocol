@@ -18,6 +18,18 @@ contract DividendModule is CheckpointModule {
 	event DividendClaimed(address beneficiary, uint256 amount);
 	event DividendExpired(uint256 unclaimedAmount);
 
+	constructor(
+		address _token,
+		address _issuer,
+		uint256 _time
+	)
+		CheckpointModule
+	(
+		_token,
+		_issuer,
+		_time
+	) public { }
+
 	function issueDividend(uint256 _claimPeriod) public onlyIssuer payable {
 		require (dividendTime < now);
 		require (claimExpiration == 0);
