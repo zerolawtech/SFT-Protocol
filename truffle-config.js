@@ -14,7 +14,7 @@
 
 var HDWalletProvider = require("truffle-hdwallet-provider");
 
-var mnemonic = "catch walk shiver";
+var mnemonic = "heart ripple stay below olympic husband";
 
 module.exports = {
   solc: {
