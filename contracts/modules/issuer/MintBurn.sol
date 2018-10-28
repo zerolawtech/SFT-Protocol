@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../../open-zeppelin/SafeMath.sol";
 import "../ModuleBase.sol";
+import "../../SecurityToken.sol";
 
 
 contract MintBurn is IssuerModuleBase {
@@ -14,10 +15,11 @@ contract MintBurn is IssuerModuleBase {
 		return (false, false, false);
 	}
 
-	function mint(address _token, uint256 _value) external onlyIssuer returns (bool) {
+	function mint(address _token, uint256 _value) external returns (bool) {
+		return true;
 		SecurityToken t = SecurityToken(_token);
 		uint256 _new = t.balanceOf(address(issuer)).add(_value);
-		require(t.modifyBalance(address(issuer), _new));
+		require(t.modifyBalance(address(issuer), _new), "SACKOSHIT");
 		return true;
 
 	}

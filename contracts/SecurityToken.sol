@@ -263,6 +263,7 @@ contract SecurityToken is STBase {
 			}
 		}
 		emit BalanceChanged(_owner, _old, _value);
+		return true;
 	}
 
 	function attachModule(address _module) external returns (bool) {

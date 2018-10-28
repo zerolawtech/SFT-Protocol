@@ -3,25 +3,10 @@ pragma solidity ^0.4.24;
 import "../SecurityToken.sol";
 import "../IssuingEntity.sol";
 
-contract ModuleBase {
+contract STModuleBase {
 
 	bytes32 public issuerID;
 	IssuingEntity public issuer;
-
-	modifier onlyIssuer () {
-		require (issuer.owners(msg.sender));
-		_;
-	}
-
-	constructor(address _issuer) public {
-		issuer = IssuingEntity(_issuer);
-		issuerID = issuer.issuerID();
-	}
-
-}
-
-contract STModuleBase is ModuleBase {
-
 	SecurityToken public token;
 
 	modifier onlyParent() {
@@ -29,7 +14,13 @@ contract STModuleBase is ModuleBase {
 		_;
 	}
 
-	constructor(address _token, address _issuer) ModuleBase(_issuer) public {
+	modifier onlyIssuer () {
+		require (issuer.owners(msg.sender));
+		_;
+	}
+
+	constructor(address _token, address _issuer) public {
+		issuer = IssuingEntity(_issuer);
 		token = SecurityToken(_token);
 	}
 
@@ -39,8 +30,9 @@ contract STModuleBase is ModuleBase {
 
 }
 
-contract IssuerModuleBase is ModuleBase {
+contract IssuerModuleBase {
 
+	bytes32 public issuerID;
 	IssuingEntity public issuer;
 
 	modifier onlyParent() {
@@ -48,8 +40,14 @@ contract IssuerModuleBase is ModuleBase {
 		_;
 	}
 
-	constructor(address _issuer) ModuleBase(_issuer) public {
-		
+	modifier onlyIssuer () {
+		require (issuer.owners(msg.sender));
+		_;
+	}
+
+	constructor(address _issuer) public {
+		issuer = IssuingEntity(_issuer);
+		issuerID = issuer.issuerID();
 	}
 
 	function owner() public view returns (address) {
