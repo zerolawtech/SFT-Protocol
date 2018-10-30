@@ -383,7 +383,10 @@ contract IssuingEntity is STBase, MultiSig {
 						a slot is available in the overall country limit
 					*/
 					if (_check || _country[0] != _country[1]) {
-						require (c.counts[0].limit == 0 || c.counts[0].count < c.counts[0].limit);
+						require (
+							c.counts[0].limit == 0 ||
+							c.counts[0].count < c.counts[0].limit
+						);
 					}
 					if (!_check) {
 						_check = _rating[0] != _rating[1];
@@ -505,10 +508,20 @@ contract IssuingEntity is STBase, MultiSig {
 			) = _getRegistrar(_addr[0]).getInvestors(_addr[0], _addr[1]);
 		} else {
 			if (_key[0] != 0) {
-				(_id[0], _allowed[0], _rating[0], _country[0]) = _getRegistrar(_addr[0]).getInvestor(_addr[0]);
+				(
+					_id[0],
+					_allowed[0],
+					_rating[0],
+					_country[0]
+				) = _getRegistrar(_addr[0]).getInvestor(_addr[0]);
 			}
 			if (_key[1] != 0) {
-				(_id[0], _allowed[1], _rating[1], _country[1]) = _getRegistrar(_addr[1]).getInvestor(_addr[1]);
+				(
+					_id[0],
+					_allowed[1],
+					_rating[1],
+					_country[1]
+				) = _getRegistrar(_addr[1]).getInvestor(_addr[1]);
 			}	
 		}
 		return (_allowed, _rating, _country);
