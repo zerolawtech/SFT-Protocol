@@ -12,19 +12,24 @@ const TOKENS = 5;
 
 async function transfer(token, from, to, value) {
   try {
-    await tokens[token].contract.transfer(investors[to[0]].accounts[to[1]].addr, value, {from: investors[from[0]].accounts[from[1]].addr});   
+    await token.contract.transfer(to, value, {from: from});   
   } catch(e) {
     return false;
   };
-  investors[from[0]].accounts[from[1]].balances[token] -= value;
-  investors[to[0]].accounts[to[1]].balances[token] += value;
+  token.balances[from] -= value;
+  if (token.balances[to] == undefined) {
+    token.balances[to] = value;
+  } else {
+    token.balances[to] += value;
+  }
   return true;
 }
 
 async function isAllowed(investor) {
-  if (countries[investor.country].minRating > investor.rating) { return false; }
-  if (!countries[investor.country].allowed) { return false; }
-  if (countries[investor.country].count >= countries[investor.country].limit) { return false; }
+  let c = countries[investor.country];
+  if (c.minRating > investor.rating) { return false; }
+  if (!c.allowed) { return false; }
+  if (c.count >= c.limit) { return false; }
   for (i = 0; i < investor.kyc.length; i++) {
     if (!kyc[investor.kyc[i]].active) continue;
     return true;
@@ -35,6 +40,7 @@ async function isAllowed(investor) {
 
 var kyc = [];
 var issuer;
+var issuerAccount;
 var tokens = [];
 var investors = [{id:"issuer"}];
 var countries = [{}];
@@ -47,18 +53,19 @@ for (var i = 0; i < COUNTRIES; i++) {
 contract('SecurityToken', async (accounts) => {
   
   it('Should deploy KYC contracts and whitelist accounts', async() => {    
-    investors[0].accounts = [{addr:accounts[1], balances:Array(TOKENS).fill(0)}];
+    investors[0].accounts = [accounts[1]];
+    issuerAccount = accounts[1];
     for (var i = 2; i < accounts.length; i++) {
       if (investors.length == 1 || Math.random() > 0.33) {
         investors.push({
           id:"investor"+i,
           country:Math.ceil(Math.random()*COUNTRIES),
           rating:Math.ceil(Math.random()*RATINGS),
-          accounts:[{addr:accounts[i], balances:Array(TOKENS).fill(0)}],
+          accounts:[accounts[i]],
           kyc:[]
         });
       } else {
-        investors.slice(-1)[0].accounts.push({addr:accounts[i], balances:Array(TOKENS).fill(0)});
+        investors.slice(-1)[0].accounts.push(accounts[i]);
       }
     }
     console.log("Total of "+investors.length+" unique investors.");
@@ -70,7 +77,7 @@ contract('SecurityToken', async (accounts) => {
       });
       for (var k = 1; k < investors.length; k++) {
         if (Math.random() > INVESTOR_KYC_PCT) continue;
-        await kyc[i].contract.addInvestor(investors[k].id, investors[k].country, 0, investors[k].rating, 9999999999, investors[k].accounts.map(a => a.addr), {from: accounts[0]});
+        await kyc[i].contract.addInvestor(investors[k].id, investors[k].country, 0, investors[k].rating, 9999999999, investors[k].accounts, {from: accounts[0]});
         investors[k].kyc.push(i);
       }
     }
@@ -82,10 +89,11 @@ contract('SecurityToken', async (accounts) => {
     for (i = 0; i < 5; i++) {
       tokens.push({
         contract: await SecurityToken.new(issuer.address, "Test Token "+i, "TS"+i, 1000000, {from: accounts[1]}),
-        active: true
+        active: true,
+        balances: {}
       });
+      tokens.slice(-1)[0].balances[investors[0].accounts[0]] = 1000000;
       await issuer.addToken(tokens.slice(-1)[0].contract.address, {from: accounts[1]});
-      investors[0].accounts[0].balances[i] = 1000000;
     }
     for (i = 0; i < kyc.length; i++) {
       if (Math.random() > KYC_PCT) continue;
@@ -110,11 +118,20 @@ contract('SecurityToken', async (accounts) => {
     for (var t = 0; t < tokens.length; t++) {
       for (var i = 1; i < investors.length; i++) {
         let expected = await isAllowed(investors[i]);
-        let result = await transfer(t, [0,0], [i,Math.floor(Math.random()*investors[i].accounts.length)], Math.ceil(Math.random()*investors[0].accounts[0].balances[t]));
+        let receiver = investors[i].accounts[Math.floor(Math.random()*investors[i].accounts.length)];
+        let value = Math.ceil(Math.random()*tokens[t].balances[issuerAccount]);
+        let result = await transfer(tokens[t], issuerAccount, receiver, value);
         if (expected != result) {
-          console.log(investors[i], countries[investors[i].country]);
+          console.log(investors[i]);
+          console.log(countries[investors[i].country]);
         }
         assert.equal(result, expected);
+        if (result) {
+          let x = await tokens[t].contract.balanceOf(receiver);
+          assert.equal(x.valueOf(), tokens[t].balances[receiver], "Receiver balance is wrong");
+          x = await tokens[t].contract.balanceOf(issuer.address);
+          assert.equal(x.valueOf(), tokens[t].balances[issuerAccount], "Issuer balance is wrong");
+        }
       }
     }
   })
