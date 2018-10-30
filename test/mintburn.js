@@ -1,6 +1,5 @@
 const IssuingEntity = artifacts.require("IssuingEntity");
 const SecurityToken = artifacts.require("SecurityToken");
-const KYCRegistrar = artifacts.require("KYCRegistrar");
 const MintBurn = artifacts.require("MintBurn");
 
 
@@ -8,20 +7,9 @@ var issuer, registrar, token, mod;
 
 contract('SecurityToken', async (accounts) => {
   
-  it('Should add registrar to IssuingEntity', async() => {
-    var error = "";
-    issuer = await IssuingEntity.deployed();
-    registrar = await KYCRegistrar.deployed();
-    token = await SecurityToken.deployed();
-    try {
-      await issuer.addRegistrar(registrar.address, {from: accounts[1]});   
-    } catch(e) {
-      error = e;
-    };
-    assert.equal(error, "", error);
-  });
-  
   it('Should deploy and attach MintBurn', async() => {
+    issuer = await IssuingEntity.deployed();
+    token = await SecurityToken.deployed();
     mod = await MintBurn.new(issuer.address, {from: accounts[1]});
     await issuer.attachModule(issuer.address, mod.address, {from: accounts[1]});
   });
@@ -49,5 +37,41 @@ contract('SecurityToken', async (accounts) => {
     result = await issuer.balanceOf(await issuer.issuerID());
     assert.equal(result.valueOf(), 3000000, "minting failed");
   });
+
+  it('Should burn some more tokens', async() => {
+    await mod.burn(token.address, 2000000, {from: accounts[1]});
+    result = await token.balanceOf(issuer.address);
+    assert.equal(result.valueOf(), 1000000, "burning failed");
+    result = await issuer.balanceOf(await issuer.issuerID());
+    assert.equal(result.valueOf(), 1000000, "burning failed");
+  });
+
+  it('Should detach MintBurn', async() => {
+    await issuer.detachModule(issuer.address, mod.address, {from: accounts[1]});
+  });
+
+  it('Should fail to burn some tokens', async() => {
+    var error;
+    try {
+      await mod.burn(token.address, 500000, {from: accounts[1]});
+    } catch(e) {
+      error = e;
+    }
+    assert.notEqual(error.message, "", "was able to burn");
+  });
+
+  it('Should fail to mint some tokens', async() => {
+    var error;
+    try {
+      await mod.mint(token.address, 500000, {from: accounts[1]});
+    } catch(e) {
+      error = e;
+    }
+    assert.notEqual(error.message, "", "was able to mint");
+  });
+
+
+
+
 
 });
