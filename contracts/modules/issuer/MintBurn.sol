@@ -16,12 +16,10 @@ contract MintBurn is IssuerModuleBase {
 	}
 
 	function mint(address _token, uint256 _value) external returns (bool) {
-		return true;
 		SecurityToken t = SecurityToken(_token);
 		uint256 _new = t.balanceOf(address(issuer)).add(_value);
-		require(t.modifyBalance(address(issuer), _new), "SACKOSHIT");
+		require(t.modifyBalance(address(issuer), _new));
 		return true;
-
 	}
 
 	function burn(address _token, uint256 _value) external onlyIssuer returns (bool) {
