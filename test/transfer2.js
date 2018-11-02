@@ -37,6 +37,17 @@ async function isAllowed(investor) {
   return false;
 }
 
+async function getCount(token, country, rating) {
+  // figure out investor counts
+}
+
+function randC(num) {
+  return Math.ceil(Math.random()*num);
+}
+
+function randF(num) {
+  return Math.floor(Math.random()*num);
+}
 
 var kyc = [];
 var issuer;
@@ -59,8 +70,8 @@ contract('SecurityToken', async (accounts) => {
       if (investors.length == 1 || Math.random() > 0.33) {
         investors.push({
           id:"investor"+i,
-          country:Math.ceil(Math.random()*COUNTRIES),
-          rating:Math.ceil(Math.random()*RATINGS),
+          country:randC(COUNTRIES),
+          rating:randC(RATINGS),
           accounts:[accounts[i]],
           kyc:[]
         });
@@ -105,8 +116,8 @@ contract('SecurityToken', async (accounts) => {
   it('Should approve countries', async() => {
     for (i = 1; i < countries.length; i++) {
       if (Math.random() > COUNTRY_PCT) continue;
-      countries[i].minRating = Math.ceil(Math.random()*RATINGS);
-      countries[i].limit = Math.ceil(Math.random()*investors.length);
+      countries[i].minRating = randC(RATINGS);
+      countries[i].limit = randC(investors.length);
       countries[i].allowed = true;
       await issuer.setCountries([i], [countries[i].minRating], [countries[i].limit], {from: accounts[1]});
       let x = await issuer.getCountryInvestorLimit(i, 0);
@@ -118,8 +129,8 @@ contract('SecurityToken', async (accounts) => {
     for (var t = 0; t < tokens.length; t++) {
       for (var i = 1; i < investors.length; i++) {
         let expected = await isAllowed(investors[i]);
-        let receiver = investors[i].accounts[Math.floor(Math.random()*investors[i].accounts.length)];
-        let value = Math.ceil(Math.random()*tokens[t].balances[issuerAccount]);
+        let receiver = investors[i].accounts[randF(investors[i].accounts.length)];
+        let value = randC(tokens[t].balances[issuerAccount]);
         let result = await transfer(tokens[t], issuerAccount, receiver, value);
         if (expected != result) {
           console.log(investors[i]);
@@ -131,6 +142,9 @@ contract('SecurityToken', async (accounts) => {
           assert.equal(x.valueOf(), tokens[t].balances[receiver], "Receiver balance is wrong");
           x = await tokens[t].contract.balanceOf(issuer.address);
           assert.equal(x.valueOf(), tokens[t].balances[issuerAccount], "Issuer balance is wrong");
+         // check balance in issuer contract
+          // check investor counts
+          // check total supply
         }
       }
     }
