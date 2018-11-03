@@ -383,7 +383,10 @@ contract IssuingEntity is STBase, MultiSig {
 						a slot is available in the overall country limit
 					*/
 					if (_check || _country[0] != _country[1]) {
-						require (c.counts[0].limit == 0 || c.counts[0].count < c.counts[0].limit);
+						require (
+							c.counts[0].limit == 0 ||
+							c.counts[0].count < c.counts[0].limit
+						);
 					}
 					if (!_check) {
 						_check = _rating[0] != _rating[1];
@@ -437,7 +440,7 @@ contract IssuingEntity is STBase, MultiSig {
 	}
 
 	function _getIdView(address _addr) internal view returns (bytes32, uint8) {
-		if (owners[_addr]) {
+		if (owners[_addr] || _addr == address(this)) {
 			return (issuerID, 0);
 		}
 		bytes32 _id = idMap[_addr];
@@ -484,6 +487,7 @@ contract IssuingEntity is STBase, MultiSig {
 		uint16[2] _country
 	) {
 		bytes32[2] memory _id;
+		/* If key == 0 the address belongs to the issuer or a custodian. */
 		if (_key[0] == 0) {
 			_allowed[0] = true;
 			_rating[0] = 0;
@@ -504,10 +508,20 @@ contract IssuingEntity is STBase, MultiSig {
 			) = _getRegistrar(_addr[0]).getInvestors(_addr[0], _addr[1]);
 		} else {
 			if (_key[0] != 0) {
-				(_id[0], _allowed[0], _rating[0], _country[0]) = _getRegistrar(_addr[0]).getInvestor(_addr[0]);
+				(
+					_id[0],
+					_allowed[0],
+					_rating[0],
+					_country[0]
+				) = _getRegistrar(_addr[0]).getInvestor(_addr[0]);
 			}
 			if (_key[1] != 0) {
-				(_id[0], _allowed[1], _rating[1], _country[1]) = _getRegistrar(_addr[1]).getInvestor(_addr[1]);
+				(
+					_id[0],
+					_allowed[1],
+					_rating[1],
+					_country[1]
+				) = _getRegistrar(_addr[1]).getInvestor(_addr[1]);
 			}	
 		}
 		return (_allowed, _rating, _country);
@@ -566,9 +580,14 @@ contract IssuingEntity is STBase, MultiSig {
 		uint8 _rating,
 		uint16 _country
 	) {
-		_getId(_owner);
-		bool _allowed;
-		(_id, _allowed, _rating, _country) = _getRegistrar(_owner).getInvestor(_owner);
+		if (_getId(_owner) == issuerID) {
+			_id = issuerID;
+			_rating = 0;
+			_country = 0;
+		} else {
+			bool _allowed;
+			(_id, _allowed, _rating, _country) = _getRegistrar(_owner).getInvestor(_owner);
+		}
 		uint256 _oldTotal = accounts[_id].balance;
 		if (_new > _old) {
 			uint256 _newTotal = uint256(accounts[_id].balance).add(_new.sub(_old));

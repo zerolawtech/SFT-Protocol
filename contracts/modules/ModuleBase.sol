@@ -1,17 +1,17 @@
 pragma solidity ^0.4.24;
 
 import "../SecurityToken.sol";
-import "../KYCRegistrar.sol";
 import "../IssuingEntity.sol";
 
-contract _ModuleBase {
+contract STModuleBase {
 
 	bytes32 public issuerID;
 	IssuingEntity public issuer;
+	SecurityToken public token;
 
-	constructor(address _issuer) public {
-		issuer = IssuingEntity(_issuer);
-		issuerID = issuer.issuerID();
+	modifier onlyParent() {
+		require (msg.sender == address(token) || msg.sender == address(token.issuer()));
+		_;
 	}
 
 	modifier onlyIssuer () {
@@ -19,19 +19,9 @@ contract _ModuleBase {
 		_;
 	}
 
-}
-
-contract STModuleBase is _ModuleBase {
-
-	SecurityToken public token;
-
-	constructor(address _token, address _issuer) _ModuleBase(_issuer) public {
+	constructor(address _token, address _issuer) public {
+		issuer = IssuingEntity(_issuer);
 		token = SecurityToken(_token);
-	}
-
-	modifier onlyParent() {
-		require (msg.sender == address(token) || msg.sender == address(token.issuer()));
-		_;
 	}
 
 	function owner() public view returns (address) {
@@ -40,13 +30,24 @@ contract STModuleBase is _ModuleBase {
 
 }
 
-contract IssuerModuleBase is _ModuleBase {
+contract IssuerModuleBase {
 
+	bytes32 public issuerID;
 	IssuingEntity public issuer;
 
 	modifier onlyParent() {
 		require (msg.sender == address(issuer));
 		_;
+	}
+
+	modifier onlyIssuer () {
+		require (issuer.owners(msg.sender));
+		_;
+	}
+
+	constructor(address _issuer) public {
+		issuer = IssuingEntity(_issuer);
+		issuerID = issuer.issuerID();
 	}
 
 	function owner() public view returns (address) {
