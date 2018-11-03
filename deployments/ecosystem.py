@@ -14,8 +14,9 @@ kyc = []
 issuers = []
 investors = [] # {'id':None, 'country':0, 'rating':0, 'accounts':[], 'kyc':[]}
 
-def test(network, accounts):
+def deplsoy(network, accounts):
     
+    """Create a diverse ecosystem"""
     # create investors
     print("Creating investors...")
     for i in range(2, len(accounts)):
@@ -81,7 +82,7 @@ def test(network, accounts):
     for issuer, token in [(k,x) for k in issuers for x in k.tokens]:
         _id = issuer.issuerID()
         for i in investors:
-            allowed = is_allowed(issuer, i)
+            allowed = _is_allowed(issuer, i)
             try:
                 value = random.randint(1,token.balances[accounts[1]])
                 to = random.choice(i['accounts'])
@@ -89,7 +90,7 @@ def test(network, accounts):
                 assert allowed == True, (
                     "Transfer should have failed - {}".format(allowed))
                 token.balances[accounts[1]] -= value
-                if investor_balance(issuer, i) == 0:
+                if _investor_balance(issuer, i) == 0:
                     issuer.countries[i['country']]['count'] += 1
                 token.balances[to] += value
             except ValueError:
@@ -98,23 +99,16 @@ def test(network, accounts):
             assert token.balanceOf(to) == token.balances[to], (
                 "Incorrect issuer Balance")
             assert token.balanceOf(issuer.address) == token.balances[accounts[1]]
-            assert issuer.balanceOf(i['id']) == investor_balance(issuer, i)
+            assert issuer.balanceOf(i['id']) == _investor_balance(issuer, i)
             assert issuer.balanceOf(_id) == sum(t.balances[accounts[1]] for t in issuer.tokens)
             assert issuer.getCountryInvestorCount(i['country'],0) == issuer.countries[i['country']]['count']
 
-    print("Transferring tokens between users...")
-    for issuer, token in [(k,x) for k in issuers for x in k.tokens]:
-        _id = issuer.issuerID()
-        for i in investors:
 
-    
-
-
-def is_allowed(issuer, investor):
+def _is_allowed(issuer, investor):
     c = issuer.countries[investor['country']]
     if not c['allowed']:
         return "Country is not allowed"
-    if c['count'] == c['limit'] and investor_balance(issuer, investor) == 0:
+    if c['count'] == c['limit'] and _investor_balance(issuer, investor) == 0:
         return "Investor limit reached"
     if c['minRating'] > investor['rating']:
         return "Investor rating too low"
@@ -122,7 +116,7 @@ def is_allowed(issuer, investor):
         return "No KYC"
     return True
 
-def investor_balance(issuer, investor):
+def _investor_balance(issuer, investor):
     total = 0
     for account in investor['accounts']:
         total += sum(t.balances[account] for t in issuer.tokens)
