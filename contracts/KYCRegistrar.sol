@@ -101,9 +101,9 @@ contract KYCRegistrar {
 	/// @param _owners Array of addresses for owning authority
 	/// @param _id ID of owning authority
 	/// @param _threshold multisig threshold for owning authority
-	constructor (address[] _owners, bytes32 _id, uint8 _threshold) public {
+	constructor (address[] _owners, uint8 _threshold) public {
 		require (_threshold <= _owners.length);
-		ownerID = _id;
+		ownerID = keccak256(abi.encodePacked(address(this)));
 		Authority storage a = authorityData[ownerID];
 		a.approved = true;
 		a.multiSigThreshold = _threshold;
