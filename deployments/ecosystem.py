@@ -34,8 +34,7 @@ def deplsoy(network, accounts):
     # deploy KYCRegistry contracts, add investors
     print("Deploying registries and adding investors...")
     for i in range(REGISTRIES):
-        kyc.append(network.deploy("KYCRegistrar", [accounts[0]],
-                                  b"kyc"+bytes(i), 1))
+        kyc.append(network.deploy("KYCRegistrar", [accounts[0]], 1))
         for inv in investors:
             if random.random() > 0.66:
                 continue
