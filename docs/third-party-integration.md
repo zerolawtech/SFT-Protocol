@@ -15,7 +15,7 @@ At this point, you will be able to transfer tokens from the issuer to any addres
 
 Note that the issuer's balance is assigned to the IssuingEntity contract. The issuer can transfer these tokens with a normal call to `SecurityToken.transfer` from any approved address. Sending tokens to any address associated with the issuer will increase the balance on the IssuingEntity contract.
 
-You can also introduce further limitations on investor counts or attach optional modules to add more bespoke functionality. See the [IssuingEntity](https://github.com/iamdefinitelyahuman/security-token/blob/master/docs/lssuingEntity.md) and [SecurityToken](https://github.com/iamdefinitelyahuman/security-token/blob/master/docs/SecurityToken.md) pages for detailed explanations of how to use these contracts.
+You can also introduce further limitations on investor counts or attach optional modules to add more bespoke functionality. See the [IssuingEntity](./lssuingEntity.md) and [SecurityToken](https://github.com/iamdefinitelyahuman/security-token/blob/master/docs/SecurityToken.md) pages for detailed explanations of how to use these contracts.
 
 ## Transferring Tokens
 SecurityToken.sol is based on the [ERC20 Token Standard](https://theethereum.wiki/w/index.php/ERC20_Token_Standard). Token transfers may be performed in the same ways as any token using this standard.  However, in order to send or receive tokens you must also:
