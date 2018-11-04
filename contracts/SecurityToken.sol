@@ -128,10 +128,10 @@ contract SecurityToken is STBase {
 	)
 		internal
 		view
-		returns (
-			address[2]
-		)
-	{
+		returns
+	(
+		address[2]
+	) {
 		if (_id[0] == issuerID) {
 			_addr[0] = address(issuer);
 		}
