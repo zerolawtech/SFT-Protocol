@@ -18,8 +18,11 @@ SFT expands upon the ERC20 token standard. Tokens are transferred via the `trans
   - Modules may be applied at this level that introduce permissioning / functionality to all associated security token contracts
 - [KYCRegistrar](contracts/KYCRegistrar.sol)
   - Whitelists that provide identity, region, and accreditation information of investors based on off-chain KYC/AML verification
+- [Custodian](contracts/Custodian.sol)
+  - Contracts that represent an entity approved to hold tokens for multiple investors
+  - Simple base interface allows for wide customisation depending on the needs of the owner
 
-### KYCRegistrar
+## KYCRegistrar
 
 KYCRegistrar contracts are registries that hold information on identity, region, and rating of investors.
 
@@ -29,7 +32,7 @@ Contract authorities associate addresses to ID hashes that denotes the identity 
 
 *See the [KYCRegistrar](docs/kyc-registrar.md) page for in-depth details.*
 
-### IssuingEntity
+## IssuingEntity
 
 Before an issuer can create a security token they must deploy an IssuingEntity contract. This contract has several key purposes:
 
@@ -40,7 +43,7 @@ Before an issuer can create a security token they must deploy an IssuingEntity c
 
 *See the [IssuingEntity](docs/issuing-entity.md) page for in-depth details.*
 
-### SecurityToken
+## SecurityToken
 
 SecurityToken represents a single, fungible class of securities from an issuer. It conforms to the ERC20 standard, with an additional `checkTransfer` function available to verify if a transfer will succeed. Before tokens can be transferred, all of the following checks must pass:
 
@@ -52,7 +55,13 @@ Transfers that move tokens between different addressses owned by the same entity
 
 *See the [SecurityToken](docs/security-token.md) page for in-depth details.*
 
-### Modules
+## Custodian
+
+TODO
+
+*See the [Custodian](docs/custodian.md) page for in-depth details.*
+
+## Modules
 
 Issuers may attach modules to IssuingEntity or SecurityToken. When a module is attached, a call to `getBindings` checks the hook points that the module should be called at. Depending on the functionality of the module it may attach at any of the following hook points:
 
@@ -74,4 +83,4 @@ The wide range of functionality that modules can hook into allows for many diffe
 
 ## License
 
-This project is licensed under the...
+This project is licensed under the [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.html) license.
