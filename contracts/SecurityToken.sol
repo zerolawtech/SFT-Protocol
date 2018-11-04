@@ -23,15 +23,30 @@ contract SecurityToken is STBase {
 
 	event NewSecurityToken(address creator, address contractAddr, bytes32 id);
 	event Transfer(address indexed from, address indexed to, uint tokens);
-	event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
-	event BalanceChanged(address indexed owner, uint256 oldBalance, uint256 newBalance);
+	event Approval(
+		address indexed tokenOwner,
+		address indexed spender,
+		uint tokens
+	);
+	event BalanceChanged(
+		address indexed owner,
+		uint256 oldBalance,
+		uint256 newBalance
+	);
 
 	/// @notice Security token constructor
 	/// @dev Initially the total supply is credited to the issuer
 	/// @param _name Name of the token
 	/// @param _symbol Unique ticker symbol
 	/// @param _totalSupply Total supply of the token
-	constructor(address _issuer, string _name, string _symbol, uint256 _totalSupply) public {
+	constructor(
+		address _issuer,
+		string _name,
+		string _symbol,
+		uint256 _totalSupply
+	)
+		public
+	{
 		issuer = IssuingEntity(_issuer);
 		issuerID = issuer.issuerID();
 		name = _name;
@@ -91,8 +106,19 @@ contract SecurityToken is STBase {
 		returns (bool)
 	{
 		require (_value > 0);
-		(bytes32[2] memory _id, uint8[2] memory _rating, uint16[2] memory _country) = issuer.checkTransferView(address(this), _from, _to, _value);
-		_checkTransfer(address[2]([_from, _to]), _id[0], _id, _rating, _country, _value);
+		(
+			bytes32[2] memory _id,
+			uint8[2] memory _rating,
+			uint16[2] memory _country
+		) = issuer.checkTransferView(address(this), _from, _to, _value);
+		_checkTransfer(
+			address[2]([_from, _to]),
+			_id[0],
+			_id,
+			_rating,
+			_country,
+			_value
+		);
 		return true;
 	}
 
@@ -104,17 +130,29 @@ contract SecurityToken is STBase {
 		uint256 _value
 	)
 		internal
-		returns
-	(
-		bytes32 _authId,
-		bytes32[2] _id,
-		address[2] _addr,
-		uint8[2] _rating,
-		uint16[2] _country
-	) {
+		returns (
+			bytes32 _authId,
+			bytes32[2] _id,
+			address[2] _addr,
+			uint8[2] _rating,
+			uint16[2] _country
+		)
+	{
 		require (_value > 0);
-		(_authId, _id, _rating, _country) = issuer.checkTransfer(address(this), _auth, _from, _to, _value);
-		_addr = _checkTransfer(address[2]([_from, _to]), _authId, _id, _rating, _country, _value);
+		(
+			_authId,
+			_id,
+			_rating,
+			_country
+		) = issuer.checkTransfer(address(this), _auth, _from, _to, _value);
+		_addr = _checkTransfer(
+			address[2]([_from, _to]),
+			_authId,
+			_id,
+			_rating,
+			_country,
+			_value
+		);
 		return(_authId, _id, _addr, _rating, _country);
 	}
 
@@ -128,10 +166,8 @@ contract SecurityToken is STBase {
 	)
 		internal
 		view
-		returns
-	(
-		address[2]
-	) {
+		returns (address[2])
+	{
 		if (_id[0] == issuerID) {
 			_addr[0] = address(issuer);
 		}
@@ -140,7 +176,16 @@ contract SecurityToken is STBase {
 		}
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				require(ISTModule(modules[i].module).checkTransfer(_addr, _authId, _id, _rating, _country, _value));
+				require(
+					ISTModule(modules[i].module).checkTransfer(
+						_addr,
+						_authId,
+						_id,
+						_rating,
+						_country,
+						_value
+					)
+				);
 			}
 		}
 		return (
@@ -234,7 +279,15 @@ contract SecurityToken is STBase {
 		require (issuer.transferTokens(_id, _rating, _country, _value));
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
-				require (ISTModule(modules[i].module).transferTokens(_addr, _id, _rating, _country, _value));
+				require (
+					ISTModule(modules[i].module).transferTokens(
+						_addr,
+						_id,
+						_rating,
+						_country,
+						_value
+					)
+				);
 			}
 		}
 		emit Transfer(_addr[0], _addr[1], _value);
@@ -246,7 +299,13 @@ contract SecurityToken is STBase {
 	/// @param _owner Owner of the tokens
 	/// @param _value Balance to set
 	/// @return bool
-	function modifyBalance(address _owner, uint256 _value) external returns (bool) {
+	function modifyBalance(
+		address _owner,
+		uint256 _value
+	)
+		external
+		returns (bool)
+	{
 		require (isActiveModule(msg.sender));
 		if (balances[_owner] == _value) return true;
 		if (balances[_owner] > _value) {
@@ -256,10 +315,23 @@ contract SecurityToken is STBase {
 		}
 		uint256 _old = balances[_owner];
 		balances[_owner] = _value;
-		(bytes32 _id, uint8 _rating, uint16 _country) = issuer.balanceChanged(_owner, _old, _value);
+		(
+			bytes32 _id,
+			uint8 _rating,
+			uint16 _country
+		) = issuer.balanceChanged(_owner, _old, _value);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
-				require (ISTModule(modules[i].module).balanceChanged(_owner, _id, _rating, _country, _old, _value));
+				require (
+					ISTModule(modules[i].module).balanceChanged(
+						_owner,
+						_id,
+						_rating,
+						_country,
+						_old,
+						_value
+					)
+				);
 			}
 		}
 		emit BalanceChanged(_owner, _old, _value);
@@ -281,8 +353,8 @@ contract SecurityToken is STBase {
 	}
 
 	/// @notice Determines if a module is active on this token
-	/// @dev If a module is active on the issuer level, it will apply to all tokens
-	/// under that issuer
+	/// @dev If a module is active on the issuer level, it will apply to all
+	/// tokens under that issuer
 	/// @param _module Deployed module address
 	function isActiveModule(address _module) internal view returns (bool) {
 		if (activeModules[_module]) return true;

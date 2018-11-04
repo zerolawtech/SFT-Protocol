@@ -28,11 +28,7 @@ contract Crowdsale is STModuleBase {
 		address _issuer,
 		address _receiver
 	)
-		STModuleBase
-	(
-		_token,
-		_issuer
-	)
+		STModuleBase(_token, _issuer)
 		public
 	{
 		receiver = _receiver;
@@ -59,10 +55,8 @@ contract Crowdsale is STModuleBase {
 		uint256 _sent
 	)
 		internal
-		returns
-	(
-		uint256 _excess
-	) {
+		returns (uint256 _excess)
+	{
 		if (_max == 0 || _sold.add(_sent) < _max) {
 			return 0;
 		}

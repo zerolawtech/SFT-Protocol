@@ -418,13 +418,13 @@ contract KYCRegistrar {
 	)
 		external
 		view
-		returns
-	(
-		bytes32 _id,
-		bool _allowed,
-		uint8 _rating,
-		uint16 _country
-	) {
+		returns (
+			bytes32 _id,
+			bool _allowed,
+			uint8 _rating,
+			uint16 _country
+		)
+	{
 		_id = idMap[_addr].id;
 		Investor storage i = investorData[_id];
 		require (i.country != 0);
@@ -442,14 +442,13 @@ contract KYCRegistrar {
 	)
 		external
 		view
-		returns
-	(
-		
-		bytes32[2] _id,
-		bool[2] _allowed,
-		uint8[2] _rating,
-		uint16[2] _country
-	) {
+		returns (
+			bytes32[2] _id,
+			bool[2] _allowed,
+			uint8[2] _rating,
+			uint16[2] _country
+		)
+	{
 		Investor storage f = investorData[idMap[_from].id];
 		require (f.country != 0);
 		Investor storage t = investorData[idMap[_to].id];

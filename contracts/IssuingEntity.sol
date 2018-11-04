@@ -91,11 +91,7 @@ contract IssuingEntity is STBase, MultiSig {
 		address[] _owners,
 		uint64 _threshold
 	)
-		MultiSig
-	(
-		_owners,
-		_threshold
-	)
+		MultiSig(_owners, _threshold)
 		public 
 	{
 		issuerID = keccak256(abi.encodePacked(address(this)));
@@ -281,13 +277,13 @@ contract IssuingEntity is STBase, MultiSig {
 		uint256 _value
 	)
 		external
-		returns
-	(
-		bytes32 _idAuth,
-		bytes32[2] _id,
-		uint8[2] _rating,
-		uint16[2] _country
-	) {
+		returns (
+			bytes32 _idAuth,
+			bytes32[2] _id,
+			uint8[2] _rating,
+			uint16[2] _country
+		)
+	{
 		_idAuth = _getId(_auth);
 		_id[0] = _getId(_from);
 		_id[1] = _getId(_to);
@@ -311,12 +307,11 @@ contract IssuingEntity is STBase, MultiSig {
 	)
 		external
 		view
-		returns
-	(
-		bytes32[2] _id,
-		uint8[2] _rating,
-		uint16[2] _country
-	)
+		returns (
+			bytes32[2] _id,
+			uint8[2] _rating,
+			uint16[2] _country
+		)
 	{
 		uint8[2] memory _key;
 		(_id[0], _key[0]) = _getIdView(_from);
@@ -480,12 +475,12 @@ contract IssuingEntity is STBase, MultiSig {
 	)
 		internal
 		view
-		returns 
-	(
-		bool[2] _allowed,
-		uint8[2] _rating,
-		uint16[2] _country
-	) {
+		returns (
+			bool[2] _allowed,
+			uint8[2] _rating,
+			uint16[2] _country
+		)
+	{
 		bytes32[2] memory _id;
 		/* If key == 0 the address belongs to the issuer or a custodian. */
 		if (_key[0] == 0) {
@@ -555,7 +550,9 @@ contract IssuingEntity is STBase, MultiSig {
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
 				IIssuerModule m = IIssuerModule(modules[i].module);
-				require (m.transferTokens(msg.sender, _id, _rating, _country, _value));
+				require (
+					m.transferTokens(msg.sender, _id, _rating, _country, _value)
+				);
 			}
 		}
 		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
@@ -574,19 +571,24 @@ contract IssuingEntity is STBase, MultiSig {
 	)
 		external
 		onlyToken
-		returns
-	(
-		bytes32 _id,
-		uint8 _rating,
-		uint16 _country
-	) {
+		returns (
+			bytes32 _id,
+			uint8 _rating,
+			uint16 _country
+		)
+	{
 		if (_getId(_owner) == issuerID) {
 			_id = issuerID;
 			_rating = 0;
 			_country = 0;
 		} else {
 			bool _allowed;
-			(_id, _allowed, _rating, _country) = _getRegistrar(_owner).getInvestor(_owner);
+			(
+				_id,
+				_allowed,
+				_rating,
+				_country
+			) = _getRegistrar(_owner).getInvestor(_owner);
 		}
 		uint256 _oldTotal = accounts[_id].balance;
 		if (_new > _old) {
