@@ -14,11 +14,10 @@ kyc = []
 issuers = []
 investors = [] # {'id':None, 'country':0, 'rating':0, 'accounts':[], 'kyc':[]}
 
-def deplsoy(network, accounts):
+def deploy(network, accounts):
     
     """Create a diverse ecosystem"""
     # create investors
-    print("Creating investors...")
     for i in range(2, len(accounts)):
         if len(investors) < 1 or random.random()<0.66:
             investors.append({
@@ -32,7 +31,6 @@ def deplsoy(network, accounts):
             investors[-1]['accounts'].append(accounts[i])
 
     # deploy KYCRegistry contracts, add investors
-    print("Deploying registries and adding investors...")
     for i in range(REGISTRIES):
         kyc.append(network.deploy("KYCRegistrar", [accounts[0]], 1))
         for inv in investors:
@@ -42,8 +40,8 @@ def deplsoy(network, accounts):
                                 inv['rating'], 9999999999, inv['accounts'])
             inv['kyc'].add(i)
     
-    # deploy IssuingEntity and SecurityToken contracts, associate tokens and registries
-    print("Deploying IssuingEntities and SecurityTokens...")
+    # deploy IssuingEntity and SecurityToken contracts,
+    # associate tokens and registries
     for i in range(ISSUERS):
         issuer = network.deploy("IssuingEntity", [accounts[1]],
                                 1, {'from':accounts[1]})
@@ -77,7 +75,7 @@ def deplsoy(network, accounts):
             issuer.setCountries([c], [country['minRating']], [country['limit']])
             assert (issuer.getCountryInvestorLimit(c, 0) == country['limit'])
     
-    print("Distributing tokens from issuer to investors...")
+    # send tokens from issuer to investors
     for issuer, token in [(k,x) for k in issuers for x in k.tokens]:
         _id = issuer.issuerID()
         for i in investors:

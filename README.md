@@ -1,66 +1,77 @@
 # SFT Protocol
 
 ## Description
-The SFT protocol is a collection of interconnected smart contracts built upon the ethereum blockchain that allow for the tokenization of debt and equity based securities.  It provides a robust, flexible framework allowing issuers and investors to retain regulatory compliance throughout primary issuance and multi-jurisdictional secondary trading.
+
+The SFT protocol is a set of compliance-oriented smart contracts built on the Ethereum blockchain that allow for the tokenization of debt and equity based securities. It provides a robust, flexible framework allowing issuers and investors to retain regulatory compliance throughout primary issuance and multi-jurisdictional secondary trading.
 
 ## How it works
-SFT expands upon the ERC20 token standard.  Tokens are transferred via the `transfer` and `transferFrom` methods, however the transfer will only succeed if approved by a series of permissioning modules.  A call to `checkTransfer` returns true if the transfer is possible.  The standard configuration includes checkng a KYC/AML whitelist, tracking investor counts and limits, and restrictions on countries and accreditted status.  By implmenting other modules a variety of additional functionality is possible so as to allow compliance to laws in the countries of the issuer and investors.
 
+SFT expands upon the ERC20 token standard. Tokens are transferred via the `transfer` and `transferFrom` functions, however the transfer will only succeed if approved by a series of permissioning modules. A call to `checkTransfer` returns true if the transfer is possible. The standard configuration includes checking a KYC/AML whitelist, tracking investor counts and limits, and restrictions on countries and accreditted status. By implmenting other modules a variety of additional functionality is possible so as to allow compliance to laws in the countries of the issuer and investors.
 
 ## Components
 
- - [SecurityToken](contracts/SecurityToken.sol)
-   - An ERC20 compliant token that represents a claim to ownership of a security
-   - Modules may be applied to each security token to add additional permissioning or functionality
- - [IssuingEntity](contracts/IssuingEntity.sol)
-   - Represents the company that issues one or more security tokens
-   - Modules may be applied at this level that introduce permissioning / functionality to every security token created by the issuer
- - [KYCRegistrar](contracts/KYCRegistrar.sol)
-   - The top level permission authority that grants permission for investors, issuers, and exchanges based on off-chain KYC/AML verification
+- [SecurityToken](contracts/SecurityToken.sol)
+  - ERC20 compliant tokens intended to represent a claim to ownership of securities
+  - Modules may be applied to each security token to add additional permissioning or functionality
+- [IssuingEntity](contracts/IssuingEntity.sol)
+  - Central owner contract for tokens created by the same issuer
+  - Modules may be applied at this level that introduce permissioning / functionality to all associated security token contracts
+- [KYCRegistrar](contracts/KYCRegistrar.sol)
+  - Whitelists that provide identity, region, and accreditation information of investors based on off-chain KYC/AML verification
 
 ### KYCRegistrar
-KYCRegistrar is a central registry contract that establishes the identity, class, and permissions of every address allowed to interact with security tokens. Each permitted address has a hash attached to it, that denotes the entity controlling the address.  More than one address may be associated to a single entity.
 
-There are four types of entities:
- 1. Investor: Legal persons that have cleared KYC/AML checks and are authorised to hold security tokens. Stored data includes the country, state/province/territory, rating (accreditted, qualified, etc), and expiry date of the authorisation.
- 2. Issuer: Legal persons that are authrorised to issue security tokens.
- 3. Exchange: Platforms authorised to facilitate secondary trading of security tokens.
- 4. Authority: Entities that can add, modify, and remove other entities from the KYC registry. Each authority is only able to do so in countries where it has been granted permission.  Authorities are given their permission by the contract owner.
- 
-The registrar contract employs a multisig system such that authorities must call each method from several approved addresses before the code will execute. This is important, as permissions granted or revoked at the registry contract will affect every security token in the network.
+KYCRegistrar contracts are registries that hold information on identity, region, and rating of investors.
 
- 
+Registries may be maintained by a single entity, or a federation of entities where each are approved to provide identification services for their specific jurisdiction. The contract owner can authorize other entities to add investors within specified countries.
+
+Contract authorities associate addresses to ID hashes that denotes the identity of the investor who owns the address. More than one address may be associated to the same hash. Anyone can call `getID` to see which hash is associated to an address, and then using this ID call functions to query information about the investor's region and accreditation rating.
+
+*See the [KYCRegistrar](docs/kyc-registrar.md) page for in-depth details.*
+
 ### IssuingEntity
-Before an issuer can create security tokens they must deploy an IssuingEntity contract. This contract has several key purposes:
 
- - Tracks investor counts and total balances across all security tokens deployed by the issuer
- - Enforces permissions relating to investor limits and authorised countries
- - Holds a mapping of hashes for legal documents related to the issuer
+Before an issuer can create a security token they must deploy an IssuingEntity contract. This contract has several key purposes:
 
-Before any security tokens can be sold, an issuer must authorise countries and specify minimum invetor ratings using the `setCountries` method.  Additional restrictions on investor limits can be specified with `setInvestorLimits` and `setCountryInvestorLimits`.
+- Holds a whitelist of associated KYC registries that investor data can be pulled from
+- Tracks investor counts and total balances across all security tokens deployed by the issuer
+- Enforces permissions relating to investor limits and authorised countries
+- Holds a mapping of hashes for legal documents related to the issuer
 
+*See the [IssuingEntity](docs/issuing-entity.md) page for in-depth details.*
 
 ### SecurityToken
-SecurityToken represents a single, fungible class of securities from an issuer. It conforms to the ERC20 standard, with an additional `checkTransfer` method available to verify if a transfer will succeed.  Before tokens can be transferred, all of the following checks must pass:
 
- - Issuer limits on investor counts: global, country specific, and accreditation rating specific
- - Sender, receiver, and issuer addresses must be validated by the KYC registrar
- - Optional permissions added via modules applied at the SecurityToken and IssuingEntity level
- 
-Transfers that move tokens between different wallets owned by the same entity (as identified in the KYC registrar) are not as heavily restricted because there is no change of ownership.  Any address belonging to a single entity can call `transferFrom` and move tokens from any of their wallets.  The issuer can use the same function to move any tokens between any address.
- 
+SecurityToken represents a single, fungible class of securities from an issuer. It conforms to the ERC20 standard, with an additional `checkTransfer` function available to verify if a transfer will succeed. Before tokens can be transferred, all of the following checks must pass:
+
+- Sender and receiver addresses must be validated by a KYC registrar
+- Issuer imposed limits on investor counts: global, country specific, and accreditation rating specific
+- Optional permissions added via modules applied at the SecurityToken and IssuingEntity level
+
+Transfers that move tokens between different addressses owned by the same entity (as identified in the KYC registrar) are not as heavily restricted because there is no change of ownership. Any address belonging to a single entity can call `transferFrom` and move tokens from any of their wallets. The issuer can use the same function to move any tokens between any address.
+
+*See the [SecurityToken](docs/security-token.md) page for in-depth details.*
 
 ### Modules
-Modules attach to IssuingEntity or SecurityToken via the `attachModule` method.  When a module is attached, a call to `getBindings` checks the hook points that the module should be called at.  Depending on the functionality of the module it should contain some or all of these functions:
 
- - `checkTransfer`: called to verify permissions before a transfer is allowed
- - `transferTokens`: called after a transfer has completed successfully
- - `balanceChanged`: called after a balance has changed, such that there was not a corresponding change to another balance (e.g. token minting and burning)
- 
-The flow in any of these actions is SecurityToken > SecurityToken modules > IssuingEntity > IssuingEntity modules.
+Issuers may attach modules to IssuingEntity or SecurityToken. When a module is attached, a call to `getBindings` checks the hook points that the module should be called at. Depending on the functionality of the module it may attach at any of the following hook points:
 
-Modules can also call a `modifyBalance` method to change the balance of any address. This will also modify the totalSupply and trigger a call to `balanceChanged`.  Modules that are active at the IssuingEntity level can call this method on any security token, modules at the SecurityToken level can only call it on the token they are attached to.
+- `checkTransfer`: called to verify permissions before a transfer is allowed
+- `transferTokens`: called after a transfer has completed successfully
+- `balanceChanged`: called after a balance has changed, such that there was not a corresponding change to another balance (e.g. token minting and burning)
 
-Modules can be removed via the `detachModule` method. They should only be included when they are required so as to minimize gas costs around a transfer.
+Modules can also directly change the balance of any address. Modules that are active at the IssuingEntity level can call this function on any security token, modules at the SecurityToken level can only call it on the token they are attached to.
 
-Because of the wide range of functionality that modules can hook into, many different applications are possible through them.  Some examples include: dividend payment, voting rights, country/time based token locks, centralised and decentralised exchanges.
+When a module is no longer required it can be detached. This should always be done in order to optimize gas costs.
+
+The wide range of functionality that modules can hook into allows for many different applications. Some examples include: crowdsales, country/time based token locks, voting rights, dividend payments, decentralised trading, and bond redemption.
+
+*See the [Modules](docs/modules.md) page for in-depth details.*
+
+## Third-Party Integration
+
+*See the [Third Party Integration](docs/third-party-integration.md) page for in-depth details.*
+
+## License
+
+This project is licensed under the...
