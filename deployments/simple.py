@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 
 import itertools
 
@@ -8,4 +9,3 @@ def deploy(network, accounts):
     issuer.addToken(token.address)
     for count,country,rating in [(c,i[0],i[1]) for c,i in enumerate(itertools.product([1,2,3], [1,2]), start=2)]:
         kyc.addInvestor(b"investor"+str(count).encode(), country, 0, rating, 9999999999, [accounts[count]])
-    
