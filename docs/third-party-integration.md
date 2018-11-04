@@ -14,7 +14,7 @@ Issuing tokens and being able to transfer them requires the following steps:
 4. Call `IssuingEntity.addToken` to attach the token to the issuer.
 5. Call `IssuingEntity.setCountries` to approve investors from specific countries to hold the tokens.
 
-At this point, you will be able to transfer tokens from the issuer to any address that has been whitelisted by one of the approved investor registries *if the investor meets the country and rating requirements*.
+At this point, the issuer will be able to transfer tokens to any address that has been whitelisted by one of the approved investor registries *if the investor meets the country and rating requirements*.
 
 Note that the issuer's balance is assigned to the IssuingEntity contract. The issuer can transfer these tokens with a normal call to `SecurityToken.transfer` from any approved address. Sending tokens to any address associated with the issuer will increase the balance on the IssuingEntity contract.
 
@@ -30,7 +30,7 @@ SecurityToken.sol is based on the [ERC20 Token Standard](https://theethereum.wik
 
 You can check if a transfer will succeed without performing a transaction by calling the `checkTransfer` function of the token contract.
 
-Restrictions imposed on investor limits, approved countries and minimum ratings do not apply if you are trying to transfer an existing balance - in these cases you will be able to send tokens but not receive any more.
+Restrictions imposed on investor limits, approved countries and minimum ratings are only checked when receiving tokens. Unless an address has been explicitely blocked, it will always be able to send an existing balance.  For example, an investor may purchase tokens that are only require being accreditted, and then later their accreditation status expires. The investor may still transfer the tokens they already have, but may not receive any more tokens.
 
 Transferring a balance between two addresses associated with the same investor ID does not have the same restrictions imposed, as there is no change of ownership.  An investor with multiple addresses may call `transferFrom` to move tokens from any of their addresses without first using the `approve` method. The issuer can also use `transferFrom` to move any investor's tokens, without prior approval.
 
