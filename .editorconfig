@@ -1,0 +1,3 @@
+[*.{sol,py,json,js}]
+indent_style = tab
+indent_size = 4
