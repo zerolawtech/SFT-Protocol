@@ -77,6 +77,10 @@ The wide range of functionality that modules can hook into allows for many diffe
 
 *See the [Modules](docs/modules.md) page for in-depth details.*
 
+## Testing and Deployment
+
+Unit testing and deployment of this project is performed with [brownie](https://github.com/iamdefinitelyahuman/brownie).
+
 ## Third-Party Integration
 
 *See the [Third Party Integration](docs/third-party-integration.md) page for in-depth details.*
