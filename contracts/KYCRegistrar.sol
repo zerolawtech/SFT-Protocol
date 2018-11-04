@@ -99,7 +99,6 @@ contract KYCRegistrar {
 
 	/// @notice KYC registrar constructor
 	/// @param _owners Array of addresses for owning authority
-	/// @param _id ID of owning authority
 	/// @param _threshold multisig threshold for owning authority
 	constructor (address[] _owners, uint8 _threshold) public {
 		require (_threshold <= _owners.length);
