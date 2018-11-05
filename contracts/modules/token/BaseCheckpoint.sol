@@ -13,7 +13,14 @@ contract CheckpointModule is STModuleBase {
 	mapping (address => uint256) balance;
 	mapping (address => bool) zeroBalance;
 
-	constructor(address _token, address _issuer, uint256 _time) STModuleBase(_token, _issuer) public {
+	constructor(
+		address _token,
+		address _issuer,
+		uint256 _time
+	)
+		STModuleBase(_token, _issuer)
+		public
+	{
 		require (_time >= now);
 		totalSupply = token.totalSupply();
 		time = _time;
@@ -26,8 +33,10 @@ contract CheckpointModule is STModuleBase {
 	}
 
 	function transferTokens(
-		address _from,
-		address _to,
+		address[2] _addr,
+		bytes32[2],
+		uint8[2],
+		uint16[2],
 		uint256 _value
 	)
 		external
@@ -35,22 +44,25 @@ contract CheckpointModule is STModuleBase {
 		returns (bool)
 	{
 		if (now < time) return true;
-		if (balance[_from] == 0 && !zeroBalance[_from]) {
-			balance[_from] = token.balanceOf(_from).add(_value);
+		if (balance[_addr[0]] == 0 && !zeroBalance[_addr[0]]) {
+			balance[_addr[0]] = token.balanceOf(_addr[0]).add(_value);
 		}
-		if (balance[_to] == 0 && !zeroBalance[_to]) {
-			uint256 _bal = token.balanceOf(_to).sub(_value);
+		if (balance[_addr[1]] == 0 && !zeroBalance[_addr[1]]) {
+			uint256 _bal = token.balanceOf(_addr[1]).sub(_value);
 			if (_bal == 0) {
-				zeroBalance[_to] == true;
+				zeroBalance[_addr[1]] == true;
 			} else {
-				balance[_to] = _bal;
+				balance[_addr[1]] = _bal;
 			}
 		}
 		return true;
 	}
 
 	function balanceChanged(
-		address _owner,
+		address _addr,
+		bytes32,
+		uint8,
+		uint16,
 		uint256 _old,
 		uint256 _new
 	)
@@ -62,12 +74,12 @@ contract CheckpointModule is STModuleBase {
 			totalSupply = totalSupply.add(_new).sub(_old);
 			return true;
 		}
-		if (balance[_owner] > 0) return true;
-		if (zeroBalance[_owner]) return true;
+		if (balance[_addr] > 0) return true;
+		if (zeroBalance[_addr]) return true;
 		if (_old > 0) {
-			balance[_owner] = _old;
+			balance[_addr] = _old;
 		} else {
-			zeroBalance[_owner] = true;
+			zeroBalance[_addr] = true;
 		}
 		return true;
 	}
