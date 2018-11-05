@@ -23,12 +23,11 @@ contract DividendModule is CheckpointModule {
 		address _issuer,
 		uint256 _time
 	)
-		CheckpointModule
-	(
-		_token,
-		_issuer,
-		_time
-	) public { }
+		CheckpointModule(_token, _issuer, _time)
+		public
+	{
+		
+	}
 
 	function issueDividend(uint256 _claimPeriod) public onlyIssuer payable {
 		require (dividendTime < now);
