@@ -2,3 +2,4 @@ deployments/__pycache__/
 tests/__pycache__/
 build/
 .vscode
+*.acc
