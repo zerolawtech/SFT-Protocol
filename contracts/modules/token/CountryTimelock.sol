@@ -5,6 +5,7 @@ import "../ModuleBase.sol";
 
 contract CountryLockModule is STModuleBase {
 
+	string public name = "CountryTimeLock";
 	mapping (uint16 => uint256) public countryLock;
 
 	function modifyCountryLock(uint16 _country, uint256 _epochTime) public onlyIssuer {

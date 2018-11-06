@@ -8,6 +8,8 @@ contract DEXModule is STModuleBase {
 
 	using SafeMath for uint256;
 
+	string public name = "DEX";
+
 	struct ExchangeBalance {
 		uint256 total;
 		mapping (bytes32 => uint256) exchange;

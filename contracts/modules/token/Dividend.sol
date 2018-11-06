@@ -8,6 +8,7 @@ contract DividendModule is CheckpointModule {
 
 	using SafeMath for uint256;
 
+	string public name = "Dividend";
 	uint256 public dividendTime;
 	uint256 public dividendAmount;
 	uint256 public claimExpiration;

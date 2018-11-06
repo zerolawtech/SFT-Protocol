@@ -9,6 +9,8 @@ contract MintBurn is IssuerModuleBase {
 
 	using SafeMath for uint256;
 
+	string public name = "MintBurn";
+
 	event TokensMinted(address indexed token, uint256 amount);
 	event TokensBurned(address indexed token, uint256 amount);
 

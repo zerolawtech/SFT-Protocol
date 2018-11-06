@@ -4,6 +4,7 @@ pragma solidity ^0.4.24;
 interface IBaseModule {
 	function getBindings() external view returns (bool, bool, bool);
 	function owner() external view returns (address);
+	function name() external view returns (string);
 }
 
 interface ISTModule {

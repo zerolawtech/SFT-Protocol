@@ -8,6 +8,7 @@ contract Crowdsale is STModuleBase {
 
 	using SafeMath for uint256;
 
+	string public name = "Crowdsale";
 	address receiver;
 
 	uint64 public crowdsaleStart;
