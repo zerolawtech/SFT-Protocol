@@ -75,7 +75,7 @@ contract IssuingEntity is STBase, MultiSig {
 	event TokenAdded(address indexed token);
 	event TokenRestricted(address indexed token, bool restricted);
 	event GloballyRestricted(bool restricted);
-
+	
 	modifier onlyToken() {
 		require (tokens[msg.sender].set && !tokens[msg.sender].restricted);
 		_;
@@ -700,6 +700,10 @@ contract IssuingEntity is STBase, MultiSig {
 			}
 		}
 		revert();
+	}
+
+	function getRegistrar(bytes32 _id) external view returns (address) {
+		return regArray[accounts[_id].regKey].registrar;
 	}
 
 	function addCustodian(address _addr) external onlyOwner returns (bool) {
