@@ -95,6 +95,7 @@ contract IssuingEntity is STBase, MultiSig {
 		public 
 	{
 		issuerID = keccak256(abi.encodePacked(address(this)));
+		// idMap[address(this)] = issuerID;
 		regArray.push(Registrar(KYCRegistrar(0),false));
 		emit NewIssuingEntity(msg.sender, address(this), issuerID);
 	}
@@ -320,6 +321,7 @@ contract IssuingEntity is STBase, MultiSig {
 		address[2] memory _addr = [_from, _to];
 		bool[2] memory _allowed;
 
+		
 		(_allowed, _rating, _country) = _getInvestors(_addr, _key);
 		_checkTransfer(_token, _id[0], _id, _allowed, _rating, _country, _value);
 		return (_id, _rating, _country);
@@ -500,7 +502,7 @@ contract IssuingEntity is STBase, MultiSig {
 				_allowed,
 				_rating,
 				_country
-			) = _getRegistrar(_addr[0]).getInvestors(_addr[0], _addr[1]);
+			) = regArray[_key[0]].registrar.getInvestors(_addr[0], _addr[1]);
 		} else {
 			if (_key[0] != 0) {
 				(
@@ -508,22 +510,18 @@ contract IssuingEntity is STBase, MultiSig {
 					_allowed[0],
 					_rating[0],
 					_country[0]
-				) = _getRegistrar(_addr[0]).getInvestor(_addr[0]);
+				) = regArray[_key[0]].registrar.getInvestor(_addr[0]);
 			}
 			if (_key[1] != 0) {
 				(
-					_id[0],
+					_id[1],
 					_allowed[1],
 					_rating[1],
 					_country[1]
-				) = _getRegistrar(_addr[1]).getInvestor(_addr[1]);
+				) = regArray[_key[1]].registrar.getInvestor(_addr[1]);
 			}	
 		}
 		return (_allowed, _rating, _country);
-	}
-
-	function _getRegistrar(address _addr) internal view returns (KYCRegistrar) {
-		return regArray[accounts[idMap[_addr]].regKey].registrar;
 	}
 
 	/// @notice Transfer tokens through the issuing entity level
@@ -583,12 +581,13 @@ contract IssuingEntity is STBase, MultiSig {
 			_country = 0;
 		} else {
 			bool _allowed;
+			uint8 _key = accounts[idMap[_owner]].regKey;
 			(
 				_id,
 				_allowed,
 				_rating,
 				_country
-			) = _getRegistrar(_owner).getInvestor(_owner);
+			) = regArray[_key].registrar.getInvestor(_owner);
 		}
 		uint256 _oldTotal = accounts[_id].balance;
 		if (_new > _old) {

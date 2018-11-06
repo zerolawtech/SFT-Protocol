@@ -174,6 +174,7 @@ contract SecurityToken is STBase {
 		if (_id[1] == issuerID) {
 			_addr[1] = address(issuer);
 		}
+		require (balances[_addr[0]] >= _value);
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
 				require(
