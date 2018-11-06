@@ -9,6 +9,9 @@ contract MintBurn is IssuerModuleBase {
 
 	using SafeMath for uint256;
 
+	event TokensMinted(address indexed token, uint256 amount);
+	event TokensBurned(address indexed token, uint256 amount);
+
 	constructor(address _issuer) IssuerModuleBase(_issuer) public { }
 
 	function getBindings() external pure returns (bool, bool, bool) {
@@ -19,6 +22,7 @@ contract MintBurn is IssuerModuleBase {
 		SecurityToken t = SecurityToken(_token);
 		uint256 _new = t.balanceOf(address(issuer)).add(_value);
 		require(t.modifyBalance(address(issuer), _new));
+		emit TokensMinted(_token, _value);
 		return true;
 	}
 
@@ -26,6 +30,7 @@ contract MintBurn is IssuerModuleBase {
 		SecurityToken t = SecurityToken(_token);
 		uint256 _new = t.balanceOf(address(issuer)).sub(_value);
 		require(t.modifyBalance(address(issuer), _new));
+		emit TokensBurned(_token, _value);
 		return true;
 	}
 }
