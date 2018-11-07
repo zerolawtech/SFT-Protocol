@@ -45,6 +45,7 @@ contract DividendModule is CheckpointModule {
 		if (_beneficiary == 0) {
 			_beneficiary = msg.sender;
 		}
+		require (!issuer.owners(_beneficiary));
 		require (!claimed[_beneficiary]);
 		uint256 _value = _getBalance(_beneficiary).mul(dividendAmount).div(totalSupply);
 		claimed[_beneficiary] = true;
@@ -60,7 +61,7 @@ contract DividendModule is CheckpointModule {
 
 	function closeDividend() public onlyIssuer {
 		require (claimExpiration > 0);
-		require (now > claimExpiration);
+		require (now > claimExpiration || address(this).balance == 0);
 		emit DividendExpired(address(this).balance);
 		msg.sender.transfer(address(this).balance);
 		require (token.detachModule(address(this)));

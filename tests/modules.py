@@ -7,9 +7,9 @@ DEPLOYMENT = "simple"
 def mintburn_setup(network, accounts):
     '''MintBurn: deploy and attach''' 
     global issuer, token, mint
-    issuer = network.IssuingEntity
-    token = network.SecurityToken
-    mint = network.deploy("MintBurn", issuer.address, {'from':accounts[1]})
+    issuer = accounts[1].IssuingEntity
+    token = accounts[1].SecurityToken
+    mint = accounts[1].deploy("MintBurn", issuer.address)
     assert issuer.revert("attachModule", issuer.address,
                          mint.address, {'from':accounts[2]}), (
                              "Account 2 was able to attach")
@@ -54,9 +54,9 @@ def mintburn_final(network, accounts):
 def dividend_setup(network, accounts):
     '''Dividend: deploy and attach'''
     global dividend_time, dividend
-    dividend_time = int(time.time()+5)
-    dividend = network.deploy("DividendModule", token.address, issuer.address,
-                            dividend_time, {'from':accounts[1]})
+    dividend_time = int(time.time()+3)
+    dividend = accounts[1].deploy("DividendModule", token.address, issuer.address,
+                            dividend_time)
     assert issuer.revert("attachModule", token.address,
                          dividend.address, {'from':accounts[2]}), (
                              "Account 2 was able to attach")
@@ -64,14 +64,14 @@ def dividend_setup(network, accounts):
 
 def dividend_transfer(network, accounts):
     '''Dividend: transfer tokens before claim time'''
-    token.transfer(accounts[2], 10000)
-    token.transfer(accounts[2], 30000)
-    token.transfer(accounts[3], 20000)
-    token.transfer(accounts[4], 50000)
-    token.transfer(accounts[5], 10000, {'from':accounts[4]})
-    token.transfer(accounts[6], 100000)
-    token.transferFrom(accounts[6], accounts[7], 60000, {'from':accounts[1]})
-    assert token.balanceOf(accounts[6]) == 40000, "Account balance is wrong"
+    token.transfer(accounts[2], 100)
+    token.transfer(accounts[2], 300)
+    token.transfer(accounts[3], 200)
+    token.transfer(accounts[4], 500)
+    token.transfer(accounts[5], 100, {'from':accounts[4]})
+    token.transfer(accounts[6], 900)
+    token.transferFrom(accounts[6], accounts[7], 600, {'from':accounts[1]})
+    assert token.circulatingSupply() == 2000, "Circulating supply is wrong"
 
 def dividend_mint(network, accounts):
     '''Dividend: attach MintBurn, mint and burn tokens'''
@@ -94,23 +94,23 @@ def dividend_issue(network, accounts):
                                "Dividend was successfully issued by account 2")
     assert dividend.revert("issueDividend", 100), (
         "Was able to issue a dividend without sending any eth")
-    dividend.issueDividend(100, {'value':1e19})
+    dividend.issueDividend(100, {'value':2e19})
     assert dividend.revert("issueDividend", 100, {'value':1e19}), (
         "Was able to call issueDividend twice")
 
 def dividend_claim(network, accounts):
     '''Dividend: claim dividends'''
     blank = "0x"+("0"*40)
-    dividend.claimDividend(blank, {'from':accounts[2]})
-    dividend.claimDividend(blank, {'from':accounts[3]})
-    dividend.claimDividend(accounts[4],{'from':accounts[0]})
-    dividend.claimDividend(accounts[5])
-    dividend.claimMany(accounts[6:8])
-    assert dividend.revert("claimDividend",blank,{'from':accounts[2]}), (
-        "Dividend claimed twice by account 2")
-    assert dividend.revert("claimDividend",blank), (
-        "Dividend claimed by issuer")
-    assert dividend.revert("claimDividend",accounts[3]), (
-        "Dividend claimed twice for account 3 by issuer")
 
-    # need to verify dividend amounts
+    assert dividend.revert("claimDividend",accounts[1]), "Issuer was able to claim"
+    dividend.claimDividend(accounts[8])
+    for i,final in enumerate([int(4e18), int(2e18), int(4e18), int(1e18), int(3e18), int(6e18)], start=2):
+        balance = accounts[i].balance()
+        dividend.claimDividend(accounts[i])
+        assert accounts[i].balance() == balance+final, "Dividend payout wrong: {}".format(i)
+        assert dividend.revert("claimDividend",accounts[i]), "Able to claim twice"
+
+def dividend_close(network, accounts):
+    '''Dividend: close dividends'''
+    dividend.closeDividend()
+    token.transfer(accounts[2], 100)
