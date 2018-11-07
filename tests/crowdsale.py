@@ -4,13 +4,13 @@ import time
 
 DEPLOYMENT = "simple"
 
-def crowdsale_setup(network, accounts):
+def crowdsale_setup():
     '''Deploy and attach''' 
     global issuer, token, sale
-    issuer = accounts[1].IssuingEntity
-    token = accounts[1].SecurityToken
+    issuer = IssuingEntity[0]
+    token = SecurityToken[0]
     sale = accounts[1].deploy(
-        "CrowdsaleModule",
+        CrowdsaleModule,
         token.address,
         issuer.address,
         accounts[9],            # receiving address
@@ -24,12 +24,12 @@ def crowdsale_setup(network, accounts):
         [])                     # bonus start times
     issuer.attachModule(token.address, sale.address)
 
-def crowdsale_not_open(network, accounts):
+def crowdsale_not_open():
     '''Try to send eth before it opens'''
     assert accounts[1].revert("transfer", sale.address, 1e18), "Was able to send eth"
     assert accounts[2].revert("transfer", sale.address, 1e18), "Was able to send eth"
 
-def crowdsale_open(network, accounts):
+def crowdsale_open():
     time.sleep(2)
     '''Send eth once sale is open'''
     accounts[2].transfer(sale.address, 1e18) # $1000
@@ -42,3 +42,9 @@ def crowdsale_open(network, accounts):
     assert token.balanceOf(accounts[3]) == 20000, "Token balance is wrong"
     assert accounts[9].balance() == 102e18, "Receiver balance is wrong"
     assert accounts[1].revert("transfer", sale.address, 1e18), "Issuer was able to participate"
+    accounts[4].transfer(sale.address, 8e18) # $8000
+    assert token.balanceOf(accounts[4]) == 160000,  "Token balance is wrong"
+    assert accounts[9].balance() == 110e18, "Receiver balance is wrong"
+    accounts[5].transfer(sale.address, 9e18) # $9000
+    assert token.balanceOf(accounts[5]) == 180000,  "Token balance is wrong"
+    assert accounts[9].balance() == 119e18, "Receiver balance is wrong"

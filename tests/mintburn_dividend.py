@@ -4,12 +4,12 @@ import time
 
 DEPLOYMENT = "simple"
 
-def mintburn_setup(network, accounts):
+def mintburn_setup():
     '''MintBurn: deploy and attach''' 
     global issuer, token, mint
-    issuer = accounts[1].IssuingEntity
-    token = accounts[1].SecurityToken
-    mint = accounts[1].deploy("MintBurnModule", issuer.address)
+    issuer = IssuingEntity[0]
+    token = SecurityToken[0]
+    mint = accounts[1].deploy(MintBurnModule, issuer.address)
     assert issuer.revert("attachModule", issuer.address,
                          mint.address, {'from':accounts[2]}), (
                              "Account 2 was able to attach")
@@ -17,19 +17,19 @@ def mintburn_setup(network, accounts):
     assert issuer.revert("attachModule", issuer.address, mint.address), (
         "Was able to attach module twice")
 
-def mintburn_mint(network, accounts):
+def mintburn_mint():
     '''MintBurn: mint tokens'''
     mint.mint(token.address, 1000000)
     assert token.balanceOf(issuer.address) == 2000000, "Issuer balance is wrong"
     assert mint.revert("mint", token.address, 1, {'from':accounts[2]}), (
         "Account 2 was able to mint")
 
-def mintburn_transfer(network, accounts):
+def mintburn_transfer():
     '''MintBurn: transfer tokens while attached'''
     token.transfer(accounts[2],10000)
     token.transfer(accounts[1],10000, {'from':accounts[2]})
 
-def mintburn_burn(network, accounts):
+def mintburn_burn():
     '''MintBurn: burn tokens'''
     mint.burn(token.address, 1000000)
     assert token.balanceOf(issuer.address) == 1000000, "Issuer balance is wrong"
@@ -38,7 +38,7 @@ def mintburn_burn(network, accounts):
     assert mint.revert("burn", token.address, 2000000), (
         "Was able to burn more tokens than currently exist")
 
-def mintburn_detach(network, accounts):
+def mintburn_detach():
     '''MintBurn: detach module'''
     assert issuer.revert("detachModule", issuer.address,
                          mint.address, {'from':accounts[2]}), (
@@ -48,23 +48,23 @@ def mintburn_detach(network, accounts):
     )
     issuer.detachModule(issuer.address, mint.address)
 
-def mintburn_final(network, accounts):
+def mintburn_final():
     '''MintBurn: attach and detach once more'''
     issuer.attachModule(issuer.address, mint.address)
     issuer.detachModule(issuer.address, mint.address)
 
-def dividend_setup(network, accounts):
+def dividend_setup():
     '''Dividend: deploy and attach'''
     global dividend_time, dividend
     dividend_time = int(time.time()+3)
-    dividend = accounts[1].deploy("DividendModule", token.address, issuer.address,
+    dividend = accounts[1].deploy(DividendModule, token.address, issuer.address,
                             dividend_time)
     assert issuer.revert("attachModule", token.address,
                          dividend.address, {'from':accounts[2]}), (
                              "Account 2 was able to attach")
     issuer.attachModule(token.address, dividend.address)
 
-def dividend_transfer(network, accounts):
+def dividend_transfer():
     '''Dividend: transfer tokens before claim time'''
     token.transfer(accounts[2], 100)
     token.transfer(accounts[2], 300)
@@ -75,21 +75,21 @@ def dividend_transfer(network, accounts):
     token.transferFrom(accounts[6], accounts[7], 600, {'from':accounts[1]})
     assert token.circulatingSupply() == 2000, "Circulating supply is wrong"
 
-def dividend_mint(network, accounts):
+def dividend_mint():
     '''Dividend: attach MintBurn, mint and burn tokens'''
     issuer.attachModule(issuer.address, mint.address)
     mint.mint(token.address, 1000000)
     mint.burn(token.address, 500000)
     issuer.detachModule(issuer.address, mint.address)
 
-def dividend_transfer2(network, accounts):
+def dividend_transfer2():
     '''Dividend: transfer tokens after claim time'''
     if dividend_time > time.time():
         time.sleep(dividend_time-time.time()+1)
     token.transfer(accounts[2], 100000)
     token.transfer(accounts[2], 10000)
 
-def dividend_issue(network, accounts):
+def dividend_issue():
     '''Dividend: issue the dividend'''
     assert dividend.revert("issueDividend", 100,
                            {'from':accounts[2], 'value':1e19}), (
@@ -100,7 +100,7 @@ def dividend_issue(network, accounts):
     assert dividend.revert("issueDividend", 100, {'value':1e19}), (
         "Was able to call issueDividend twice")
 
-def dividend_claim(network, accounts):
+def dividend_claim():
     '''Dividend: claim dividends'''
     blank = "0x"+("0"*40)
 
@@ -112,7 +112,7 @@ def dividend_claim(network, accounts):
         assert accounts[i].balance() == balance+final, "Dividend payout wrong: {}".format(i)
         assert dividend.revert("claimDividend",accounts[i]), "Able to claim twice"
 
-def dividend_close(network, accounts):
+def dividend_close():
     '''Dividend: close dividends'''
     dividend.closeDividend()
     token.transfer(accounts[2], 100)
