@@ -41,3 +41,4 @@ def crowdsale_open(network, accounts):
     accounts[3].transfer(sale.address, 9.5e17) # $950
     assert token.balanceOf(accounts[3]) == 20000, "Token balance is wrong"
     assert accounts[9].balance() == 102e18, "Receiver balance is wrong"
+    assert accounts[1].revert("transfer", sale.address, 1e18), "Issuer was able to participate"
