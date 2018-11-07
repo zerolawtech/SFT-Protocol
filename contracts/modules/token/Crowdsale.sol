@@ -4,7 +4,7 @@ import "../../open-zeppelin/SafeMath.sol";
 import "../ModuleBase.sol";
 
 
-contract Crowdsale is STModuleBase {
+contract CrowdsaleModule is STModuleBase {
 
 	using SafeMath for uint256;
 

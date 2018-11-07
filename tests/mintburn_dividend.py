@@ -9,11 +9,13 @@ def mintburn_setup(network, accounts):
     global issuer, token, mint
     issuer = accounts[1].IssuingEntity
     token = accounts[1].SecurityToken
-    mint = accounts[1].deploy("MintBurn", issuer.address)
+    mint = accounts[1].deploy("MintBurnModule", issuer.address)
     assert issuer.revert("attachModule", issuer.address,
                          mint.address, {'from':accounts[2]}), (
                              "Account 2 was able to attach")
     issuer.attachModule(issuer.address, mint.address)
+    assert issuer.revert("attachModule", issuer.address, mint.address), (
+        "Was able to attach module twice")
 
 def mintburn_mint(network, accounts):
     '''MintBurn: mint tokens'''

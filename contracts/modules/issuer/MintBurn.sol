@@ -5,7 +5,7 @@ import "../ModuleBase.sol";
 import "../../SecurityToken.sol";
 
 
-contract MintBurn is IssuerModuleBase {
+contract MintBurnModule is IssuerModuleBase {
 
 	using SafeMath for uint256;
 
