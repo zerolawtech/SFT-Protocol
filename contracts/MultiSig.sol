@@ -12,8 +12,17 @@ contract MultiSig {
 	uint64 public multiSigThreshold;
 	uint64 public ownerCount;
 
-	event MultiSigCall (address caller, uint256 callCount, bytes calldata);
-	event MultiSigCallApproved (address caller, bytes calldata);
+	event MultiSigCall (
+		address indexed caller,
+		bytes4 indexed callSignature,
+		bytes32 indexed callHash,
+		uint256 callCount
+	);
+	event MultiSigCallApproved (
+		address indexed caller,
+		bytes4 indexed callSignature,
+		bytes32 indexed callHash
+	);
 	event ThresholdSet (uint64 threshold);
 	event NewOwners (address[] added, uint64 ownerCount);
 	event RemovedOwners (address[] removed, uint64 ownerCount);
@@ -42,11 +51,16 @@ contract MultiSig {
 		}
 		if (multiSigAuth[_callHash].length + 1 >= multiSigThreshold) {
 			delete multiSigAuth[_callHash];
-			emit MultiSigCallApproved(msg.sender, msg.data);
+			emit MultiSigCallApproved(msg.sender, msg.sig, _callHash);
 			return true;
 		}
 		multiSigAuth[_callHash].push(msg.sender);
-		emit MultiSigCall(msg.sender, multiSigAuth[_callHash].length, msg.data);
+		emit MultiSigCall(
+			msg.sender,
+			msg.sig,
+			_callHash,
+			multiSigAuth[_callHash].length
+		);
 		return false;
 	}
 
