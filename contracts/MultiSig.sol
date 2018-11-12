@@ -2,8 +2,8 @@ pragma solidity ^0.4.24;
 
 import "./open-zeppelin/SafeMath.sol";
 
-/// @title MultiSignature Owner Controls
-contract MultiSig {
+/// @title MultiSignature, MultiOwner Controls
+contract MultiSigMultiOwner {
 
 	using SafeMath64 for uint64;
 
@@ -156,7 +156,14 @@ contract MultiSig {
 		return true;
 	}
 
-	function setApprovedUntil(bytes32 _id, uint64 _approvedUntil) external onlyOwner returns (bool) {
+	function setApprovedUntil(
+		bytes32 _id,
+		uint64 _approvedUntil
+	 )
+	 	external
+		 onlyOwner
+		 returns (bool)
+	{
 		if (!_checkMultiSig()) {
 			return false;
 		}
@@ -166,7 +173,14 @@ contract MultiSig {
 		return true;
 	}
 
-	function addPermittedSignatures(bytes32 _id, bytes4[] _signatures) external onlyOwner returns (bool) {
+	function addPermittedSignatures(
+		bytes32 _id,
+		bytes4[] _signatures
+	)
+		external
+		onlyOwner
+		returns (bool)
+	{
 		if (!_checkMultiSig()) {
 			return false;
 		}
@@ -179,7 +193,14 @@ contract MultiSig {
 		return true;
 	}
 
-	function removedPermittedSignatures(bytes32 _id, bytes4[] _signatures) external onlyOwner returns (bool) {
+	function removedPermittedSignatures(
+		bytes32 _id,
+		bytes4[] _signatures
+	)
+		external
+		onlyOwner
+		returns (bool)
+	{
 		if (!_checkMultiSig()) {
 			return false;
 		}
@@ -192,7 +213,14 @@ contract MultiSig {
 		return true;
 	}
 
-	function setMultiSigThreshold(bytes32 _id, uint64 _threshold) external onlySelfAuthority(_id) returns (bool) {
+	function setMultiSigThreshold(
+		bytes32 _id,
+		uint64 _threshold
+	)
+		external
+		onlySelfAuthority(_id)
+		returns (bool)
+	{
 		if (!_checkMultiSig()) {
 			return false;
 		}
@@ -203,7 +231,14 @@ contract MultiSig {
 		return true;
 	}
 
-	function addAuthorityAddresses(bytes32 _id, address[] _owners) external onlySelfAuthority(_id) returns (bool) {
+	function addAuthorityAddresses(
+		bytes32 _id,
+		address[] _owners
+	)
+		external
+		onlySelfAuthority(_id)
+		returns (bool)
+	{
 		if (!_checkMultiSig()) {
 			return false;
 		}
@@ -218,7 +253,14 @@ contract MultiSig {
 		return true;
 	}
 
-	function removeAuthorityAddresses(bytes32 _id, address[] _owners) external onlySelfAuthority(_id)  returns (bool) {
+	function removeAuthorityAddresses(
+		bytes32 _id,
+		address[] _owners
+	)
+		external
+		onlySelfAuthority(_id)
+		returns (bool)
+	{
 		if (!_checkMultiSig()) {
 			return false;
 		}
@@ -234,6 +276,5 @@ contract MultiSig {
 		emit RemovedAuthorityAddresses(_id, _owners, a.addressCount);
 		return true;
 	}
-
 
 }
