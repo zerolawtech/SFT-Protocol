@@ -7,59 +7,81 @@ contract MultiSig {
 
 	using SafeMath64 for uint64;
 
-	mapping (address => bool) public owners;
-	mapping (bytes32 => address[]) multiSigAuth;
-	uint64 public multiSigThreshold;
-	uint64 public ownerCount;
+	bytes32 ownerID;
+	mapping (address => Address) idMap;
+	mapping (bytes32 => Authority) authorityData;
+
+	struct Address {
+		bytes32 id;
+		bool restricted;
+	}
+
+	struct Authority {
+		mapping (bytes4 => bool) permitted;
+		mapping (bytes32 => address[]) multiSigAuth;
+		uint64 multiSigThreshold;
+		uint64 addressCount;
+		bool approved;
+	}
 
 	event MultiSigCall (
-		address indexed caller,
+		bytes32 indexed id,
 		bytes4 indexed callSignature,
 		bytes32 indexed callHash,
+		address caller,
 		uint256 callCount
 	);
 	event MultiSigCallApproved (
-		address indexed caller,
+		bytes32 indexed id,
 		bytes4 indexed callSignature,
-		bytes32 indexed callHash
+		bytes32 indexed callHash,
+		address caller
 	);
-	event ThresholdSet (uint64 threshold);
-	event NewOwners (address[] added, uint64 ownerCount);
-	event RemovedOwners (address[] removed, uint64 ownerCount);
+	event ThresholdSet (bytes32 indexed id, uint64 threshold);
+	event NewOwners (bytes32 indexed id, address[] added, uint64 ownerCount);
+	event RemovedOwners (bytes32 indexed id, address[] removed, uint64 ownerCount);
 
 	modifier onlyOwner() {
-		require(owners[msg.sender]);
+		require(idMap[msg.sender].id == ownerID);
 		_;
 	}
 
 	constructor(address[] _owners, uint64 _threshold) public {
 		require(_owners.length >= _threshold);
 		require(_threshold > 0);
+		ownerID = keccak256(abi.encodePacked(address(this)));
 		for (uint256 i = 0; i < _owners.length; i++) {
-			owners[_owners[i]] = true;
+			idMap[_owners[i]].id = ownerID;
 		}
-		ownerCount = uint64(_owners.length);
-		multiSigThreshold = _threshold;
-		emit NewOwners(_owners, ownerCount);
-		emit ThresholdSet(_threshold);
+		authorityData[ownerID].addressCount = uint64(_owners.length);
+		authorityData[ownerID].multiSigThreshold = _threshold;
+		authorityData[ownerID].approved = true;
+		emit NewOwners(ownerID, _owners, authorityData[ownerID].addressCount);
+		emit ThresholdSet(ownerID, _threshold);
 	}
 
 	function _checkMultiSig() internal returns (bool) {
 		bytes32 _callHash = keccak256(msg.data);
-		for (uint256 i = 0; i < multiSigAuth[_callHash].length; i++) {
-			require(multiSigAuth[_callHash][i] != msg.sender);
+		bytes32 _id = idMap[msg.sender].id;
+		Authority storage a = authorityData[_id];
+		if (_id != ownerID) {
+			require(a.permitted[msg.sig]);
+		} 
+		for (uint256 i = 0; i < a.multiSigAuth[_callHash].length; i++) {
+			require(a.multiSigAuth[_callHash][i] != msg.sender);
 		}
-		if (multiSigAuth[_callHash].length + 1 >= multiSigThreshold) {
-			delete multiSigAuth[_callHash];
-			emit MultiSigCallApproved(msg.sender, msg.sig, _callHash);
+		if (a.multiSigAuth[_callHash].length + 1 >= a.multiSigThreshold) {
+			delete a.multiSigAuth[_callHash];
+			emit MultiSigCallApproved(_id, msg.sig, _callHash, msg.sender);
 			return true;
 		}
-		multiSigAuth[_callHash].push(msg.sender);
+		a.multiSigAuth[_callHash].push(msg.sender);
 		emit MultiSigCall(
-			msg.sender,
+			_id, 
 			msg.sig,
 			_callHash,
-			multiSigAuth[_callHash].length
+			msg.sender,
+			a.multiSigAuth[_callHash].length
 		);
 		return false;
 	}
@@ -68,36 +90,50 @@ contract MultiSig {
 		if (!_checkMultiSig()) {
 			return false;
 		}
-		require(ownerCount >= _threshold);
+		Authority storage a = authorityData[idMap[msg.sender].id];
+		require(a.addressCount >= _threshold);
 		require(_threshold > 0);
-		multiSigThreshold = _threshold;
+		a.multiSigThreshold = _threshold;
 		return true;
 	}
 
-	function addOwners(address[] _owners) external onlyOwner returns (bool) {
+	function addOwners(bytes32 _id, address[] _owners) external onlyOwner returns (bool) {
+		require(_id != 0);
 		if (!_checkMultiSig()) {
 			return false;
 		}
+		bytes32 _authID = idMap[msg.sender].id;
+		Authority storage a = authorityData[_id];
+		/* only original owner may add addresses to another sub-authority */
+		require (_authID == _id || _authID == ownerID);
+		require (a.approved);
 		for (uint256 i = 0; i < _owners.length; i++) {
-			require(!owners[_owners[i]]);
-			owners[_owners[i]] = true;
+			require(idMap[_owners[i]].id == 0);
+			idMap[_owners[i]].id = _id;
 		}
-		ownerCount = ownerCount.add(uint64(_owners.length));
-		emit NewOwners(_owners, ownerCount);
+		a.addressCount = a.addressCount.add(uint64(_owners.length));
+		emit NewOwners(_id, _owners, a.addressCount);
 		return true;
 	}
 
-	function removeOwners(address[] _owners) external onlyOwner returns (bool) {
+	function removeOwners(bytes32 _id, address[] _owners) external onlyOwner returns (bool) {
+		require(_id != 0);
 		if (!_checkMultiSig()) {
 			return false;
 		}
-		require(ownerCount.sub(uint64(_owners.length)) >= multiSigThreshold);
+		bytes32 _authID = idMap[msg.sender].id;
+		Authority storage a = authorityData[_id];
+		/* only original owner may remove addresses from another sub-authority */
+		require (_authID == _id || _authID == ownerID);
+		require (a.approved);
+		require(a.addressCount.sub(uint64(_owners.length)) >= a.multiSigThreshold);
 		for (uint256 i = 0; i < _owners.length; i++) {
-			require(!owners[_owners[i]]);
-			delete owners[_owners[i]];
+			require(idMap[_owners[i]].id == _id);
+			require(!idMap[_owners[i]].restricted);
+			idMap[_owners[i]].restricted = true;
 		}
-		ownerCount = ownerCount.add(uint64(_owners.length));
-		emit RemovedOwners(_owners, ownerCount);
+		a.addressCount = a.addressCount.sub(uint64(_owners.length));
+		emit RemovedOwners(_id, _owners, a.addressCount);
 		return true;
 	}
 
