@@ -12,11 +12,6 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	using SafeMath64 for uint64;
 	using SafeMath for uint256;
 
-	struct InvestorCount {
-		uint64 count;
-		uint64 limit;
-	}
-
 	/*
 		Each country will have discrete limits for each investor class.
 		minRating corresponds to investor accreditation levels.
@@ -24,7 +19,8 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	struct Country {
 		bool allowed;
 		uint8 minRating;
-		mapping (uint8 => InvestorCount) counts;
+		uint64[8] counts;
+		uint64[8] limits;
 	}
 
 	struct Account {
@@ -47,7 +43,8 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 
 	bool locked;
 	Registrar[] regArray;
-	mapping (uint8 => InvestorCount) counts;
+	uint64[8] public counts;
+	uint64[8] public limits;
 	mapping (uint16 => Country) countries;
 	mapping (bytes32 => Account) accounts;
 	mapping (address => Token) tokens;
@@ -60,9 +57,13 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		bytes32 indexed to,
 		uint256 value
 	);
-	event CountryApproved(uint16 indexed country, uint8 minRating, uint64 limit);
-	event CountryBlocked(uint16 indexed country);
-	event InvestorLimitSet(uint16 indexed country, uint8 rating, uint64 limit);
+	event CountryModified(
+		uint16 indexed country,
+		bool allowed,
+		uint8 minrating,
+		uint64[8] limits
+	);
+	event InvestorLimitSet(uint16 indexed country, uint64[8] limits);
 	event NewDocumentHash(string indexed document, bytes32 documentHash);
 	event RegistrarAdded(address indexed registrar);
 	event RegistrarRemoved(address indexed registrar);
@@ -89,18 +90,6 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		emit NewIssuingEntity(msg.sender, address(this), ownerID);
 	}
 
-	/// @notice Fetch count of all investors, regardless of rating
-	/// @return integer
-	function totalInvestors() external view returns (uint64) {
-		return counts[0].count;
-	}
-
-	/// @notice Fetch limit of all investors, regardless of rating
-	/// @return integer
-	function totalInvestorLimit() external view returns (uint64) {
-		return counts[0].limit;
-	}
-
 	/// @notice Fetch balance of an investor, issuer, or exchange
 	/// @param _id Account to query
 	/// @return integer
@@ -108,53 +97,48 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return uint256(accounts[_id].balance);
 	}
 
-	/// @notice Fetch count of investors by country and rating
-	/// @param _country Country to query
-	/// @param _rating Rating to query
-	/// @return integer
-	function getCountryInvestorCount(
-		uint16 _country,
-		uint8 _rating
-	)
-		external
-		view
-		returns (uint64)
-	{
-		return countries[_country].counts[_rating].count;
-	}
-
-	/// @notice Fetch limit of investors by country and rating
-	/// @param _country Country to query
-	/// @param _rating Rating to query
-	/// @return integer
-	function getCountryInvestorLimit(
-		uint16 _country,
-		uint8 _rating
-	)
-		external
-		view
-		returns (uint64)
-	{
-		return countries[_country].counts[_rating].limit;
-	}
-
 	/// @notice Fetch count and limit of investors by country and rating
 	/// in one call to preserve gas
 	/// @param _country Country to query
-	/// @param _rating Rating to query
-	/// @return integer
-	function getCountryInfo(
-		uint16 _country,
-		uint8 _rating
+	/// @return counts, limits
+	function getCountry(
+		uint16 _country
 	)
 		external
 		view
-		returns (uint64 _count, uint64 _limit)
+		returns (uint64[8] _count, uint64[8] _limit)
 	{
 		return (
-			countries[_country].counts[_rating].count,
-			countries[_country].counts[_rating].limit
+			countries[_country].counts,
+			countries[_country].limits
 		);
+	}
+
+	/// @notice Set country
+	/// @param _country Country to modify
+	/// @param _allowed Is country approved
+	/// @param _minRating minimum investor rating
+	/// @param _limits investor limits
+	/// @return bool
+	function setCountry(
+		uint16 _country,
+		bool _allowed,
+		uint8 _minRating,
+		uint64[8] _limits
+	)
+		external
+		returns (bool)
+	{
+		if (!_checkMultiSig()) {
+			return false;
+		}
+		//emit InvestorLimitSet(_country, _limits[i]);
+		Country storage c = countries[_country];
+		c.limits = _limits;
+		c.minRating = _minRating;
+		c.allowed = _allowed;
+		emit CountryModified(_country, _allowed, _minRating, _limits);
+		return true;
 	}
 
 	/// @notice Initialize countries so they can accept investors
@@ -179,21 +163,10 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 			Country storage c = countries[_country[i]];
 			c.allowed = true;
 			c.minRating = _minRating[i];
-			c.counts[0].limit = _limit[i];
-			emit CountryApproved(_country[i], _minRating[i], _limit[i]);
+			c.limits[0] = _limit[i];
+			emit CountryModified(_country[i], true, _minRating[i], c.limits);
 
 		}
-	}
-
-	/// @notice Block a country from all transactions
-	/// @param _country Country to modify
-	function blockCountry(uint16 _country) external returns (bool) {
-		if (!_checkMultiSig()) {
-			return false;
-		}
-		countries[_country].allowed = false;
-		emit CountryBlocked(_country);
-		return true;
 	}
 
 	/// @notice Set investor limits
@@ -201,7 +174,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	/// regardless of rating
 	/// @param _limits Array of limits per rating
 	function setInvestorLimits(
-		uint64[] _limits
+		uint64[8] _limits
 	)
 		external
 		returns (bool)
@@ -209,39 +182,8 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		if (!_checkMultiSig()) {
 			return false;
 		}
-		for (uint8 i = 0; i < _limits.length; i++) {
-			/*
-				investorLimit[0] == combined sum of investorLimit[1:]
-			*/
-			counts[i].limit = _limits[i];
-			emit InvestorLimitSet(0, i, _limits[i]);
-		}
-		return true;
-	}
-
-	/// @notice Set country investor limits after creation
-	/// @param _country Country to modify
-	/// @param _ratings Ratings to modify
-	/// @param _limits New limits
-	function setCountryInvestorLimits(
-		uint16 _country,
-		uint8[] _ratings,
-		uint64[] _limits
-	)
-		external
-		returns (bool)
-	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
-		require (_ratings.length == _limits.length);
-		Country storage c = countries[_country];
-		require (c.allowed);
-		for (uint256 i = 0; i < _ratings.length; i++) {
-			require (_ratings[i] != 0);
-			c.counts[_ratings[i]].limit = _limits[i];
-			emit InvestorLimitSet(_country, uint8(i), _limits[i]);
-		}
+		limits = _limits;
+		emit InvestorLimitSet(0, _limits);
 		return true;
 	}
 
@@ -273,11 +215,11 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		
 		if (_idAuth == ownerID && idMap[_auth].id != ownerID) {
 			/* bytes4 signatures of transfer, transferFrom */
-			require(authorityData[idMap[_auth].id].approvedUntil >= now);
 			require(
+				authorityData[idMap[_auth].id].approvedUntil >= now &&
 				authorityData[idMap[_auth].id].signatures[
 					(_idAuth == _id[0] ? bytes4(0xa9059cbb) : bytes4(0x23b872dd))
-				]
+				], "Authority is not permitted"
 			);
 		}
 
@@ -311,8 +253,11 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		(_id[1], _key[1]) = _getIdView(_to);
 
 		if (_id[0] == ownerID && idMap[_from].id != ownerID) {
-			require(authorityData[idMap[_from].id].approvedUntil >= now);
-			require(authorityData[idMap[_from].id].signatures[0xa9059cbb]);
+			require(
+				authorityData[idMap[_from].id].approvedUntil >= now &&
+				authorityData[idMap[_from].id].signatures[0xa9059cbb],
+				"Authority is not permitted"
+			);
 		}
 
 		address[2] memory _addr = [_from, _to];
@@ -338,24 +283,24 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		require(tokens[_token].set);
 		/* If issuer is not the authority, check the sender is not restricted */
 		if (_id[0] != ownerID) {
-			require(!tokens[_token].restricted);
-			require(!locked);
-			require(!accounts[_id[0]].restricted);
-			require(_allowed[0]);	
+			require(!locked, "Transfers locked: Issuer");
+			require(!tokens[_token].restricted, "Transfers locked: Token");
+			require(!accounts[_id[0]].restricted, "Sender restricted: Issuer");
+			require(_allowed[0], "Sender restricted: Registrar");	
 		}
 		/* Always check the receiver is not restricted. */
-		require(!accounts[_id[1]].restricted);
-		require(_allowed[1]);
+		require(!accounts[_id[1]].restricted, "Receiver restricted: Token");
+		require(_allowed[1], "Receiver restricted: Registrar");
 		if (_id[0] != _id[1]) {
 			/* TODO Exchange to exchange transfers are not permitted */
 			if (_rating[1] != 0) {
 				Country storage c = countries[_country[1]];
-				require (c.allowed);
+				require (c.allowed, "Reciever blocked: Country");
 				/*  
 					If the receiving investor currently has a 0 balance,
 					we must make sure a slot is available for allocation
 				*/
-				require (_rating[1] >= c.minRating);
+				require (_rating[1] >= c.minRating, "Receiver blocked: Rating");
 				if (accounts[_id[1]].balance == 0) {
 					/*
 						If the sender is an investor and still retains a balance,
@@ -367,8 +312,10 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 					);
 					if (_check) {
 						require (
-							counts[0].limit == 0 ||
-							counts[0].count < counts[0].limit
+							limits[0] == 0 ||
+							counts[0] < limits[0],
+							"Investor Limit"
+
 						);
 					}
 					/*
@@ -377,8 +324,9 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 					*/
 					if (_check || _country[0] != _country[1]) {
 						require (
-							c.counts[0].limit == 0 ||
-							c.counts[0].count < c.counts[0].limit
+							c.limits[0] == 0 ||
+							c.counts[0] < c.limits[0],
+							"Investor Limit"
 						);
 					}
 					if (!_check) {
@@ -391,8 +339,9 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 					*/
 					if (_check) {
 						require (
-							counts[_rating[1]].limit == 0 ||
-							counts[_rating[1]].count < counts[_rating[1]].limit
+							limits[_rating[1]] == 0 ||
+							counts[_rating[1]] < limits[_rating[1]],
+							"Investor Limit"
 						);
 					}
 					/*
@@ -402,8 +351,9 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 					*/
 					if (_check || _country[0] != _country[1]) {
 						require (
-							c.counts[_rating[1]].limit == 0 ||
-							c.counts[_rating[1]].count < c.counts[_rating[1]].limit
+							c.limits[_rating[1]] == 0 ||
+							c.counts[_rating[1]] < c.limits[_rating[1]],
+							"Investor Limit"
 						);
 					}
 				}
@@ -451,12 +401,11 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		bytes32 _id = idMap[_addr].id;
 		if (_id == 0) {
 			for (uint256 i = 1; i < regArray.length; i++) {
-				if (address(regArray[i].registrar) == 0) {
-					continue;
-				}
-				_id = regArray[i].registrar.getId(_addr);
-				if (_id != 0) {
-					return (_id, uint8(i));
+				if (address(regArray[i].registrar) > 0) {
+					_id = regArray[i].registrar.getId(_addr);
+					if (_id != 0) {
+						return (_id, uint8(i));
+					}
 				}
 			}
 			revert();
@@ -548,7 +497,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		returns (bool)
 	{
 		if (_id[0] == _id[1]) return true;
-		uint _balance = uint256(accounts[_id[0]].balance).sub(_value);
+		uint256 _balance = uint256(accounts[_id[0]].balance).sub(_value);
 		_setBalance(_id[0], _rating[0], _country[0], _balance);
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
 		_setBalance(_id[1], _rating[1], _country[1], _balance);
@@ -635,25 +584,27 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		Account storage a = accounts[_id];
 		Country storage c = countries[_country];
 		if (_id != ownerID) {
+			/* rating from registrar does not match local rating */
 			if (_rating != a.rating) {
+				/* local rating is not 0, rating has changed */
 				if (a.rating > 0) {
-					c.counts[_rating].count = c.counts[_rating].count.sub(1);
-					c.counts[a.rating].count = c.counts[a.rating].count.add(1);
+					c.counts[_rating] = c.counts[_rating].sub(1);
+					c.counts[a.rating] = c.counts[a.rating].add(1);
 				}
 				a.rating = _rating;
 			}
 			/* If this sets an investor account balance > 0, take an available slot */
 			if (a.balance == 0) {
-				counts[0].count = counts[0].count.add(1);
-				counts[_rating].count = counts[_rating].count.add(1);
-				c.counts[0].count = c.counts[0].count.add(1);
-				c.counts[_rating].count = c.counts[_rating].count.add(1);
+				counts[0] = counts[0].add(1);
+				counts[_rating] = counts[_rating].add(1);
+				c.counts[0] = c.counts[0].add(1);
+				c.counts[_rating] = c.counts[_rating].add(1);
 			/* If this sets an investor account balance to 0, add another available slot */
 			} else if (_value == 0) {
-				counts[0].count = counts[0].count.sub(1);
-				counts[_rating].count = counts[_rating].count.sub(1);
-				c.counts[0].count = c.counts[0].count.sub(1);
-				c.counts[_rating].count = c.counts[_rating].count.sub(1);
+				counts[0] = counts[0].sub(1);
+				counts[_rating] = counts[_rating].sub(1);
+				c.counts[0] = c.counts[0].sub(1);
+				c.counts[_rating] = c.counts[_rating].sub(1);
 			}
 		}
 		a.balance = uint240(_value);

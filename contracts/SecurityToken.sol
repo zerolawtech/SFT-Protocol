@@ -106,7 +106,7 @@ contract SecurityToken is STBase {
 		view
 		returns (bool)
 	{
-		require (_value > 0);
+		require (_value > 0, "Cannot send 0 tokens");
 		(
 			bytes32[2] memory _id,
 			uint8[2] memory _rating,
@@ -139,7 +139,7 @@ contract SecurityToken is STBase {
 			uint16[2] _country
 		)
 	{
-		require (_value > 0);
+		require (_value > 0, "Cannot send 0 tokens");
 		(
 			_authId,
 			_id,
@@ -175,7 +175,7 @@ contract SecurityToken is STBase {
 		if (_id[1] == ownerID) {
 			_addr[1] = address(issuer);
 		}
-		require (balances[_addr[0]] >= _value);
+		require (balances[_addr[0]] >= _value, "Insufficient Balance");
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
 				require(

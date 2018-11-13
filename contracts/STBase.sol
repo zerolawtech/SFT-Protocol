@@ -21,10 +21,6 @@ contract STBase {
 	event ModuleAttached(address module, bool check, bool transfer, bool balance);
 	event ModuleDetached(address module);
 
-	modifier onlyOwner() {
-		_;
-	}
-
 	/// @notice Fallback function
 	function () public payable {
 		revert();
@@ -41,17 +37,13 @@ contract STBase {
 		activeModules[_module] = true;
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (modules[i].module == 0) {
-				modules[i].module = _module;
-				modules[i].checkTransfer = _check;
-				modules[i].transferTokens = _transfer;
-				modules[i].balanceChanged = _balance;
+				modules[i] = Module(_module, _check, _transfer, _balance);
 				emit ModuleAttached(_module, _check, _transfer, _balance);
 				return;
 			}
 		}
 		modules.push(Module(_module, _check, _transfer, _balance));
 		emit ModuleAttached(_module, _check, _transfer, _balance);
-		return;
 	}
 
 	/// @notice Detach a module from a token
