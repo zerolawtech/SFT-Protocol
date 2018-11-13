@@ -411,7 +411,16 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		}
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				require(IIssuerModule(modules[i].module).checkTransfer(_token, _idAuth, _id, _rating, _country, _value));
+				require(
+					IIssuerModule(modules[i].module).checkTransfer(
+						_token,
+						_idAuth,
+						_id,
+						_rating,
+						_country,
+						_value
+					)
+				);
 			}
 		}
 	}
@@ -449,7 +458,6 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 				if (_id != 0) {
 					return (_id, uint8(i));
 				}
-				
 			}
 			revert();
 		}
@@ -598,7 +606,14 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
 				IIssuerModule m = IIssuerModule(modules[i].module);
-				require (m.balanceChanged(msg.sender, _id, _rating, _country, _oldTotal, _newTotal));
+				require (m.balanceChanged(
+					msg.sender,
+					_id,
+					_rating,
+					_country,
+					_oldTotal,
+					_newTotal
+				));
 			}
 		}
 		return (_id, _rating, _country);
@@ -708,20 +723,6 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		emit CustodianAdded(_addr);
 	}
 
-	function setInvestorRestriction(
-		bytes32 _id,
-		bool _restricted
-	)
-		external
-		returns (bool)
-	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
-		accounts[_id].restricted = _restricted;
-		emit InvestorRestricted(_id, _restricted);
-	}
-
 	/// @notice Add a new security token contract
 	/// @param _token Token contract address
 	/// @return bool
@@ -740,13 +741,18 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return true;
 	}
 
-	function setGlobalRestriction(bool _restricted) external returns (bool) {
+	function setInvestorRestriction(
+		bytes32 _id,
+		bool _restricted
+	)
+		external
+		returns (bool)
+	{
 		if (!_checkMultiSig()) {
 			return false;
 		}
-		locked = _restricted;
-		emit GloballyRestricted(_restricted);
-		return true;
+		accounts[_id].restricted = _restricted;
+		emit InvestorRestricted(_id, _restricted);
 	}
 
 	function setTokenRestriction(
@@ -765,11 +771,13 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return true;
 	}
 
-	/// @notice Determines if a module is active on this issuing entity
-	/// @param _module Deployed module address
-	/// @return boolean
-	function isActiveModule(address _module) external view returns (bool) {
-		return activeModules[_module];
+	function setGlobalRestriction(bool _restricted) external returns (bool) {
+		if (!_checkMultiSig()) {
+			return false;
+		}
+		locked = _restricted;
+		emit GloballyRestricted(_restricted);
+		return true;
 	}
 
 	function attachModule(
@@ -810,6 +818,13 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 			SecurityToken(_target).detachModule(_module);
 		}
 		return true;
+	}
+
+	/// @notice Determines if a module is active on this issuing entity
+	/// @param _module Deployed module address
+	/// @return boolean
+	function isActiveModule(address _module) external view returns (bool) {
+		return activeModules[_module];
 	}
 
 }
