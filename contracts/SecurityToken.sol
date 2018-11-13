@@ -250,10 +250,10 @@ contract SecurityToken is STBase {
 			uint16[2] memory _country
 		) = _checkToSend(_auth, _from, _to, _value);
 
-		if (_id[0] != _id[1] && _authId != ownerID) {
+		if (_id[0] != _id[1] && _authId != ownerID && _authId != _id[0]) {
 			/*
-				If the call was not made by the issuer and involves a change
-				in ownership, subtract from the allowed mapping.
+				If the call was not made by the issuer or the sender and involves
+				a change in ownership, subtract from the allowed mapping.
 			*/
 			allowed[_from][_auth] = allowed[_from][_auth].sub(_value);
 		}
