@@ -19,10 +19,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 
 	/*
 		Each country will have discrete limits for each investor class.
-		minRating corresponds to investor accreditation levels:
-			1 - unaccredited
-			2 - accredited
-			3 - qualified
+		minRating corresponds to investor accreditation levels.
 	*/
 	struct Country {
 		bool allowed;
@@ -214,10 +211,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		}
 		for (uint8 i = 0; i < _limits.length; i++) {
 			/*
-				investorLimit[0] = combined sum of investorLimit[1] [2] and [3]
-				investorLimit[1] = unaccredited
-				investorLimit[2] = accredited
-				investorLimit[3] = qualified
+				investorLimit[0] == combined sum of investorLimit[1:]
 			*/
 			counts[i].limit = _limits[i];
 			emit InvestorLimitSet(0, i, _limits[i]);

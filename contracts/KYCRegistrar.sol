@@ -14,12 +14,6 @@ contract KYCRegistrar {
 		bool restricted;
 	}
 	
-	/*
-		Investor accreditation levels:
-			1 - unaccredited
-			2 - accredited
-			3 - qualified
-	*/
 	struct Investor {
 		uint8 rating;
 		uint16 region;
