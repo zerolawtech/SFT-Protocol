@@ -93,7 +93,6 @@ contract MultiSigMultiOwner {
 		}
 		a.addressCount = uint64(_owners.length);
 		a.multiSigThreshold = _threshold;
-		a.approvedUntil = 18446744073709551615;
 		emit NewAuthority(ownerID, a.approvedUntil, _threshold);
 		emit NewAuthorityAddresses(ownerID, _owners, a.addressCount);
 	}
@@ -114,11 +113,6 @@ contract MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		bytes32 _newHash = keccak256(abi.encodePacked(
-			_callHash,
-			_sig,
-			msg.sender
-		));
 		bytes32 _id = idMap[tx.origin].id;
 		require(_id != 0);
 		require(!idMap[tx.origin].restricted);
@@ -126,7 +120,12 @@ contract MultiSigMultiOwner {
 			require(authorityData[_id].signatures[_sig]);
 			require(authorityData[_id].approvedUntil >= now);
 		}
-		return _multiSigPrivate(_id, _sig, _newHash, tx.origin);
+		return _multiSigPrivate(
+			_id,
+			_sig,
+			keccak256(abi.encodePacked(_callHash, _sig, msg.sender)),
+			tx.origin
+		);
 	}
 
 	function isApprovedAuthority(
