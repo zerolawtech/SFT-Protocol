@@ -107,8 +107,18 @@ contract MultiSigMultiOwner {
 		);
 	}
 
-	function checkMultiSigExternal(bytes32 _callHash, bytes4 _sig) external returns (bool) {
-		bytes32 _newHash = keccak256(abi.encodePacked(_callHash, _sig, msg.sender));
+	function checkMultiSigExternal(
+		bytes32 _callHash,
+		bytes4 _sig
+	)
+		external
+		returns (bool)
+	{
+		bytes32 _newHash = keccak256(abi.encodePacked(
+			_callHash,
+			_sig,
+			msg.sender
+		));
 		bytes32 _id = idMap[tx.origin].id;
 		require(_id != 0);
 		require(!idMap[tx.origin].restricted);
@@ -119,7 +129,14 @@ contract MultiSigMultiOwner {
 		return _multiSigPrivate(_id, _sig, _newHash, tx.origin);
 	}
 
-	function isApprovedAuthority(address _addr, bytes4 _sig) external view returns (bool) {
+	function isApprovedAuthority(
+		address _addr,
+		bytes4 _sig
+	)
+		external
+		view
+		returns (bool)
+	{
 		bytes32 _id = idMap[_addr].id;
 		require(_id != 0);
 		require(!idMap[_addr].restricted);
@@ -130,7 +147,15 @@ contract MultiSigMultiOwner {
 		return true;
 	}
 
-	function _multiSigPrivate(bytes32 _id, bytes4 _sig, bytes32 _callHash, address _sender) private returns (bool) {
+	function _multiSigPrivate(
+		bytes32 _id,
+		bytes4 _sig,
+		bytes32 _callHash,
+		address _sender
+	)
+		private
+		returns (bool)
+	{
 		Authority storage a = authorityData[_id];
 		for (uint256 i = 0; i < a.multiSigAuth[_callHash].length; i++) {
 			require(a.multiSigAuth[_callHash][i] != _sender);
