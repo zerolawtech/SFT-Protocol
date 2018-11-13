@@ -5,23 +5,24 @@ import "../IssuingEntity.sol";
 
 contract STModuleBase {
 
-	bytes32 public issuerID;
+	bytes32 public ownerID;
 	IssuingEntity public issuer;
 	SecurityToken public token;
 
 	modifier onlyParent() {
-		require (msg.sender == address(token) || msg.sender == address(token.issuer()));
+		require (msg.sender == address(token) || msg.sender == address(issuer));
 		_;
 	}
 
 	modifier onlyIssuer () {
-		require (issuer.owners(msg.sender));
+		require (issuer.isApprovedAuthority(msg.sender, msg.sig));
 		_;
 	}
 
 	constructor(address _token, address _issuer) public {
 		issuer = IssuingEntity(_issuer);
 		token = SecurityToken(_token);
+		ownerID = issuer.ownerID();
 	}
 
 	function owner() public view returns (address) {
@@ -32,7 +33,7 @@ contract STModuleBase {
 
 contract IssuerModuleBase {
 
-	bytes32 public issuerID;
+	bytes32 public ownerID;
 	IssuingEntity public issuer;
 
 	modifier onlyParent() {
@@ -41,13 +42,13 @@ contract IssuerModuleBase {
 	}
 
 	modifier onlyIssuer () {
-		require (issuer.owners(msg.sender));
+		require (issuer.isApprovedAuthority(msg.sender, msg.sig));
 		_;
 	}
 
 	constructor(address _issuer) public {
 		issuer = IssuingEntity(_issuer);
-		issuerID = issuer.issuerID();
+		ownerID = issuer.ownerID();
 	}
 
 	function owner() public view returns (address) {

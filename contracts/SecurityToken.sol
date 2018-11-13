@@ -11,6 +11,7 @@ contract SecurityToken is STBase {
 	using SafeMath for uint256;
 
 	IssuingEntity public issuer;
+	bytes32 public ownerID;
 
 	/* Assets cannot be fractionalized */
 	uint8 public constant decimals = 0;
@@ -48,12 +49,12 @@ contract SecurityToken is STBase {
 		public
 	{
 		issuer = IssuingEntity(_issuer);
-		issuerID = issuer.issuerID();
+		ownerID = issuer.ownerID();
 		name = _name;
 		symbol = _symbol;
 		balances[_issuer] = _totalSupply;
 		totalSupply = _totalSupply;
-		emit NewSecurityToken(msg.sender, address(this), issuerID);
+		emit NewSecurityToken(msg.sender, address(this), ownerID);
 		emit Transfer(0, _issuer, _totalSupply);
 	}
 
@@ -168,10 +169,10 @@ contract SecurityToken is STBase {
 		view
 		returns (address[2])
 	{
-		if (_id[0] == issuerID) {
+		if (_id[0] == ownerID) {
 			_addr[0] = address(issuer);
 		}
-		if (_id[1] == issuerID) {
+		if (_id[1] == ownerID) {
 			_addr[1] = address(issuer);
 		}
 		require (balances[_addr[0]] >= _value);
@@ -249,7 +250,7 @@ contract SecurityToken is STBase {
 			uint16[2] memory _country
 		) = _checkToSend(_auth, _from, _to, _value);
 
-		if (_id[0] != _id[1] && _authId != issuerID) {
+		if (_id[0] != _id[1] && _authId != ownerID) {
 			/*
 				If the call was not made by the issuer and involves a change
 				in ownership, subtract from the allowed mapping.

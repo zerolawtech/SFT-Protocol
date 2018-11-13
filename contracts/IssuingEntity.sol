@@ -7,7 +7,7 @@ import "./interfaces/Custodian.sol";
 import "./MultiSig.sol";
 
 /// @title Issuing Entity
-contract IssuingEntity is STBase, MultiSig {
+contract IssuingEntity is STBase, MultiSigMultiOwner {
 
 	using SafeMath64 for uint64;
 	using SafeMath for uint256;
@@ -71,8 +71,8 @@ contract IssuingEntity is STBase, MultiSig {
 	event RegistrarAdded(address indexed registrar);
 	event RegistrarRemoved(address indexed registrar);
 	event CustodianAdded(address indexed custodian);
-	event CustodianRemoved(address indexed custodian);
 	event TokenAdded(address indexed token);
+	event InvestorRestricted(bytes32 indexed id, bool restricted);
 	event TokenRestricted(address indexed token, bool restricted);
 	event GloballyRestricted(bool restricted);
 	
@@ -82,7 +82,7 @@ contract IssuingEntity is STBase, MultiSig {
 	}
 	
 	modifier onlyUnlocked() {
-		require (!locked || owners[msg.sender]);
+		require (!locked || authorityMap[msg.sender].id != 0);
 		_;
 	}
 
@@ -91,13 +91,11 @@ contract IssuingEntity is STBase, MultiSig {
 		address[] _owners,
 		uint64 _threshold
 	)
-		MultiSig(_owners, _threshold)
+		MultiSigMultiOwner(_owners, _threshold)
 		public 
 	{
-		issuerID = keccak256(abi.encodePacked(address(this)));
-		// idMap[address(this)] = issuerID;
 		regArray.push(Registrar(KYCRegistrar(0),false));
-		emit NewIssuingEntity(msg.sender, address(this), issuerID);
+		emit NewIssuingEntity(msg.sender, address(this), ownerID);
 	}
 
 	/// @notice Fetch count of all investors, regardless of rating
@@ -164,10 +162,9 @@ contract IssuingEntity is STBase, MultiSig {
 	{
 		return (
 			countries[_country].counts[_rating].count,
-			countries[_country].counts[_rating].limit);
+			countries[_country].counts[_rating].limit
+		);
 	}
-
-	
 
 	/// @notice Initialize countries so they can accept investors
 	/// @param _country Array of counties to add
@@ -179,7 +176,6 @@ contract IssuingEntity is STBase, MultiSig {
 		uint64[] _limit
 	)
 		external
-		onlyOwner
 		returns (bool)
 	{
 		if (!_checkMultiSig()) {
@@ -200,7 +196,7 @@ contract IssuingEntity is STBase, MultiSig {
 
 	/// @notice Block a country from all transactions
 	/// @param _country Country to modify
-	function blockCountry(uint16 _country) external onlyOwner returns (bool) {
+	function blockCountry(uint16 _country) external returns (bool) {
 		if (!_checkMultiSig()) {
 			return false;
 		}
@@ -217,7 +213,6 @@ contract IssuingEntity is STBase, MultiSig {
 		uint64[] _limits
 	)
 		external
-		onlyOwner
 		returns (bool)
 	{
 		if (!_checkMultiSig()) {
@@ -246,7 +241,6 @@ contract IssuingEntity is STBase, MultiSig {
 		uint64[] _limits
 	)
 		external
-		onlyOwner
 		returns (bool)
 	{
 		if (!_checkMultiSig()) {
@@ -289,6 +283,12 @@ contract IssuingEntity is STBase, MultiSig {
 		_id[0] = _getId(_from);
 		_id[1] = _getId(_to);
 		
+		if (authorityMap[_auth].id != 0 && authorityMap[_auth].id != ownerID) {
+			/* bytes4 signatures of transfer, transferFrom */
+			require(authorityData[authorityMap[_auth].id].approvedUntil >= now);
+			require(authorityData[authorityMap[_auth].id].signatures[(_idAuth == _id[0] ? bytes4(0xa9059cbb) : bytes4(0x23b872dd))]);
+		}
+
 		address _addr = (_idAuth == _id[0] ? _auth : _from);
 		bool[2] memory _allowed;
 
@@ -314,6 +314,11 @@ contract IssuingEntity is STBase, MultiSig {
 			uint16[2] _country
 		)
 	{
+		if (authorityMap[_from].id != 0 && authorityMap[_from].id != ownerID) {
+			require(authorityData[authorityMap[_from].id].approvedUntil >= now);
+			require(authorityData[authorityMap[_from].id].signatures[0xa9059cbb]);
+		}
+		
 		uint8[2] memory _key;
 		(_id[0], _key[0]) = _getIdView(_from);
 		(_id[1], _key[1]) = _getIdView(_to);
@@ -321,7 +326,6 @@ contract IssuingEntity is STBase, MultiSig {
 		address[2] memory _addr = [_from, _to];
 		bool[2] memory _allowed;
 
-		
 		(_allowed, _rating, _country) = _getInvestors(_addr, _key);
 		_checkTransfer(_token, _id[0], _id, _allowed, _rating, _country, _value);
 		return (_id, _rating, _country);
@@ -341,7 +345,7 @@ contract IssuingEntity is STBase, MultiSig {
 	{	
 		require(tokens[_token].set);
 		/* If issuer is not the authority, check the sender is not restricted */
-		if (_idAuth != issuerID) {
+		if (_id[0] != ownerID) {
 			require(!tokens[_token].restricted);
 			require(!locked);
 			require(!accounts[_id[0]].restricted);
@@ -427,7 +431,7 @@ contract IssuingEntity is STBase, MultiSig {
 
 	function _getId(address _addr) internal returns (bytes32) {
 		(bytes32 _id, uint8 _key) = _getIdView(_addr);
-		if (idMap[_addr] == 0) {
+		if (idMap[_addr] == 0 && authorityMap[_addr].id == 0) {
 			idMap[_addr] = _id;
 		}
 		if (accounts[_id].regKey != _key) {
@@ -437,8 +441,8 @@ contract IssuingEntity is STBase, MultiSig {
 	}
 
 	function _getIdView(address _addr) internal view returns (bytes32, uint8) {
-		if (owners[_addr] || _addr == address(this)) {
-			return (issuerID, 0);
+		if (authorityMap[_addr].id != 0 || _addr == address(this)) {
+			return (ownerID, 0);
 		}
 		bytes32 _id = idMap[_addr];
 		if (_id == 0) {
@@ -575,8 +579,8 @@ contract IssuingEntity is STBase, MultiSig {
 			uint16 _country
 		)
 	{
-		if (_getId(_owner) == issuerID) {
-			_id = issuerID;
+		if (_owner == address(this)) {
+			_id = ownerID;
 			_rating = 0;
 			_country = 0;
 		} else {
@@ -620,7 +624,7 @@ contract IssuingEntity is STBase, MultiSig {
 	{
 		Account storage a = accounts[_id];
 		Country storage c = countries[_country];
-		if (_id != issuerID) {
+		if (_id != ownerID) {
 			if (_rating != a.rating) {
 				if (a.rating > 0) {
 					c.counts[_rating].count = c.counts[_rating].count.sub(1);
@@ -672,7 +676,7 @@ contract IssuingEntity is STBase, MultiSig {
 		return documentHashes[_documentId];
 	}
 
-	function addRegistrar(address _registrar) external onlyOwner returns (bool) {
+	function addRegistrar(address _registrar) external returns (bool) {
 		if (!_checkMultiSig()) {
 			return false;
 		}
@@ -688,7 +692,7 @@ contract IssuingEntity is STBase, MultiSig {
 		return true;
 	}
 
-	function removeRegistrar(address _registrar) external onlyOwner returns (bool) {
+	function removeRegistrar(address _registrar) external returns (bool) {
 		if (!_checkMultiSig()) {
 			return false;
 		}
@@ -706,7 +710,7 @@ contract IssuingEntity is STBase, MultiSig {
 		return regArray[accounts[_id].regKey].registrar;
 	}
 
-	function addCustodian(address _addr) external onlyOwner returns (bool) {
+	function addCustodian(address _addr) external returns (bool) {
 		if (!_checkMultiSig()) {
 			return false;
 		}
@@ -716,47 +720,42 @@ contract IssuingEntity is STBase, MultiSig {
 		emit CustodianAdded(_addr);
 	}
 
-	function setCustodianRestriction(
-		address _addr,
+	function setInvestorRestriction(
+		bytes32 _id,
 		bool _restricted
 	)
 		external
-		onlyOwner
 		returns (bool)
 	{
 		if (!_checkMultiSig()) {
 			return false;
 		}
-		bytes32 _id = ICustodian(_addr).id();
 		accounts[_id].restricted = _restricted;
-		emit CustodianRemoved(_addr);
+		emit InvestorRestricted(_id, _restricted);
 	}
 
 	/// @notice Add a new security token contract
 	/// @param _token Token contract address
 	/// @return bool
-	function addToken(address _token) external onlyOwner returns (bool) {
+	function addToken(address _token) external returns (bool) {
 		if (!_checkMultiSig()) {
 			return false;
 		}
 		SecurityToken token = SecurityToken(_token);
 		require (!tokens[_token].set);
-		require (token.issuerID() == issuerID);
+		require (token.ownerID() == ownerID);
 		require (token.circulatingSupply() == 0);
 		tokens[_token].set = true;
-		uint256 _balance = uint256(accounts[issuerID].balance).add(token.treasurySupply());
-		accounts[issuerID].balance = uint240(_balance);
+		uint256 _balance = uint256(accounts[ownerID].balance).add(token.treasurySupply());
+		accounts[ownerID].balance = uint240(_balance);
 		emit TokenAdded(_token);
 		return true;
 	}
 
-	function setGlobalRestriction(
-		bool _restricted
-	)
-		external
-		onlyOwner
-		returns (bool)
-	{
+	function setGlobalRestriction(bool _restricted) external returns (bool) {
+		if (!_checkMultiSig()) {
+			return false;
+		}
 		locked = _restricted;
 		emit GloballyRestricted(_restricted);
 		return true;
@@ -767,7 +766,6 @@ contract IssuingEntity is STBase, MultiSig {
 		bool _restricted
 	)
 		external
-		onlyOwner
 		returns (bool)
 	{
 		if (!_checkMultiSig()) {
@@ -791,7 +789,6 @@ contract IssuingEntity is STBase, MultiSig {
 		address _module
 	)
 		external
-		onlyOwner
 		returns (bool)
 	{
 		if (!_checkMultiSig()) {
@@ -814,7 +811,6 @@ contract IssuingEntity is STBase, MultiSig {
 		returns (bool)
 	{
 		if (_target != address(this) || _module != msg.sender) {
-			require (owners[msg.sender]);
 			if (!_checkMultiSig()) {
 				return false;
 			}

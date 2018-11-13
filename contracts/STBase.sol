@@ -7,8 +7,6 @@ import "./interfaces/STModule.sol";
 /// @title Security Token Base
 contract STBase {
 
-	bytes32 public issuerID;
-
 	struct Module {
 		address module;
 		bool checkTransfer;
