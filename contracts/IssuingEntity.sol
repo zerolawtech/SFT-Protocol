@@ -53,7 +53,6 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	mapping (uint8 => InvestorCount) counts;
 	mapping (uint16 => Country) countries;
 	mapping (bytes32 => Account) accounts;
-	mapping (address => bytes32) idMap;
 	mapping (address => Token) tokens;
 	mapping (string => bytes32) documentHashes;
 
@@ -78,11 +77,6 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	
 	modifier onlyToken() {
 		require (tokens[msg.sender].set && !tokens[msg.sender].restricted);
-		_;
-	}
-	
-	modifier onlyUnlocked() {
-		require (!locked || authorityMap[msg.sender].id != 0);
 		_;
 	}
 
@@ -283,10 +277,14 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		_id[0] = _getId(_from);
 		_id[1] = _getId(_to);
 		
-		if (authorityMap[_auth].id != 0 && authorityMap[_auth].id != ownerID) {
+		if (_idAuth == ownerID && idMap[_auth].id != ownerID) {
 			/* bytes4 signatures of transfer, transferFrom */
-			require(authorityData[authorityMap[_auth].id].approvedUntil >= now);
-			require(authorityData[authorityMap[_auth].id].signatures[(_idAuth == _id[0] ? bytes4(0xa9059cbb) : bytes4(0x23b872dd))]);
+			require(authorityData[idMap[_auth].id].approvedUntil >= now);
+			require(
+				authorityData[idMap[_auth].id].signatures[
+					(_idAuth == _id[0] ? bytes4(0xa9059cbb) : bytes4(0x23b872dd))
+				]
+			);
 		}
 
 		address _addr = (_idAuth == _id[0] ? _auth : _from);
@@ -294,7 +292,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 
 		(_allowed, _rating, _country) = _getInvestors(
 			address[2]([_addr, _to]),
-			uint8[2]([accounts[idMap[_addr]].regKey, accounts[idMap[_to]].regKey])
+			uint8[2]([accounts[idMap[_addr].id].regKey, accounts[idMap[_to].id].regKey])
 		);
 		_checkTransfer(_token, _idAuth, _id, _allowed, _rating, _country, _value);
 		return (_idAuth, _id, _rating, _country);
@@ -313,15 +311,15 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 			uint8[2] _rating,
 			uint16[2] _country
 		)
-	{
-		if (authorityMap[_from].id != 0 && authorityMap[_from].id != ownerID) {
-			require(authorityData[authorityMap[_from].id].approvedUntil >= now);
-			require(authorityData[authorityMap[_from].id].signatures[0xa9059cbb]);
-		}
-		
+	{	
 		uint8[2] memory _key;
 		(_id[0], _key[0]) = _getIdView(_from);
 		(_id[1], _key[1]) = _getIdView(_to);
+
+		if (_id[0] == ownerID && idMap[_from].id != ownerID) {
+			require(authorityData[idMap[_from].id].approvedUntil >= now);
+			require(authorityData[idMap[_from].id].signatures[0xa9059cbb]);
+		}
 
 		address[2] memory _addr = [_from, _to];
 		bool[2] memory _allowed;
@@ -431,8 +429,8 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 
 	function _getId(address _addr) internal returns (bytes32) {
 		(bytes32 _id, uint8 _key) = _getIdView(_addr);
-		if (idMap[_addr] == 0 && authorityMap[_addr].id == 0) {
-			idMap[_addr] = _id;
+		if (idMap[_addr].id == 0) {
+			idMap[_addr].id = _id;
 		}
 		if (accounts[_id].regKey != _key) {
 			accounts[_id].regKey = _key;
@@ -441,10 +439,13 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	}
 
 	function _getIdView(address _addr) internal view returns (bytes32, uint8) {
-		if (authorityMap[_addr].id != 0 || _addr == address(this)) {
+		if (
+			authorityData[idMap[_addr].id].addressCount > 0 ||
+			_addr == address(this)
+		) {
 			return (ownerID, 0);
 		}
-		bytes32 _id = idMap[_addr];
+		bytes32 _id = idMap[_addr].id;
 		if (_id == 0) {
 			for (uint256 i = 1; i < regArray.length; i++) {
 				if (address(regArray[i].registrar) == 0) {
@@ -585,7 +586,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 			_country = 0;
 		} else {
 			bool _allowed;
-			uint8 _key = accounts[idMap[_owner]].regKey;
+			uint8 _key = accounts[idMap[_owner].id].regKey;
 			(
 				_id,
 				_allowed,
@@ -657,7 +658,6 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		bytes32 _hash
 	)
 		external
-		onlyOwner
 		returns (bool)
 	{
 		if (!_checkMultiSig()) {
@@ -676,34 +676,28 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return documentHashes[_documentId];
 	}
 
-	function addRegistrar(address _registrar) external returns (bool) {
+	function setRegistrar(address _registrar, bool _allowed) external returns (bool) {
 		if (!_checkMultiSig()) {
 			return false;
 		}
 		for (uint256 i = 1; i < regArray.length; i++) {
 			if (address(regArray[i].registrar) == _registrar) {
-				regArray[i].restricted = false;
-				emit RegistrarAdded(_registrar);
-				return true;
-			}
-		}
-		regArray.push(Registrar(KYCRegistrar(_registrar), false));
-		emit RegistrarAdded(_registrar);
-		return true;
-	}
-
-	function removeRegistrar(address _registrar) external returns (bool) {
-		if (!_checkMultiSig()) {
-			return false;
-		}
-		for (uint256 i = 1; i < regArray.length; i++) {
-			if (address(regArray[i].registrar) == _registrar) {
-				regArray[i].restricted = true;
+				regArray[i].restricted = !_allowed;
+				if (_allowed) {
+					emit RegistrarAdded(_registrar);
+					return true;
+				}
 				emit RegistrarRemoved(_registrar);
 				return true;
 			}
 		}
+		if (_allowed) {
+			regArray.push(Registrar(KYCRegistrar(_registrar), false));
+			emit RegistrarAdded(_registrar);
+			return true;
+		}
 		revert();
+		
 	}
 
 	function getRegistrar(bytes32 _id) external view returns (address) {
@@ -715,7 +709,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 			return false;
 		}
 		bytes32 _id = ICustodian(_addr).id();
-		idMap[_addr] = _id;
+		idMap[_addr].id = _id;
 		accounts[_id].registrar = _addr;
 		emit CustodianAdded(_addr);
 	}

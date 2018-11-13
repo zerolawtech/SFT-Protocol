@@ -8,7 +8,7 @@ contract MultiSigMultiOwner {
 	using SafeMath64 for uint64;
 
 	bytes32 public ownerID;
-	mapping (address => Address) authorityMap;
+	mapping (address => Address) idMap;
 	mapping (bytes32 => Authority) authorityData;
 
 	struct Address {
@@ -59,15 +59,15 @@ contract MultiSigMultiOwner {
 	);
 
 	modifier onlyOwner() {
-		require(authorityMap[msg.sender].id == ownerID);
-		require(!authorityMap[msg.sender].restricted);
+		require(idMap[msg.sender].id == ownerID);
+		require(!idMap[msg.sender].restricted);
 		_;
 	}
 
 	modifier onlyAuthority() {
-		bytes32 _id = authorityMap[msg.sender].id;
+		bytes32 _id = idMap[msg.sender].id;
 		require(_id != 0);
-		require(!authorityMap[msg.sender].restricted);
+		require(!idMap[msg.sender].restricted);
 		if (_id != ownerID) {
 			require(authorityData[_id].signatures[msg.sig]);
 			require(authorityData[_id].approvedUntil >= now);
@@ -77,20 +77,10 @@ contract MultiSigMultiOwner {
 
 	modifier onlySelfAuthority(bytes32 _id) {
 		require (_id != 0);
-		if (authorityMap[msg.sender].id != ownerID) {
-			require(authorityMap[msg.sender].id == _id);
+		if (idMap[msg.sender].id != ownerID) {
+			require(idMap[msg.sender].id == _id);
 		}
 		_;
-	}
-
-	function isApprovedAuthority(address _addr, bytes4 _sig) external view returns (bool) {
-		bytes32 _id = authorityMap[_addr].id;
-		require(_id != 0);
-		require(!authorityMap[_addr].restricted);
-		if (_id != ownerID) {
-			require(authorityData[_id].signatures[_sig]);
-			require(authorityData[_id].approvedUntil >= now);
-		}
 	}
 
 	constructor(address[] _owners, uint64 _threshold) public {
@@ -99,37 +89,68 @@ contract MultiSigMultiOwner {
 		ownerID = keccak256(abi.encodePacked(address(this)));
 		Authority storage a = authorityData[ownerID];
 		for (uint256 i = 0; i < _owners.length; i++) {
-			authorityMap[_owners[i]].id = ownerID;
+			idMap[_owners[i]].id = ownerID;
 		}
 		a.addressCount = uint64(_owners.length);
 		a.multiSigThreshold = _threshold;
 		a.approvedUntil = 18446744073709551615;
-		emit NewAuthority(ownerID, _threshold, a.approvedUntil);
+		emit NewAuthority(ownerID, a.approvedUntil, _threshold);
 		emit NewAuthorityAddresses(ownerID, _owners, a.addressCount);
 	}
 
 	function _checkMultiSig() internal onlyAuthority returns (bool) {
-		bytes32 _callHash = keccak256(msg.data);
-		bytes32 _id = authorityMap[msg.sender].id;
+		return _multiSigPrivate(
+			idMap[msg.sender].id,
+			msg.sig,
+			keccak256(msg.data),
+			msg.sender
+		);
+	}
+
+	function checkMultiSigExternal(bytes32 _callHash, bytes4 _sig) external returns (bool) {
+		bytes32 _newHash = keccak256(abi.encodePacked(_callHash, _sig, msg.sender));
+		bytes32 _id = idMap[tx.origin].id;
+		require(_id != 0);
+		require(!idMap[tx.origin].restricted);
+		if (_id != ownerID) {
+			require(authorityData[_id].signatures[_sig]);
+			require(authorityData[_id].approvedUntil >= now);
+		}
+		return _multiSigPrivate(_id, _sig, _newHash, tx.origin);
+	}
+
+	function isApprovedAuthority(address _addr, bytes4 _sig) external view returns (bool) {
+		bytes32 _id = idMap[_addr].id;
+		require(_id != 0);
+		require(!idMap[_addr].restricted);
+		if (_id != ownerID) {
+			require(authorityData[_id].signatures[_sig]);
+			require(authorityData[_id].approvedUntil >= now);
+		}
+		return true;
+	}
+
+	function _multiSigPrivate(bytes32 _id, bytes4 _sig, bytes32 _callHash, address _sender) private returns (bool) {
 		Authority storage a = authorityData[_id];
 		for (uint256 i = 0; i < a.multiSigAuth[_callHash].length; i++) {
-			require(a.multiSigAuth[_callHash][i] != msg.sender);
+			require(a.multiSigAuth[_callHash][i] != _sender);
 		}
 		if (a.multiSigAuth[_callHash].length + 1 >= a.multiSigThreshold) {
 			delete a.multiSigAuth[_callHash];
-			emit MultiSigCallApproved(_id, msg.sig, _callHash, msg.sender);
+			emit MultiSigCallApproved(_id, _sig, _callHash, _sender);
 			return true;
 		}
-		a.multiSigAuth[_callHash].push(msg.sender);
+		a.multiSigAuth[_callHash].push(_sender);
 		emit MultiSigCall(
 			_id, 
-			msg.sig,
+			_sig,
 			_callHash,
-			msg.sender,
+			_sender,
 			a.multiSigAuth[_callHash].length,
 			a.multiSigThreshold
 		);
 		return false;
+
 	}
 
 	function addAuthority(
@@ -152,8 +173,8 @@ contract MultiSigMultiOwner {
 		require(a.addressCount == 0);
 		require(_id != 0);
 		for (uint256 i = 0; i < _owners.length; i++) {
-			require(authorityMap[_owners[i]].id == 0);
-			authorityMap[_owners[i]].id = _id;
+			require(idMap[_owners[i]].id == 0);
+			idMap[_owners[i]].id = _id;
 		}
 		for (i = 0; i < _signatures.length; i++) {
 			a.signatures[_signatures[i]] = true;
@@ -163,6 +184,7 @@ contract MultiSigMultiOwner {
 		a.multiSigThreshold = _threshold;
 		emit NewAuthority(_id, _threshold, _approvedUntil);
 		emit NewAuthorityAddresses(_id, _owners, a.addressCount);
+		emit NewAuthorityPermissions(_id, _signatures);
 		return true;
 	}
 
@@ -183,9 +205,10 @@ contract MultiSigMultiOwner {
 		return true;
 	}
 
-	function addPermittedSignatures(
+	function setPermittedSignatures(
 		bytes32 _id,
-		bytes4[] _signatures
+		bytes4[] _signatures,
+		bool _allowed
 	)
 		external
 		onlyOwner
@@ -197,29 +220,13 @@ contract MultiSigMultiOwner {
 		Authority storage a = authorityData[_id];
 		require(a.addressCount > 0);
 		for (uint256 i = 0; i < _signatures.length; i++) {
-			a.signatures[_signatures[i]] = true;
+			a.signatures[_signatures[i]] = _allowed;
 		}
-		emit NewAuthorityPermissions(_id, _signatures);
-		return true;
-	}
-
-	function removedPermittedSignatures(
-		bytes32 _id,
-		bytes4[] _signatures
-	)
-		external
-		onlyOwner
-		returns (bool)
-	{
-		if (!_checkMultiSig()) {
-			return false;
+		if (_allowed) {
+			emit NewAuthorityPermissions(_id, _signatures);
+		} else {
+			emit RemovedAuthorityPermissions(_id, _signatures);
 		}
-		Authority storage a = authorityData[_id];
-		require(a.addressCount > 0);
-		for (uint256 i = 0; i < _signatures.length; i++) {
-			a.signatures[_signatures[i]] = false;
-		}
-		emit RemovedAuthorityPermissions(_id, _signatures);
 		return true;
 	}
 
@@ -234,7 +241,7 @@ contract MultiSigMultiOwner {
 		if (!_checkMultiSig()) {
 			return false;
 		}
-		Authority storage a = authorityData[authorityMap[msg.sender].id];
+		Authority storage a = authorityData[idMap[msg.sender].id];
 		require(a.addressCount >= _threshold);
 		a.multiSigThreshold = _threshold;
 		emit ThresholdSet(_id, _threshold);
@@ -255,8 +262,8 @@ contract MultiSigMultiOwner {
 		Authority storage a = authorityData[_id];
 		require(a.addressCount > 0);
 		for (uint256 i = 0; i < _owners.length; i++) {
-			require(authorityMap[_owners[i]].id == 0);
-			authorityMap[_owners[i]].id = _id;
+			require(idMap[_owners[i]].id == 0);
+			idMap[_owners[i]].id = _id;
 		}
 		a.addressCount = a.addressCount.add(uint64(_owners.length));
 		emit NewAuthorityAddresses(_id, _owners, a.addressCount);
@@ -276,9 +283,9 @@ contract MultiSigMultiOwner {
 		}
 		Authority storage a = authorityData[_id];
 		for (uint256 i = 0; i < _owners.length; i++) {
-			require(authorityMap[_owners[i]].id == _id);
-			require(!authorityMap[_owners[i]].restricted);
-			authorityMap[_owners[i]].restricted = true;
+			require(idMap[_owners[i]].id == _id);
+			require(!idMap[_owners[i]].restricted);
+			idMap[_owners[i]].restricted = true;
 		}
 		a.addressCount = a.addressCount.sub(uint64(_owners.length));
 		require (a.addressCount >= a.multiSigThreshold);
