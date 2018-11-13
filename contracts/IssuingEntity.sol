@@ -804,7 +804,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		if (_target != address(this) || _module != msg.sender) {
+		if (_module != msg.sender) {
 			if (!_checkMultiSig()) {
 				return false;
 			}
