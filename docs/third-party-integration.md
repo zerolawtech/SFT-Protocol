@@ -9,7 +9,7 @@ To setup an investor registry, deploy [KYCRegistrar.sol](https://github.com/iamd
 Issuing tokens and being able to transfer them requires the following steps:
 
 1. Deploy [IssuingEntity.sol](https://github.com/iamdefinitelyahuman/security-token/blob/master/contracts/IssuingEntity.sol).
-2. Call `IssuingEntity.addRegistrar` to add one or more investor registries. You may maintain your own registry and/or use those belonging to trusted third parties.
+2. Call `IssuingEntity.setRegistrar` to add one or more investor registries. You may maintain your own registry and/or use those belonging to trusted third parties.
 3. Deploy [SecurityToken.sol](https://github.com/iamdefinitelyahuman/security-token/blob/master/contracts/SecurityToken.sol). Enter the address of the issuer contract from step 1 in the constructor. The total supply of tokens will be initially creditted to the issuer.
 4. Call `IssuingEntity.addToken` to attach the token to the issuer.
 5. Call `IssuingEntity.setCountries` to approve investors from specific countries to hold the tokens.

@@ -4,7 +4,7 @@ import "./SecurityToken.sol";
 import "./MultiSig.sol";
 
 /// @title Custodian Contract
-contract Custodian is MultiSig {
+contract Custodian is MultiSigMultiOwner {
 
 	string public name;
 	bytes32 public id;
@@ -15,11 +15,7 @@ contract Custodian is MultiSig {
 		address[] _owners,
 		uint64 _threshold
 	)
-		MultiSig
-	(
-		_owners,
-		_threshold
-	)
+		MultiSigMultiOwner(_owners, _threshold)
 		public
 	{
 		name = _name;
@@ -32,9 +28,11 @@ contract Custodian is MultiSig {
 		uint256 _value
 	)
 		external
-		onlyOwner
 		returns (bool)
 	{
+		if (!_checkMultiSig()) {
+			return false;
+		}
 		require(SecurityToken(_token).transfer(_to, _value));
 		return true;
 	}
