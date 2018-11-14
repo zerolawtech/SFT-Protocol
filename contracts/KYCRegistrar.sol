@@ -68,9 +68,7 @@ contract KYCRegistrar {
 	);
 
 
-	/**
-	 *	@dev Checks that the calling address is associated with the owner.
-	 */
+	/// @dev Checks that the calling address is associated with the owner
 	modifier onlyOwner() {
 		require(idMap[msg.sender].id == ownerID);
 		require(!idMap[msg.sender].restricted);

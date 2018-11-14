@@ -74,12 +74,17 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	event TokenRestricted(address indexed token, bool restricted);
 	event GloballyRestricted(bool restricted);
 	
+	/// @dev check that call originates from a registered, unrestricted token
 	modifier onlyToken() {
 		require (tokens[msg.sender].set && !tokens[msg.sender].restricted);
 		_;
 	}
 
-	/// @notice Issuing entity constructor
+	/**
+		@notice Issuing entity constructor
+		@param _owners Array of addresses to associate with owner
+		@param _threshold multisig threshold for owning authority
+	 */
 	constructor(
 		address[] _owners,
 		uint64 _threshold
@@ -91,17 +96,21 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		emit NewIssuingEntity(msg.sender, address(this), ownerID);
 	}
 
-	/// @notice Fetch balance of an investor, issuer, or exchange
-	/// @param _id Account to query
-	/// @return integer
+	/**
+		@notice Fetch balance of an investor, issuer, or exchange
+		@param _id Account to query
+		@return integer
+	 */
 	function balanceOf(bytes32 _id) external view returns (uint256) {
 		return uint256(accounts[_id].balance);
 	}
-
-	/// @notice Fetch count and limit of investors by country and rating
-	/// in one call to preserve gas
-	/// @param _country Country to query
-	/// @return counts, limits
+//TODOFROM HERE
+	/**
+		@notice Fetch count and limit of investors by country and rating
+		in one call to preserve gas
+		@param _country Country to query
+		@return counts, limits
+	 */
 	function getCountry(
 		uint16 _country
 	)
@@ -115,12 +124,14 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		);
 	}
 
-	/// @notice Set country
-	/// @param _country Country to modify
-	/// @param _allowed Is country approved
-	/// @param _minRating minimum investor rating
-	/// @param _limits investor limits
-	/// @return bool
+	/**
+		@notice Set country
+		@param _country Country to modify
+		@param _allowed Is country approved
+		@param _minRating minimum investor rating
+		@param _limits investor limits
+		@return bool
+	 */
 	function setCountry(
 		uint16 _country,
 		bool _allowed,
@@ -139,10 +150,12 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return true;
 	}
 
-	/// @notice Initialize countries so they can accept investors
-	/// @param _country Array of counties to add
-	/// @param _minRating Array of minimum investor ratings necessary for each country
-	/// @param _limit Array of maximum mumber of investors allowed from this country
+	/**
+		@notice Initialize countries so they can accept investors
+		@param _country Array of counties to add
+		@param _minRating Array of minimum investor ratings necessary for each country
+		@param _limit Array of maximum mumber of investors allowed from this country
+	 */
 	function setCountries(
 		uint16[] _country,
 		uint8[] _minRating,
@@ -165,10 +178,12 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		}
 	}
 
-	/// @notice Set investor limits
-	/// @dev The first array entry (0) corresponds to the total investor limit,
-	/// regardless of rating
-	/// @param _limits Array of limits per rating
+	/**
+		@notice Set investor limits
+		@dev The first array entry (0) corresponds to the total investor limit,
+		regardless of rating
+		@param _limits Array of limits per rating
+	 */
 	function setInvestorLimits(
 		uint64[8] _limits
 	)
@@ -181,13 +196,15 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return true;
 	}
 
-	/// @notice Check if a transfer is possible at the issuing entity level
-	/// @param _token Token being transferred
-	/// @param _auth address of the caller attempting the transfer
-	/// @param _from address of the sender
-	/// @param _to address of the receiver
-	/// @param _value Number of tokens being transferred
-	/// @return boolean
+	/**
+		@notice Check if a transfer is possible at the issuing entity level
+		@param _token Token being transferred
+		@param _auth address of the caller attempting the transfer
+		@param _from address of the sender
+		@param _to address of the receiver
+		@param _value Number of tokens being transferred
+		@return boolean
+	 */
 	function checkTransfer(
 		address _token,
 		address _auth,
@@ -474,12 +491,14 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return (_allowed, _rating, _country);
 	}
 
-	/// @notice Transfer tokens through the issuing entity level
-	/// @param _id Array of sender/receiver IDs
-	/// @param _rating Arracy of sender/receiver ratings
-	/// @param _country Array of sender/receiver countries
-	/// @param _value Number of tokens being transferred
-	/// @return boolean
+	/**
+		@notice Transfer tokens through the issuing entity level
+		@param _id Array of sender/receiver IDs
+		@param _rating Arracy of sender/receiver ratings
+		@param _country Array of sender/receiver countries
+		@param _value Number of tokens being transferred
+		@return boolean
+	 */
 	function transferTokens(
 		bytes32[2] _id,
 		uint8[2] _rating,
@@ -507,11 +526,13 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return true;
 	}
 
-	/// @notice Affect a direct balance change (burn/mint) at the issuing entity level
-	/// @param _owner Token owner
-	/// @param _old Old balance
-	/// @param _new New balance
-	/// @return boolean
+	/**
+		@notice Affect a direct balance change (burn/mint) at the issuing entity level
+		@param _owner Token owner
+		@param _old Old balance
+		@param _new New balance
+		@return boolean
+	 */
 	function balanceChanged(
 		address _owner,
 		uint256 _old,
@@ -562,11 +583,13 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return (_id, _rating, _country);
 	}
 
-	/// @notice Directly set a balance at the issuing entity level
-	/// @param _id ID of affected entity
-	/// @param _country Country of affected entity
-	/// @param _value New balance
-	/// @return boolean
+	/**
+		@notice Directly set a balance at the issuing entity level
+		@param _id ID of affected entity
+		@param _country Country of affected entity
+		@param _value New balance
+		@return boolean
+	 */
 	function _setBalance(
 		bytes32 _id,
 		uint8 _rating,
@@ -604,9 +627,11 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		a.balance = uint240(_value);
 	}
 
-	/// @notice Set document hash
-	/// @param _documentId Document ID being hashed
-	/// @param _hash Hash of the document
+	/**
+		@notice Set document hash
+		@param _documentId Document ID being hashed
+		@param _hash Hash of the document
+	 */
 	function setDocumentHash(
 		string _documentId,
 		bytes32 _hash
@@ -621,9 +646,11 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return true;
 	}
 
-	/// @notice Fetch document hash
-	/// @param _documentId Document ID to fetch
-	/// @return string
+	/**
+		@notice Fetch document hash
+		@param _documentId Document ID to fetch
+		@return string
+	 */
 	function getDocumentHash(string _documentId) external view returns (bytes32) {
 		return documentHashes[_documentId];
 	}
@@ -662,9 +689,11 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		emit CustodianAdded(_addr);
 	}
 
-	/// @notice Add a new security token contract
-	/// @param _token Token contract address
-	/// @return bool
+	/**
+		@notice Add a new security token contract
+		@param _token Token contract address
+		@return bool
+	 */
 	function addToken(address _token) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		SecurityToken token = SecurityToken(_token);
@@ -747,9 +776,11 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return true;
 	}
 
-	/// @notice Determines if a module is active on this issuing entity
-	/// @param _module Deployed module address
-	/// @return boolean
+	/**
+		@notice Determines if a module is active on this issuing entity
+		@param _module Deployed module address
+		@return boolean
+	 */
 	function isActiveModule(address _module) external view returns (bool) {
 		return activeModules[_module];
 	}
