@@ -30,9 +30,7 @@ contract Custodian is MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		require(SecurityToken(_token).transfer(_to, _value));
 		return true;
 	}

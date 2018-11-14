@@ -14,7 +14,8 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 
 	/*
 		Each country will have discrete limits for each investor class.
-		minRating corresponds to investor accreditation levels.
+		minRating corresponds to the minimum investor level for this country.
+		counts[0] and levels[0] == the sum total of counts[1:] and limits[1:]
 	*/
 	struct Country {
 		bool allowed;
@@ -129,10 +130,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
-		//emit InvestorLimitSet(_country, _limits[i]);
+		if (!_checkMultiSig()) return false;
 		Country storage c = countries[_country];
 		c.limits = _limits;
 		c.minRating = _minRating;
@@ -153,9 +151,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		require (_country.length == _minRating.length);
 		require (_country.length == _limit.length);
 		for (uint256 i = 0; i < _country.length; i++) {
@@ -179,9 +175,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		limits = _limits;
 		emit InvestorLimitSet(0, _limits);
 		return true;
@@ -620,9 +614,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		require (documentHashes[_documentId] == 0);
 		documentHashes[_documentId] = _hash;
 		emit NewDocumentHash(_documentId, _hash);
@@ -637,9 +629,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	}
 
 	function setRegistrar(address _registrar, bool _allowed) external returns (bool) {
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		for (uint256 i = 1; i < regArray.length; i++) {
 			if (address(regArray[i].registrar) == _registrar) {
 				regArray[i].restricted = !_allowed;
@@ -665,9 +655,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	}
 
 	function addCustodian(address _addr) external returns (bool) {
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		bytes32 _id = ICustodian(_addr).id();
 		idMap[_addr].id = _id;
 		accounts[_id].registrar = _addr;
@@ -678,9 +666,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	/// @param _token Token contract address
 	/// @return bool
 	function addToken(address _token) external returns (bool) {
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		SecurityToken token = SecurityToken(_token);
 		require (!tokens[_token].set);
 		require (token.ownerID() == ownerID);
@@ -699,9 +685,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		accounts[_id].restricted = _restricted;
 		emit InvestorRestricted(_id, _restricted);
 	}
@@ -713,9 +697,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		require (tokens[_token].set);
 		tokens[_token].restricted = _restricted;
 		emit TokenRestricted(_token, _restricted);
@@ -723,9 +705,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	}
 
 	function setGlobalRestriction(bool _restricted) external returns (bool) {
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		locked = _restricted;
 		emit GloballyRestricted(_restricted);
 		return true;
@@ -738,9 +718,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		if (_target == address(this)) {
 			_attachModule(_module);
 		} else {
@@ -758,9 +736,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		returns (bool)
 	{
 		if (_module != msg.sender) {
-			if (!_checkMultiSig()) {
-				return false;
-			}
+			if (!_checkMultiSig()) return false;
 		}
 		if (_target == address(this)) {
 			_detachModule(_module);
