@@ -253,8 +253,8 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		bool[2] memory _allowed;
 
 		(_allowed, _rating, _country) = _getInvestors(
-			address[2]([_addr, _to]),
-			uint8[2]([accounts[idMap[_addr].id].regKey, accounts[idMap[_to].id].regKey])
+			[_addr, _to],
+			[accounts[idMap[_addr].id].regKey, accounts[idMap[_to].id].regKey]
 		);
 		_checkTransfer(_token, _authID, _id, _allowed, _rating, _country, _value);
 		return (_authID, _id, _rating, _country);
@@ -408,7 +408,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 				}
 			}
 		}
-		/* Call checkTransfer on attached modules */
+		/* bytes4 signature for issuer module checkTransfer() */
 		_callModules(0, 0x47fca5df, abi.encode(
 			_token,
 			_authID,
@@ -420,7 +420,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	}
 
 	/**
-		@notice Fetch an investor ID from an address
+		@notice External view to fetch an investor ID from an address
 		@param _addr address of token being transferred
 		@return bytes32 investor ID
 	 */
@@ -430,7 +430,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	}
 
 	/**
-		@dev internal investor ID fetch, updates local record
+		@notice internal investor ID fetch, updates local record
 		@param _addr address of token being transferred
 		@return bytes32 investor ID
 	 */
@@ -446,7 +446,8 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	}
 
 	/**
-		@dev internal investor ID fetch, does not update local record
+		@notice internal investor ID fetch
+		@dev common logic for getID() and _getID()
 		@param _addr address of token being transferred
 		@return bytes32 investor ID, uint8 registrar index
 	 */
@@ -467,7 +468,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 					}
 				}
 			}
-			revert();
+			revert("Address not registered");
 		}
 		if (accounts[_id].registrar != 0) {
 			return (_id, 0);
@@ -481,7 +482,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 					return (_id, uint8(i));
 				}
 			}
-			revert();
+			revert("Address not registered");
 		}
 		return (_id, accounts[_id].regKey);
 	}
@@ -570,7 +571,13 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		_setBalance(_id[0], _rating[0], _country[0], _balance);
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
 		_setBalance(_id[1], _rating[1], _country[1], _balance);
-		_callModules(1, 0x0cfb54c9, abi.encode(msg.sender, _id, _rating, _country, _value));
+		/* bytes4 signature for token module transferTokens() */
+		_callModules(1, 0x0cfb54c9, abi.encode(
+			msg.sender,
+			_id, _rating,
+			_country,
+			_value
+		));
 		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
 		return true;
 	}
@@ -617,6 +624,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			_newTotal = uint256(accounts[_id].balance).sub(_old.sub(_new));
 		}
 		_setBalance(_id, _rating, _country, _newTotal);
+		/* bytes4 signature for token module balanceChanged() */
 		_callModules(2, 0x4268353d, abi.encode(
 			msg.sender,
 			_id,

@@ -476,7 +476,7 @@ contract KYCRegistrar {
 	{
 		_id = idMap[_addr].id;
 		Investor storage i = investorData[_id];
-		require(i.country != 0);
+		require(i.country != 0, "Address not registered");
 		return (
 			_id,
 			!i.restricted && i.expires > now && !idMap[_addr].restricted,
@@ -511,9 +511,9 @@ contract KYCRegistrar {
 		)
 	{
 		Investor storage f = investorData[idMap[_from].id];
-		require(f.country != 0);
+		require(f.country != 0, "Sender not Registered");
 		Investor storage t = investorData[idMap[_to].id];
-		require(t.country != 0);
+		require(t.country != 0, "Receiver not Registered");
 		return (
 			bytes32[2]([idMap[_from].id, idMap[_to].id]),
 			bool[2]([
