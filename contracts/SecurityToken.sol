@@ -132,7 +132,7 @@ contract SecurityToken is STBase {
 	)
 		internal
 		returns (
-			bytes32 _authId,
+			bytes32 _authID,
 			bytes32[2] _id,
 			address[2] _addr,
 			uint8[2] _rating,
@@ -141,25 +141,25 @@ contract SecurityToken is STBase {
 	{
 		require (_value > 0, "Cannot send 0 tokens");
 		(
-			_authId,
+			_authID,
 			_id,
 			_rating,
 			_country
 		) = issuer.checkTransfer(address(this), _auth, _from, _to, _value);
 		_addr = _checkTransfer(
 			address[2]([_from, _to]),
-			_authId,
+			_authID,
 			_id,
 			_rating,
 			_country,
 			_value
 		);
-		return(_authId, _id, _addr, _rating, _country);
+		return(_authID, _id, _addr, _rating, _country);
 	}
 
 	function _checkTransfer(
 		address[2] _addr,
-		bytes32 _authId,
+		bytes32 _authID,
 		bytes32[2] _id,
 		uint8[2] _rating,
 		uint16[2] _country,
@@ -181,7 +181,7 @@ contract SecurityToken is STBase {
 				require(
 					ISTModule(modules[i].module).checkTransfer(
 						_addr,
-						_authId,
+						_authID,
 						_id,
 						_rating,
 						_country,
@@ -213,7 +213,7 @@ contract SecurityToken is STBase {
 	/// @return boolean
 	function transfer(address _to, uint256 _value) external returns (bool) {
 		(
-			bytes32 _authId,
+			bytes32 _authID,
 			bytes32[2] memory _id,
 			address[2] memory _addr,
 			uint8[2] memory _rating,
@@ -243,14 +243,14 @@ contract SecurityToken is STBase {
 			_auth = msg.sender;
 		}
 		(
-			bytes32 _authId,
+			bytes32 _authID,
 			bytes32[2] memory _id,
 			address[2] memory _addr,
 			uint8[2] memory _rating,
 			uint16[2] memory _country
 		) = _checkToSend(_auth, _from, _to, _value);
 
-		if (_id[0] != _id[1] && _authId != ownerID && _authId != _id[0]) {
+		if (_id[0] != _id[1] && _authID != ownerID && _authID != _id[0]) {
 			/*
 				If the call was not made by the issuer or the sender and involves
 				a change in ownership, subtract from the allowed mapping.

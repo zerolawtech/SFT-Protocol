@@ -76,7 +76,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	
 	/// @dev check that call originates from a registered, unrestricted token
 	modifier onlyToken() {
-		require (tokens[msg.sender].set && !tokens[msg.sender].restricted);
+		require(tokens[msg.sender].set && !tokens[msg.sender].restricted);
 		_;
 	}
 
@@ -97,40 +97,41 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	}
 
 	/**
-		@notice Fetch balance of an investor, issuer, or exchange
-		@param _id Account to query
-		@return integer
+		@notice Fetch balance of an investor from their ID
+		@param _id ID to query
+		@return uint256 balance
 	 */
 	function balanceOf(bytes32 _id) external view returns (uint256) {
 		return uint256(accounts[_id].balance);
 	}
-//TODOFROM HERE
+
 	/**
-		@notice Fetch count and limit of investors by country and rating
-		in one call to preserve gas
+		@notice Fetch minrating, investor counts and limits of a country
+		@dev counts[0] and levels[0] == the sum of counts[1:] and limits[1:]
 		@param _country Country to query
-		@return counts, limits
+		@return uint64 minRating, uint64 arrays of counts, limits
 	 */
 	function getCountry(
 		uint16 _country
 	)
 		external
 		view
-		returns (uint64[8] _count, uint64[8] _limit)
+		returns (uint64 _minRating, uint64[8] _count, uint64[8] _limit)
 	{
 		return (
+			countries[_country].minRating,
 			countries[_country].counts,
 			countries[_country].limits
 		);
 	}
 
 	/**
-		@notice Set country
+		@notice Set all information about a country
 		@param _country Country to modify
 		@param _allowed Is country approved
 		@param _minRating minimum investor rating
-		@param _limits investor limits
-		@return bool
+		@param _limits array of investor limits
+		@return bool success
 	 */
 	function setCountry(
 		uint16 _country,
@@ -151,10 +152,14 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	}
 
 	/**
-		@notice Initialize countries so they can accept investors
+		@notice Initialize many countries in a single call
+		@dev
+			This call is useful if you have a lot of countries to approve
+			where there is no investor limit specific to the investor ratings
 		@param _country Array of counties to add
 		@param _minRating Array of minimum investor ratings necessary for each country
 		@param _limit Array of maximum mumber of investors allowed from this country
+		@return bool success
 	 */
 	function setCountries(
 		uint16[] _country,
@@ -165,10 +170,10 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		returns (bool)
 	{
 		if (!_checkMultiSig()) return false;
-		require (_country.length == _minRating.length);
-		require (_country.length == _limit.length);
+		require(_country.length == _minRating.length);
+		require(_country.length == _limit.length);
 		for (uint256 i = 0; i < _country.length; i++) {
-			require (_minRating[i] != 0);
+			require(_minRating[i] != 0);
 			Country storage c = countries[_country[i]];
 			c.allowed = true;
 			c.minRating = _minRating[i];
@@ -180,9 +185,12 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 
 	/**
 		@notice Set investor limits
-		@dev The first array entry (0) corresponds to the total investor limit,
-		regardless of rating
-		@param _limits Array of limits per rating
+		@dev
+			_limits[0] is the total investor limit, [1:] correspond to limits
+			at each specific investor rating. Setting a value of 0 means there
+			is no limit.
+		@param _limits Array of limits
+		@return bool success
 	 */
 	function setInvestorLimits(
 		uint64[8] _limits
@@ -197,13 +205,16 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	}
 
 	/**
-		@notice Check if a transfer is possible at the issuing entity level
-		@param _token Token being transferred
+		@notice Check if transfer is possible based on issuer level restrictions
+		@param _token address of token being transferred
 		@param _auth address of the caller attempting the transfer
 		@param _from address of the sender
 		@param _to address of the receiver
-		@param _value Number of tokens being transferred
-		@return boolean
+		@param _value number of tokens being transferred
+		@return bytes32 ID of caller
+		@return bytes32[] IDs of sender and receiver
+		@return uint8[] ratings of sender and receiver
+		@return uint16[] countries of sender and receiver
 	 */
 	function checkTransfer(
 		address _token,
@@ -214,37 +225,50 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	)
 		external
 		returns (
-			bytes32 _idAuth,
+			bytes32 _authID,
 			bytes32[2] _id,
 			uint8[2] _rating,
 			uint16[2] _country
 		)
 	{
-		_idAuth = _getId(_auth);
-		_id[0] = _getId(_from);
-		_id[1] = _getId(_to);
+		_authID = _getID(_auth);
+		_id[0] = _getID(_from);
+		_id[1] = _getID(_to);
 		
-		if (_idAuth == ownerID && idMap[_auth].id != ownerID) {
-			/* bytes4 signatures of transfer, transferFrom */
+		if (_authID == ownerID && idMap[_auth].id != ownerID) {
+			/*
+				bytes4 signatures of transfer, transferFrom
+				This enforces sub-authority permissioning around transfers
+			*/
 			require(
 				authorityData[idMap[_auth].id].approvedUntil >= now &&
 				authorityData[idMap[_auth].id].signatures[
-					(_idAuth == _id[0] ? bytes4(0xa9059cbb) : bytes4(0x23b872dd))
+					(_authID == _id[0] ? bytes4(0xa9059cbb) : bytes4(0x23b872dd))
 				], "Authority is not permitted"
 			);
 		}
 
-		address _addr = (_idAuth == _id[0] ? _auth : _from);
+		address _addr = (_authID == _id[0] ? _auth : _from);
 		bool[2] memory _allowed;
 
 		(_allowed, _rating, _country) = _getInvestors(
 			address[2]([_addr, _to]),
 			uint8[2]([accounts[idMap[_addr].id].regKey, accounts[idMap[_to].id].regKey])
 		);
-		_checkTransfer(_token, _idAuth, _id, _allowed, _rating, _country, _value);
-		return (_idAuth, _id, _rating, _country);
+		_checkTransfer(_token, _authID, _id, _allowed, _rating, _country, _value);
+		return (_authID, _id, _rating, _country);
 	}	
 		
+	/**
+		@notice View function to check if transfer is permitted
+		@param _token address of token being transferred
+		@param _from address of the sender
+		@param _to address of the receiver
+		@param _value number of tokens being transferred
+		@return bytes32[] IDs of sender and receiver
+		@return uint8[] ratings of sender and receiver
+		@return uint16[] countries of sender and receiver
+	 */
 	function checkTransferView(
 		address _token,
 		address _from,
@@ -260,8 +284,8 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		)
 	{	
 		uint8[2] memory _key;
-		(_id[0], _key[0]) = _getIdView(_from);
-		(_id[1], _key[1]) = _getIdView(_to);
+		(_id[0], _key[0]) = _getIDView(_from);
+		(_id[1], _key[1]) = _getIDView(_to);
 
 		if (_id[0] == ownerID && idMap[_from].id != ownerID) {
 			require(
@@ -279,9 +303,19 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return (_id, _rating, _country);
 	}
 
+	/**
+		@dev internal check if transfer is permitted
+		@param _token address of token being transferred
+		@param _authID id hash of caller
+		@param _id addresses of sender and receiver
+		@param _allowed array of permission bools from registrar
+		@param _rating array of investor ratings
+		@param _country array of investor countries
+		@param _value amount to be transferred
+	 */
 	function _checkTransfer(
 		address _token,
-		bytes32 _idAuth,
+		bytes32 _authID,
 		bytes32[2] _id,
 		bool[2] _allowed,
 		uint8[2] _rating,
@@ -303,41 +337,44 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		require(!accounts[_id[1]].restricted, "Receiver restricted: Token");
 		require(_allowed[1], "Receiver restricted: Registrar");
 		if (_id[0] != _id[1]) {
-			/* TODO Exchange to exchange transfers are not permitted */
+			/*
+				A rating of 0 implies the receiver is the issuer or a
+				custodian, no further checks are needed.
+			*/
 			if (_rating[1] != 0) {
 				Country storage c = countries[_country[1]];
-				require (c.allowed, "Reciever blocked: Country");
+				require(c.allowed, "Reciever blocked: Country");
 				/*  
 					If the receiving investor currently has a 0 balance,
-					we must make sure a slot is available for allocation
+					we must make sure a slot is available for allocation.
 				*/
-				require (_rating[1] >= c.minRating, "Receiver blocked: Rating");
+				require(_rating[1] >= c.minRating, "Receiver blocked: Rating");
 				if (accounts[_id[1]].balance == 0) {
-					/*
-						If the sender is an investor and still retains a balance,
-						a new slot must be available
-					*/
+					/* create a bool to prevent repeated comparisons */
 					bool _check = (
 						_rating[0] != 0 ||
 						accounts[_id[1]].balance > _value
 					);
+					/*
+						If the sender is an investor and still retains a balance,
+						a new slot must be available.
+					*/
 					if (_check) {
-						require (
+						require(
 							limits[0] == 0 ||
 							counts[0] < limits[0],
-							"Investor Limit"
-
+							"Total Investor Limit"
 						);
 					}
 					/*
 						If the investors are from different countries, make sure
-						a slot is available in the overall country limit
+						a slot is available in the overall country limit.
 					*/
 					if (_check || _country[0] != _country[1]) {
-						require (
+						require(
 							c.limits[0] == 0 ||
 							c.counts[0] < c.limits[0],
-							"Investor Limit"
+							"Country Investor Limit"
 						);
 					}
 					if (!_check) {
@@ -346,36 +383,37 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 					/*
 						If the investors are of different ratings, make sure a
 						slot is available in the receiver's rating in the overall
-						count
+						count.
 					*/
 					if (_check) {
-						require (
+						require(
 							limits[_rating[1]] == 0 ||
 							counts[_rating[1]] < limits[_rating[1]],
-							"Investor Limit"
+							"Total Investor Limit: Rating"
 						);
 					}
 					/*
 						If the investors don't match in country or rating, make
 						sure a slot is available in both the specific country
-						and rating for the receiver
+						and rating for the receiver.
 					*/
 					if (_check || _country[0] != _country[1]) {
-						require (
+						require(
 							c.limits[_rating[1]] == 0 ||
 							c.counts[_rating[1]] < c.limits[_rating[1]],
-							"Investor Limit"
+							"Country Investor Limit: Rating"
 						);
 					}
 				}
 			}
 		}
+		/* Call any attached modules */
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
 				require(
 					IIssuerModule(modules[i].module).checkTransfer(
 						_token,
-						_idAuth,
+						_authID,
 						_id,
 						_rating,
 						_country,
@@ -386,13 +424,13 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		}
 	}
 
-	function getId(address _addr) external view returns (bytes32) {
-		(bytes32 _id, uint8 _key) = _getIdView(_addr);
+	function getID(address _addr) external view returns (bytes32) {
+		(bytes32 _id, uint8 _key) = _getIDView(_addr);
 		return _id;
 	}
 
-	function _getId(address _addr) internal returns (bytes32) {
-		(bytes32 _id, uint8 _key) = _getIdView(_addr);
+	function _getID(address _addr) internal returns (bytes32) {
+		(bytes32 _id, uint8 _key) = _getIDView(_addr);
 		if (idMap[_addr].id == 0) {
 			idMap[_addr].id = _id;
 		}
@@ -402,7 +440,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return _id;
 	}
 
-	function _getIdView(address _addr) internal view returns (bytes32, uint8) {
+	function _getIDView(address _addr) internal view returns (bytes32, uint8) {
 		if (
 			authorityData[idMap[_addr].id].addressCount > 0 ||
 			_addr == address(this)
@@ -413,7 +451,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		if (_id == 0) {
 			for (uint256 i = 1; i < regArray.length; i++) {
 				if (address(regArray[i].registrar) > 0) {
-					_id = regArray[i].registrar.getId(_addr);
+					_id = regArray[i].registrar.getID(_addr);
 					if (_id != 0) {
 						return (_id, uint8(i));
 					}
@@ -428,7 +466,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 			for (i = 1; i < regArray.length; i++) {
 				if (
 					address(regArray[i].registrar) != 0 && 
-					_id == regArray[i].registrar.getId(_addr)
+					_id == regArray[i].registrar.getID(_addr)
 				) {
 					return (_id, uint8(i));
 				}
@@ -517,7 +555,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
 				IIssuerModule m = IIssuerModule(modules[i].module);
-				require (
+				require(
 					m.transferTokens(msg.sender, _id, _rating, _country, _value)
 				);
 			}
@@ -570,7 +608,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
 				IIssuerModule m = IIssuerModule(modules[i].module);
-				require (m.balanceChanged(
+				require(m.balanceChanged(
 					msg.sender,
 					_id,
 					_rating,
@@ -629,30 +667,30 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 
 	/**
 		@notice Set document hash
-		@param _documentId Document ID being hashed
+		@param _documentID Document ID being hashed
 		@param _hash Hash of the document
 	 */
 	function setDocumentHash(
-		string _documentId,
+		string _documentID,
 		bytes32 _hash
 	)
 		external
 		returns (bool)
 	{
 		if (!_checkMultiSig()) return false;
-		require (documentHashes[_documentId] == 0);
-		documentHashes[_documentId] = _hash;
-		emit NewDocumentHash(_documentId, _hash);
+		require(documentHashes[_documentID] == 0);
+		documentHashes[_documentID] = _hash;
+		emit NewDocumentHash(_documentID, _hash);
 		return true;
 	}
 
 	/**
 		@notice Fetch document hash
-		@param _documentId Document ID to fetch
+		@param _documentID Document ID to fetch
 		@return string
 	 */
-	function getDocumentHash(string _documentId) external view returns (bytes32) {
-		return documentHashes[_documentId];
+	function getDocumentHash(string _documentID) external view returns (bytes32) {
+		return documentHashes[_documentID];
 	}
 
 	function setRegistrar(address _registrar, bool _allowed) external returns (bool) {
@@ -697,9 +735,9 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	function addToken(address _token) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		SecurityToken token = SecurityToken(_token);
-		require (!tokens[_token].set);
-		require (token.ownerID() == ownerID);
-		require (token.circulatingSupply() == 0);
+		require(!tokens[_token].set);
+		require(token.ownerID() == ownerID);
+		require(token.circulatingSupply() == 0);
 		tokens[_token].set = true;
 		uint256 _balance = uint256(accounts[ownerID].balance).add(token.treasurySupply());
 		accounts[ownerID].balance = uint240(_balance);
@@ -727,7 +765,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		returns (bool)
 	{
 		if (!_checkMultiSig()) return false;
-		require (tokens[_token].set);
+		require(tokens[_token].set);
 		tokens[_token].restricted = _restricted;
 		emit TokenRestricted(_token, _restricted);
 		return true;
@@ -751,7 +789,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		if (_target == address(this)) {
 			_attachModule(_module);
 		} else {
-			require (tokens[_target].set);
+			require(tokens[_target].set);
 			SecurityToken(_target).attachModule(_module);
 		}
 		return true;
@@ -770,7 +808,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		if (_target == address(this)) {
 			_detachModule(_module);
 		} else {
-			require (tokens[_target].set);
+			require(tokens[_target].set);
 			SecurityToken(_target).detachModule(_module);
 		}
 		return true;

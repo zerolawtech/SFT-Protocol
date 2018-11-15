@@ -399,7 +399,7 @@ contract KYCRegistrar {
 		@param _idString ID string to generate hash from
 		@return bytes32 investor ID hash
 	 */
-	function generateId(string _idString) external pure returns (bytes32) {
+	function generateID(string _idString) external pure returns (bytes32) {
 		return keccak256(abi.encodePacked(_idString));
 	}
 
@@ -408,7 +408,7 @@ contract KYCRegistrar {
 		@param _addr Address to query
 		@return bytes32 investor ID
 	 */
-	function getId(address _addr) external view returns (bytes32) {
+	function getID(address _addr) external view returns (bytes32) {
 		return idMap[_addr].id;
 	}
 
