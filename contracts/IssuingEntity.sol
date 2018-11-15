@@ -418,11 +418,21 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		));
 	}
 
+	/**
+		@notice Fetch an investor ID from an address
+		@param _addr address of token being transferred
+		@return bytes32 investor ID
+	 */
 	function getID(address _addr) external view returns (bytes32) {
 		(bytes32 _id, uint8 _key) = _getIDView(_addr);
 		return _id;
 	}
 
+	/**
+		@dev internal investor ID fetch, updates local record
+		@param _addr address of token being transferred
+		@return bytes32 investor ID
+	 */
 	function _getID(address _addr) internal returns (bytes32) {
 		(bytes32 _id, uint8 _key) = _getIDView(_addr);
 		if (idMap[_addr].id == 0) {
@@ -434,6 +444,11 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return _id;
 	}
 
+	/**
+		@dev internal investor ID fetch, does not update local record
+		@param _addr address of token being transferred
+		@return bytes32 investor ID, uint8 registrar index
+	 */
 	function _getIDView(address _addr) internal view returns (bytes32, uint8) {
 		if (
 			authorityData[idMap[_addr].id].addressCount > 0 ||
@@ -470,6 +485,12 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return (_id, accounts[_id].regKey);
 	}
 
+	/**
+		@dev fetch investor data from registrar(s)
+		@param _addr array of investor addresses
+		@param _key array of registrar indexes
+		@return permissions, ratings, and countries of investors
+	 */
 	function _getInvestors(
 		address[2] _addr,
 		uint8[2] _key
@@ -494,7 +515,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 			_rating[1] = 0;
 			_country[1] = 0;
 		}
-		
+		/* If both investors are in the same registry, call getInvestors */
 		if (_key[0] == _key[1] && _key[0] != 0) {
 			(
 				_id,
@@ -502,6 +523,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 				_rating,
 				_country
 			) = regArray[_key[0]].registrar.getInvestors(_addr[0], _addr[1]);
+		/* Otherwise, call getInvestor at each registry */
 		} else {
 			if (_key[0] != 0) {
 				(
@@ -529,7 +551,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		@param _rating Arracy of sender/receiver ratings
 		@param _country Array of sender/receiver countries
 		@param _value Number of tokens being transferred
-		@return boolean
+		@return bool success
 	 */
 	function transferTokens(
 		bytes32[2] _id,
@@ -541,12 +563,12 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		onlyToken
 		returns (bool)
 	{
+		/* If no actual transfer of ownership, return true immediately */
 		if (_id[0] == _id[1]) return true;
 		uint256 _balance = uint256(accounts[_id[0]].balance).sub(_value);
 		_setBalance(_id[0], _rating[0], _country[0], _balance);
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
 		_setBalance(_id[1], _rating[1], _country[1], _balance);
-		
 		_callModules(1, 0x0cfb54c9, abi.encode(msg.sender, _id, _rating, _country, _value));
 		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
 		return true;
@@ -554,10 +576,11 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 
 	/**
 		@notice Affect a direct balance change (burn/mint) at the issuing entity level
+		@dev This can only be called by a token
 		@param _owner Token owner
 		@param _old Old balance
 		@param _new New balance
-		@return boolean
+		@return id, rating, and country of the affected investor
 	 */
 	function balanceChanged(
 		address _owner,
@@ -606,10 +629,10 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 
 	/**
 		@notice Directly set a balance at the issuing entity level
-		@param _id ID of affected entity
-		@param _country Country of affected entity
-		@param _value New balance
-		@return boolean
+		@param _id investor ID
+		@param _rating investor rating
+		@param _country investor country
+		@param _value new balance value
 	 */
 	function _setBalance(
 		bytes32 _id,
@@ -624,7 +647,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		if (_id != ownerID) {
 			/* rating from registrar does not match local rating */
 			if (_rating != a.rating) {
-				/* local rating is not 0, rating has changed */
+				/* if local rating is not 0, rating has changed */
 				if (a.rating > 0) {
 					c.counts[_rating] = c.counts[_rating].sub(1);
 					c.counts[a.rating] = c.counts[a.rating].add(1);
@@ -652,6 +675,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		@notice Set document hash
 		@param _documentID Document ID being hashed
 		@param _hash Hash of the document
+		@return bool success
 	 */
 	function setDocumentHash(
 		string _documentID,
@@ -670,7 +694,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	/**
 		@notice Fetch document hash
 		@param _documentID Document ID to fetch
-		@return string
+		@return document hash
 	 */
 	function getDocumentHash(string _documentID) external view returns (bytes32) {
 		return documentHashes[_documentID];
