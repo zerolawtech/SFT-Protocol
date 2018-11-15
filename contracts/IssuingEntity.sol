@@ -408,7 +408,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 			}
 		}
 		/* Call checkTransfer on attached modules */
-		_callModule(0x47fca5df, abi.encode(
+		_callModules(0, 0x47fca5df, abi.encode(
 			_token,
 			_authID,
 			_id,
@@ -547,7 +547,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
 		_setBalance(_id[1], _rating[1], _country[1], _balance);
 		
-		_callModule(0x0cfb54c9, abi.encode(msg.sender, _id, _rating, _country, _value));
+		_callModules(1, 0x0cfb54c9, abi.encode(msg.sender, _id, _rating, _country, _value));
 		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
 		return true;
 	}
@@ -593,7 +593,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 			_newTotal = uint256(accounts[_id].balance).sub(_old.sub(_new));
 		}
 		_setBalance(_id, _rating, _country, _newTotal);
-		_callModule(0x4268353d, abi.encode(
+		_callModules(2, 0x4268353d, abi.encode(
 			msg.sender,
 			_id,
 			_rating,
@@ -805,14 +805,5 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	function isActiveModule(address _module) external view returns (bool) {
 		return activeModules[_module];
 	}
-
-	function _callModule(bytes4 _sig, bytes _data) internal {
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
-				require(modules[i].module.call(_sig, _data));
-			}
-		}
-	}
-
 
 }

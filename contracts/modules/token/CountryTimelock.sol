@@ -28,8 +28,8 @@ contract CountryLockModule is STModuleBase {
 		require (countryLock[_country[1]] < now);
 	}
 
-	function getBindings() external pure returns (bool, bool, bool) {
-		return (true, false, false);
+	function getBindings() external pure returns (bool[3]) {
+		return [true, false, false];
 	}
 
 }

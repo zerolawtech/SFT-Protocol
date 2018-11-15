@@ -176,23 +176,15 @@ contract SecurityToken is STBase {
 			_addr[1] = address(issuer);
 		}
 		require (balances[_addr[0]] >= _value, "Insufficient Balance");
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				require(
-					ISTModule(modules[i].module).checkTransfer(
-						_addr,
-						_authID,
-						_id,
-						_rating,
-						_country,
-						_value
-					)
-				);
-			}
-		}
-		return (
-			_addr
-		);
+		_callModules(0,0x70aaf928,abi.encode(
+			_addr,
+			_authID,
+			_id,
+			_rating,
+			_country,
+			_value
+		));
+		return _addr;
 	}
 
 	/// @notice ERC-20 approve standard
@@ -279,19 +271,13 @@ contract SecurityToken is STBase {
 		balances[_addr[0]] = balances[_addr[0]].sub(_value);
 		balances[_addr[1]] = balances[_addr[1]].add(_value);
 		require (issuer.transferTokens(_id, _rating, _country, _value));
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
-				require (
-					ISTModule(modules[i].module).transferTokens(
-						_addr,
-						_id,
-						_rating,
-						_country,
-						_value
-					)
-				);
-			}
-		}
+		_callModules(1, 0x35a341da, abi.encode(
+			_addr,
+			_id,
+			_rating,
+			_country,
+			_value
+		));
 		emit Transfer(_addr[0], _addr[1], _value);
 	}
 
@@ -322,20 +308,14 @@ contract SecurityToken is STBase {
 			uint8 _rating,
 			uint16 _country
 		) = issuer.balanceChanged(_owner, _old, _value);
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
-				require (
-					ISTModule(modules[i].module).balanceChanged(
-						_owner,
-						_id,
-						_rating,
-						_country,
-						_old,
-						_value
-					)
-				);
-			}
-		}
+		_callModules(2, 0x4268353d, abi.encode(
+			_owner,
+			_id,
+			_rating,
+			_country,
+			_old,
+			_value
+		));
 		emit BalanceChanged(_owner, _old, _value);
 		return true;
 	}

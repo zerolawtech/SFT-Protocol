@@ -16,8 +16,8 @@ contract MintBurnModule is IssuerModuleBase {
 
 	constructor(address _issuer) IssuerModuleBase(_issuer) public { }
 
-	function getBindings() external pure returns (bool, bool, bool) {
-		return (false, false, false);
+	function getBindings() external pure returns (bool[3]) {
+		return [false, false, false];
 	}
 
 	function mint(address _token, uint256 _value) external onlyIssuer returns (bool) {

@@ -84,8 +84,8 @@ contract CheckpointModule is STModuleBase {
 		return true;
 	}
 
-	function getBindings() external pure returns (bool, bool, bool) {
-		return (false, true, true);
+	function getBindings() external pure returns (bool[3]) {
+		return [false, true, true];
 	}
 
 }

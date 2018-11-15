@@ -155,8 +155,8 @@ contract CrowdsaleModule is STModuleBase {
 		return true;
 	}
 
-	function getBindings() external pure returns (bool, bool, bool) {
-		return (true, false, false);
+	function getBindings() external pure returns (bool[3]) {
+		return [true, false, false];
 	}
 
 }
