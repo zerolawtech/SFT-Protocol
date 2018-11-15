@@ -407,21 +407,15 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 				}
 			}
 		}
-		/* Call any attached modules */
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (address(modules[i].module) != 0 && modules[i].checkTransfer) {
-				require(
-					IIssuerModule(modules[i].module).checkTransfer(
-						_token,
-						_authID,
-						_id,
-						_rating,
-						_country,
-						_value
-					)
-				);
-			}
-		}
+		/* Call checkTransfer on attached modules */
+		_callModule(0x47fca5df, abi.encode(
+			_token,
+			_authID,
+			_id,
+			_rating,
+			_country,
+			_value
+		));
 	}
 
 	function getID(address _addr) external view returns (bytes32) {
@@ -552,14 +546,8 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		_setBalance(_id[0], _rating[0], _country[0], _balance);
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
 		_setBalance(_id[1], _rating[1], _country[1], _balance);
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (address(modules[i].module) != 0 && modules[i].transferTokens) {
-				IIssuerModule m = IIssuerModule(modules[i].module);
-				require(
-					m.transferTokens(msg.sender, _id, _rating, _country, _value)
-				);
-			}
-		}
+		
+		_callModule(0x0cfb54c9, abi.encode(msg.sender, _id, _rating, _country, _value));
 		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
 		return true;
 	}
@@ -605,19 +593,14 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 			_newTotal = uint256(accounts[_id].balance).sub(_old.sub(_new));
 		}
 		_setBalance(_id, _rating, _country, _newTotal);
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
-				IIssuerModule m = IIssuerModule(modules[i].module);
-				require(m.balanceChanged(
-					msg.sender,
-					_id,
-					_rating,
-					_country,
-					_oldTotal,
-					_newTotal
-				));
-			}
-		}
+		_callModule(0x4268353d, abi.encode(
+			msg.sender,
+			_id,
+			_rating,
+			_country,
+			_oldTotal,
+			_newTotal
+		));
 		return (_id, _rating, _country);
 	}
 
@@ -822,5 +805,14 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	function isActiveModule(address _module) external view returns (bool) {
 		return activeModules[_module];
 	}
+
+	function _callModule(bytes4 _sig, bytes _data) internal {
+		for (uint256 i = 0; i < modules.length; i++) {
+			if (address(modules[i].module) != 0 && modules[i].balanceChanged) {
+				require(modules[i].module.call(_sig, _data));
+			}
+		}
+	}
+
 
 }
