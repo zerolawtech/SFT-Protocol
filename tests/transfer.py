@@ -12,17 +12,17 @@ def transfer_from_issuer():
     a = accounts
     check.confirms(token.transfer, (a[2], 100), "Unable to send to account 2")
     check.equal(token.balanceOf(a[2]), 100, "Wrong balance on account 2")
-    check.equal(issuer.balanceOf(issuer.getId(a[2])), 100, "Wrong balance on account 2")
+    check.equal(issuer.balanceOf(issuer.getID(a[2])), 100, "Wrong balance on account 2")
     check.confirms(token.transfer,(a[3], 1000), "Unable to send to account 3")
     check.equal(token.balanceOf(a[3]), 1000, "Wrong balance on account 3")
-    check.equal(issuer.balanceOf(issuer.getId(a[3])), 1000, "Wrong balance on account 3")
+    check.equal(issuer.balanceOf(issuer.getID(a[3])), 1000, "Wrong balance on account 3")
     check.confirms(token.transfer, (a[4], 100), "Unable to send to account 4")
     check.confirms(token.transfer, (a[4], 100), "Unable to send to account 4")
     check.equal(token.balanceOf(a[4]), 200, "Wrong balance on account 4")
-    check.equal(issuer.balanceOf(issuer.getId(a[4])), 200, "Wrong balance on account 4")
+    check.equal(issuer.balanceOf(issuer.getID(a[4])), 200, "Wrong balance on account 4")
     check.equal(token.balanceOf(a[1]), 0, "Wrong balance on account 1")
     check.equal(token.balanceOf(issuer.address), 998700, "Wrong balance on issuer")
-    check.equal(issuer.balanceOf(issuer.getId(a[1])), 998700, "Wrong balance on account 1")
+    check.equal(issuer.balanceOf(issuer.getID(a[1])), 998700, "Wrong balance on account 1")
 
 def transfer_between_investors():
     '''Transfers between investors'''
@@ -46,7 +46,7 @@ def transfer_from():
 
 def transfer_same_investor():
     '''Transfers from multiple addresses with same ID'''
-    check.confirms(KYCRegistrar[0].addInvestor,(b"investor8", 1, 0, 1, 9999999999, a[8:10]),"Could not add investor to registrar")
+    check.confirms(KYCRegistrar[0].addInvestor,(b"investor8", 1, b'abc', 1, 9999999999, a[8:10]),"Could not add investor to registrar")
     check.confirms(token.transfer,(a[8],1000), "Unable to send to account 8")
     check.equal(token.balanceOf(a[8]),1000, "Account 8 balance wrong")
     check.equal(token.balanceOf(a[9]),0, "Account 9 balance wrong")
