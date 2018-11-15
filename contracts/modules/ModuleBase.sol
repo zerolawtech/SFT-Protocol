@@ -25,6 +25,10 @@ contract STModuleBase {
 		ownerID = issuer.ownerID();
 	}
 
+	function () public payable {
+		revert();
+	}
+
 	function owner() public view returns (address) {
 		return address(token);
 	}
@@ -49,6 +53,10 @@ contract IssuerModuleBase {
 	constructor(address _issuer) public {
 		issuer = IssuingEntity(_issuer);
 		ownerID = issuer.ownerID();
+	}
+
+	function () public payable {
+		revert();
 	}
 
 	function owner() public view returns (address) {
