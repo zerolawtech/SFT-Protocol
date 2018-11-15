@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import "../SecurityToken.sol";
 import "../IssuingEntity.sol";
 
+///@title SecurityToken Module Base Contract
 contract STModuleBase {
 
 	bytes32 public ownerID;
@@ -19,14 +20,15 @@ contract STModuleBase {
 		_;
 	}
 
+	/**
+		@notice Base constructor
+		@param _token SecurityToken contract address
+		@param _issuer IssuingEntity contract address
+	 */
 	constructor(address _token, address _issuer) public {
 		issuer = IssuingEntity(_issuer);
 		token = SecurityToken(_token);
 		ownerID = issuer.ownerID();
-	}
-
-	function () public payable {
-		revert();
 	}
 
 	function owner() public view returns (address) {
@@ -35,6 +37,7 @@ contract STModuleBase {
 
 }
 
+///@title IssuingEntity Module Base Contract
 contract IssuerModuleBase {
 
 	bytes32 public ownerID;
@@ -50,13 +53,13 @@ contract IssuerModuleBase {
 		_;
 	}
 
+	/**
+		@notice Base constructor
+		@param _issuer IssuingEntity contract address
+	 */
 	constructor(address _issuer) public {
 		issuer = IssuingEntity(_issuer);
 		ownerID = issuer.ownerID();
-	}
-
-	function () public payable {
-		revert();
 	}
 
 	function owner() public view returns (address) {

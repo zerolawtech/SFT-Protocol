@@ -17,11 +17,6 @@ contract Modular {
 	event ModuleAttached(address module, bool check, bool transfer, bool balance);
 	event ModuleDetached(address module);
 
-	/// @notice Fallback function
-	function () public payable {
-		revert();
-	}
-
 	/**
 		@notice Internal function to attach a module
 		@dev This is called by attachModule() in the inheriting contract
