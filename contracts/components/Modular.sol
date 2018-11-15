@@ -3,7 +3,9 @@ pragma solidity ^0.4.24;
 import "../interfaces/STModule.sol";
 
 
-/// @title Security Token Base
+/**
+	@title Modular Functionality for IssuingEntity and SecurityToken
+ */
 contract Modular {
 
 	struct Module {
@@ -11,11 +13,10 @@ contract Modular {
 		bool[3] hooks;
 	}
 
-	/* Modules are loaded on an as-needed basis to keep gas costs minimal. */
 	Module[] modules;
 	mapping (address => bool) activeModules;
 
-	//event ModuleAttached(address module, bool check, bool transfer, bool balance);
+	event ModuleAttached(address module, bool check, bool transfer, bool balance);
 	event ModuleDetached(address module);
 
 	/// @notice Fallback function
@@ -23,9 +24,11 @@ contract Modular {
 		revert();
 	}
 
-	/// @notice Attach a module to a token
-	/// @param _module Address of the deployed module
-	/// @return boolean
+	/**
+		@notice Internal function to attach a module
+		@dev This is called by attachModule() in the inheriting contract
+		@param _module Address of the module to attach
+	 */
 	function _attachModule(address _module) internal {
 		require (!activeModules[_module]);
 		IBaseModule b = IBaseModule(_module);
@@ -35,17 +38,19 @@ contract Modular {
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (modules[i].module == 0) {
 				modules[i] = Module(_module, _hooks);
-				//emit ModuleAttached(_module, _check, _transfer, _balance);
+				emit ModuleAttached(_module, _hooks[0], _hooks[1], _hooks[2]);
 				return;
 			}
 		}
 		modules.push(Module(_module, _hooks));
-		//emit ModuleAttached(_module, _check, _transfer, _balance);
+		emit ModuleAttached(_module, _hooks[0], _hooks[1], _hooks[2]);
 	}
 
-	/// @notice Detach a module from a token
-	/// @param _module of the deployed module
-	/// @return boolean
+	/**
+		@notice Internal function to detach a module
+		@dev This is called by detachModule() in the inheriting contract
+		@param _module Address of the module to detach
+	 */
 	function _detachModule(address _module) internal {
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (modules[i].module == _module) {
@@ -59,7 +64,10 @@ contract Modular {
 	}
 
 	/**
-		@notice Iterate through active modules and call any 
+		@notice Internal function to iterate and call modules
+		@param _hook Index of module hooks bool[] to know if it should be called
+		@param _sig bytes4 signature to call module with
+		@param _bytes calldata to send to module
 	 */
 	function _callModules(uint256 _hook, bytes4 _sig, bytes _data) internal {
 		for (uint256 i = 0; i < modules.length; i++) {
