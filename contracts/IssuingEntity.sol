@@ -66,13 +66,12 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	);
 	event InvestorLimitSet(uint16 indexed country, uint64[8] limits);
 	event NewDocumentHash(string indexed document, bytes32 documentHash);
-	event RegistrarAdded(address indexed registrar);
-	event RegistrarRemoved(address indexed registrar);
+	event RegistrarSet(address indexed registrar, bool allowed);
 	event CustodianAdded(address indexed custodian);
 	event TokenAdded(address indexed token);
-	event InvestorRestricted(bytes32 indexed id, bool restricted);
-	event TokenRestricted(address indexed token, bool restricted);
-	event GloballyRestricted(bool restricted);
+	event InvestorRestriction(bytes32 indexed id, bool allowed);
+	event TokenRestriction(address indexed token, bool allowed);
+	event GlobalRestriction(bool allowed);
 	
 	/// @dev check that call originates from a registered, unrestricted token
 	modifier onlyToken() {
@@ -92,6 +91,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		MultiSigMultiOwner(_owners, _threshold)
 		public 
 	{
+		/* First registrar is empty so Account.regKey == 0 means it is unset. */
 		regArray.push(Registrar(KYCRegistrar(0),false));
 		emit NewIssuingEntity(msg.sender, address(this), ownerID);
 	}
@@ -654,13 +654,13 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 				}
 				a.rating = _rating;
 			}
-			/* If this sets an investor account balance > 0, take an available slot */
+			/* If investor account balance was 0, increase investor counts */
 			if (a.balance == 0) {
 				counts[0] = counts[0].add(1);
 				counts[_rating] = counts[_rating].add(1);
 				c.counts[0] = c.counts[0].add(1);
 				c.counts[_rating] = c.counts[_rating].add(1);
-			/* If this sets an investor account balance to 0, add another available slot */
+			/* If investor account balance is now 0, reduce investor counts */
 			} else if (_value == 0) {
 				counts[0] = counts[0].sub(1);
 				counts[_rating] = counts[_rating].sub(1);
@@ -700,44 +700,60 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return documentHashes[_documentID];
 	}
 
+	/**
+		@notice Attach or remove a KYCRegistrar contract
+		@param _registrar address of registrar
+		@param _allowed registrar permission
+		@return bool success
+	 */
 	function setRegistrar(address _registrar, bool _allowed) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		for (uint256 i = 1; i < regArray.length; i++) {
 			if (address(regArray[i].registrar) == _registrar) {
 				regArray[i].restricted = !_allowed;
-				if (_allowed) {
-					emit RegistrarAdded(_registrar);
-					return true;
-				}
-				emit RegistrarRemoved(_registrar);
+				emit RegistrarSet(_registrar, _allowed);
 				return true;
 			}
 		}
 		if (_allowed) {
 			regArray.push(Registrar(KYCRegistrar(_registrar), false));
-			emit RegistrarAdded(_registrar);
+			emit RegistrarSet(_registrar, _allowed);
 			return true;
 		}
-		revert();
-		
+		revert();		
 	}
 
+	/**
+		@notice Get address of the registrar an investor is associated with
+		@param _id Investor ID
+		@return registrar address
+	 */
 	function getRegistrar(bytes32 _id) external view returns (address) {
 		return regArray[accounts[_id].regKey].registrar;
 	}
 
+	/**
+		@notice Add a custodian
+		@dev
+			Custodians are entities such as broker or exchanges that are approved
+			to hold tokens for 1 or more beneficial owners.
+			https://github.com/iamdefinitelyahuman/security-token/blob/master/docs/custodian.md
+		@param _addr address of custodian contract
+		@return bool success
+	 */
 	function addCustodian(address _addr) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		bytes32 _id = ICustodian(_addr).id();
 		idMap[_addr].id = _id;
 		accounts[_id].registrar = _addr;
 		emit CustodianAdded(_addr);
+		return true;
 	}
 
 	/**
 		@notice Add a new security token contract
 		@param _token Token contract address
-		@return bool
+		@return bool success
 	 */
 	function addToken(address _token) external returns (bool) {
 		if (!_checkMultiSig()) return false;
@@ -752,39 +768,75 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return true;
 	}
 
+	/**
+		@notice Set restriction on an investor ID
+		@dev
+			This is used for regular investors or custodians. Restrictions
+			on sub-authorities must be handled with MultiSig functions.
+		@param _id investor ID
+		@param _allowed permission bool
+		@return bool success
+	 */
 	function setInvestorRestriction(
 		bytes32 _id,
-		bool _restricted
+		bool _allowed
 	)
 		external
 		returns (bool)
 	{
 		if (!_checkMultiSig()) return false;
-		accounts[_id].restricted = _restricted;
-		emit InvestorRestricted(_id, _restricted);
+		accounts[_id].restricted = !_allowed;
+		emit InvestorRestriction(_id, _allowed);
+		return true;
 	}
 
+	/**
+		@notice Set restriction on a token
+		@dev
+			Only the issuer can transfer restricted tokens. Useful in dealing
+			with a security breach or a token migration.
+		@param _token Address of the token
+		@param _allowed permission bool
+		@return bool success
+	 */
 	function setTokenRestriction(
 		address _token,
-		bool _restricted
+		bool _allowed
 	)
 		external
 		returns (bool)
 	{
 		if (!_checkMultiSig()) return false;
 		require(tokens[_token].set);
-		tokens[_token].restricted = _restricted;
-		emit TokenRestricted(_token, _restricted);
+		tokens[_token].restricted = !_allowed;
+		emit TokenRestriction(_token, _allowed);
 		return true;
 	}
 
-	function setGlobalRestriction(bool _restricted) external returns (bool) {
+	/**
+		@notice Set restriction on all tokens for this issuer
+		@dev Only the issuer can transfer restricted tokens.
+		@param _allowed permission bool
+		@return bool success
+	 */
+	function setGlobalRestriction(bool _allowed) external returns (bool) {
 		if (!_checkMultiSig()) return false;
-		locked = _restricted;
-		emit GloballyRestricted(_restricted);
+		locked = !_allowed;
+		emit GlobalRestriction(_allowed);
 		return true;
 	}
 
+	/**
+		@notice Attach a module to IssuingEntity or SecurityToken
+		@dev
+			Modules have a lot of permission and flexibility in what they
+			can do. Only attach a module that has been properly auditted and
+			where you understand exactly what it is doing.
+			https://github.com/iamdefinitelyahuman/security-token/blob/master/docs/modules.md
+		@param _target Address of the contract where the module is attached
+		@param _module Address of the module contract
+		@return bool success
+	 */
 	function attachModule(
 		address _target,
 		address _module
@@ -802,6 +854,13 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 		return true;
 	}
 
+	/**
+		@notice Detach a module from IssuingEntity or SecurityToken
+		@dev This function may also be called by the module itself.
+		@param _target Address of the contract where the module is attached
+		@param _module Address of the module contract
+		@return bool success
+	 */
 	function detachModule(
 		address _target,
 		address _module
@@ -824,7 +883,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 	/**
 		@notice Determines if a module is active on this issuing entity
 		@param _module Deployed module address
-		@return boolean
+		@return bool
 	 */
 	function isActiveModule(address _module) external view returns (bool) {
 		return activeModules[_module];

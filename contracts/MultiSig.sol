@@ -212,7 +212,7 @@ contract MultiSigMultiOwner {
 		return true;
 	}
 
-	function setApprovedUntil(
+	function setAuthorityApprovedUntil(
 		bytes32 _id,
 		uint64 _approvedUntil
 	 )
@@ -229,7 +229,7 @@ contract MultiSigMultiOwner {
 		return true;
 	}
 
-	function setPermittedSignatures(
+	function setAuthoritySignatures(
 		bytes32 _id,
 		bytes4[] _signatures,
 		bool _allowed
@@ -254,7 +254,7 @@ contract MultiSigMultiOwner {
 		return true;
 	}
 
-	function setMultiSigThreshold(
+	function setAuthorityThreshold(
 		bytes32 _id,
 		uint64 _threshold
 	)
