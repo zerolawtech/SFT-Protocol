@@ -193,13 +193,11 @@ contract MultiSigMultiOwner {
 	}
 
 	/**
-		@notice Private multisig functionality
-		@dev common logic for _checkMultiSig() and checkMultiSigExternal()
-		@param _id calling authority ID
-		@param _sig original msg.sig
-		@param _callHash keccack256 of msg.callhash
-		@param _address caller address
-		@return bool - has call met multisig threshold?
+		@notice Check if address belongs to an approved authority
+		@dev Used to verify permission for calls to modules
+		@param _addr Address of caller
+		@param _sig Original msg.sig
+		@return bool approval
 	 */
 	function isApprovedAuthority(
 		address _addr,
