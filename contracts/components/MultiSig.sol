@@ -7,10 +7,6 @@ contract MultiSigMultiOwner {
 
 	using SafeMath64 for uint64;
 
-	bytes32 public ownerID;
-	mapping (address => Address) idMap;
-	mapping (bytes32 => Authority) authorityData;
-
 	struct Address {
 		bytes32 id;
 		bool restricted;
@@ -23,6 +19,10 @@ contract MultiSigMultiOwner {
 		uint64 addressCount;
 		uint64 approvedUntil;
 	}
+
+	bytes32 public ownerID;
+	mapping (address => Address) idMap;
+	mapping (bytes32 => Authority) authorityData;
 
 	event MultiSigCall (
 		bytes32 indexed id,
@@ -43,10 +43,6 @@ contract MultiSigMultiOwner {
 		uint64 approvedUntil,
 		uint64 threshold
 	);
-	event ApprovedUntilSet (bytes32 indexed id, uint64 approvedUntil);
-	event ThresholdSet (bytes32 indexed id, uint64 threshold);
-	event NewAuthorityPermissions (bytes32 indexed id, bytes4[] signatures);
-	event RemovedAuthorityPermissions (bytes32 indexed id, bytes4[] signatures);
 	event NewAuthorityAddresses (
 		bytes32 indexed id,
 		address[] added,
@@ -57,24 +53,23 @@ contract MultiSigMultiOwner {
 		address[] removed,
 		uint64 ownerCount
 	);
-
+	event ApprovedUntilSet (bytes32 indexed id, uint64 approvedUntil);
+	event ThresholdSet (bytes32 indexed id, uint64 threshold);
+	event NewAuthorityPermissions (bytes32 indexed id, bytes4[] signatures);
+	event RemovedAuthorityPermissions (bytes32 indexed id, bytes4[] signatures);
+	
+	/// @dev Checks that the calling address is associated with the owner
 	modifier onlyOwner() {
 		require(idMap[msg.sender].id == ownerID);
 		require(!idMap[msg.sender].restricted);
 		_;
 	}
 
-	modifier onlyAuthority() {
-		bytes32 _id = idMap[msg.sender].id;
-		require(_id != 0);
-		require(!idMap[msg.sender].restricted);
-		if (_id != ownerID) {
-			require(authorityData[_id].signatures[msg.sig]);
-			require(authorityData[_id].approvedUntil >= now);
-		}
-		_;
-	}
-
+	/**
+		@dev
+	 		Checks that the calling address belongs to the owner, or is
+			associated with the authority it is trying to enact a change upon.
+	 */
 	modifier onlySelfAuthority(bytes32 _id) {
 		require (_id != 0);
 		if (idMap[msg.sender].id != ownerID) {
@@ -83,6 +78,11 @@ contract MultiSigMultiOwner {
 		_;
 	}
 
+	/**
+		@notice KYC registrar constructor
+		@param _owners Array of addresses for owning authority
+		@param _threshold multisig threshold for owning authority
+	 */ 
 	constructor(address[] _owners, uint64 _threshold) public {
 		require(_owners.length >= _threshold);
 		require(_owners.length > 0);
@@ -97,18 +97,43 @@ contract MultiSigMultiOwner {
 		emit NewAuthorityAddresses(ownerID, _owners, a.addressCount);
 	}
 
-	function _checkMultiSig() internal onlyAuthority returns (bool) {
+	/**
+		@notice Internal multisig functionality
+		@dev
+			Includiding a call to this function will also restrict
+			the calling function so that only an authority may use it.
+			It is comparble to using an 'onlyAuthority' modifier.
+		@return bool - has call met multisig threshold?
+	 */
+	function _checkMultiSig() internal returns (bool) {
+		bytes32 _id = idMap[msg.sender].id;
+		require(_id != 0);
+		require(!idMap[msg.sender].restricted);
+		if (_id != ownerID) {
+			require(authorityData[_id].signatures[msg.sig]);
+			require(authorityData[_id].approvedUntil >= now);
+		}
 		return _multiSigPrivate(
-			idMap[msg.sender].id,
+			_id,
 			msg.sig,
 			keccak256(msg.data),
 			msg.sender
 		);
 	}
 
+	/**
+		@notice External multisig functionality
+		@dev
+			This call allows you to add multisig functionality to modules.
+			It uses tx.origin to confirm that the original caller is an
+			approved authority.
+		@param _sig original msg.sig
+		@param _callHash keccack256 of original msg.callhash
+		@return bool - has call met multisig threshold?
+	 */
 	function checkMultiSigExternal(
-		bytes32 _callHash,
-		bytes4 _sig
+		bytes4 _sig,
+		bytes32 _callHash
 	)
 		external
 		returns (bool)
@@ -128,24 +153,15 @@ contract MultiSigMultiOwner {
 		);
 	}
 
-	function isApprovedAuthority(
-		address _addr,
-		bytes4 _sig
-	)
-		external
-		view
-		returns (bool)
-	{
-		bytes32 _id = idMap[_addr].id;
-		require(_id != 0);
-		require(!idMap[_addr].restricted);
-		if (_id != ownerID) {
-			require(authorityData[_id].signatures[_sig]);
-			require(authorityData[_id].approvedUntil >= now);
-		}
-		return true;
-	}
-
+	/**
+		@notice Private multisig functionality
+		@dev common logic for _checkMultiSig() and checkMultiSigExternal()
+		@param _id calling authority ID
+		@param _sig original msg.sig
+		@param _callHash keccack256 of msg.callhash
+		@param _address caller address
+		@return bool - has call met multisig threshold?
+	 */
 	function _multiSigPrivate(
 		bytes32 _id,
 		bytes4 _sig,
@@ -174,12 +190,47 @@ contract MultiSigMultiOwner {
 			a.multiSigThreshold
 		);
 		return false;
-
 	}
 
+	/**
+		@notice Private multisig functionality
+		@dev common logic for _checkMultiSig() and checkMultiSigExternal()
+		@param _id calling authority ID
+		@param _sig original msg.sig
+		@param _callHash keccack256 of msg.callhash
+		@param _address caller address
+		@return bool - has call met multisig threshold?
+	 */
+	function isApprovedAuthority(
+		address _addr,
+		bytes4 _sig
+	)
+		external
+		view
+		returns (bool)
+	{
+		bytes32 _id = idMap[_addr].id;
+		require(_id != 0);
+		require(!idMap[_addr].restricted);
+		if (_id != ownerID) {
+			require(authorityData[_id].signatures[_sig]);
+			require(authorityData[_id].approvedUntil >= now);
+		}
+		return true;
+	}
+
+	/**
+		@notice Add a new authority
+		@param _id Authority ID
+		@param _addr Array of addressses to register as authority
+		@param _signatures Array of bytes4 sigs this authority may call
+		@param _approvedUntil Epoch time that authority is approved until
+		@param _threshold Minimum number of calls to a method for multisig
+		@return bool success
+	 */
 	function addAuthority(
 		bytes32 _id,
-		address[] _owners,
+		address[] _addr,
 		bytes4[] _signatures,
 		uint64 _approvedUntil,
 		uint64 _threshold
@@ -191,27 +242,34 @@ contract MultiSigMultiOwner {
 		if (!_checkMultiSig()) {
 			return false;
 		}
-		require (_owners.length >= _threshold);
-		require (_owners.length > 0);
+		require (_addr.length >= _threshold);
+		require (_addr.length > 0);
 		Authority storage a = authorityData[_id];
 		require(a.addressCount == 0);
 		require(_id != 0);
-		for (uint256 i = 0; i < _owners.length; i++) {
-			require(idMap[_owners[i]].id == 0);
-			idMap[_owners[i]].id = _id;
+		for (uint256 i = 0; i < _addr.length; i++) {
+			require(idMap[_addr[i]].id == 0);
+			idMap[_addr[i]].id = _id;
 		}
 		for (i = 0; i < _signatures.length; i++) {
 			a.signatures[_signatures[i]] = true;
 		}
 		a.approvedUntil = _approvedUntil;
-		a.addressCount = uint64(_owners.length);
+		a.addressCount = uint64(_addr.length);
 		a.multiSigThreshold = _threshold;
 		emit NewAuthority(_id, _threshold, _approvedUntil);
-		emit NewAuthorityAddresses(_id, _owners, a.addressCount);
+		emit NewAuthorityAddresses(_id, _addr, a.addressCount);
 		emit NewAuthorityPermissions(_id, _signatures);
 		return true;
 	}
 
+	/**
+		@notice Modify an authority's approvedUntil time
+		@dev You can restrict an authority by setting the value to 0
+		@param _id Authority ID
+		@param _approvedUntil Epoch time that authority is approved until
+		@return bool success
+	 */
 	function setAuthorityApprovedUntil(
 		bytes32 _id,
 		uint64 _approvedUntil
@@ -229,6 +287,13 @@ contract MultiSigMultiOwner {
 		return true;
 	}
 
+	/**
+		@notice Modify an authority's permitted function calls
+		@param _id Authority ID
+		@param _signatures Array of bytes4 sigs
+		@param _allowed bool permission for calling the signatures
+		@return bool success
+	 */
 	function setAuthoritySignatures(
 		bytes32 _id,
 		bytes4[] _signatures,
@@ -254,6 +319,12 @@ contract MultiSigMultiOwner {
 		return true;
 	}
 
+	/**
+		@notice Modify an authority's multisig threshold
+		@param _id Authority ID
+		@param _threshold New multisig threshold value
+		@return bool success
+	 */
 	function setAuthorityThreshold(
 		bytes32 _id,
 		uint64 _threshold
@@ -272,9 +343,15 @@ contract MultiSigMultiOwner {
 		return true;
 	}
 
+	/**
+		@notice Add new addresses to an authority
+		@param _id Authority ID
+		@param _addr Array of addresses
+		@return bool success
+	 */
 	function addAuthorityAddresses(
 		bytes32 _id,
-		address[] _owners
+		address[] _addr
 	)
 		external
 		onlySelfAuthority(_id)
@@ -285,18 +362,25 @@ contract MultiSigMultiOwner {
 		}
 		Authority storage a = authorityData[_id];
 		require(a.addressCount > 0);
-		for (uint256 i = 0; i < _owners.length; i++) {
-			require(idMap[_owners[i]].id == 0);
-			idMap[_owners[i]].id = _id;
+		for (uint256 i = 0; i < _addr.length; i++) {
+			require(idMap[_addr[i]].id == 0);
+			idMap[_addr[i]].id = _id;
 		}
-		a.addressCount = a.addressCount.add(uint64(_owners.length));
-		emit NewAuthorityAddresses(_id, _owners, a.addressCount);
+		a.addressCount = a.addressCount.add(uint64(_addr.length));
+		emit NewAuthorityAddresses(_id, _addr, a.addressCount);
 		return true;
 	}
 
+	/**
+		@notice Remove addresses from an authority
+		@dev Once an address has been removed it may never be re-used
+		@param _id Authority ID
+		@param _addr Array of addresses
+		@return bool success
+	 */
 	function removeAuthorityAddresses(
 		bytes32 _id,
-		address[] _owners
+		address[] _addr
 	)
 		external
 		onlySelfAuthority(_id)
@@ -306,15 +390,15 @@ contract MultiSigMultiOwner {
 			return false;
 		}
 		Authority storage a = authorityData[_id];
-		for (uint256 i = 0; i < _owners.length; i++) {
-			require(idMap[_owners[i]].id == _id);
-			require(!idMap[_owners[i]].restricted);
-			idMap[_owners[i]].restricted = true;
+		for (uint256 i = 0; i < _addr.length; i++) {
+			require(idMap[_addr[i]].id == _id);
+			require(!idMap[_addr[i]].restricted);
+			idMap[_addr[i]].restricted = true;
 		}
-		a.addressCount = a.addressCount.sub(uint64(_owners.length));
+		a.addressCount = a.addressCount.sub(uint64(_addr.length));
 		require (a.addressCount >= a.multiSigThreshold);
 		require (a.addressCount > 0);
-		emit RemovedAuthorityAddresses(_id, _owners, a.addressCount);
+		emit RemovedAuthorityAddresses(_id, _addr, a.addressCount);
 		return true;
 	}
 

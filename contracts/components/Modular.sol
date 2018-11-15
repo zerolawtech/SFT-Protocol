@@ -3,9 +3,7 @@ pragma solidity ^0.4.24;
 import "../interfaces/STModule.sol";
 
 
-/**
-	@title Modular Functionality for IssuingEntity and SecurityToken
- */
+/// @title Modular Functionality for IssuingEntity and SecurityToken
 contract Modular {
 
 	struct Module {

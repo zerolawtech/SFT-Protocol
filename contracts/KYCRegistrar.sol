@@ -239,7 +239,7 @@ contract KYCRegistrar {
 	}
 
 	/**
-		@dev Internal multisig functionality
+		@notice Internal multisig functionality
 		@return bool - has call met multisig threshold?
 	 */
 	function _checkMultiSig() internal returns (bool) {
