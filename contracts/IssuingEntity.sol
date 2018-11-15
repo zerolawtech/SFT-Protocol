@@ -334,7 +334,7 @@ contract IssuingEntity is STBase, MultiSigMultiOwner {
 			require(_allowed[0], "Sender restricted: Registrar");	
 		}
 		/* Always check the receiver is not restricted. */
-		require(!accounts[_id[1]].restricted, "Receiver restricted: Token");
+		require(!accounts[_id[1]].restricted, "Receiver restricted: Issuer");
 		require(_allowed[1], "Receiver restricted: Registrar");
 		if (_id[0] != _id[1]) {
 			/*
