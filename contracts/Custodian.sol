@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./SecurityToken.sol";
-import "./MultiSig.sol";
+import "./components/MultiSig.sol";
 
 /// @title Custodian Contract
 contract Custodian is MultiSigMultiOwner {

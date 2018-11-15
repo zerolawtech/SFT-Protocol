@@ -1,19 +1,20 @@
 pragma solidity ^0.4.24;
 
 import "./open-zeppelin/SafeMath.sol";
+import "./KYCRegistrar.sol";
 import "./SecurityToken.sol";
-import "./STBase.sol";
 import "./interfaces/Custodian.sol";
-import "./MultiSig.sol";
+import "./components/Modular.sol";
+import "./components/MultiSig.sol";
 
 /// @title Issuing Entity
-contract IssuingEntity is STBase, MultiSigMultiOwner {
+contract IssuingEntity is Modular, MultiSigMultiOwner {
 
 	using SafeMath64 for uint64;
 	using SafeMath for uint256;
 
 	/*
-		Each country will have discrete limits for each investor class.
+		Each country can have specific limits for each investor class.
 		minRating corresponds to the minimum investor level for this country.
 		counts[0] and levels[0] == the sum total of counts[1:] and limits[1:]
 	*/

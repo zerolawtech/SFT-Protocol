@@ -1,11 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "./KYCRegistrar.sol";
-import "./interfaces/STModule.sol";
+import "../interfaces/STModule.sol";
 
 
 /// @title Security Token Base
-contract STBase {
+contract Modular {
 
 	struct Module {
 		address module;

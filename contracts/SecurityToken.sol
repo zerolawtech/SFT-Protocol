@@ -2,11 +2,11 @@ pragma solidity ^0.4.24;
 
 import "./open-zeppelin/SafeMath.sol";
 import "./IssuingEntity.sol";
-import "./STBase.sol";
+import "./components/Modular.sol";
 
 
 /// @title Security Token
-contract SecurityToken is STBase {
+contract SecurityToken is Modular {
 
 	using SafeMath for uint256;
 
