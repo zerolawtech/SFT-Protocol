@@ -490,7 +490,8 @@ contract KYCRegistrar {
 		@dev
 			This call is increases gas efficiency around token transfers
 			by minimizing the amount of calls to the registrar.
-		@param _addr array of addresses to query
+		@param _from first address to query
+		@param _to second address to query
 		@return bytes32 array of investor ID
 		@return bool array - investors are permitted?
 		@return uint8 array of investor ratings

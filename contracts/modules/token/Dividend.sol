@@ -45,7 +45,7 @@ contract DividendModule is CheckpointModule {
 		if (_beneficiary == 0) {
 			_beneficiary = msg.sender;
 		}
-		require (issuer.getId(_beneficiary) != ownerID);
+		require (issuer.getID(_beneficiary) != ownerID);
 		require (!claimed[_beneficiary]);
 		uint256 _value = _getBalance(_beneficiary).mul(dividendAmount).div(totalSupply);
 		claimed[_beneficiary] = true;
