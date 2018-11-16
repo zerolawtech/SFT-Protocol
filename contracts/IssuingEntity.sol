@@ -7,7 +7,7 @@ import "./interfaces/Custodian.sol";
 import "./components/Modular.sol";
 import "./components/MultiSig.sol";
 
-/// @title Issuing Entity
+/** @title Issuing Entity */
 contract IssuingEntity is Modular, MultiSigMultiOwner {
 
 	using SafeMath64 for uint64;
@@ -74,7 +74,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	event TokenRestriction(address indexed token, bool allowed);
 	event GlobalRestriction(bool allowed);
 	
-	/// @dev check that call originates from a registered, unrestricted token
+	/** @dev check that call originates from a registered, unrestricted token */
 	modifier onlyToken() {
 		require(tokens[msg.sender].set && !tokens[msg.sender].restricted);
 		_;

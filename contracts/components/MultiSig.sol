@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../open-zeppelin/SafeMath.sol";
 
-/// @title MultiSignature, MultiOwner Controls
+/** @title MultiSignature, MultiOwner Controls */
 contract MultiSigMultiOwner {
 
 	using SafeMath64 for uint64;
