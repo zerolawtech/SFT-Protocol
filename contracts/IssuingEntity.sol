@@ -45,8 +45,8 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 
 	bool locked;
 	Registrar[] regArray;
-	uint64[8] public counts;
-	uint64[8] public limits;
+	uint64[8] counts;
+	uint64[8] limits;
 	mapping (uint16 => Country) countries;
 	mapping (bytes32 => Account) accounts;
 	mapping (address => Token) tokens;
@@ -104,6 +104,14 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	 */
 	function balanceOf(bytes32 _id) external view returns (uint256) {
 		return uint256(accounts[_id].balance);
+	}
+
+	/**
+		@notice Fetch total investor counts and limits
+		@return counts, limits
+	 */
+	function getInvestorCounts() external view returns (uint64[8], uint64[8]) {
+		return (counts, limits);
 	}
 
 	/**
