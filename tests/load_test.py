@@ -38,7 +38,7 @@ def create_ecosystem():
         for inv in investors:
             if random.random() > 0.66:
                 continue
-            KYCRegistrar[-1].addInvestor(inv['id'], inv['country'], 0,
+            KYCRegistrar[-1].addInvestor(inv['id'], inv['country'], '0x00',
                                 inv['rating'], 9999999999, inv['accounts'])
             inv['kyc'].add(i)
     
@@ -73,7 +73,7 @@ def create_ecosystem():
             }
             issuer.countries.append(country)
             issuer.setCountries([c], [country['minRating']], [country['limit']])
-            check.equal(issuer.getCountryInvestorLimit(c, 0), country['limit'], "Country limit is wrong")
+            check.equal(issuer.getCountry(c)[2][0], country['limit'], "Country limit is wrong")
 
 
 def transfer_issuer_to_investors():
@@ -98,7 +98,7 @@ def transfer_issuer_to_investors():
             check.equal(token.balanceOf(issuer.address), token.balances[a[1]])
             check.equal(issuer.balanceOf(i['id']), _investor_balance(issuer, i))
             check.equal(issuer.balanceOf(_id), sum(t.balances[a[1]] for t in issuer.tokens))
-            check.equal(issuer.getCountryInvestorCount(i['country'],0), issuer.countries[i['country']]['count'])
+            check.equal(issuer.getCountry(i['country'])[1][0], issuer.countries[i['country']]['count'])
 
 
 def _is_allowed(issuer, investor):

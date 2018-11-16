@@ -58,7 +58,7 @@ contract MultiSigMultiOwner {
 	event NewAuthorityPermissions (bytes32 indexed id, bytes4[] signatures);
 	event RemovedAuthorityPermissions (bytes32 indexed id, bytes4[] signatures);
 	
-	/// @dev Checks that the calling address is associated with the owner
+	/** @dev Checks that the calling address is associated with the owner */
 	modifier onlyOwner() {
 		require(idMap[msg.sender].id == ownerID);
 		require(!idMap[msg.sender].restricted);
@@ -159,7 +159,7 @@ contract MultiSigMultiOwner {
 		@param _id calling authority ID
 		@param _sig original msg.sig
 		@param _callHash keccack256 of msg.callhash
-		@param _address caller address
+		@param _sender caller address
 		@return bool - has call met multisig threshold?
 	 */
 	function _multiSigPrivate(

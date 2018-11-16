@@ -60,7 +60,7 @@ contract Modular {
 		@notice Internal function to iterate and call modules
 		@param _hook Index of module hooks bool[] to know if it should be called
 		@param _sig bytes4 signature to call module with
-		@param _bytes calldata to send to module
+		@param _data calldata to send to module
 	 */
 	function _callModules(uint256 _hook, bytes4 _sig, bytes _data) internal {
 		for (uint256 i = 0; i < modules.length; i++) {

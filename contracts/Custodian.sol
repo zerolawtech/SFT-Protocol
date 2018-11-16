@@ -10,8 +10,6 @@ import "./components/MultiSig.sol";
 		it should be expanded upon depending on the specific needs
 		of the owner.
  */
-/// @title Custodian Contract
-/// @dev
 contract Custodian is MultiSigMultiOwner {
 
 	string public name;

@@ -305,7 +305,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	}
 
 	/**
-		@dev internal check if transfer is permitted
+		@notice internal check if transfer is permitted
 		@param _token address of token being transferred
 		@param _authID id hash of caller
 		@param _id addresses of sender and receiver
@@ -653,7 +653,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	{
 		Account storage a = accounts[_id];
 		Country storage c = countries[_country];
-		if (_id != ownerID) {
+		if (_rating != 0) {
 			/* rating from registrar does not match local rating */
 			if (_rating != a.rating) {
 				/* if local rating is not 0, rating has changed */
