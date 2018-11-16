@@ -1,0 +1,3522 @@
+"ISO Country Code", "Region Name", "ISO_3166-2 Region Code", "Bytes3 Result"
+AD,Andorra la Vella,AD-07,303700
+AD,Canillo,AD-02,303200
+AD,Encamp,AD-03,303300
+AD,Escaldes-Engordany,AD-08,303800
+AD,La Massana,AD-04,303400
+AD,Ordino,AD-05,303500
+AD,Sant Julia de Loria,AD-06,303600
+AE,'Ajman,AE-AJ,414a00
+AE,Abu Zaby,AE-AZ,415a00
+AE,Al Fujayrah,AE-FU,465500
+AE,Ash Shariqah,AE-SH,534800
+AE,Dubayy,AE-DU,445500
+AE,Ra's al Khaymah,AE-RK,524b00
+AE,Umm al Qaywayn,AE-UQ,555100
+AF,Badakhshan,AF-BDS,424453
+AF,Badghis,AF-BDG,424447
+AF,Baghlan,AF-BGL,42474c
+AF,Balkh,AF-BAL,42414c
+AF,Bamyan,AF-BAM,42414d
+AF,Daykundi,AF-DAY,444159
+AF,Farah,AF-FRA,465241
+AF,Faryab,AF-FYB,465942
+AF,Ghazni,AF-GHA,474841
+AF,Ghor,AF-GHO,47484f
+AF,Helmand,AF-HEL,48454c
+AF,Herat,AF-HER,484552
+AF,Jowzjan,AF-JOW,4a4f57
+AF,Kabul,AF-KAB,4b4142
+AF,Kandahar,AF-KAN,4b414e
+AF,Kapisa,AF-KAP,4b4150
+AF,Khost,AF-KHO,4b484f
+AF,Kunar,AF-KNR,4b4e52
+AF,Kunduz,AF-KDZ,4b445a
+AF,Laghman,AF-LAG,4c4147
+AF,Logar,AF-LOG,4c4f47
+AF,Nangarhar,AF-NAN,4e414e
+AF,Nimroz,AF-NIM,4e494d
+AF,Nuristan,AF-NUR,4e5552
+AF,Paktika,AF-PKA,504b41
+AF,Paktiya,AF-PIA,504941
+AF,Panjshayr,AF-PAN,50414e
+AF,Parwan,AF-PAR,504152
+AF,Samangan,AF-SAM,53414d
+AF,Sar-e Pul,AF-SAR,534152
+AF,Takhar,AF-TAK,54414b
+AF,Uruzgan,AF-URU,555255
+AF,Wardak,AF-WAR,574152
+AF,Zabul,AF-ZAB,5a4142
+AG,Saint John,AG-04,303400
+AG,Saint Mary,AG-05,303500
+AG,Saint Paul,AG-06,303600
+AL,Berat,AL-01,303100
+AL,Diber,AL-09,303900
+AL,Durres,AL-02,303200
+AL,Elbasan,AL-03,303300
+AL,Fier,AL-04,303400
+AL,Gjirokaster,AL-05,303500
+AL,Korce,AL-06,303600
+AL,Kukes,AL-07,303700
+AL,Lezhe,AL-08,303800
+AL,Shkoder,AL-10,313000
+AL,Tirane,AL-11,313100
+AL,Vlore,AL-12,313200
+AM,Aragacotn,AM-AG,414700
+AM,Ararat,AM-AR,415200
+AM,Armavir,AM-AV,415600
+AM,Erevan,AM-ER,455200
+AM,Gegark'unik',AM-GR,475200
+AM,Kotayk',AM-KT,4b5400
+AM,Lori,AM-LO,4c4f00
+AM,Sirak,AM-SH,534800
+AM,Syunik',AM-SU,535500
+AM,Tavus,AM-TV,545600
+AM,Vayoc Jor,AM-VD,564400
+AO,Bengo,AO-BGO,42474f
+AO,Benguela,AO-BGU,424755
+AO,Bie,AO-BIE,424945
+AO,Cabinda,AO-CAB,434142
+AO,Cunene,AO-CNN,434e4e
+AO,Huambo,AO-HUA,485541
+AO,Huila,AO-HUI,485549
+AO,Kuando Kubango,AO-CCU,434355
+AO,Kwanza Norte,AO-CNO,434e4f
+AO,Kwanza Sul,AO-CUS,435553
+AO,Luanda,AO-LUA,4c5541
+AO,Lunda Norte,AO-LNO,4c4e4f
+AO,Lunda Sul,AO-LSU,4c5355
+AO,Malange,AO-MAL,4d414c
+AO,Moxico,AO-MOX,4d4f58
+AO,Namibe,AO-NAM,4e414d
+AO,Uige,AO-UIG,554947
+AO,Zaire,AO-ZAI,5a4149
+AR,Buenos Aires,AR-B,420000
+AR,Catamarca,AR-K,4b0000
+AR,Chaco,AR-H,480000
+AR,Chubut,AR-U,550000
+AR,Ciudad Autonoma de Buenos Aires,AR-C,430000
+AR,Cordoba,AR-X,580000
+AR,Corrientes,AR-W,570000
+AR,Entre Rios,AR-E,450000
+AR,Formosa,AR-P,500000
+AR,Jujuy,AR-Y,590000
+AR,La Pampa,AR-L,4c0000
+AR,La Rioja,AR-F,460000
+AR,Mendoza,AR-M,4d0000
+AR,Misiones,AR-N,4e0000
+AR,Neuquen,AR-Q,510000
+AR,Rio Negro,AR-R,520000
+AR,Salta,AR-A,410000
+AR,San Juan,AR-J,4a0000
+AR,San Luis,AR-D,440000
+AR,Santa Cruz,AR-Z,5a0000
+AR,Santa Fe,AR-S,530000
+AR,Santiago del Estero,AR-G,470000
+AR,Tierra del Fuego,AR-V,560000
+AR,Tucuman,AR-T,540000
+AT,Burgenland,AT-1,310000
+AT,Karnten,AT-2,320000
+AT,Niederosterreich,AT-3,330000
+AT,Oberosterreich,AT-4,340000
+AT,Salzburg,AT-5,350000
+AT,Steiermark,AT-6,360000
+AT,Tirol,AT-7,370000
+AT,Vorarlberg,AT-8,380000
+AT,Wien,AT-9,390000
+AU,Australian Capital Territory,AU-ACT,414354
+AU,New South Wales,AU-NSW,4e5357
+AU,Northern Territory,AU-NT,4e5400
+AU,Queensland,AU-QLD,514c44
+AU,South Australia,AU-SA,534100
+AU,Tasmania,AU-TAS,544153
+AU,Victoria,AU-VIC,564943
+AU,Western Australia,AU-WA,574100
+AZ,Abseron,AZ-ABS,414253
+AZ,Agcabadi,AZ-AGC,414743
+AZ,Agdam,AZ-AGM,41474d
+AZ,Agdas,AZ-AGS,414753
+AZ,Agstafa,AZ-AGA,414741
+AZ,Agsu,AZ-AGU,414755
+AZ,Astara,AZ-AST,415354
+AZ,Baki,AZ-BA,424100
+AZ,Balakan,AZ-BAL,42414c
+AZ,Barda,AZ-BAR,424152
+AZ,Beylaqan,AZ-BEY,424559
+AZ,Bilasuvar,AZ-BIL,42494c
+AZ,Cabrayil,AZ-CAB,434142
+AZ,Calilabad,AZ-CAL,43414c
+AZ,Daskasan,AZ-DAS,444153
+AZ,Fuzuli,AZ-FUZ,46555a
+AZ,Gadabay,AZ-GAD,474144
+AZ,Ganca,AZ-GA,474100
+AZ,Goranboy,AZ-GOR,474f52
+AZ,Goycay,AZ-GOY,474f59
+AZ,Goygol,AZ-GYG,475947
+AZ,Haciqabul,AZ-HAC,484143
+AZ,Imisli,AZ-IMI,494d49
+AZ,Ismayilli,AZ-ISM,49534d
+AZ,Kalbacar,AZ-KAL,4b414c
+AZ,Lacin,AZ-LAC,4c4143
+AZ,Lankaran,AZ-LA,4c4100
+AZ,Lerik,AZ-LER,4c4552
+AZ,Masalli,AZ-MAS,4d4153
+AZ,Mingacevir,AZ-MI,4d4900
+AZ,Naftalan,AZ-NA,4e4100
+AZ,Naxcivan,AZ-NX,4e5800
+AZ,Neftcala,AZ-NEF,4e4546
+AZ,Oguz,AZ-OGU,4f4755
+AZ,Qabala,AZ-QAB,514142
+AZ,Qax,AZ-QAX,514158
+AZ,Qazax,AZ-QAZ,51415a
+AZ,Qobustan,AZ-QOB,514f42
+AZ,Quba,AZ-QBA,514241
+AZ,Qubadli,AZ-QBI,514249
+AZ,Qusar,AZ-QUS,515553
+AZ,Saatli,AZ-SAT,534154
+AZ,Sabirabad,AZ-SAB,534142
+AZ,Saki,AZ-SA,534100
+AZ,Salyan,AZ-SAL,53414c
+AZ,Samaxi,AZ-SMI,534d49
+AZ,Samkir,AZ-SKR,534b52
+AZ,Samux,AZ-SMX,534d58
+AZ,Sirvan,AZ-SR,535200
+AZ,Sumqayit,AZ-SM,534d00
+AZ,Susa,AZ-SUS,535553
+AZ,Tartar,AZ-TAR,544152
+AZ,Tovuz,AZ-TOV,544f56
+AZ,Ucar,AZ-UCA,554341
+AZ,Xacmaz,AZ-XAC,584143
+AZ,Xankandi,AZ-XA,584100
+AZ,Xizi,AZ-XIZ,58495a
+AZ,Xocali,AZ-XCI,584349
+AZ,Xocavand,AZ-XVD,585644
+AZ,Yardimli,AZ-YAR,594152
+AZ,Yevlax,AZ-YE,594500
+AZ,Zangilan,AZ-ZAN,5a414e
+AZ,Zaqatala,AZ-ZAQ,5a4151
+AZ,Zardab,AZ-ZAR,5a4152
+BA,Federacija Bosne i Hercegovine,BA-BIH,424948
+BA,Republika Srpska,BA-SRP,535250
+BB,Christ Church,BB-01,303100
+BB,Saint James,BB-04,303400
+BB,Saint Joseph,BB-06,303600
+BB,Saint Michael,BB-08,303800
+BB,Saint Peter,BB-09,303900
+BD,Barisal,BD-06,303600
+BD,Chittagong,BD-10,313000
+BD,Dhaka,BD-13,313300
+BD,Khulna,BD-27,323700
+BD,Rajshahi,BD-54,353400
+BD,Rangpur,BD-55,353500
+BD,Sylhet,BD-60,363000
+BE,Antwerpen,BE-VAN,56414e
+BE,Brabant wallon,BE-WBR,574252
+BE,Brussels Hoofdstedelijk Gewest,BE-BRU,425255
+BE,Hainaut,BE-WHT,574854
+BE,Liege,BE-WLG,574c47
+BE,Limburg,BE-VLI,564c49
+BE,Luxembourg,BE-WLX,574c58
+BE,Namur,BE-WNA,574e41
+BE,Oost-Vlaanderen,BE-VOV,564f56
+BE,Vlaams-Brabant,BE-VBR,564252
+BE,West-Vlaanderen,BE-VWV,565756
+BF,Bale,BF-BAL,42414c
+BF,Bam,BF-BAM,42414d
+BF,Banwa,BF-BAN,42414e
+BF,Bazega,BF-BAZ,42415a
+BF,Bougouriba,BF-BGR,424752
+BF,Boulgou,BF-BLG,424c47
+BF,Boulkiemde,BF-BLK,424c4b
+BF,Comoe,BF-COM,434f4d
+BF,Ganzourgou,BF-GAN,47414e
+BF,Gnagna,BF-GNA,474e41
+BF,Gourma,BF-GOU,474f55
+BF,Houet,BF-HOU,484f55
+BF,Ioba,BF-IOB,494f42
+BF,Kadiogo,BF-KAD,4b4144
+BF,Kenedougou,BF-KEN,4b454e
+BF,Komondjari,BF-KMD,4b4d44
+BF,Kompienga,BF-KMP,4b4d50
+BF,Kossi,BF-KOS,4b4f53
+BF,Koulpelogo,BF-KOP,4b4f50
+BF,Kouritenga,BF-KOT,4b4f54
+BF,Kourweogo,BF-KOW,4b4f57
+BF,Leraba,BF-LER,4c4552
+BF,Loroum,BF-LOR,4c4f52
+BF,Mouhoun,BF-MOU,4d4f55
+BF,Nahouri,BF-NAO,4e414f
+BF,Namentenga,BF-NAM,4e414d
+BF,Nayala,BF-NAY,4e4159
+BF,Noumbiel,BF-NOU,4e4f55
+BF,Oubritenga,BF-OUB,4f5542
+BF,Oudalan,BF-OUD,4f5544
+BF,Passore,BF-PAS,504153
+BF,Poni,BF-PON,504f4e
+BF,Sanguie,BF-SNG,534e47
+BF,Sanmatenga,BF-SMT,534d54
+BF,Seno,BF-SEN,53454e
+BF,Sissili,BF-SIS,534953
+BF,Soum,BF-SOM,534f4d
+BF,Sourou,BF-SOR,534f52
+BF,Tapoa,BF-TAP,544150
+BF,Tuy,BF-TUI,545549
+BF,Yagha,BF-YAG,594147
+BF,Yatenga,BF-YAT,594154
+BF,Ziro,BF-ZIR,5a4952
+BF,Zondoma,BF-ZON,5a4f4e
+BF,Zoundweogo,BF-ZOU,5a4f55
+BG,Blagoevgrad,BG-01,303100
+BG,Burgas,BG-02,303200
+BG,Dobrich,BG-08,303800
+BG,Gabrovo,BG-07,303700
+BG,Haskovo,BG-26,323600
+BG,Kardzhali,BG-09,303900
+BG,Kyustendil,BG-10,313000
+BG,Lovech,BG-11,313100
+BG,Montana,BG-12,313200
+BG,Pazardzhik,BG-13,313300
+BG,Pernik,BG-14,313400
+BG,Pleven,BG-15,313500
+BG,Plovdiv,BG-16,313600
+BG,Razgrad,BG-17,313700
+BG,Ruse,BG-18,313800
+BG,Shumen,BG-27,323700
+BG,Silistra,BG-19,313900
+BG,Sliven,BG-20,323000
+BG,Smolyan,BG-21,323100
+BG,Sofia,BG-23,323300
+BG,Sofia (stolitsa),BG-22,323200
+BG,Stara Zagora,BG-24,323400
+BG,Targovishte,BG-25,323500
+BG,Varna,BG-03,303300
+BG,Veliko Tarnovo,BG-04,303400
+BG,Vidin,BG-05,303500
+BG,Vratsa,BG-06,303600
+BG,Yambol,BG-28,323800
+BH,Al 'Asimah,BH-13,313300
+BH,Al Muharraq,BH-15,313500
+BH,Ash Shamaliyah,BH-17,313700
+BI,Bubanza,BI-BB,424200
+BI,Bujumbura Mairie,BI-BM,424d00
+BI,Bururi,BI-BR,425200
+BI,Cankuzo,BI-CA,434100
+BI,Cibitoke,BI-CI,434900
+BI,Gitega,BI-GI,474900
+BI,Karuzi,BI-KR,4b5200
+BI,Kayanza,BI-KY,4b5900
+BI,Kirundo,BI-KI,4b4900
+BI,Makamba,BI-MA,4d4100
+BI,Muramvya,BI-MU,4d5500
+BI,Muyinga,BI-MY,4d5900
+BI,Mwaro,BI-MW,4d5700
+BI,Ngozi,BI-NG,4e4700
+BI,Rutana,BI-RT,525400
+BI,Ruyigi,BI-RY,525900
+BJ,Alibori,BJ-AL,414c00
+BJ,Atacora,BJ-AK,414b00
+BJ,Atlantique,BJ-AQ,415100
+BJ,Borgou,BJ-BO,424f00
+BJ,Collines,BJ-CO,434f00
+BJ,Couffo,BJ-KO,4b4f00
+BJ,Donga,BJ-DO,444f00
+BJ,Littoral,BJ-LI,4c4900
+BJ,Mono,BJ-MO,4d4f00
+BJ,Oueme,BJ-OU,4f5500
+BJ,Plateau,BJ-PL,504c00
+BJ,Zou,BJ-ZO,5a4f00
+BN,Belait,BN-BE,424500
+BN,Brunei-Muara,BN-BM,424d00
+BN,Temburong,BN-TE,544500
+BN,Tutong,BN-TU,545500
+BO,Chuquisaca,BO-H,480000
+BO,Cochabamba,BO-C,430000
+BO,El Beni,BO-B,420000
+BO,La Paz,BO-L,4c0000
+BO,Oruro,BO-O,4f0000
+BO,Pando,BO-N,4e0000
+BO,Potosi,BO-P,500000
+BO,Santa Cruz,BO-S,530000
+BO,Tarija,BO-T,540000
+BQ,Bonaire,BQ-BO,424f00
+BQ,Saba,BQ-SA,534100
+BQ,Sint Eustatius,BQ-SE,534500
+BR,Acre,BR-AC,414300
+BR,Alagoas,BR-AL,414c00
+BR,Amapa,BR-AP,415000
+BR,Amazonas,BR-AM,414d00
+BR,Bahia,BR-BA,424100
+BR,Ceara,BR-CE,434500
+BR,Distrito Federal,BR-DF,444600
+BR,Espirito Santo,BR-ES,455300
+BR,Goias,BR-GO,474f00
+BR,Maranhao,BR-MA,4d4100
+BR,Mato Grosso,BR-MT,4d5400
+BR,Mato Grosso do Sul,BR-MS,4d5300
+BR,Minas Gerais,BR-MG,4d4700
+BR,Para,BR-PA,504100
+BR,Paraiba,BR-PB,504200
+BR,Parana,BR-PR,505200
+BR,Pernambuco,BR-PE,504500
+BR,Piaui,BR-PI,504900
+BR,Rio de Janeiro,BR-RJ,524a00
+BR,Rio Grande do Norte,BR-RN,524e00
+BR,Rio Grande do Sul,BR-RS,525300
+BR,Rondonia,BR-RO,524f00
+BR,Roraima,BR-RR,525200
+BR,Santa Catarina,BR-SC,534300
+BR,Sao Paulo,BR-SP,535000
+BR,Sergipe,BR-SE,534500
+BR,Tocantins,BR-TO,544f00
+BS,Central Andros,BS-CS,435300
+BS,City of Freeport,BS-FP,465000
+BS,East Grand Bahama,BS-EG,454700
+BS,Harbour Island,BS-HI,484900
+BS,Hope Town,BS-HT,485400
+BS,Long Island,BS-LI,4c4900
+BS,South Eleuthera,BS-SE,534500
+BT,Chhukha,BT-12,313200
+BT,Dagana,BT-22,323200
+BT,Gasa,BT-GA,474100
+BT,Haa,BT-13,313300
+BT,Monggar,BT-42,343200
+BT,Paro,BT-11,313100
+BT,Punakha,BT-23,323300
+BT,Thimphu,BT-15,313500
+BT,Trashi Yangtse,BT-TY,545900
+BT,Trongsa,BT-32,333200
+BT,Zhemgang,BT-34,333400
+BW,Central,BW-CE,434500
+BW,Ghanzi,BW-GH,474800
+BW,Kgalagadi,BW-KG,4b4700
+BW,Kgatleng,BW-KL,4b4c00
+BW,Kweneng,BW-KW,4b5700
+BW,North East,BW-NE,4e4500
+BW,North West,BW-NW,4e5700
+BW,South East,BW-SE,534500
+BW,Southern,BW-SO,534f00
+BY,Brestskaya voblasts',BY-BR,425200
+BY,Homyel'skaya voblasts',BY-HO,484f00
+BY,Hrodzenskaya voblasts',BY-HR,485200
+BY,Mahilyowskaya voblasts',BY-MA,4d4100
+BY,Minskaya voblasts',BY-MI,4d4900
+BY,Vitsyebskaya voblasts',BY-VI,564900
+BZ,Belize,BZ-BZ,425a00
+BZ,Cayo,BZ-CY,435900
+BZ,Corozal,BZ-CZL,435a4c
+BZ,Orange Walk,BZ-OW,4f5700
+BZ,Stann Creek,BZ-SC,534300
+BZ,Toledo,BZ-TOL,544f4c
+CA,Alberta,CA-AB,414200
+CA,British Columbia,CA-BC,424300
+CA,Manitoba,CA-MB,4d4200
+CA,New Brunswick,CA-NB,4e4200
+CA,Newfoundland and Labrador,CA-NL,4e4c00
+CA,Northwest Territories,CA-NT,4e5400
+CA,Nova Scotia,CA-NS,4e5300
+CA,Nunavut,CA-NU,4e5500
+CA,Ontario,CA-ON,4f4e00
+CA,Prince Edward Island,CA-PE,504500
+CA,Quebec,CA-QC,514300
+CA,Saskatchewan,CA-SK,534b00
+CA,Yukon,CA-YT,595400
+CD,Bas-Uele,CD-BU,425500
+CD,Equateur,CD-EQ,455100
+CD,Haut-Katanga,CD-HK,484b00
+CD,Haut-Lomani,CD-HL,484c00
+CD,Haut-Uele,CD-HU,485500
+CD,Ituri,CD-IT,495400
+CD,Kasai,CD-KS,4b5300
+CD,Kasai Central,CD-KC,4b4300
+CD,Kasai Oriental,CD-KE,4b4500
+CD,Kinshasa,CD-KN,4b4e00
+CD,Kongo Central,CD-BC,424300
+CD,Kwango,CD-KG,4b4700
+CD,Kwilu,CD-KL,4b4c00
+CD,Lomami,CD-LO,4c4f00
+CD,Lualaba,CD-LU,4c5500
+CD,Mai-Ndombe,CD-MN,4d4e00
+CD,Maniema,CD-MA,4d4100
+CD,Mongala,CD-MO,4d4f00
+CD,Nord-Kivu,CD-NK,4e4b00
+CD,Nord-Ubangi,CD-NU,4e5500
+CD,Sankuru,CD-SA,534100
+CD,Sud-Kivu,CD-SK,534b00
+CD,Sud-Ubangi,CD-SU,535500
+CD,Tanganyika,CD-TA,544100
+CD,Tshopo,CD-TO,544f00
+CD,Tshuapa,CD-TU,545500
+CF,Bamingui-Bangoran,CF-BB,424200
+CF,Bangui,CF-BGF,424746
+CF,Basse-Kotto,CF-BK,424b00
+CF,Gribingui,CF-KB,4b4200
+CF,Haut-Mbomou,CF-HM,484d00
+CF,Haute-Kotto,CF-HK,484b00
+CF,Kemo-Gribingui,CF-KG,4b4700
+CF,Lobaye,CF-LB,4c4200
+CF,Mambere-Kadei,CF-HS,485300
+CF,Mbomou,CF-MB,4d4200
+CF,Nana-Mambere,CF-NM,4e4d00
+CF,Ombella-Mpoko,CF-MP,4d5000
+CF,Ouaka,CF-UK,554b00
+CF,Ouham,CF-AC,414300
+CF,Ouham-Pende,CF-OP,4f5000
+CF,Sangha,CF-SE,534500
+CG,Bouenza,CG-11,313100
+CG,Brazzaville,CG-BZV,425a56
+CG,Cuvette,CG-8,380000
+CG,Cuvette-Ouest,CG-15,313500
+CG,Lekoumou,CG-2,320000
+CG,Likouala,CG-7,370000
+CG,Niari,CG-9,390000
+CG,Plateaux,CG-14,313400
+CG,Pointe-Noire,CG-16,313600
+CG,Pool,CG-12,313200
+CG,Sangha,CG-13,313300
+CH,Aargau,CH-AG,414700
+CH,Appenzell Ausserrhoden,CH-AR,415200
+CH,Appenzell Innerrhoden,CH-AI,414900
+CH,Basel-Landschaft,CH-BL,424c00
+CH,Basel-Stadt,CH-BS,425300
+CH,Bern,CH-BE,424500
+CH,Fribourg,CH-FR,465200
+CH,Geneve,CH-GE,474500
+CH,Glarus,CH-GL,474c00
+CH,Graubunden,CH-GR,475200
+CH,Jura,CH-JU,4a5500
+CH,Luzern,CH-LU,4c5500
+CH,Neuchatel,CH-NE,4e4500
+CH,Nidwalden,CH-NW,4e5700
+CH,Obwalden,CH-OW,4f5700
+CH,Sankt Gallen,CH-SG,534700
+CH,Schaffhausen,CH-SH,534800
+CH,Schwyz,CH-SZ,535a00
+CH,Solothurn,CH-SO,534f00
+CH,Thurgau,CH-TG,544700
+CH,Ticino,CH-TI,544900
+CH,Uri,CH-UR,555200
+CH,Valais,CH-VS,565300
+CH,Vaud,CH-VD,564400
+CH,Zug,CH-ZG,5a4700
+CH,Zurich,CH-ZH,5a4800
+CI,Abidjan,CI-AB,414200
+CI,Bas-Sassandra,CI-BS,425300
+CI,Comoe,CI-CM,434d00
+CI,Denguele,CI-DN,444e00
+CI,Goh-Djiboua,CI-GD,474400
+CI,Lacs,CI-LC,4c4300
+CI,Lagunes,CI-LG,4c4700
+CI,Montagnes,CI-MG,4d4700
+CI,Sassandra-Marahoue,CI-SM,534d00
+CI,Savanes,CI-SV,535600
+CI,Vallee du Bandama,CI-VB,564200
+CI,Woroba,CI-WR,575200
+CI,Zanzan,CI-ZZ,5a5a00
+CL,Aisen del General Carlos Ibanez del Campo,CL-AI,414900
+CL,Antofagasta,CL-AN,414e00
+CL,Arica y Parinacota,CL-AP,415000
+CL,Atacama,CL-AT,415400
+CL,Biobio,CL-BI,424900
+CL,Coquimbo,CL-CO,434f00
+CL,La Araucania,CL-AR,415200
+CL,Libertador General Bernardo O'Higgins,CL-LI,4c4900
+CL,Los Lagos,CL-LL,4c4c00
+CL,Los Rios,CL-LR,4c5200
+CL,Magallanes,CL-MA,4d4100
+CL,Maule,CL-ML,4d4c00
+CL,Region Metropolitana de Santiago,CL-RM,524d00
+CL,Tarapaca,CL-TA,544100
+CL,Valparaiso,CL-VS,565300
+CM,Adamaoua,CM-AD,414400
+CM,Centre,CM-CE,434500
+CM,Est,CM-ES,455300
+CM,Extreme-Nord,CM-EN,454e00
+CM,Littoral,CM-LT,4c5400
+CM,Nord,CM-NO,4e4f00
+CM,Nord-Ouest,CM-NW,4e5700
+CM,Ouest,CM-OU,4f5500
+CM,Sud,CM-SU,535500
+CM,Sud-Ouest,CM-SW,535700
+CN,Anhui,CN-AH,414800
+CN,Beijing,CN-BJ,424a00
+CN,Chongqing,CN-CQ,435100
+CN,Fujian,CN-FJ,464a00
+CN,Gansu,CN-GS,475300
+CN,Guangdong,CN-GD,474400
+CN,Guangxi,CN-GX,475800
+CN,Guizhou,CN-GZ,475a00
+CN,Hainan,CN-HI,484900
+CN,Hebei,CN-HE,484500
+CN,Heilongjiang,CN-HL,484c00
+CN,Henan,CN-HA,484100
+CN,Hubei,CN-HB,484200
+CN,Hunan,CN-HN,484e00
+CN,Jiangsu,CN-JS,4a5300
+CN,Jiangxi,CN-JX,4a5800
+CN,Jilin,CN-JL,4a4c00
+CN,Liaoning,CN-LN,4c4e00
+CN,Nei Mongol,CN-NM,4e4d00
+CN,Ningxia,CN-NX,4e5800
+CN,Qinghai,CN-QH,514800
+CN,Shaanxi,CN-SN,534e00
+CN,Shandong,CN-SD,534400
+CN,Shanghai,CN-SH,534800
+CN,Shanxi,CN-SX,535800
+CN,Sichuan,CN-SC,534300
+CN,Tianjin,CN-TJ,544a00
+CN,Xinjiang,CN-XJ,584a00
+CN,Xizang,CN-XZ,585a00
+CN,Yunnan,CN-YN,594e00
+CN,Zhejiang,CN-ZJ,5a4a00
+CO,Amazonas,CO-AMA,414d41
+CO,Antioquia,CO-ANT,414e54
+CO,Arauca,CO-ARA,415241
+CO,Atlantico,CO-ATL,41544c
+CO,Bolivar,CO-BOL,424f4c
+CO,Boyaca,CO-BOY,424f59
+CO,Caldas,CO-CAL,43414c
+CO,Caqueta,CO-CAQ,434151
+CO,Casanare,CO-CAS,434153
+CO,Cauca,CO-CAU,434155
+CO,Cesar,CO-CES,434553
+CO,Choco,CO-CHO,43484f
+CO,Cordoba,CO-COR,434f52
+CO,Cundinamarca,CO-CUN,43554e
+CO,Distrito Capital de Bogota,CO-DC,444300
+CO,Guainia,CO-GUA,475541
+CO,Guaviare,CO-GUV,475556
+CO,Huila,CO-HUI,485549
+CO,La Guajira,CO-LAG,4c4147
+CO,Magdalena,CO-MAG,4d4147
+CO,Meta,CO-MET,4d4554
+CO,Narino,CO-NAR,4e4152
+CO,Norte de Santander,CO-NSA,4e5341
+CO,Putumayo,CO-PUT,505554
+CO,Quindio,CO-QUI,515549
+CO,Risaralda,CO-RIS,524953
+CO,"San Andres, Providencia y Santa Catalina",CO-SAP,534150
+CO,Santander,CO-SAN,53414e
+CO,Sucre,CO-SUC,535543
+CO,Tolima,CO-TOL,544f4c
+CO,Valle del Cauca,CO-VAC,564143
+CO,Vaupes,CO-VAU,564155
+CO,Vichada,CO-VID,564944
+CR,Alajuela,CR-A,410000
+CR,Cartago,CR-C,430000
+CR,Guanacaste,CR-G,470000
+CR,Heredia,CR-H,480000
+CR,Limon,CR-L,4c0000
+CR,Puntarenas,CR-P,500000
+CR,San Jose,CR-SJ,534a00
+CU,Artemisa,CU-15,313500
+CU,Camaguey,CU-09,303900
+CU,Ciego de Avila,CU-08,303800
+CU,Cienfuegos,CU-06,303600
+CU,Granma,CU-12,313200
+CU,Guantanamo,CU-14,313400
+CU,Holguin,CU-11,313100
+CU,Isla de la Juventud,CU-99,393900
+CU,La Habana,CU-03,303300
+CU,Las Tunas,CU-10,313000
+CU,Matanzas,CU-04,303400
+CU,Mayabeque,CU-16,313600
+CU,Pinar del Rio,CU-01,303100
+CU,Sancti Spiritus,CU-07,303700
+CU,Santiago de Cuba,CU-13,313300
+CU,Villa Clara,CU-05,303500
+CV,Boa Vista,CV-BV,425600
+CV,Brava,CV-BR,425200
+CV,Maio,CV-MA,4d4100
+CV,Mosteiros,CV-MO,4d4f00
+CV,Paul,CV-PA,504100
+CV,Porto Novo,CV-PN,504e00
+CV,Praia,CV-PR,505200
+CV,Ribeira Brava,CV-RB,524200
+CV,Ribeira Grande,CV-RG,524700
+CV,Ribeira Grande de Santiago,CV-RS,525300
+CV,Sal,CV-SL,534c00
+CV,Santa Catarina,CV-CA,434100
+CV,Santa Catarina do Fogo,CV-CF,434600
+CV,Santa Cruz,CV-CR,435200
+CV,Sao Domingos,CV-SD,534400
+CV,Sao Filipe,CV-SF,534600
+CV,Sao Miguel,CV-SM,534d00
+CV,Sao Salvador do Mundo,CV-SS,535300
+CV,Sao Vicente,CV-SV,535600
+CV,Tarrafal,CV-TA,544100
+CV,Tarrafal de Sao Nicolau,CV-TS,545300
+CY,Ammochostos,CY-04,303400
+CY,Keryneia,CY-06,303600
+CY,Larnaka,CY-03,303300
+CY,Lefkosia,CY-01,303100
+CY,Lemesos,CY-02,303200
+CY,Pafos,CY-05,303500
+CZ,Jihocesky kraj,CZ-JC,4a4300
+CZ,Jihomoravsky kraj,CZ-JM,4a4d00
+CZ,Karlovarsky kraj,CZ-KA,4b4100
+CZ,Kraj Vysocina,CZ-63,363300
+CZ,Kralovehradecky kraj,CZ-KR,4b5200
+CZ,Liberecky kraj,CZ-LI,4c4900
+CZ,Moravskoslezsky kraj,CZ-MO,4d4f00
+CZ,Olomoucky kraj,CZ-OL,4f4c00
+CZ,Pardubicky kraj,CZ-PA,504100
+CZ,Plzensky kraj,CZ-PL,504c00
+CZ,"Praha, Hlavni mesto",CZ-10,313000
+CZ,Stredocesky kraj,CZ-ST,535400
+CZ,Ustecky kraj,CZ-US,555300
+CZ,Zlinsky kraj,CZ-ZL,5a4c00
+DE,Baden-Wurttemberg,DE-BW,425700
+DE,Bayern,DE-BY,425900
+DE,Berlin,DE-BE,424500
+DE,Brandenburg,DE-BB,424200
+DE,Bremen,DE-HB,484200
+DE,Hamburg,DE-HH,484800
+DE,Hessen,DE-HE,484500
+DE,Mecklenburg-Vorpommern,DE-MV,4d5600
+DE,Niedersachsen,DE-NI,4e4900
+DE,Nordrhein-Westfalen,DE-NW,4e5700
+DE,Rheinland-Pfalz,DE-RP,525000
+DE,Saarland,DE-SL,534c00
+DE,Sachsen,DE-SN,534e00
+DE,Sachsen-Anhalt,DE-ST,535400
+DE,Schleswig-Holstein,DE-SH,534800
+DE,Thuringen,DE-TH,544800
+DJ,Ali Sabieh,DJ-AS,415300
+DJ,Arta,DJ-AR,415200
+DJ,Dikhil,DJ-DI,444900
+DJ,Djibouti,DJ-DJ,444a00
+DJ,Obock,DJ-OB,4f4200
+DJ,Tadjourah,DJ-TA,544100
+DK,Hovedstaden,DK-84,383400
+DK,Midtjylland,DK-82,383200
+DK,Nordjylland,DK-81,383100
+DK,Sjelland,DK-85,383500
+DK,Syddanmark,DK-83,383300
+DM,Saint Andrew,DM-02,303200
+DM,Saint David,DM-03,303300
+DM,Saint George,DM-04,303400
+DM,Saint John,DM-05,303500
+DM,Saint Joseph,DM-06,303600
+DM,Saint Luke,DM-07,303700
+DM,Saint Mark,DM-08,303800
+DM,Saint Patrick,DM-09,303900
+DM,Saint Paul,DM-10,313000
+DO,Azua,DO-02,303200
+DO,Baoruco,DO-03,303300
+DO,Barahona,DO-04,303400
+DO,Dajabon,DO-05,303500
+DO,Distrito Nacional (Santo Domingo),DO-01,303100
+DO,Duarte,DO-06,303600
+DO,El Seibo,DO-08,303800
+DO,Elias Pina,DO-07,303700
+DO,Espaillat,DO-09,303900
+DO,Hato Mayor,DO-30,333000
+DO,Hermanas Mirabal,DO-19,313900
+DO,Independencia,DO-10,313000
+DO,La Altagracia,DO-11,313100
+DO,La Romana,DO-12,313200
+DO,La Vega,DO-13,313300
+DO,Maria Trinidad Sanchez,DO-14,313400
+DO,Monsenor Nouel,DO-28,323800
+DO,Monte Cristi,DO-15,313500
+DO,Monte Plata,DO-29,323900
+DO,Pedernales,DO-16,313600
+DO,Peravia,DO-17,313700
+DO,Puerto Plata,DO-18,313800
+DO,Samana,DO-20,323000
+DO,San Cristobal,DO-21,323100
+DO,San Juan,DO-22,323200
+DO,San Pedro de Macoris,DO-23,323300
+DO,Sanchez Ramirez,DO-24,323400
+DO,Santiago,DO-25,323500
+DO,Santiago Rodriguez,DO-26,323600
+DO,Valverde,DO-27,323700
+DZ,Adrar,DZ-01,303100
+DZ,Ain Defla,DZ-44,343400
+DZ,Ain Temouchent,DZ-46,343600
+DZ,Alger,DZ-16,313600
+DZ,Annaba,DZ-23,323300
+DZ,Batna,DZ-05,303500
+DZ,Bechar,DZ-08,303800
+DZ,Bejaia,DZ-06,303600
+DZ,Biskra,DZ-07,303700
+DZ,Blida,DZ-09,303900
+DZ,Bordj Bou Arreridj,DZ-34,333400
+DZ,Bouira,DZ-10,313000
+DZ,Boumerdes,DZ-35,333500
+DZ,Chlef,DZ-02,303200
+DZ,Constantine,DZ-25,323500
+DZ,Djelfa,DZ-17,313700
+DZ,El Bayadh,DZ-32,333200
+DZ,El Oued,DZ-39,333900
+DZ,El Tarf,DZ-36,333600
+DZ,Ghardaia,DZ-47,343700
+DZ,Guelma,DZ-24,323400
+DZ,Illizi,DZ-33,333300
+DZ,Khenchela,DZ-40,343000
+DZ,Laghouat,DZ-03,303300
+DZ,M'sila,DZ-28,323800
+DZ,Mascara,DZ-29,323900
+DZ,Medea,DZ-26,323600
+DZ,Mila,DZ-43,343300
+DZ,Mostaganem,DZ-27,323700
+DZ,Naama,DZ-45,343500
+DZ,Oran,DZ-31,333100
+DZ,Ouargla,DZ-30,333000
+DZ,Oum el Bouaghi,DZ-04,303400
+DZ,Relizane,DZ-48,343800
+DZ,Saida,DZ-20,323000
+DZ,Setif,DZ-19,313900
+DZ,Sidi Bel Abbes,DZ-22,323200
+DZ,Skikda,DZ-21,323100
+DZ,Souk Ahras,DZ-41,343100
+DZ,Tamanrasset,DZ-11,313100
+DZ,Tebessa,DZ-12,313200
+DZ,Tiaret,DZ-14,313400
+DZ,Tindouf,DZ-37,333700
+DZ,Tipaza,DZ-42,343200
+DZ,Tissemsilt,DZ-38,333800
+DZ,Tizi Ouzou,DZ-15,313500
+DZ,Tlemcen,DZ-13,313300
+EC,Azuay,EC-A,410000
+EC,Bolivar,EC-B,420000
+EC,Canar,EC-F,460000
+EC,Carchi,EC-C,430000
+EC,Chimborazo,EC-H,480000
+EC,Cotopaxi,EC-X,580000
+EC,El Oro,EC-O,4f0000
+EC,Esmeraldas,EC-E,450000
+EC,Galapagos,EC-W,570000
+EC,Guayas,EC-G,470000
+EC,Imbabura,EC-I,490000
+EC,Loja,EC-L,4c0000
+EC,Los Rios,EC-R,520000
+EC,Manabi,EC-M,4d0000
+EC,Morona Santiago,EC-S,530000
+EC,Napo,EC-N,4e0000
+EC,Orellana,EC-D,440000
+EC,Pastaza,EC-Y,590000
+EC,Pichincha,EC-P,500000
+EC,Santa Elena,EC-SE,534500
+EC,Sucumbios,EC-U,550000
+EC,Tungurahua,EC-T,540000
+EC,Zamora Chinchipe,EC-Z,5a0000
+EE,Harjumaa,EE-37,333700
+EE,Hiiumaa,EE-39,333900
+EE,Ida-Virumaa,EE-44,343400
+EE,Jarvamaa,EE-51,353100
+EE,Jogevamaa,EE-49,343900
+EE,Laane-Virumaa,EE-59,353900
+EE,Laanemaa,EE-57,353700
+EE,Parnumaa,EE-67,363700
+EE,Polvamaa,EE-65,363500
+EE,Raplamaa,EE-70,373000
+EE,Saaremaa,EE-74,373400
+EE,Tartumaa,EE-78,373800
+EE,Valgamaa,EE-82,383200
+EE,Viljandimaa,EE-84,383400
+EE,Vorumaa,EE-86,383600
+EG,Ad Daqahliyah,EG-DK,444b00
+EG,Al Bahr al Ahmar,EG-BA,424100
+EG,Al Buhayrah,EG-BH,424800
+EG,Al Fayyum,EG-FYM,46594d
+EG,Al Gharbiyah,EG-GH,474800
+EG,Al Iskandariyah,EG-ALX,414c58
+EG,Al Isma'iliyah,EG-IS,495300
+EG,Al Jizah,EG-GZ,475a00
+EG,Al Minufiyah,EG-MNF,4d4e46
+EG,Al Minya,EG-MN,4d4e00
+EG,Al Qahirah,EG-C,430000
+EG,Al Qalyubiyah,EG-KB,4b4200
+EG,Al Uqsur,EG-LX,4c5800
+EG,Al Wadi al Jadid,EG-WAD,574144
+EG,As Suways,EG-SUZ,53555a
+EG,Ash Sharqiyah,EG-SHR,534852
+EG,Aswan,EG-ASN,41534e
+EG,Asyut,EG-AST,415354
+EG,Bani Suwayf,EG-BNS,424e53
+EG,Bur Sa'id,EG-PTS,505453
+EG,Dumyat,EG-DT,445400
+EG,Janub Sina',EG-JS,4a5300
+EG,Kafr ash Shaykh,EG-KFS,4b4653
+EG,Matruh,EG-MT,4d5400
+EG,Qina,EG-KN,4b4e00
+EG,Shamal Sina',EG-SIN,53494e
+EG,Suhaj,EG-SHG,534847
+ER,Al Awsat,ER-MA,4d4100
+ER,Al Janubi,ER-DU,445500
+ER,Ansaba,ER-AN,414e00
+ER,Janubi al Bahri al Ahmar,ER-DK,444b00
+ER,Qash-Barkah,ER-GB,474200
+ER,Shimali al Bahri al Ahmar,ER-SK,534b00
+ES,Andalucia,ES-AN,414e00
+ES,Aragon,ES-AR,415200
+ES,"Asturias, Principado de",ES-AS,415300
+ES,Canarias,ES-CN,434e00
+ES,Cantabria,ES-CB,434200
+ES,Castilla y Leon,ES-CL,434c00
+ES,Castilla-La Mancha,ES-CM,434d00
+ES,Catalunya,ES-CT,435400
+ES,Ceuta,ES-CE,434500
+ES,Extremadura,ES-EX,455800
+ES,Galicia,ES-GA,474100
+ES,Illes Balears,ES-IB,494200
+ES,La Rioja,ES-RI,524900
+ES,"Madrid, Comunidad de",ES-MD,4d4400
+ES,Melilla,ES-ML,4d4c00
+ES,"Murcia, Region de",ES-MC,4d4300
+ES,"Navarra, Comunidad Foral de",ES-NC,4e4300
+ES,Pais Vasco,ES-PV,505600
+ES,"Valenciana, Comunidad",ES-VC,564300
+ET,Adis Abeba,ET-AA,414100
+ET,Afar,ET-AF,414600
+ET,Amara,ET-AM,414d00
+ET,Binshangul Gumuz,ET-BE,424500
+ET,Dire Dawa,ET-DD,444400
+ET,Gambela Hizboch,ET-GA,474100
+ET,Hareri Hizb,ET-HA,484100
+ET,Oromiya,ET-OR,4f5200
+ET,Sumale,ET-SO,534f00
+ET,Tigray,ET-TI,544900
+ET,YeDebub Biheroch Bihereseboch na Hizboch,ET-SN,534e00
+FI,Etela-Karjala,FI-02,303200
+FI,Etela-Pohjanmaa,FI-03,303300
+FI,Etela-Savo,FI-04,303400
+FI,Kainuu,FI-05,303500
+FI,Kanta-Hame,FI-06,303600
+FI,Keski-Pohjanmaa,FI-07,303700
+FI,Keski-Suomi,FI-08,303800
+FI,Kymenlaakso,FI-09,303900
+FI,Lappi,FI-10,313000
+FI,Paijat-Hame,FI-16,313600
+FI,Pirkanmaa,FI-11,313100
+FI,Pohjanmaa,FI-12,313200
+FI,Pohjois-Karjala,FI-13,313300
+FI,Pohjois-Pohjanmaa,FI-14,313400
+FI,Pohjois-Savo,FI-15,313500
+FI,Satakunta,FI-17,313700
+FI,Uusimaa,FI-18,313800
+FI,Varsinais-Suomi,FI-19,313900
+FJ,Central,FJ-C,430000
+FJ,Northern,FJ-N,4e0000
+FJ,Western,FJ-W,570000
+FM,Chuuk,FM-TRK,54524b
+FM,Kosrae,FM-KSA,4b5341
+FM,Pohnpei,FM-PNI,504e49
+FM,Yap,FM-YAP,594150
+FR,Auvergne-Rhone-Alpes,FR-ARA,415241
+FR,Bourgogne-Franche-Comte,FR-BFC,424643
+FR,Bretagne,FR-E,450000
+FR,Centre-Val de Loire,FR-CVL,43564c
+FR,Corse,FR-H,480000
+FR,Grand-Est,FR-GES,474553
+FR,Hauts-de-France,FR-HDF,484446
+FR,Ile-de-France,FR-J,4a0000
+FR,Normandie,FR-NOR,4e4f52
+FR,Nouvelle-Aquitaine,FR-NAQ,4e4151
+FR,Occitanie,FR-OCC,4f4343
+FR,Pays-de-la-Loire,FR-R,520000
+FR,Provence-Alpes-Cote d'Azur,FR-PAC,504143
+GA,Estuaire,GA-1,310000
+GA,Haut-Ogooue,GA-2,320000
+GA,Moyen-Ogooue,GA-3,330000
+GA,Ngounie,GA-4,340000
+GA,Nyanga,GA-5,350000
+GA,Ogooue-Ivindo,GA-6,360000
+GA,Ogooue-Lolo,GA-7,370000
+GA,Ogooue-Maritime,GA-8,380000
+GA,Woleu-Ntem,GA-9,390000
+GB,England,GB-ENG,454e47
+GB,Northern Ireland,GB-NIR,4e4952
+GB,Scotland,GB-SCT,534354
+GB,Wales,GB-WLS,574c53
+GD,Saint Andrew,GD-01,303100
+GD,Saint David,GD-02,303200
+GD,Saint George,GD-03,303300
+GD,Saint John,GD-04,303400
+GD,Saint Mark,GD-05,303500
+GD,Saint Patrick,GD-06,303600
+GE,Abkhazia,GE-AB,414200
+GE,Ajaria,GE-AJ,414a00
+GE,Guria,GE-GU,475500
+GE,Imereti,GE-IM,494d00
+GE,K'akheti,GE-KA,4b4100
+GE,Kvemo Kartli,GE-KK,4b4b00
+GE,Mtskheta-Mtianeti,GE-MM,4d4d00
+GE,Rach'a-Lechkhumi-Kvemo Svaneti,GE-RL,524c00
+GE,Samegrelo-Zemo Svaneti,GE-SZ,535a00
+GE,Samtskhe-Javakheti,GE-SJ,534a00
+GE,Shida Kartli,GE-SK,534b00
+GE,Tbilisi,GE-TB,544200
+GH,Ashanti,GH-AH,414800
+GH,Brong-Ahafo,GH-BA,424100
+GH,Central,GH-CP,435000
+GH,Eastern,GH-EP,455000
+GH,Greater Accra,GH-AA,414100
+GH,Northern,GH-NP,4e5000
+GH,Upper East,GH-UE,554500
+GH,Upper West,GH-UW,555700
+GH,Volta,GH-TV,545600
+GH,Western,GH-WP,575000
+GL,Kommune Kujalleq,GL-KU,4b5500
+GL,Kommuneqarfik Sermersooq,GL-SM,534d00
+GL,Qaasuitsup Kommunia,GL-QA,514100
+GL,Qeqqata Kommunia,GL-QE,514500
+GM,Banjul,GM-B,420000
+GM,Central River,GM-M,4d0000
+GM,Lower River,GM-L,4c0000
+GM,North Bank,GM-N,4e0000
+GM,Upper River,GM-U,550000
+GM,Western,GM-W,570000
+GN,Beyla,GN-BE,424500
+GN,Boffa,GN-BF,424600
+GN,Boke,GN-B,420000
+GN,Conakry,GN-C,430000
+GN,Coyah,GN-CO,434f00
+GN,Dabola,GN-DB,444200
+GN,Dalaba,GN-DL,444c00
+GN,Dinguiraye,GN-DI,444900
+GN,Dubreka,GN-DU,445500
+GN,Faranah,GN-F,460000
+GN,Forecariah,GN-FO,464f00
+GN,Fria,GN-FR,465200
+GN,Gaoual,GN-GA,474100
+GN,Guekedou,GN-GU,475500
+GN,Kankan,GN-K,4b0000
+GN,Kerouane,GN-KE,4b4500
+GN,Kindia,GN-D,440000
+GN,Kissidougou,GN-KS,4b5300
+GN,Koubia,GN-KB,4b4200
+GN,Koundara,GN-KN,4b4e00
+GN,Kouroussa,GN-KO,4b4f00
+GN,Labe,GN-L,4c0000
+GN,Lelouma,GN-LE,4c4500
+GN,Lola,GN-LO,4c4f00
+GN,Macenta,GN-MC,4d4300
+GN,Mali,GN-ML,4d4c00
+GN,Mamou,GN-M,4d0000
+GN,Mandiana,GN-MD,4d4400
+GN,Nzerekore,GN-N,4e0000
+GN,Pita,GN-PI,504900
+GN,Siguiri,GN-SI,534900
+GN,Telimele,GN-TE,544500
+GN,Tougue,GN-TO,544f00
+GN,Yomou,GN-YO,594f00
+GQ,Annobon,GQ-AN,414e00
+GQ,Bioko Norte,GQ-BN,424e00
+GQ,Bioko Sur,GQ-BS,425300
+GQ,Centro Sur,GQ-CS,435300
+GQ,Kie-Ntem,GQ-KN,4b4e00
+GQ,Litoral,GQ-LI,4c4900
+GQ,Wele-Nzas,GQ-WN,574e00
+GR,Anatoliki Makedonia kai Thraki,GR-A,410000
+GR,Attiki,GR-I,490000
+GR,Dytiki Ellada,GR-G,470000
+GR,Dytiki Makedonia,GR-C,430000
+GR,Ionia Nisia,GR-F,460000
+GR,Ipeiros,GR-D,440000
+GR,Kentriki Makedonia,GR-B,420000
+GR,Kriti,GR-M,4d0000
+GR,Notio Aigaio,GR-L,4c0000
+GR,Peloponnisos,GR-J,4a0000
+GR,Sterea Ellada,GR-H,480000
+GR,Thessalia,GR-E,450000
+GR,Voreio Aigaio,GR-K,4b0000
+GT,Alta Verapaz,GT-AV,415600
+GT,Baja Verapaz,GT-BV,425600
+GT,Chimaltenango,GT-CM,434d00
+GT,Chiquimula,GT-CQ,435100
+GT,El Progreso,GT-PR,505200
+GT,Escuintla,GT-ES,455300
+GT,Guatemala,GT-GU,475500
+GT,Huehuetenango,GT-HU,485500
+GT,Izabal,GT-IZ,495a00
+GT,Jalapa,GT-JA,4a4100
+GT,Jutiapa,GT-JU,4a5500
+GT,Peten,GT-PE,504500
+GT,Quetzaltenango,GT-QZ,515a00
+GT,Quiche,GT-QC,514300
+GT,Retalhuleu,GT-RE,524500
+GT,Sacatepequez,GT-SA,534100
+GT,San Marcos,GT-SM,534d00
+GT,Santa Rosa,GT-SR,535200
+GT,Solola,GT-SO,534f00
+GT,Suchitepequez,GT-SU,535500
+GT,Totonicapan,GT-TO,544f00
+GT,Zacapa,GT-ZA,5a4100
+GW,Bafata,GW-BA,424100
+GW,Biombo,GW-BM,424d00
+GW,Bissau,GW-BS,425300
+GW,Bolama,GW-BL,424c00
+GW,Cacheu,GW-CA,434100
+GW,Gabu,GW-GA,474100
+GW,Oio,GW-OI,4f4900
+GW,Quinara,GW-QU,515500
+GW,Tombali,GW-TO,544f00
+GY,Cuyuni-Mazaruni,GY-CU,435500
+GY,Demerara-Mahaica,GY-DE,444500
+GY,East Berbice-Corentyne,GY-EB,454200
+GY,Essequibo Islands-West Demerara,GY-ES,455300
+GY,Mahaica-Berbice,GY-MA,4d4100
+GY,Pomeroon-Supenaam,GY-PM,504d00
+GY,Upper Demerara-Berbice,GY-UD,554400
+HN,Atlantida,HN-AT,415400
+HN,Choluteca,HN-CH,434800
+HN,Colon,HN-CL,434c00
+HN,Comayagua,HN-CM,434d00
+HN,Copan,HN-CP,435000
+HN,Cortes,HN-CR,435200
+HN,El Paraiso,HN-EP,455000
+HN,Francisco Morazan,HN-FM,464d00
+HN,Gracias a Dios,HN-GD,474400
+HN,Intibuca,HN-IN,494e00
+HN,Islas de la Bahia,HN-IB,494200
+HN,La Paz,HN-LP,4c5000
+HN,Lempira,HN-LE,4c4500
+HN,Ocotepeque,HN-OC,4f4300
+HN,Olancho,HN-OL,4f4c00
+HN,Santa Barbara,HN-SB,534200
+HN,Valle,HN-VA,564100
+HN,Yoro,HN-YO,594f00
+HR,Bjelovarsko-bilogorska zupanija,HR-07,303700
+HR,Brodsko-posavska zupanija,HR-12,313200
+HR,Dubrovacko-neretvanska zupanija,HR-19,313900
+HR,Grad Zagreb,HR-21,323100
+HR,Istarska zupanija,HR-18,313800
+HR,Karlovacka zupanija,HR-04,303400
+HR,Koprivnicko-krizevacka zupanija,HR-06,303600
+HR,Krapinsko-zagorska zupanija,HR-02,303200
+HR,Licko-senjska zupanija,HR-09,303900
+HR,Medimurska zupanija,HR-20,323000
+HR,Osjecko-baranjska zupanija,HR-14,313400
+HR,Pozesko-slavonska zupanija,HR-11,313100
+HR,Primorsko-goranska zupanija,HR-08,303800
+HR,Sibensko-kninska zupanija,HR-15,313500
+HR,Sisacko-moslavacka zupanija,HR-03,303300
+HR,Splitsko-dalmatinska zupanija,HR-17,313700
+HR,Varazdinska zupanija,HR-05,303500
+HR,Viroviticko-podravska zupanija,HR-10,313000
+HR,Vukovarsko-srijemska zupanija,HR-16,313600
+HR,Zadarska zupanija,HR-13,313300
+HR,Zagrebacka zupanija,HR-01,303100
+HT,Artibonite,HT-AR,415200
+HT,Centre,HT-CE,434500
+HT,Grande'Anse,HT-GA,474100
+HT,Nippes,HT-NI,4e4900
+HT,Nord,HT-ND,4e4400
+HT,Nord-Est,HT-NE,4e4500
+HT,Nord-Ouest,HT-NO,4e4f00
+HT,Ouest,HT-OU,4f5500
+HT,Sud,HT-SD,534400
+HT,Sud-Est,HT-SE,534500
+HU,Bacs-Kiskun,HU-BK,424b00
+HU,Baranya,HU-BA,424100
+HU,Bekes,HU-BE,424500
+HU,Borsod-Abauj-Zemplen,HU-BZ,425a00
+HU,Budapest,HU-BU,425500
+HU,Csongrad,HU-CS,435300
+HU,Fejer,HU-FE,464500
+HU,Gyor-Moson-Sopron,HU-GS,475300
+HU,Hajdu-Bihar,HU-HB,484200
+HU,Heves,HU-HE,484500
+HU,Jasz-Nagykun-Szolnok,HU-JN,4a4e00
+HU,Komarom-Esztergom,HU-KE,4b4500
+HU,Nograd,HU-NO,4e4f00
+HU,Pest,HU-PE,504500
+HU,Somogy,HU-SO,534f00
+HU,Szabolcs-Szatmar-Bereg,HU-SZ,535a00
+HU,Tolna,HU-TO,544f00
+HU,Vas,HU-VA,564100
+HU,Veszprem,HU-VM,564d00
+HU,Zala,HU-ZA,5a4100
+ID,Aceh,ID-AC,414300
+ID,Bali,ID-BA,424100
+ID,Banten,ID-BT,425400
+ID,Bengkulu,ID-BE,424500
+ID,Gorontalo,ID-GO,474f00
+ID,Jakarta Raya,ID-JK,4a4b00
+ID,Jambi,ID-JA,4a4100
+ID,Jawa Barat,ID-JB,4a4200
+ID,Jawa Tengah,ID-JT,4a5400
+ID,Jawa Timur,ID-JI,4a4900
+ID,Kalimantan Barat,ID-KB,4b4200
+ID,Kalimantan Selatan,ID-KS,4b5300
+ID,Kalimantan Tengah,ID-KT,4b5400
+ID,Kalimantan Timur,ID-KI,4b4900
+ID,Kepulauan Bangka Belitung,ID-BB,424200
+ID,Kepulauan Riau,ID-KR,4b5200
+ID,Lampung,ID-LA,4c4100
+ID,Maluku,ID-ML,4d4c00
+ID,Maluku Utara,ID-MU,4d5500
+ID,Nusa Tenggara Barat,ID-NB,4e4200
+ID,Nusa Tenggara Timur,ID-NT,4e5400
+ID,Papua,ID-PP,505000
+ID,Papua Barat,ID-PB,504200
+ID,Riau,ID-RI,524900
+ID,Sulawesi Barat,ID-SR,535200
+ID,Sulawesi Selatan,ID-SN,534e00
+ID,Sulawesi Tengah,ID-ST,535400
+ID,Sulawesi Tenggara,ID-SG,534700
+ID,Sulawesi Utara,ID-SA,534100
+ID,Sumatera Barat,ID-SB,534200
+ID,Sumatera Selatan,ID-SS,535300
+ID,Sumatera Utara,ID-SU,535500
+ID,Yogyakarta,ID-YO,594f00
+IE,Carlow,IE-CW,435700
+IE,Cavan,IE-CN,434e00
+IE,Clare,IE-CE,434500
+IE,Cork,IE-CO,434f00
+IE,Donegal,IE-DL,444c00
+IE,Dublin,IE-D,440000
+IE,Galway,IE-G,470000
+IE,Kerry,IE-KY,4b5900
+IE,Kildare,IE-KE,4b4500
+IE,Kilkenny,IE-KK,4b4b00
+IE,Laois,IE-LS,4c5300
+IE,Leitrim,IE-LM,4c4d00
+IE,Limerick,IE-LK,4c4b00
+IE,Longford,IE-LD,4c4400
+IE,Louth,IE-LH,4c4800
+IE,Mayo,IE-MO,4d4f00
+IE,Meath,IE-MH,4d4800
+IE,Monaghan,IE-MN,4d4e00
+IE,Offaly,IE-OY,4f5900
+IE,Roscommon,IE-RN,524e00
+IE,Sligo,IE-SO,534f00
+IE,Tipperary,IE-TA,544100
+IE,Waterford,IE-WD,574400
+IE,Westmeath,IE-WH,574800
+IE,Wexford,IE-WX,575800
+IE,Wicklow,IE-WW,575700
+IL,HaDarom,IL-D,440000
+IL,HaMerkaz,IL-M,4d0000
+IL,HaTsafon,IL-Z,5a0000
+IL,Hefa,IL-HA,484100
+IL,Tel Aviv,IL-TA,544100
+IL,Yerushalayim,IL-JM,4a4d00
+IN,Andaman and Nicobar Islands,IN-AN,414e00
+IN,Andhra Pradesh,IN-AP,415000
+IN,Arunachal Pradesh,IN-AR,415200
+IN,Assam,IN-AS,415300
+IN,Bihar,IN-BR,425200
+IN,Chandigarh,IN-CH,434800
+IN,Chhattisgarh,IN-CT,435400
+IN,Dadra and Nagar Haveli,IN-DN,444e00
+IN,Daman and Diu,IN-DD,444400
+IN,Delhi,IN-DL,444c00
+IN,Goa,IN-GA,474100
+IN,Gujarat,IN-GJ,474a00
+IN,Haryana,IN-HR,485200
+IN,Himachal Pradesh,IN-HP,485000
+IN,Jammu and Kashmir,IN-JK,4a4b00
+IN,Jharkhand,IN-JH,4a4800
+IN,Karnataka,IN-KA,4b4100
+IN,Kerala,IN-KL,4b4c00
+IN,Lakshadweep,IN-LD,4c4400
+IN,Madhya Pradesh,IN-MP,4d5000
+IN,Maharashtra,IN-MH,4d4800
+IN,Manipur,IN-MN,4d4e00
+IN,Meghalaya,IN-ML,4d4c00
+IN,Mizoram,IN-MZ,4d5a00
+IN,Nagaland,IN-NL,4e4c00
+IN,Odisha,IN-OR,4f5200
+IN,Puducherry,IN-PY,505900
+IN,Punjab,IN-PB,504200
+IN,Rajasthan,IN-RJ,524a00
+IN,Sikkim,IN-SK,534b00
+IN,Tamil Nadu,IN-TN,544e00
+IN,Telangana,IN-TG,544700
+IN,Tripura,IN-TR,545200
+IN,Uttar Pradesh,IN-UP,555000
+IN,Uttarakhand,IN-UT,555400
+IN,West Bengal,IN-WB,574200
+IQ,Al Anbar,IQ-AN,414e00
+IQ,Al Basrah,IQ-BA,424100
+IQ,Al Muthanna,IQ-MU,4d5500
+IQ,Al Qadisiyah,IQ-QA,514100
+IQ,An Najaf,IQ-NA,4e4100
+IQ,Arbil,IQ-AR,415200
+IQ,As Sulaymaniyah,IQ-SU,535500
+IQ,Babil,IQ-BB,424200
+IQ,Baghdad,IQ-BG,424700
+IQ,Dahuk,IQ-DA,444100
+IQ,Dhi Qar,IQ-DQ,445100
+IQ,Diyala,IQ-DI,444900
+IQ,Karbala',IQ-KA,4b4100
+IQ,Kirkuk,IQ-KI,4b4900
+IQ,Maysan,IQ-MA,4d4100
+IQ,Ninawa,IQ-NI,4e4900
+IQ,Salah ad Din,IQ-SD,534400
+IQ,Wasit,IQ-WA,574100
+IR,Alborz,IR-32,333200
+IR,Ardabil,IR-03,303300
+IR,Azarbayjan-e Gharbi,IR-02,303200
+IR,Azarbayjan-e Sharqi,IR-01,303100
+IR,Bushehr,IR-06,303600
+IR,Chahar Mahal va Bakhtiari,IR-08,303800
+IR,Esfahan,IR-04,303400
+IR,Fars,IR-14,313400
+IR,Gilan,IR-19,313900
+IR,Golestan,IR-27,323700
+IR,Hamadan,IR-24,323400
+IR,Hormozgan,IR-23,323300
+IR,Ilam,IR-05,303500
+IR,Kerman,IR-15,313500
+IR,Kermanshah,IR-17,313700
+IR,Khorasan-e Jonubi,IR-29,323900
+IR,Khorasan-e Razavi,IR-30,333000
+IR,Khorasan-e Shomali,IR-31,333100
+IR,Khuzestan,IR-10,313000
+IR,Kohgiluyeh va Bowyer Ahmad,IR-18,313800
+IR,Kordestan,IR-16,313600
+IR,Lorestan,IR-20,323000
+IR,Markazi,IR-22,323200
+IR,Mazandaran,IR-21,323100
+IR,Qazvin,IR-28,323800
+IR,Qom,IR-26,323600
+IR,Semnan,IR-12,313200
+IR,Sistan va Baluchestan,IR-13,313300
+IR,Tehran,IR-07,303700
+IR,Yazd,IR-25,323500
+IR,Zanjan,IR-11,313100
+IS,Austurland,IS-7,370000
+IS,Hofudborgarsvaedi,IS-1,310000
+IS,Nordurland eystra,IS-6,360000
+IS,Nordurland vestra,IS-5,350000
+IS,Sudurland,IS-8,380000
+IS,Sudurnes,IS-2,320000
+IS,Vestfirdir,IS-4,340000
+IS,Vesturland,IS-3,330000
+IT,Abruzzo,IT-65,363500
+IT,Basilicata,IT-77,373700
+IT,Calabria,IT-78,373800
+IT,Campania,IT-72,373200
+IT,Emilia-Romagna,IT-45,343500
+IT,Friuli-Venezia Giulia,IT-36,333600
+IT,Lazio,IT-62,363200
+IT,Liguria,IT-42,343200
+IT,Lombardia,IT-25,323500
+IT,Marche,IT-57,353700
+IT,Molise,IT-67,363700
+IT,Piemonte,IT-21,323100
+IT,Puglia,IT-75,373500
+IT,Sardegna,IT-88,383800
+IT,Sicilia,IT-82,383200
+IT,Toscana,IT-52,353200
+IT,Trentino-Alto Adige,IT-32,333200
+IT,Umbria,IT-55,353500
+IT,Valle d'Aosta,IT-23,323300
+IT,Veneto,IT-34,333400
+JM,Clarendon,JM-13,313300
+JM,Hanover,JM-09,303900
+JM,Kingston,JM-01,303100
+JM,Manchester,JM-12,313200
+JM,Portland,JM-04,303400
+JM,Saint Andrew,JM-02,303200
+JM,Saint Ann,JM-06,303600
+JM,Saint Catherine,JM-14,313400
+JM,Saint Elizabeth,JM-11,313100
+JM,Saint James,JM-08,303800
+JM,Saint Mary,JM-05,303500
+JM,Saint Thomas,JM-03,303300
+JM,Trelawny,JM-07,303700
+JM,Westmoreland,JM-10,313000
+JO,Al 'Aqabah,JO-AQ,415100
+JO,Al 'Asimah,JO-AM,414d00
+JO,Al Balqa',JO-BA,424100
+JO,Al Karak,JO-KA,4b4100
+JO,Al Mafraq,JO-MA,4d4100
+JO,At Tafilah,JO-AT,415400
+JO,Az Zarqa',JO-AZ,415a00
+JO,Irbid,JO-IR,495200
+JO,Ma'an,JO-MN,4d4e00
+JO,Madaba,JO-MD,4d4400
+JP,Aichi,JP-23,323300
+JP,Akita,JP-05,303500
+JP,Aomori,JP-02,303200
+JP,Chiba,JP-12,313200
+JP,Ehime,JP-38,333800
+JP,Fukui,JP-18,313800
+JP,Fukuoka,JP-40,343000
+JP,Fukushima,JP-07,303700
+JP,Gifu,JP-21,323100
+JP,Gunma,JP-10,313000
+JP,Hiroshima,JP-34,333400
+JP,Hokkaido,JP-01,303100
+JP,Hyogo,JP-28,323800
+JP,Ibaraki,JP-08,303800
+JP,Ishikawa,JP-17,313700
+JP,Iwate,JP-03,303300
+JP,Kagawa,JP-37,333700
+JP,Kagoshima,JP-46,343600
+JP,Kanagawa,JP-14,313400
+JP,Kochi,JP-39,333900
+JP,Kumamoto,JP-43,343300
+JP,Kyoto,JP-26,323600
+JP,Mie,JP-24,323400
+JP,Miyagi,JP-04,303400
+JP,Miyazaki,JP-45,343500
+JP,Nagano,JP-20,323000
+JP,Nagasaki,JP-42,343200
+JP,Nara,JP-29,323900
+JP,Niigata,JP-15,313500
+JP,Oita,JP-44,343400
+JP,Okayama,JP-33,333300
+JP,Okinawa,JP-47,343700
+JP,Osaka,JP-27,323700
+JP,Saga,JP-41,343100
+JP,Saitama,JP-11,313100
+JP,Shiga,JP-25,323500
+JP,Shimane,JP-32,333200
+JP,Shizuoka,JP-22,323200
+JP,Tochigi,JP-09,303900
+JP,Tokushima,JP-36,333600
+JP,Tokyo,JP-13,313300
+JP,Tottori,JP-31,333100
+JP,Toyama,JP-16,313600
+JP,Wakayama,JP-30,333000
+JP,Yamagata,JP-06,303600
+JP,Yamaguchi,JP-35,333500
+JP,Yamanashi,JP-19,313900
+KE,Baringo,KE-01,303100
+KE,Bomet,KE-02,303200
+KE,Bungoma,KE-03,303300
+KE,Busia,KE-04,303400
+KE,Embu,KE-06,303600
+KE,Garissa,KE-07,303700
+KE,Homa Bay,KE-08,303800
+KE,Isiolo,KE-09,303900
+KE,Kajiado,KE-10,313000
+KE,Kakamega,KE-11,313100
+KE,Kericho,KE-12,313200
+KE,Kiambu,KE-13,313300
+KE,Kilifi,KE-14,313400
+KE,Kirinyaga,KE-15,313500
+KE,Kisii,KE-16,313600
+KE,Kisumu,KE-17,313700
+KE,Kitui,KE-18,313800
+KE,Kwale,KE-19,313900
+KE,Laikipia,KE-20,323000
+KE,Lamu,KE-21,323100
+KE,Machakos,KE-22,323200
+KE,Makueni,KE-23,323300
+KE,Mandera,KE-24,323400
+KE,Marsabit,KE-25,323500
+KE,Meru,KE-26,323600
+KE,Migori,KE-27,323700
+KE,Mombasa,KE-28,323800
+KE,Murang'a,KE-29,323900
+KE,Nairobi City,KE-30,333000
+KE,Nakuru,KE-31,333100
+KE,Nandi,KE-32,333200
+KE,Narok,KE-33,333300
+KE,Nyamira,KE-34,333400
+KE,Nyeri,KE-36,333600
+KE,Samburu,KE-37,333700
+KE,Siaya,KE-38,333800
+KE,Taita/Taveta,KE-39,333900
+KE,Tana River,KE-40,343000
+KE,Tharaka-Nithi,KE-41,343100
+KE,Trans Nzoia,KE-42,343200
+KE,Turkana,KE-43,343300
+KE,Uasin Gishu,KE-44,343400
+KE,Vihiga,KE-45,343500
+KE,Wajir,KE-46,343600
+KE,West Pokot,KE-47,343700
+KG,Batken,KG-B,420000
+KG,Bishkek,KG-GB,474200
+KG,Chuy,KG-C,430000
+KG,Jalal-Abad,KG-J,4a0000
+KG,Naryn,KG-N,4e0000
+KG,Osh,KG-GO,474f00
+KG,Talas,KG-T,540000
+KG,Ysyk-Kol,KG-Y,590000
+KH,Baat Dambang,KH-2,320000
+KH,Banteay Mean Chey,KH-1,310000
+KH,Kampong Chaam,KH-3,330000
+KH,Kampong Chhnang,KH-4,340000
+KH,Kampong Spueu,KH-5,350000
+KH,Kampong Thum,KH-6,360000
+KH,Kampot,KH-7,370000
+KH,Kandaal,KH-8,380000
+KH,Kaoh Kong,KH-9,390000
+KH,Kracheh,KH-10,313000
+KH,Krong Kaeb,KH-23,323300
+KH,Krong Pailin,KH-24,323400
+KH,Krong Preah Sihanouk,KH-18,313800
+KH,Mondol Kiri,KH-11,313100
+KH,Otdar Mean Chey,KH-22,323200
+KH,Phnom Penh,KH-12,313200
+KH,Pousaat,KH-15,313500
+KH,Preah Vihear,KH-13,313300
+KH,Prey Veaeng,KH-14,313400
+KH,Rotanak Kiri,KH-16,313600
+KH,Siem Reab,KH-17,313700
+KH,Stueng Traeng,KH-19,313900
+KH,Svaay Rieng,KH-20,323000
+KH,Taakaev,KH-21,323100
+KI,Gilbert Islands,KI-G,470000
+KI,Line Islands,KI-L,4c0000
+KM,Anjouan,KM-A,410000
+KM,Grande Comore,KM-G,470000
+KM,Moheli,KM-M,4d0000
+KN,Saint George Basseterre,KN-03,303300
+KN,Saint Paul Charlestown,KN-10,313000
+KP,Chagang-do,KP-04,303400
+KP,Hamgyong-bukto,KP-09,303900
+KP,Hamgyong-namdo,KP-08,303800
+KP,Hwanghae-bukto,KP-06,303600
+KP,Hwanghae-namdo,KP-05,303500
+KP,Kangwon-do,KP-07,303700
+KP,Rason,KP-13,313300
+KP,P'yongan-bukto,KP-03,303300
+KP,P'yongan-namdo,KP-02,303200
+KP,P'yongyang,KP-01,303100
+KP,Ryanggang-do,KP-10,313000
+KR,Busan-gwangyeoksi,KR-26,323600
+KR,Chungcheongbuk-do,KR-43,343300
+KR,Chungcheongnam-do,KR-44,343400
+KR,Daegu-gwangyeoksi,KR-27,323700
+KR,Daejeon-gwangyeoksi,KR-30,333000
+KR,Gangwon-do,KR-42,343200
+KR,Gwangju-gwangyeoksi,KR-29,323900
+KR,Gyeonggi-do,KR-41,343100
+KR,Gyeongsangbuk-do,KR-47,343700
+KR,Gyeongsangnam-do,KR-48,343800
+KR,Incheon-gwangyeoksi,KR-28,323800
+KR,Jeju-teukbyeoljachido,KR-49,343900
+KR,Jeollabuk-do,KR-45,343500
+KR,Jeollanam-do,KR-46,343600
+KR,Seoul-teukbyeolsi,KR-11,313100
+KR,Ulsan-gwangyeoksi,KR-31,333100
+KW,Al 'Asimah,KW-KU,4b5500
+KW,Al Ahmadi,KW-AH,414800
+KW,Al Farwaniyah,KW-FA,464100
+KW,Al Jahra,KW-JA,4a4100
+KW,Hawalli,KW-HA,484100
+KW,Mubarak al Kabir,KW-MU,4d5500
+KZ,Almaty,KZ-ALA,414c41
+KZ,Almaty oblysy,KZ-ALM,414c4d
+KZ,Aqmola oblysy,KZ-AKM,414b4d
+KZ,Aqtobe oblysy,KZ-AKT,414b54
+KZ,Astana,KZ-AST,415354
+KZ,Atyrau oblysy,KZ-ATY,415459
+KZ,Batys Qazaqstan oblysy,KZ-ZAP,5a4150
+KZ,Bayqongyr,KZ-BAY,424159
+KZ,Mangghystau oblysy,KZ-MAN,4d414e
+KZ,Ongtustik Qazaqstan oblysy,KZ-YUZ,59555a
+KZ,Pavlodar oblysy,KZ-PAV,504156
+KZ,Qaraghandy oblysy,KZ-KAR,4b4152
+KZ,Qostanay oblysy,KZ-KUS,4b5553
+KZ,Qyzylorda oblysy,KZ-KZY,4b5a59
+KZ,Shyghys Qazaqstan oblysy,KZ-VOS,564f53
+KZ,Soltustik Qazaqstan oblysy,KZ-SEV,534556
+KZ,Zhambyl oblysy,KZ-ZHA,5a4841
+LA,Attapu,LA-AT,415400
+LA,Bokeo,LA-BK,424b00
+LA,Bolikhamxai,LA-BL,424c00
+LA,Champasak,LA-CH,434800
+LA,Houaphan,LA-HO,484f00
+LA,Khammouan,LA-KH,4b4800
+LA,Louang Namtha,LA-LM,4c4d00
+LA,Louangphabang,LA-LP,4c5000
+LA,Oudomxai,LA-OU,4f5500
+LA,Phongsali,LA-PH,504800
+LA,Salavan,LA-SL,534c00
+LA,Savannakhet,LA-SV,535600
+LA,Viangchan,LA-VI,564900
+LA,Xaignabouli,LA-XA,584100
+LA,Xekong,LA-XE,584500
+LA,Xiangkhouang,LA-XI,584900
+LB,Aakkar,LB-AK,414b00
+LB,Baalbek-Hermel,LB-BH,424800
+LB,Beqaa,LB-BI,424900
+LB,Beyrouth,LB-BA,424100
+LB,Liban-Nord,LB-AS,415300
+LB,Liban-Sud,LB-JA,4a4100
+LB,Mont-Liban,LB-JL,4a4c00
+LB,Nabatiye,LB-NA,4e4100
+LC,Anse la Raye,LC-01,303100
+LC,Castries,LC-02,303200
+LC,Dennery,LC-05,303500
+LC,Gros Islet,LC-06,303600
+LC,Laborie,LC-07,303700
+LC,Micoud,LC-08,303800
+LC,Soufriere,LC-10,313000
+LC,Vieux Fort,LC-11,313100
+LI,Balzers,LI-01,303100
+LI,Eschen,LI-02,303200
+LI,Gamprin,LI-03,303300
+LI,Mauren,LI-04,303400
+LI,Planken,LI-05,303500
+LI,Ruggell,LI-06,303600
+LI,Schaan,LI-07,303700
+LI,Schellenberg,LI-08,303800
+LI,Triesen,LI-09,303900
+LI,Triesenberg,LI-10,313000
+LI,Vaduz,LI-11,313100
+LK,Central Province,LK-2,320000
+LK,Eastern Province,LK-5,350000
+LK,North Central Province,LK-7,370000
+LK,North Western Province,LK-6,360000
+LK,Northern Province,LK-4,340000
+LK,Sabaragamuwa Province,LK-9,390000
+LK,Southern Province,LK-3,330000
+LK,Uva Province,LK-8,380000
+LK,Western Province,LK-1,310000
+LR,Bomi,LR-BM,424d00
+LR,Bong,LR-BG,424700
+LR,Gbarpolu,LR-GP,475000
+LR,Grand Bassa,LR-GB,474200
+LR,Grand Cape Mount,LR-CM,434d00
+LR,Grand Gedeh,LR-GG,474700
+LR,Grand Kru,LR-GK,474b00
+LR,Lofa,LR-LO,4c4f00
+LR,Margibi,LR-MG,4d4700
+LR,Maryland,LR-MY,4d5900
+LR,Montserrado,LR-MO,4d4f00
+LR,Nimba,LR-NI,4e4900
+LR,River Cess,LR-RI,524900
+LR,River Gee,LR-RG,524700
+LR,Sinoe,LR-SI,534900
+LS,Berea,LS-D,440000
+LS,Butha-Buthe,LS-B,420000
+LS,Leribe,LS-C,430000
+LS,Mafeteng,LS-E,450000
+LS,Maseru,LS-A,410000
+LS,Mohale's Hoek,LS-F,460000
+LS,Mokhotlong,LS-J,4a0000
+LS,Qacha's Nek,LS-H,480000
+LS,Quthing,LS-G,470000
+LS,Thaba-Tseka,LS-K,4b0000
+LT,Alytaus apskritis,LT-AL,414c00
+LT,Kauno apskritis,LT-KU,4b5500
+LT,Klaipedos apskritis,LT-KL,4b4c00
+LT,Marijampoles apskritis,LT-MR,4d5200
+LT,Panevezio apskritis,LT-PN,504e00
+LT,Siauliu apskritis,LT-SA,534100
+LT,Taurages apskritis,LT-TA,544100
+LT,Telsiu apskritis,LT-TE,544500
+LT,Utenos apskritis,LT-UT,555400
+LT,Vilniaus apskritis,LT-VL,564c00
+LU,Diekirch,LU-DI,444900
+LU,Grevenmacher,LU-GR,475200
+LU,Luxembourg,LU-LU,4c5500
+LV,Adazu novads,LV-011,303131
+LV,Aglonas novads,LV-001,303031
+LV,Aizkraukles novads,LV-002,303032
+LV,Aizputes novads,LV-003,303033
+LV,Alojas novads,LV-005,303035
+LV,Aluksnes novads,LV-007,303037
+LV,Babites novads,LV-012,303132
+LV,Baltinavas novads,LV-014,303134
+LV,Balvu novads,LV-015,303135
+LV,Bauskas novads,LV-016,303136
+LV,Beverinas novads,LV-017,303137
+LV,Brocenu novads,LV-018,303138
+LV,Carnikavas novads,LV-020,303230
+LV,Cesu novads,LV-022,303232
+LV,Cesvaines novads,LV-021,303231
+LV,Ciblas novads,LV-023,303233
+LV,Daugavpils novads,LV-025,303235
+LV,Dobeles novads,LV-026,303236
+LV,Dundagas novads,LV-027,303237
+LV,Gulbenes novads,LV-033,303333
+LV,Iecavas novads,LV-034,303334
+LV,Incukalna novads,LV-037,303337
+LV,Jaunjelgavas novads,LV-038,303338
+LV,Jaunpiebalgas novads,LV-039,303339
+LV,Jaunpils novads,LV-040,303430
+LV,Jekabpils novads,LV-042,303432
+LV,Jelgava,LV-JEL,4a454c
+LV,Jelgavas novads,LV-041,303431
+LV,Jurmala,LV-JUR,4a5552
+LV,Kekavas novads,LV-052,303532
+LV,Kokneses novads,LV-046,303436
+LV,Kraslavas novads,LV-047,303437
+LV,Kuldigas novads,LV-050,303530
+LV,Liepaja,LV-LPX,4c5058
+LV,Limbazu novads,LV-054,303534
+LV,Lubanas novads,LV-057,303537
+LV,Ludzas novads,LV-058,303538
+LV,Madonas novads,LV-059,303539
+LV,Malpils novads,LV-061,303631
+LV,Ogres novads,LV-067,303637
+LV,Olaines novads,LV-068,303638
+LV,Ozolnieku novads,LV-069,303639
+LV,Preilu novads,LV-073,303733
+LV,Rezeknes novads,LV-077,303737
+LV,Riga,LV-RIX,524958
+LV,Rojas novads,LV-079,303739
+LV,Ropazu novads,LV-080,303830
+LV,Rugaju novads,LV-082,303832
+LV,Rundales novads,LV-083,303833
+LV,Salacgrivas novads,LV-086,303836
+LV,Saldus novads,LV-088,303838
+LV,Sejas novads,LV-090,303930
+LV,Siguldas novads,LV-091,303931
+LV,Skrundas novads,LV-093,303933
+LV,Stopinu novads,LV-095,303935
+LV,Strencu novads,LV-096,303936
+LV,Talsu novads,LV-097,303937
+LV,Tukuma novads,LV-099,303939
+LV,Vainodes novads,LV-100,313030
+LV,Valkas novads,LV-101,313031
+LV,Valmiera,LV-VMR,564d52
+LV,Varkavas novads,LV-103,313033
+LV,Vecumnieku novads,LV-105,313035
+LV,Ventspils novads,LV-106,313036
+LY,Al Butnan,LY-BU,425500
+LY,Al Jabal al Akhdar,LY-JA,4a4100
+LY,Al Jabal al Gharbi,LY-JG,4a4700
+LY,Al Jafarah,LY-JI,4a4900
+LY,Al Jufrah,LY-JU,4a5500
+LY,Al Kufrah,LY-KF,4b4600
+LY,Al Marj,LY-MJ,4d4a00
+LY,Al Marqab,LY-MB,4d4200
+LY,Al Wahat,LY-WA,574100
+LY,An Nuqat al Khams,LY-NQ,4e5100
+LY,Az Zawiyah,LY-ZA,5a4100
+LY,Banghazi,LY-BA,424100
+LY,Darnah,LY-DR,445200
+LY,Ghat,LY-GT,475400
+LY,Misratah,LY-MI,4d4900
+LY,Murzuq,LY-MQ,4d5100
+LY,Nalut,LY-NL,4e4c00
+LY,Sabha,LY-SB,534200
+LY,Surt,LY-SR,535200
+LY,Tarabulus,LY-TB,544200
+LY,Wadi al Hayat,LY-WD,574400
+LY,Wadi ash Shati',LY-WS,575300
+MA,Chaouia-Ouardigha,MA-09,303900
+MA,Doukhala-Abda,MA-10,313000
+MA,Fes-Boulemane,MA-05,303500
+MA,Gharb-Chrarda-Beni Hssen,MA-02,303200
+MA,Grand Casablanca,MA-08,303800
+MA,Guelmim-Es Semara,MA-14,313400
+MA,L'Oriental,MA-04,303400
+MA,Marrakech-Tensift-Al Haouz,MA-11,313100
+MA,Meknes-Tafilalet,MA-06,303600
+MA,Rabat-Sale-Zemmour-Zaer,MA-07,303700
+MA,Souss-Massa-Draa,MA-13,313300
+MA,Tadla-Azilal,MA-12,313200
+MA,Tanger-Tetouan,MA-01,303100
+MA,Taza-Al Hoceima-Taounate,MA-03,303300
+MC,Fontvieille,MC-FO,464f00
+MC,La Condamine,MC-CO,434f00
+MC,Monaco-Ville,MC-MO,4d4f00
+MC,Moneghetti,MC-MG,4d4700
+MC,Monte-Carlo,MC-MC,4d4300
+MC,Saint-Roman,MC-SR,535200
+MD,Anenii Noi,MD-AN,414e00
+MD,Balti,MD-BA,424100
+MD,Basarabeasca,MD-BS,425300
+MD,Bender,MD-BD,424400
+MD,Briceni,MD-BR,425200
+MD,Cahul,MD-CA,434100
+MD,Calarasi,MD-CL,434c00
+MD,Cantemir,MD-CT,435400
+MD,Causeni,MD-CS,435300
+MD,Chisinau,MD-CU,435500
+MD,Cimislia,MD-CM,434d00
+MD,Criuleni,MD-CR,435200
+MD,Donduseni,MD-DO,444f00
+MD,Drochia,MD-DR,445200
+MD,Dubasari,MD-DU,445500
+MD,Edinet,MD-ED,454400
+MD,Falesti,MD-FA,464100
+MD,Floresti,MD-FL,464c00
+MD,"Gagauzia, Unitatea teritoriala autonoma",MD-GA,474100
+MD,Glodeni,MD-GL,474c00
+MD,Hincesti,MD-HI,484900
+MD,Ialoveni,MD-IA,494100
+MD,Leova,MD-LE,4c4500
+MD,Nisporeni,MD-NI,4e4900
+MD,Ocnita,MD-OC,4f4300
+MD,Orhei,MD-OR,4f5200
+MD,Rezina,MD-RE,524500
+MD,Riscani,MD-RI,524900
+MD,Singerei,MD-SI,534900
+MD,Soldanesti,MD-SD,534400
+MD,Soroca,MD-SO,534f00
+MD,Stefan Voda,MD-SV,535600
+MD,"Stinga Nistrului, unitatea teritoriala din",MD-SN,534e00
+MD,Straseni,MD-ST,535400
+MD,Taraclia,MD-TA,544100
+MD,Telenesti,MD-TE,544500
+MD,Ungheni,MD-UN,554e00
+ME,Bar,ME-02,303200
+ME,Budva,ME-05,303500
+ME,Cetinje,ME-06,303600
+ME,Danilovgrad,ME-07,303700
+ME,Herceg-Novi,ME-08,303800
+ME,Kolasin,ME-09,303900
+ME,Kotor,ME-10,313000
+ME,Mojkovac,ME-11,313100
+ME,Niksic,ME-12,313200
+ME,Podgorica,ME-16,313600
+ME,Tivat,ME-19,313900
+ME,Ulcinj,ME-20,323000
+ME,Zabljak,ME-21,323100
+MG,Antananarivo,MG-T,540000
+MG,Antsiranana,MG-D,440000
+MG,Fianarantsoa,MG-F,460000
+MG,Mahajanga,MG-M,4d0000
+MG,Toamasina,MG-A,410000
+MG,Toliara,MG-U,550000
+MH,Ailinglaplap,MH-ALL,414c4c
+MH,Ailuk,MH-ALK,414c4b
+MH,Arno,MH-ARN,41524e
+MH,Aur,MH-AUR,415552
+MH,Bikini & Kili,MH-KIL,4b494c
+MH,Ebon,MH-EBO,45424f
+MH,Enewetak & Ujelang,MH-ENI,454e49
+MH,Jabat,MH-JAB,4a4142
+MH,Jaluit,MH-JAL,4a414c
+MH,Kwajalein,MH-KWA,4b5741
+MH,Lae,MH-LAE,4c4145
+MH,Lib,MH-LIB,4c4942
+MH,Likiep,MH-LIK,4c494b
+MH,Majuro,MH-MAJ,4d414a
+MH,Maloelap,MH-MAL,4d414c
+MH,Mejit,MH-MEJ,4d454a
+MH,Mili,MH-MIL,4d494c
+MH,Namdrik,MH-NMK,4e4d4b
+MH,Namu,MH-NMU,4e4d55
+MH,Rongelap,MH-RON,524f4e
+MH,Ujae,MH-UJA,554a41
+MH,Utrik,MH-UTI,555449
+MH,Wotho,MH-WTH,575448
+MH,Wotje,MH-WTJ,57544a
+MK,Aracinovo,MK-02,303200
+MK,Berovo,MK-03,303300
+MK,Bitola,MK-04,303400
+MK,Bogdanci,MK-05,303500
+MK,Bogovinje,MK-06,303600
+MK,Bosilovo,MK-07,303700
+MK,Brvenica,MK-08,303800
+MK,Caska,MK-80,383000
+MK,Centar Zupa,MK-78,373800
+MK,Cesinovo-Oblesevo,MK-81,383100
+MK,Cucer Sandevo,MK-82,383200
+MK,Debar,MK-21,323100
+MK,Debarca,MK-22,323200
+MK,Delcevo,MK-23,323300
+MK,Demir Hisar,MK-25,323500
+MK,Demir Kapija,MK-24,323400
+MK,Dojran,MK-26,323600
+MK,Dolneni,MK-27,323700
+MK,Gevgelija,MK-18,313800
+MK,Gostivar,MK-19,313900
+MK,Gradsko,MK-20,323000
+MK,Ilinden,MK-34,333400
+MK,Jegunovce,MK-35,333500
+MK,Karbinci,MK-37,333700
+MK,Kavadarci,MK-36,333600
+MK,Kicevo,MK-40,343000
+MK,Kocani,MK-42,343200
+MK,Konce,MK-41,343100
+MK,Kratovo,MK-43,343300
+MK,Kriva Palanka,MK-44,343400
+MK,Krivogastani,MK-45,343500
+MK,Krusevo,MK-46,343600
+MK,Kumanovo,MK-47,343700
+MK,Lipkovo,MK-48,343800
+MK,Lozovo,MK-49,343900
+MK,Makedonska Kamenica,MK-51,353100
+MK,Makedonski Brod,MK-52,353200
+MK,Mavrovo i Rostusa,MK-50,353000
+MK,Mogila,MK-53,353300
+MK,Negotino,MK-54,353400
+MK,Novaci,MK-55,353500
+MK,Novo Selo,MK-56,353600
+MK,Ohrid,MK-58,353800
+MK,Pehcevo,MK-60,363000
+MK,Petrovec,MK-59,353900
+MK,Plasnica,MK-61,363100
+MK,Prilep,MK-62,363200
+MK,Probistip,MK-63,363300
+MK,Radovis,MK-64,363400
+MK,Rankovce,MK-65,363500
+MK,Resen,MK-66,363600
+MK,Rosoman,MK-67,363700
+MK,Skopje,MK-85,383500
+MK,Sopiste,MK-70,373000
+MK,Staro Nagoricane,MK-71,373100
+MK,Stip,MK-83,383300
+MK,Struga,MK-72,373200
+MK,Strumica,MK-73,373300
+MK,Studenicani,MK-74,373400
+MK,Sveti Nikole,MK-69,363900
+MK,Tearce,MK-75,373500
+MK,Tetovo,MK-76,373600
+MK,Valandovo,MK-10,313000
+MK,Vasilevo,MK-11,313100
+MK,Veles,MK-13,313300
+MK,Vevcani,MK-12,313200
+MK,Vinica,MK-14,313400
+MK,Vrapciste,MK-16,313600
+MK,Zelenikovo,MK-32,333200
+MK,Zelino,MK-30,333000
+MK,Zrnovci,MK-33,333300
+ML,Bamako,ML-BKO,424b4f
+ML,Gao,ML-7,370000
+ML,Kayes,ML-1,310000
+ML,Kidal,ML-8,380000
+ML,Koulikoro,ML-2,320000
+ML,Mopti,ML-5,350000
+ML,Segou,ML-4,340000
+ML,Sikasso,ML-3,330000
+ML,Tombouctou,ML-6,360000
+MM,Ayeyarwady,MM-07,303700
+MM,Bago,MM-02,303200
+MM,Chin,MM-14,313400
+MM,Kachin,MM-11,313100
+MM,Kayah,MM-12,313200
+MM,Kayin,MM-13,313300
+MM,Magway,MM-03,303300
+MM,Mandalay,MM-04,303400
+MM,Mon,MM-15,313500
+MM,Nay Pyi Taw,MM-18,313800
+MM,Rakhine,MM-16,313600
+MM,Sagaing,MM-01,303100
+MM,Shan,MM-17,313700
+MM,Tanintharyi,MM-05,303500
+MM,Yangon,MM-06,303600
+MN,Arhangay,MN-073,303733
+MN,Bayan-Olgiy,MN-071,303731
+MN,Bayanhongor,MN-069,303639
+MN,Bulgan,MN-067,303637
+MN,Darhan uul,MN-037,303337
+MN,Dornod,MN-061,303631
+MN,Dornogovi,MN-063,303633
+MN,Dundgovi,MN-059,303539
+MN,Dzavhan,MN-057,303537
+MN,Govi-Altay,MN-065,303635
+MN,Govi-Sumber,MN-064,303634
+MN,Hentiy,MN-039,303339
+MN,Hovd,MN-043,303433
+MN,Hovsgol,MN-041,303431
+MN,Omnogovi,MN-053,303533
+MN,Orhon,MN-035,303335
+MN,Ovorhangay,MN-055,303535
+MN,Selenge,MN-049,303439
+MN,Suhbaatar,MN-051,303531
+MN,Tov,MN-047,303437
+MN,Ulaanbaatar,MN-1,310000
+MN,Uvs,MN-046,303436
+MR,Adrar,MR-07,303700
+MR,Assaba,MR-03,303300
+MR,Brakna,MR-05,303500
+MR,Dakhlet Nouadhibou,MR-08,303800
+MR,Gorgol,MR-04,303400
+MR,Guidimaka,MR-10,313000
+MR,Hodh ech Chargui,MR-01,303100
+MR,Hodh el Gharbi,MR-02,303200
+MR,Inchiri,MR-12,313200
+MR,Nouakchott Nord,MR-14,313400
+MR,Tagant,MR-09,303900
+MR,Tiris Zemmour,MR-11,313100
+MR,Trarza,MR-06,303600
+MT,Attard,MT-01,303100
+MT,Balzan,MT-02,303200
+MT,Birkirkara,MT-04,303400
+MT,Birzebbuga,MT-05,303500
+MT,Bormla,MT-06,303600
+MT,Dingli,MT-07,303700
+MT,Ghajnsielem,MT-13,313300
+MT,Gharghur,MT-15,313500
+MT,Ghaxaq,MT-17,313700
+MT,Haz-Zabbar,MT-64,363400
+MT,Valletta,MT-60,363000
+MT,Birgu,MT-03,303300
+MT,Fgura,MT-08,303800
+MT,Floriana,MT-09,303900
+MT,Gudja,MT-11,313100
+MT,Hamrun,MT-18,313800
+MT,Kalkara,MT-21,323100
+MT,Marsa,MT-26,323600
+MT,Mellieha,MT-30,333000
+MT,Mosta,MT-32,333200
+MT,Qala,MT-42,343200
+MT,Qrendi,MT-44,343400
+MT,Nadur,MT-37,333700
+MT,Naxxar,MT-38,333800
+MT,Rabat Malta,MT-46,343600
+MT,Siggiewi,MT-55,353500
+MT,Swieqi,MT-57,353700
+MT,Xaghra,MT-61,363100
+MT,Xewkija,MT-62,363200
+MT,Zebbug Gozo,MT-65,363500
+MT,Zejtun,MT-67,363700
+MT,Zurrieq,MT-68,363800
+MT,Kirkop,MT-23,323300
+MT,Iklin,MT-19,313900
+MT,Mqabba,MT-33,333300
+MT,Msida,MT-34,333400
+MT,Isla,MT-20,323000
+MT,Lija,MT-24,323400
+MT,Luqa,MT-25,323500
+MT,Marsaxlokk,MT-28,323800
+MT,Paola,MT-39,333900
+MT,Qormi,MT-43,343300
+MT,Safi,MT-47,343700
+MT,Saint John,MT-49,343900
+MT,Saint Julian,MT-48,343800
+MT,Saint Lucia,MT-53,353300
+MT,Saint Paul's Bay,MT-51,353100
+MT,Saint Venera,MT-54,353400
+MT,Sannat,MT-52,353200
+MT,Kercem,MT-22,323200
+MT,Ta' Xbiex,MT-58,353800
+MT,Tarxien,MT-59,353900
+MT,Sliema,MT-56,353600
+MT,Rabat Gozo,MT-45,343500
+MU,Black River,MU-BL,424c00
+MU,Flacq,MU-FL,464c00
+MU,Grand Port,MU-GP,475000
+MU,Moka,MU-MO,4d4f00
+MU,Pamplemousses,MU-PA,504100
+MU,Plaines Wilhems,MU-PW,505700
+MU,Port Louis,MU-PU,505500
+MU,Riviere du Rempart,MU-RR,525200
+MU,Savanne,MU-SA,534100
+MV,Alifu Alifu,MV-02,303200
+MV,Baa,MV-20,323000
+MV,Dhaalu,MV-17,313700
+MV,Gaafu Dhaalu,MV-28,323800
+MV,Haa Alifu,MV-07,303700
+MV,Haa Dhaalu,MV-23,323300
+MV,Kaafu,MV-26,323600
+MV,Laamu,MV-05,303500
+MV,Maale,MV-MLE,4d4c45
+MV,Meemu,MV-12,313200
+MV,Noonu,MV-25,323500
+MV,Raa,MV-13,313300
+MV,Seenu,MV-01,303100
+MV,Shaviyani,MV-24,323400
+MV,Thaa,MV-08,303800
+MW,Balaka,MW-BA,424100
+MW,Blantyre,MW-BL,424c00
+MW,Chikwawa,MW-CK,434b00
+MW,Chiradzulu,MW-CR,435200
+MW,Chitipa,MW-CT,435400
+MW,Dedza,MW-DE,444500
+MW,Dowa,MW-DO,444f00
+MW,Karonga,MW-KR,4b5200
+MW,Kasungu,MW-KS,4b5300
+MW,Likoma,MW-LK,4c4b00
+MW,Lilongwe,MW-LI,4c4900
+MW,Machinga,MW-MH,4d4800
+MW,Mangochi,MW-MG,4d4700
+MW,Mchinji,MW-MC,4d4300
+MW,Mulanje,MW-MU,4d5500
+MW,Mwanza,MW-MW,4d5700
+MW,Mzimba,MW-MZ,4d5a00
+MW,Neno,MW-NE,4e4500
+MW,Nkhata Bay,MW-NB,4e4200
+MW,Nkhotakota,MW-NK,4e4b00
+MW,Nsanje,MW-NS,4e5300
+MW,Ntcheu,MW-NU,4e5500
+MW,Ntchisi,MW-NI,4e4900
+MW,Phalombe,MW-PH,504800
+MW,Rumphi,MW-RU,525500
+MW,Salima,MW-SA,534100
+MW,Thyolo,MW-TH,544800
+MW,Zomba,MW-ZO,5a4f00
+MX,Aguascalientes,MX-AGU,414755
+MX,Baja California,MX-BCN,42434e
+MX,Baja California Sur,MX-BCS,424353
+MX,Campeche,MX-CAM,43414d
+MX,Chiapas,MX-CHP,434850
+MX,Chihuahua,MX-CHH,434848
+MX,Ciudad de Mexico,MX-CMX,434d58
+MX,Coahuila de Zaragoza,MX-COA,434f41
+MX,Colima,MX-COL,434f4c
+MX,Durango,MX-DUR,445552
+MX,Guanajuato,MX-GUA,475541
+MX,Guerrero,MX-GRO,47524f
+MX,Hidalgo,MX-HID,484944
+MX,Jalisco,MX-JAL,4a414c
+MX,Mexico,MX-MEX,4d4558
+MX,Michoacan de Ocampo,MX-MIC,4d4943
+MX,Morelos,MX-MOR,4d4f52
+MX,Nayarit,MX-NAY,4e4159
+MX,Nuevo Leon,MX-NLE,4e4c45
+MX,Oaxaca,MX-OAX,4f4158
+MX,Puebla,MX-PUE,505545
+MX,Queretaro,MX-QUE,515545
+MX,Quintana Roo,MX-ROO,524f4f
+MX,San Luis Potosi,MX-SLP,534c50
+MX,Sinaloa,MX-SIN,53494e
+MX,Sonora,MX-SON,534f4e
+MX,Tabasco,MX-TAB,544142
+MX,Tamaulipas,MX-TAM,54414d
+MX,Tlaxcala,MX-TLA,544c41
+MX,Veracruz de Ignacio de la Llave,MX-VER,564552
+MX,Yucatan,MX-YUC,595543
+MX,Zacatecas,MX-ZAC,5a4143
+MY,Johor,MY-01,303100
+MY,Kedah,MY-02,303200
+MY,Kelantan,MY-03,303300
+MY,Melaka,MY-04,303400
+MY,Negeri Sembilan,MY-05,303500
+MY,Pahang,MY-06,303600
+MY,Perak,MY-08,303800
+MY,Perlis,MY-09,303900
+MY,Pulau Pinang,MY-07,303700
+MY,Sabah,MY-12,313200
+MY,Sarawak,MY-13,313300
+MY,Selangor,MY-10,313000
+MY,Terengganu,MY-11,313100
+MY,Wilayah Persekutuan Kuala Lumpur,MY-14,313400
+MY,Wilayah Persekutuan Labuan,MY-15,313500
+MY,Wilayah Persekutuan Putrajaya,MY-16,313600
+MZ,Cabo Delgado,MZ-P,500000
+MZ,Gaza,MZ-G,470000
+MZ,Inhambane,MZ-I,490000
+MZ,Manica,MZ-B,420000
+MZ,Maputo,MZ-MPM,4d504d
+MZ,Nampula,MZ-N,4e0000
+MZ,Niassa,MZ-A,410000
+MZ,Sofala,MZ-S,530000
+MZ,Tete,MZ-T,540000
+MZ,Zambezia,MZ-Q,510000
+NA,Erongo,NA-ER,455200
+NA,Hardap,NA-HA,484100
+NA,Karas,NA-KA,4b4100
+NA,Kavango East,NA-KE,4b4500
+NA,Khomas,NA-KH,4b4800
+NA,Kunene,NA-KU,4b5500
+NA,Ohangwena,NA-OW,4f5700
+NA,Omaheke,NA-OH,4f4800
+NA,Omusati,NA-OS,4f5300
+NA,Oshana,NA-ON,4f4e00
+NA,Oshikoto,NA-OT,4f5400
+NA,Otjozondjupa,NA-OD,4f4400
+NA,Zambezi,NA-CA,434100
+NE,Agadez,NE-1,310000
+NE,Diffa,NE-2,320000
+NE,Dosso,NE-3,330000
+NE,Maradi,NE-4,340000
+NE,Niamey,NE-8,380000
+NE,Tahoua,NE-5,350000
+NE,Tillaberi,NE-6,360000
+NE,Zinder,NE-7,370000
+NG,Abia,NG-AB,414200
+NG,Abuja Federal Capital Territory,NG-FC,464300
+NG,Adamawa,NG-AD,414400
+NG,Akwa Ibom,NG-AK,414b00
+NG,Anambra,NG-AN,414e00
+NG,Bauchi,NG-BA,424100
+NG,Bayelsa,NG-BY,425900
+NG,Benue,NG-BE,424500
+NG,Borno,NG-BO,424f00
+NG,Cross River,NG-CR,435200
+NG,Delta,NG-DE,444500
+NG,Ebonyi,NG-EB,454200
+NG,Edo,NG-ED,454400
+NG,Ekiti,NG-EK,454b00
+NG,Enugu,NG-EN,454e00
+NG,Gombe,NG-GO,474f00
+NG,Imo,NG-IM,494d00
+NG,Jigawa,NG-JI,4a4900
+NG,Kaduna,NG-KD,4b4400
+NG,Kano,NG-KN,4b4e00
+NG,Katsina,NG-KT,4b5400
+NG,Kebbi,NG-KE,4b4500
+NG,Kogi,NG-KO,4b4f00
+NG,Kwara,NG-KW,4b5700
+NG,Lagos,NG-LA,4c4100
+NG,Nasarawa,NG-NA,4e4100
+NG,Niger,NG-NI,4e4900
+NG,Ogun,NG-OG,4f4700
+NG,Ondo,NG-ON,4f4e00
+NG,Osun,NG-OS,4f5300
+NG,Oyo,NG-OY,4f5900
+NG,Plateau,NG-PL,504c00
+NG,Rivers,NG-RI,524900
+NG,Sokoto,NG-SO,534f00
+NG,Taraba,NG-TA,544100
+NG,Yobe,NG-YO,594f00
+NG,Zamfara,NG-ZA,5a4100
+NI,Atlantico Norte,NI-AN,414e00
+NI,Atlantico Sur,NI-AS,415300
+NI,Boaco,NI-BO,424f00
+NI,Carazo,NI-CA,434100
+NI,Chinandega,NI-CI,434900
+NI,Chontales,NI-CO,434f00
+NI,Esteli,NI-ES,455300
+NI,Granada,NI-GR,475200
+NI,Jinotega,NI-JI,4a4900
+NI,Leon,NI-LE,4c4500
+NI,Madriz,NI-MD,4d4400
+NI,Managua,NI-MN,4d4e00
+NI,Masaya,NI-MS,4d5300
+NI,Matagalpa,NI-MT,4d5400
+NI,Nueva Segovia,NI-NS,4e5300
+NI,Rio San Juan,NI-SJ,534a00
+NI,Rivas,NI-RI,524900
+NL,Drenthe,NL-DR,445200
+NL,Flevoland,NL-FL,464c00
+NL,Fryslan,NL-FR,465200
+NL,Gelderland,NL-GE,474500
+NL,Groningen,NL-GR,475200
+NL,Limburg,NL-LI,4c4900
+NL,Noord-Brabant,NL-NB,4e4200
+NL,Noord-Holland,NL-NH,4e4800
+NL,Overijssel,NL-OV,4f5600
+NL,Utrecht,NL-UT,555400
+NL,Zeeland,NL-ZE,5a4500
+NL,Zuid-Holland,NL-ZH,5a4800
+NO,Akershus,NO-02,303200
+NO,Aust-Agder,NO-09,303900
+NO,Buskerud,NO-06,303600
+NO,Finnmark,NO-20,323000
+NO,Hedmark,NO-04,303400
+NO,Hordaland,NO-12,313200
+NO,More og Romsdal,NO-15,313500
+NO,Nord-Trondelag,NO-17,313700
+NO,Nordland,NO-18,313800
+NO,Oppland,NO-05,303500
+NO,Oslo,NO-03,303300
+NO,Ostfold,NO-01,303100
+NO,Rogaland,NO-11,313100
+NO,Sogn og Fjordane,NO-14,313400
+NO,Sor-Trondelag,NO-16,313600
+NO,Telemark,NO-08,303800
+NO,Troms,NO-19,313900
+NO,Vest-Agder,NO-10,313000
+NO,Vestfold,NO-07,303700
+NP,Bagmati,NP-BA,424100
+NP,Bheri,NP-BH,424800
+NP,Dhawalagiri,NP-DH,444800
+NP,Gandaki,NP-GA,474100
+NP,Janakpur,NP-JA,4a4100
+NP,Karnali,NP-KA,4b4100
+NP,Kosi,NP-KO,4b4f00
+NP,Lumbini,NP-LU,4c5500
+NP,Mahakali,NP-MA,4d4100
+NP,Mechi,NP-ME,4d4500
+NP,Narayani,NP-NA,4e4100
+NP,Rapti,NP-RA,524100
+NP,Sagarmatha,NP-SA,534100
+NP,Seti,NP-SE,534500
+NR,Yaren,NR-14,313400
+NZ,Auckland,NZ-AUK,41554b
+NZ,Bay of Plenty,NZ-BOP,424f50
+NZ,Canterbury,NZ-CAN,43414e
+NZ,Chatham Islands Territory,NZ-CIT,434954
+NZ,Gisborne,NZ-GIS,474953
+NZ,Hawke's Bay,NZ-HKB,484b42
+NZ,Manawatu-Wanganui,NZ-MWT,4d5754
+NZ,Marlborough,NZ-MBH,4d4248
+NZ,Nelson,NZ-NSN,4e534e
+NZ,Northland,NZ-NTL,4e544c
+NZ,Otago,NZ-OTA,4f5441
+NZ,Southland,NZ-STL,53544c
+NZ,Taranaki,NZ-TKI,544b49
+NZ,Tasman,NZ-TAS,544153
+NZ,Waikato,NZ-WKO,574b4f
+NZ,Wellington,NZ-WGN,57474e
+NZ,West Coast,NZ-WTC,575443
+OM,Ad Dakhiliyah,OM-DA,444100
+OM,Al Buraymi,OM-BU,425500
+OM,Al Wusta,OM-WU,575500
+OM,Az Zahirah,OM-ZA,5a4100
+OM,Janub al Batinah,OM-BJ,424a00
+OM,Janub ash Sharqiyah,OM-SJ,534a00
+OM,Masqat,OM-MA,4d4100
+OM,Musandam,OM-MU,4d5500
+OM,Shamal al Batinah,OM-BS,425300
+OM,Shamal ash Sharqiyah,OM-SS,535300
+OM,Zufar,OM-ZU,5a5500
+PA,Bocas del Toro,PA-1,310000
+PA,Chiriqui,PA-4,340000
+PA,Cocle,PA-2,320000
+PA,Colon,PA-3,330000
+PA,Darien,PA-5,350000
+PA,Herrera,PA-6,360000
+PA,Los Santos,PA-7,370000
+PA,Panama,PA-8,380000
+PA,Veraguas,PA-9,390000
+PE,Amazonas,PE-AMA,414d41
+PE,Ancash,PE-ANC,414e43
+PE,Apurimac,PE-APU,415055
+PE,Arequipa,PE-ARE,415245
+PE,Ayacucho,PE-AYA,415941
+PE,Cajamarca,PE-CAJ,43414a
+PE,Cusco,PE-CUS,435553
+PE,El Callao,PE-CAL,43414c
+PE,Huancavelica,PE-HUV,485556
+PE,Huanuco,PE-HUC,485543
+PE,Ica,PE-ICA,494341
+PE,Junin,PE-JUN,4a554e
+PE,La Libertad,PE-LAL,4c414c
+PE,Lambayeque,PE-LAM,4c414d
+PE,Lima,PE-LIM,4c494d
+PE,Loreto,PE-LOR,4c4f52
+PE,Madre de Dios,PE-MDD,4d4444
+PE,Moquegua,PE-MOQ,4d4f51
+PE,Pasco,PE-PAS,504153
+PE,Piura,PE-PIU,504955
+PE,Puno,PE-PUN,50554e
+PE,San Martin,PE-SAM,53414d
+PE,Tacna,PE-TAC,544143
+PE,Tumbes,PE-TUM,54554d
+PE,Ucayali,PE-UCA,554341
+PG,Bougainville,PG-NSB,4e5342
+PG,Chimbu,PG-CPK,43504b
+PG,East New Britain,PG-EBR,454252
+PG,East Sepik,PG-ESW,455357
+PG,Eastern Highlands,PG-EHG,454847
+PG,Enga,PG-EPW,455057
+PG,Gulf,PG-GPK,47504b
+PG,Madang,PG-MPM,4d504d
+PG,Manus,PG-MRL,4d524c
+PG,Milne Bay,PG-MBA,4d4241
+PG,Morobe,PG-MPL,4d504c
+PG,National Capital District (Port Moresby),PG-NCD,4e4344
+PG,New Ireland,PG-NIK,4e494b
+PG,Northern,PG-NPP,4e5050
+PG,Southern Highlands,PG-SHM,53484d
+PG,West New Britain,PG-WBK,57424b
+PG,West Sepik,PG-SAN,53414e
+PG,Western,PG-WPD,575044
+PG,Western Highlands,PG-WHM,57484d
+PH,Abra,PH-ABR,414252
+PH,Agusan del Norte,PH-AGN,41474e
+PH,Agusan del Sur,PH-AGS,414753
+PH,Aklan,PH-AKL,414b4c
+PH,Albay,PH-ALB,414c42
+PH,Antique,PH-ANT,414e54
+PH,Apayao,PH-APA,415041
+PH,Aurora,PH-AUR,415552
+PH,Basilan,PH-BAS,424153
+PH,Bataan,PH-BAN,42414e
+PH,Batanes,PH-BTN,42544e
+PH,Batangas,PH-BTG,425447
+PH,Benguet,PH-BEN,42454e
+PH,Bohol,PH-BOH,424f48
+PH,Bukidnon,PH-BUK,42554b
+PH,Bulacan,PH-BUL,42554c
+PH,Cagayan,PH-CAG,434147
+PH,Camarines Norte,PH-CAN,43414e
+PH,Camarines Sur,PH-CAS,434153
+PH,Camiguin,PH-CAM,43414d
+PH,Capiz,PH-CAP,434150
+PH,Catanduanes,PH-CAT,434154
+PH,Cavite,PH-CAV,434156
+PH,Cebu,PH-CEB,434542
+PH,Cotabato,PH-NCO,4e434f
+PH,Davao del Sur,PH-DAS,444153
+PH,Davao Oriental,PH-DAO,44414f
+PH,Eastern Samar,PH-EAS,454153
+PH,Ifugao,PH-IFU,494655
+PH,Ilocos Norte,PH-ILN,494c4e
+PH,Ilocos Sur,PH-ILS,494c53
+PH,Iloilo,PH-ILI,494c49
+PH,Isabela,PH-ISA,495341
+PH,Kalinga,PH-KAL,4b414c
+PH,La Union,PH-LUN,4c554e
+PH,Laguna,PH-LAG,4c4147
+PH,Lanao del Norte,PH-LAN,4c414e
+PH,Lanao del Sur,PH-LAS,4c4153
+PH,Leyte,PH-LEY,4c4559
+PH,Maguindanao,PH-MAG,4d4147
+PH,Marinduque,PH-MAD,4d4144
+PH,Masbate,PH-MAS,4d4153
+PH,Mindoro Occidental,PH-MDC,4d4443
+PH,Mindoro Oriental,PH-MDR,4d4452
+PH,Misamis Occidental,PH-MSC,4d5343
+PH,Misamis Oriental,PH-MSR,4d5352
+PH,Mountain Province,PH-MOU,4d4f55
+PH,National Capital Region,PH-00,303000
+PH,Negros Occidental,PH-NEC,4e4543
+PH,Negros Oriental,PH-NER,4e4552
+PH,Northern Samar,PH-NSA,4e5341
+PH,Nueva Ecija,PH-NUE,4e5545
+PH,Nueva Vizcaya,PH-NUV,4e5556
+PH,Palawan,PH-PLW,504c57
+PH,Pampanga,PH-PAM,50414d
+PH,Pangasinan,PH-PAN,50414e
+PH,Quezon,PH-QUE,515545
+PH,Quirino,PH-QUI,515549
+PH,Rizal,PH-RIZ,52495a
+PH,Romblon,PH-ROM,524f4d
+PH,Samar,PH-WSA,575341
+PH,Siquijor,PH-SIG,534947
+PH,Sorsogon,PH-SOR,534f52
+PH,South Cotabato,PH-SCO,53434f
+PH,Southern Leyte,PH-SLE,534c45
+PH,Sultan Kudarat,PH-SUK,53554b
+PH,Sulu,PH-SLU,534c55
+PH,Surigao del Norte,PH-SUN,53554e
+PH,Surigao del Sur,PH-SUR,535552
+PH,Tarlac,PH-TAR,544152
+PH,Tawi-Tawi,PH-TAW,544157
+PH,Zambales,PH-ZMB,5a4d42
+PH,Zamboanga del Norte,PH-ZAN,5a414e
+PH,Zamboanga del Sur,PH-ZAS,5a4153
+PK,Azad Jammu and Kashmir,PK-JK,4a4b00
+PK,Balochistan,PK-BA,424100
+PK,Federally Administered Tribal Areas,PK-TA,544100
+PK,Gilgit-Baltistan,PK-GB,474200
+PK,Islamabad,PK-IS,495300
+PK,Khyber Pakhtunkhwa,PK-KP,4b5000
+PK,Punjab,PK-PB,504200
+PK,Sindh,PK-SD,534400
+PL,Dolnoslaskie,PL-DS,445300
+PL,Kujawsko-pomorskie,PL-KP,4b5000
+PL,Lodzkie,PL-LD,4c4400
+PL,Lubelskie,PL-LU,4c5500
+PL,Lubuskie,PL-LB,4c4200
+PL,Malopolskie,PL-MA,4d4100
+PL,Mazowieckie,PL-MZ,4d5a00
+PL,Opolskie,PL-OP,4f5000
+PL,Podkarpackie,PL-PK,504b00
+PL,Podlaskie,PL-PD,504400
+PL,Pomorskie,PL-PM,504d00
+PL,Slaskie,PL-SL,534c00
+PL,Swietokrzyskie,PL-SK,534b00
+PL,Warminsko-mazurskie,PL-WN,574e00
+PL,Wielkopolskie,PL-WP,575000
+PL,Zachodniopomorskie,PL-ZP,5a5000
+PS,Bethlehem,PS-BTH,425448
+PS,Gaza,PS-GZA,475a41
+PS,Hebron,PS-HBN,48424e
+PS,Jenin,PS-JEN,4a454e
+PS,Jericho and Al Aghwar,PS-JRH,4a5248
+PS,Jerusalem,PS-JEM,4a454d
+PS,Nablus,PS-NBS,4e4253
+PS,Qalqilya,PS-QQA,515141
+PS,Ramallah,PS-RBH,524248
+PS,Salfit,PS-SLT,534c54
+PS,Tubas,PS-TBS,544253
+PS,Tulkarm,PS-TKM,544b4d
+PT,Aveiro,PT-01,303100
+PT,Beja,PT-02,303200
+PT,Braga,PT-03,303300
+PT,Braganca,PT-04,303400
+PT,Castelo Branco,PT-05,303500
+PT,Coimbra,PT-06,303600
+PT,Evora,PT-07,303700
+PT,Faro,PT-08,303800
+PT,Guarda,PT-09,303900
+PT,Leiria,PT-10,313000
+PT,Lisboa,PT-11,313100
+PT,Portalegre,PT-12,313200
+PT,Porto,PT-13,313300
+PT,Regiao Autonoma da Madeira,PT-30,333000
+PT,Regiao Autonoma dos Acores,PT-20,323000
+PT,Santarem,PT-14,313400
+PT,Setubal,PT-15,313500
+PT,Viana do Castelo,PT-16,313600
+PT,Vila Real,PT-17,313700
+PT,Viseu,PT-18,313800
+PW,Aimeliik,PW-002,303032
+PW,Airai,PW-004,303034
+PW,Angaur,PW-010,303130
+PW,Kayangel,PW-100,313030
+PW,Koror,PW-150,313530
+PW,Melekeok,PW-212,323132
+PW,Ngaraard,PW-214,323134
+PW,Ngarchelong,PW-218,323138
+PW,Ngardmau,PW-222,323232
+PW,Ngatpang,PW-224,323234
+PW,Ngiwal,PW-228,323238
+PW,Peleliu,PW-350,333530
+PY,Alto Paraguay,PY-16,313600
+PY,Alto Parana,PY-10,313000
+PY,Amambay,PY-13,313300
+PY,Asuncion,PY-ASU,415355
+PY,Boqueron,PY-19,313900
+PY,Caaguazu,PY-5,350000
+PY,Caazapa,PY-6,360000
+PY,Canindeyu,PY-14,313400
+PY,Central,PY-11,313100
+PY,Concepcion,PY-1,310000
+PY,Cordillera,PY-3,330000
+PY,Guaira,PY-4,340000
+PY,Itapua,PY-7,370000
+PY,Misiones,PY-8,380000
+PY,Neembucu,PY-12,313200
+PY,Paraguari,PY-9,390000
+PY,Presidente Hayes,PY-15,313500
+PY,San Pedro,PY-2,320000
+QA,Ad Dawhah,QA-DA,444100
+QA,Al Khawr wa adh Dhakhirah,QA-KH,4b4800
+QA,Al Wakrah,QA-WA,574100
+QA,Ar Rayyan,QA-RA,524100
+QA,Ash Shamal,QA-MS,4d5300
+QA,Az Za'ayin,QA-ZA,5a4100
+QA,Umm Salal,QA-US,555300
+RO,Alba,RO-AB,414200
+RO,Arad,RO-AR,415200
+RO,Arges,RO-AG,414700
+RO,Bacau,RO-BC,424300
+RO,Bihor,RO-BH,424800
+RO,Bistrita-Nasaud,RO-BN,424e00
+RO,Botosani,RO-BT,425400
+RO,Braila,RO-BR,425200
+RO,Brasov,RO-BV,425600
+RO,Bucuresti,RO-B,420000
+RO,Buzau,RO-BZ,425a00
+RO,Calarasi,RO-CL,434c00
+RO,Caras-Severin,RO-CS,435300
+RO,Cluj,RO-CJ,434a00
+RO,Constanta,RO-CT,435400
+RO,Covasna,RO-CV,435600
+RO,Dambovita,RO-DB,444200
+RO,Dolj,RO-DJ,444a00
+RO,Galati,RO-GL,474c00
+RO,Giurgiu,RO-GR,475200
+RO,Gorj,RO-GJ,474a00
+RO,Harghita,RO-HR,485200
+RO,Hunedoara,RO-HD,484400
+RO,Ialomita,RO-IL,494c00
+RO,Iasi,RO-IS,495300
+RO,Ilfov,RO-IF,494600
+RO,Maramures,RO-MM,4d4d00
+RO,Mehedinti,RO-MH,4d4800
+RO,Mures,RO-MS,4d5300
+RO,Neamt,RO-NT,4e5400
+RO,Olt,RO-OT,4f5400
+RO,Prahova,RO-PH,504800
+RO,Salaj,RO-SJ,534a00
+RO,Satu Mare,RO-SM,534d00
+RO,Sibiu,RO-SB,534200
+RO,Suceava,RO-SV,535600
+RO,Teleorman,RO-TR,545200
+RO,Timis,RO-TM,544d00
+RO,Tulcea,RO-TL,544c00
+RO,Valcea,RO-VL,564c00
+RO,Vaslui,RO-VS,565300
+RO,Vrancea,RO-VN,564e00
+RS,Beograd,RS-00,303000
+RS,Borski okrug,RS-14,313400
+RS,Branicevski okrug,RS-11,313100
+RS,Jablanicki okrug,RS-23,323300
+RS,Juznobacki okrug,RS-06,303600
+RS,Juznobanatski okrug,RS-04,303400
+RS,Kolubarski okrug,RS-09,303900
+RS,Kosovsko-Mitrovacki okrug,RS-28,323800
+RS,Macvanski okrug,RS-08,303800
+RS,Moravicki okrug,RS-17,313700
+RS,Nisavski okrug,RS-20,323000
+RS,Pcinjski okrug,RS-24,323400
+RS,Pecki okrug,RS-26,323600
+RS,Pirotski okrug,RS-22,323200
+RS,Podunavski okrug,RS-10,313000
+RS,Prizrenski okrug,RS-27,323700
+RS,Rasinski okrug,RS-19,313900
+RS,Raski okrug,RS-18,313800
+RS,Severnobacki okrug,RS-01,303100
+RS,Severnobanatski okrug,RS-03,303300
+RS,Srednjebanatski okrug,RS-02,303200
+RS,Sremski okrug,RS-07,303700
+RS,Sumadijski okrug,RS-12,313200
+RS,Toplicki okrug,RS-21,323100
+RS,Zajecarski okrug,RS-15,313500
+RS,Zapadnobacki okrug,RS-05,303500
+RS,Zlatiborski okrug,RS-16,313600
+RU,"Adygeya, Respublika",RU-AD,414400
+RU,"Altay, Respublika",RU-AL,414c00
+RU,Altayskiy kray,RU-ALT,414c54
+RU,Amurskaya oblast',RU-AMU,414d55
+RU,Arkhangel'skaya oblast',RU-ARK,41524b
+RU,Astrakhanskaya oblast',RU-AST,415354
+RU,"Bashkortostan, Respublika",RU-BA,424100
+RU,Belgorodskaya oblast',RU-BEL,42454c
+RU,Bryanskaya oblast',RU-BRY,425259
+RU,"Buryatiya, Respublika",RU-BU,425500
+RU,Chechenskaya Respublika,RU-CE,434500
+RU,Chelyabinskaya oblast',RU-CHE,434845
+RU,Chukotskiy avtonomnyy okrug,RU-CHU,434855
+RU,Chuvashskaya Respublika,RU-CU,435500
+RU,"Dagestan, Respublika",RU-DA,444100
+RU,"Ingushetiya, Respublika",RU-IN,494e00
+RU,Irkutskaya oblast',RU-IRK,49524b
+RU,Ivanovskaya oblast',RU-IVA,495641
+RU,Kabardino-Balkarskaya Respublika,RU-KB,4b4200
+RU,Kaliningradskaya oblast',RU-KGD,4b4744
+RU,"Kalmykiya, Respublika",RU-KL,4b4c00
+RU,Kaluzhskaya oblast',RU-KLU,4b4c55
+RU,Kamchatskiy kray,RU-KAM,4b414d
+RU,Karachayevo-Cherkesskaya Respublika,RU-KC,4b4300
+RU,"Kareliya, Respublika",RU-KR,4b5200
+RU,Kemerovskaya oblast',RU-KEM,4b454d
+RU,Khabarovskiy kray,RU-KHA,4b4841
+RU,"Khakasiya, Respublika",RU-KK,4b4b00
+RU,Khanty-Mansiyskiy avtonomnyy okrug,RU-KHM,4b484d
+RU,Kirovskaya oblast',RU-KIR,4b4952
+RU,"Komi, Respublika",RU-KO,4b4f00
+RU,Kostromskaya oblast',RU-KOS,4b4f53
+RU,Krasnodarskiy kray,RU-KDA,4b4441
+RU,Krasnoyarskiy kray,RU-KYA,4b5941
+RU,Kurganskaya oblast',RU-KGN,4b474e
+RU,Kurskaya oblast',RU-KRS,4b5253
+RU,Leningradskaya oblast',RU-LEN,4c454e
+RU,Lipetskaya oblast',RU-LIP,4c4950
+RU,Magadanskaya oblast',RU-MAG,4d4147
+RU,"Mariy El, Respublika",RU-ME,4d4500
+RU,"Mordoviya, Respublika",RU-MO,4d4f00
+RU,Moskovskaya oblast',RU-MOS,4d4f53
+RU,Moskva,RU-MOW,4d4f57
+RU,Murmanskaya oblast',RU-MUR,4d5552
+RU,Nenetskiy avtonomnyy okrug,RU-NEN,4e454e
+RU,Nizhegorodskaya oblast',RU-NIZ,4e495a
+RU,Novgorodskaya oblast',RU-NGR,4e4752
+RU,Novosibirskaya oblast',RU-NVS,4e5653
+RU,Omskaya oblast',RU-OMS,4f4d53
+RU,Orenburgskaya oblast',RU-ORE,4f5245
+RU,Orlovskaya oblast',RU-ORL,4f524c
+RU,Penzenskaya oblast',RU-PNZ,504e5a
+RU,Permskiy kray,RU-PER,504552
+RU,Primorskiy kray,RU-PRI,505249
+RU,Pskovskaya oblast',RU-PSK,50534b
+RU,Rostovskaya oblast',RU-ROS,524f53
+RU,Ryazanskaya oblast',RU-RYA,525941
+RU,"Saha, Respublika",RU-SA,534100
+RU,Sakhalinskaya oblast',RU-SAK,53414b
+RU,Samarskaya oblast',RU-SAM,53414d
+RU,Sankt-Peterburg,RU-SPE,535045
+RU,Saratovskaya oblast',RU-SAR,534152
+RU,"Severnaya Osetiya, Respublika",RU-SE,534500
+RU,Smolenskaya oblast',RU-SMO,534d4f
+RU,Stavropol'skiy kray,RU-STA,535441
+RU,Sverdlovskaya oblast',RU-SVE,535645
+RU,Tambovskaya oblast',RU-TAM,54414d
+RU,"Tatarstan, Respublika",RU-TA,544100
+RU,Tomskaya oblast',RU-TOM,544f4d
+RU,Tul'skaya oblast',RU-TUL,54554c
+RU,Tverskaya oblast',RU-TVE,545645
+RU,Tyumenskaya oblast',RU-TYU,545955
+RU,"Tyva, Respublika",RU-TY,545900
+RU,Udmurtskaya Respublika,RU-UD,554400
+RU,Ul'yanovskaya oblast',RU-ULY,554c59
+RU,Vladimirskaya oblast',RU-VLA,564c41
+RU,Volgogradskaya oblast',RU-VGG,564747
+RU,Vologodskaya oblast',RU-VLG,564c47
+RU,Voronezhskaya oblast',RU-VOR,564f52
+RU,Yamalo-Nenetskiy avtonomnyy okrug,RU-YAN,59414e
+RU,Yaroslavskaya oblast',RU-YAR,594152
+RU,Yevreyskaya avtonomnaya oblast',RU-YEV,594556
+RU,Zabaykal'skiy kray,RU-ZAB,5a4142
+RW,Est,RW-02,303200
+RW,Nord,RW-03,303300
+RW,Ouest,RW-04,303400
+RW,Sud,RW-05,303500
+RW,Ville de Kigali,RW-01,303100
+SA,'Asir,SA-14,313400
+SA,Al Bahah,SA-11,313100
+SA,Al Hudud ash Shamaliyah,SA-08,303800
+SA,Al Jawf,SA-12,313200
+SA,Al Madinah al Munawwarah,SA-03,303300
+SA,Al Qasim,SA-05,303500
+SA,Ar Riyad,SA-01,303100
+SA,Ash Sharqiyah,SA-04,303400
+SA,Ha'il,SA-06,303600
+SA,Jazan,SA-09,303900
+SA,Makkah al Mukarramah,SA-02,303200
+SA,Najran,SA-10,313000
+SA,Tabuk,SA-07,303700
+SB,Central,SB-CE,434500
+SB,Guadalcanal,SB-GU,475500
+SB,Isabel,SB-IS,495300
+SB,Makira-Ulawa,SB-MK,4d4b00
+SB,Malaita,SB-ML,4d4c00
+SB,Western,SB-WE,574500
+SC,English River,SC-16,313600
+SD,Blue Nile,SD-NB,4e4200
+SD,Gedaref,SD-GD,474400
+SD,Gezira,SD-GZ,475a00
+SD,Kassala,SD-KA,4b4100
+SD,Khartoum,SD-KH,4b4800
+SD,North Darfur,SD-DN,444e00
+SD,North Kordofan,SD-KN,4b4e00
+SD,Northern,SD-NO,4e4f00
+SD,Red Sea,SD-RS,525300
+SD,River Nile,SD-NR,4e5200
+SD,Sennar,SD-SI,534900
+SD,South Darfur,SD-DS,445300
+SD,South Kordofan,SD-KS,4b5300
+SD,West Darfur,SD-DW,445700
+SD,White Nile,SD-NW,4e5700
+SE,Blekinge lan,SE-K,4b0000
+SE,Dalarnas lan,SE-W,570000
+SE,Gavleborgs lan,SE-X,580000
+SE,Gotlands lan,SE-I,490000
+SE,Hallands lan,SE-N,4e0000
+SE,Jamtlands lan,SE-Z,5a0000
+SE,Jonkopings lan,SE-F,460000
+SE,Kalmar lan,SE-H,480000
+SE,Kronobergs lan,SE-G,470000
+SE,Norrbottens lan,SE-BD,424400
+SE,Orebro lan,SE-T,540000
+SE,Ostergotlands lan,SE-E,450000
+SE,Skane lan,SE-M,4d0000
+SE,Sodermanlands lan,SE-D,440000
+SE,Stockholms lan,SE-AB,414200
+SE,Uppsala lan,SE-C,430000
+SE,Varmlands lan,SE-S,530000
+SE,Vasterbottens lan,SE-AC,414300
+SE,Vasternorrlands lan,SE-Y,590000
+SE,Vastmanlands lan,SE-U,550000
+SE,Vastra Gotalands lan,SE-O,4f0000
+SH,Ascension,SH-AC,414300
+SH,Saint Helena,SH-HL,484c00
+SH,Tristan da Cunha,SH-TA,544100
+SI,Ajdovscina,SI-001,303031
+SI,Bled,SI-003,303033
+SI,Bohinj,SI-004,303034
+SI,Borovnica,SI-005,303035
+SI,Bovec,SI-006,303036
+SI,Brezice,SI-009,303039
+SI,Brezovica,SI-008,303038
+SI,Celje,SI-011,303131
+SI,Cerknica,SI-013,303133
+SI,Cerkno,SI-014,303134
+SI,Crensovci,SI-015,303135
+SI,Crnomelj,SI-017,303137
+SI,Destrnik,SI-018,303138
+SI,Divaca,SI-019,303139
+SI,Domzale,SI-023,303233
+SI,Dravograd,SI-025,303235
+SI,Gornja Radgona,SI-029,303239
+SI,Grosuplje,SI-032,303332
+SI,Hoce-Slivnica,SI-160,313630
+SI,Horjul,SI-162,313632
+SI,Hrastnik,SI-034,303334
+SI,Idrija,SI-036,303336
+SI,Ig,SI-037,303337
+SI,Ilirska Bistrica,SI-038,303338
+SI,Ivancna Gorica,SI-039,303339
+SI,Izola,SI-040,303430
+SI,Jesenice,SI-041,303431
+SI,Kamnik,SI-043,303433
+SI,Kanal,SI-044,303434
+SI,Kidricevo,SI-045,303435
+SI,Kobarid,SI-046,303436
+SI,Kocevje,SI-048,303438
+SI,Koper,SI-050,303530
+SI,Kranj,SI-052,303532
+SI,Kranjska Gora,SI-053,303533
+SI,Krsko,SI-054,303534
+SI,Lasko,SI-057,303537
+SI,Lenart,SI-058,303538
+SI,Lendava,SI-059,303539
+SI,Litija,SI-060,303630
+SI,Ljubljana,SI-061,303631
+SI,Ljutomer,SI-063,303633
+SI,Log-Dragomer,SI-208,323038
+SI,Logatec,SI-064,303634
+SI,Lovrenc na Pohorju,SI-167,313637
+SI,Maribor,SI-070,303730
+SI,Medvode,SI-071,303731
+SI,Menges,SI-072,303732
+SI,Metlika,SI-073,303733
+SI,Mezica,SI-074,303734
+SI,Miklavz na Dravskem Polju,SI-169,313639
+SI,Miren-Kostanjevica,SI-075,303735
+SI,Mislinja,SI-076,303736
+SI,Mozirje,SI-079,303739
+SI,Murska Sobota,SI-080,303830
+SI,Muta,SI-081,303831
+SI,Nova Gorica,SI-084,303834
+SI,Novo Mesto,SI-085,303835
+SI,Odranci,SI-086,303836
+SI,Oplotnica,SI-171,313731
+SI,Ormoz,SI-087,303837
+SI,Piran,SI-090,303930
+SI,Pivka,SI-091,303931
+SI,Poljcane,SI-200,323030
+SI,Polzela,SI-173,313733
+SI,Postojna,SI-094,303934
+SI,Prebold,SI-174,313734
+SI,Prevalje,SI-175,313735
+SI,Ptuj,SI-096,303936
+SI,Race-Fram,SI-098,303938
+SI,Radece,SI-099,303939
+SI,Radenci,SI-100,313030
+SI,Radlje ob Dravi,SI-101,313031
+SI,Radovljica,SI-102,313032
+SI,Ravne na Koroskem,SI-103,313033
+SI,Ribnica,SI-104,313034
+SI,Rogaska Slatina,SI-106,313036
+SI,Ruse,SI-108,313038
+SI,Sempeter-Vrtojba,SI-183,313833
+SI,Sencur,SI-117,313137
+SI,Sentilj,SI-118,313138
+SI,Sentjur,SI-120,313230
+SI,Sevnica,SI-110,313130
+SI,Sezana,SI-111,313131
+SI,Skofja Loka,SI-122,313232
+SI,Skofljica,SI-123,313233
+SI,Slovenj Gradec,SI-112,313132
+SI,Slovenska Bistrica,SI-113,313133
+SI,Slovenske Konjice,SI-114,313134
+SI,Sostanj,SI-126,313236
+SI,Store,SI-127,313237
+SI,Straza,SI-203,323033
+SI,Tolmin,SI-128,313238
+SI,Trbovlje,SI-129,313239
+SI,Trebnje,SI-130,313330
+SI,Trzic,SI-131,313331
+SI,Trzin,SI-186,313836
+SI,Turnisce,SI-132,313332
+SI,Velenje,SI-133,313333
+SI,Vipava,SI-136,313336
+SI,Vodice,SI-138,313338
+SI,Vojnik,SI-139,313339
+SI,Vrhnika,SI-140,313430
+SI,Vuzenica,SI-141,313431
+SI,Zagorje ob Savi,SI-142,313432
+SI,Zalec,SI-190,313930
+SI,Zelezniki,SI-146,313436
+SI,Ziri,SI-147,313437
+SI,Zrece,SI-144,313434
+SI,Zuzemberk,SI-193,313933
+SK,Banskobystricky kraj,SK-BC,424300
+SK,Bratislavsky kraj,SK-BL,424c00
+SK,Kosicky kraj,SK-KI,4b4900
+SK,Nitriansky kraj,SK-NI,4e4900
+SK,Presovsky kraj,SK-PV,505600
+SK,Trenciansky kraj,SK-TC,544300
+SK,Trnavsky kraj,SK-TA,544100
+SK,Zilinsky kraj,SK-ZI,5a4900
+SL,Eastern,SL-E,450000
+SL,Northern,SL-N,4e0000
+SL,Southern,SL-S,530000
+SL,Western Area,SL-W,570000
+SM,Acquaviva,SM-01,303100
+SM,Chiesanuova,SM-02,303200
+SM,San Marino,SM-07,303700
+SM,Serravalle,SM-09,303900
+SN,Dakar,SN-DK,444b00
+SN,Diourbel,SN-DB,444200
+SN,Fatick,SN-FK,464b00
+SN,Kaffrine,SN-KA,4b4100
+SN,Kaolack,SN-KL,4b4c00
+SN,Kedougou,SN-KE,4b4500
+SN,Kolda,SN-KD,4b4400
+SN,Louga,SN-LG,4c4700
+SN,Matam,SN-MT,4d5400
+SN,Saint-Louis,SN-SL,534c00
+SN,Sedhiou,SN-SE,534500
+SN,Tambacounda,SN-TC,544300
+SN,Thies,SN-TH,544800
+SN,Ziguinchor,SN-ZG,5a4700
+SO,Awdal,SO-AW,415700
+SO,Bakool,SO-BK,424b00
+SO,Banaadir,SO-BN,424e00
+SO,Bari,SO-BR,425200
+SO,Bay,SO-BY,425900
+SO,Galguduud,SO-GA,474100
+SO,Gedo,SO-GE,474500
+SO,Hiiraan,SO-HI,484900
+SO,Jubbada Dhexe,SO-JD,4a4400
+SO,Jubbada Hoose,SO-JH,4a4800
+SO,Mudug,SO-MU,4d5500
+SO,Nugaal,SO-NU,4e5500
+SO,Sanaag,SO-SA,534100
+SO,Shabeellaha Dhexe,SO-SD,534400
+SO,Shabeellaha Hoose,SO-SH,534800
+SO,Sool,SO-SO,534f00
+SO,Togdheer,SO-TO,544f00
+SO,Woqooyi Galbeed,SO-WO,574f00
+SR,Brokopondo,SR-BR,425200
+SR,Commewijne,SR-CM,434d00
+SR,Coronie,SR-CR,435200
+SR,Marowijne,SR-MA,4d4100
+SR,Nickerie,SR-NI,4e4900
+SR,Para,SR-PR,505200
+SR,Paramaribo,SR-PM,504d00
+SR,Saramacca,SR-SA,534100
+SR,Wanica,SR-WA,574100
+SS,Central Equatoria,SS-EC,454300
+SS,Eastern Equatoria,SS-EE,454500
+SS,Jonglei,SS-JG,4a4700
+SS,Lakes,SS-LK,4c4b00
+SS,Northern Bahr el Ghazal,SS-BN,424e00
+SS,Unity,SS-UY,555900
+SS,Upper Nile,SS-NU,4e5500
+SS,Warrap,SS-WR,575200
+SS,Western Bahr el Ghazal,SS-BW,425700
+SS,Western Equatoria,SS-EW,455700
+ST,Principe,ST-P,500000
+ST,Sao Tome,ST-S,530000
+SV,Ahuachapan,SV-AH,414800
+SV,Cabanas,SV-CA,434100
+SV,Chalatenango,SV-CH,434800
+SV,Cuscatlan,SV-CU,435500
+SV,La Libertad,SV-LI,4c4900
+SV,La Paz,SV-PA,504100
+SV,La Union,SV-UN,554e00
+SV,Morazan,SV-MO,4d4f00
+SV,San Miguel,SV-SM,534d00
+SV,San Salvador,SV-SS,535300
+SV,San Vicente,SV-SV,535600
+SV,Santa Ana,SV-SA,534100
+SV,Sonsonate,SV-SO,534f00
+SV,Usulutan,SV-US,555300
+SY,Al Hasakah,SY-HA,484100
+SY,Al Ladhiqiyah,SY-LA,4c4100
+SY,Al Qunaytirah,SY-QU,515500
+SY,Ar Raqqah,SY-RA,524100
+SY,As Suwayda',SY-SU,535500
+SY,Dar'a,SY-DR,445200
+SY,Dayr az Zawr,SY-DY,445900
+SY,Dimashq,SY-DI,444900
+SY,Halab,SY-HL,484c00
+SY,Hamah,SY-HM,484d00
+SY,Hims,SY-HI,484900
+SY,Idlib,SY-ID,494400
+SY,Rif Dimashq,SY-RD,524400
+SY,Tartus,SY-TA,544100
+SZ,Hhohho,SZ-HH,484800
+SZ,Lubombo,SZ-LU,4c5500
+SZ,Manzini,SZ-MA,4d4100
+SZ,Shiselweni,SZ-SH,534800
+TD,Bahr el Gazel,TD-BG,424700
+TD,Batha,TD-BA,424100
+TD,Borkou,TD-BO,424f00
+TD,Chari-Baguirmi,TD-CB,434200
+TD,Guera,TD-GR,475200
+TD,Hadjer Lamis,TD-HL,484c00
+TD,Kanem,TD-KA,4b4100
+TD,Lac,TD-LC,4c4300
+TD,Logone-Occidental,TD-LO,4c4f00
+TD,Logone-Oriental,TD-LR,4c5200
+TD,Mandoul,TD-MA,4d4100
+TD,Mayo-Kebbi-Est,TD-ME,4d4500
+TD,Mayo-Kebbi-Ouest,TD-MO,4d4f00
+TD,Moyen-Chari,TD-MC,4d4300
+TD,Ouaddai,TD-OD,4f4400
+TD,Salamat,TD-SA,534100
+TD,Tandjile,TD-TA,544100
+TD,Tibesti,TD-TI,544900
+TD,Wadi Fira,TD-WF,574600
+TG,Centrale,TG-C,430000
+TG,Kara,TG-K,4b0000
+TG,Maritime,TG-M,4d0000
+TG,Plateaux,TG-P,500000
+TG,Savannes,TG-S,530000
+TH,Amnat Charoen,TH-37,333700
+TH,Ang Thong,TH-15,313500
+TH,Buri Ram,TH-31,333100
+TH,Chachoengsao,TH-24,323400
+TH,Chai Nat,TH-18,313800
+TH,Chaiyaphum,TH-36,333600
+TH,Chanthaburi,TH-22,323200
+TH,Chiang Mai,TH-50,353000
+TH,Chiang Rai,TH-57,353700
+TH,Chon Buri,TH-20,323000
+TH,Chumphon,TH-86,383600
+TH,Kalasin,TH-46,343600
+TH,Kamphaeng Phet,TH-62,363200
+TH,Kanchanaburi,TH-71,373100
+TH,Khon Kaen,TH-40,343000
+TH,Krabi,TH-81,383100
+TH,Krung Thep Maha Nakhon,TH-10,313000
+TH,Lampang,TH-52,353200
+TH,Lamphun,TH-51,353100
+TH,Loei,TH-42,343200
+TH,Lop Buri,TH-16,313600
+TH,Mae Hong Son,TH-58,353800
+TH,Maha Sarakham,TH-44,343400
+TH,Mukdahan,TH-49,343900
+TH,Nakhon Nayok,TH-26,323600
+TH,Nakhon Pathom,TH-73,373300
+TH,Nakhon Phanom,TH-48,343800
+TH,Nakhon Ratchasima,TH-30,333000
+TH,Nakhon Sawan,TH-60,363000
+TH,Nakhon Si Thammarat,TH-80,383000
+TH,Nan,TH-55,353500
+TH,Narathiwat,TH-96,393600
+TH,Nong Bua Lam Phu,TH-39,333900
+TH,Nong Khai,TH-43,343300
+TH,Nonthaburi,TH-12,313200
+TH,Pathum Thani,TH-13,313300
+TH,Pattani,TH-94,393400
+TH,Phangnga,TH-82,383200
+TH,Phatthalung,TH-93,393300
+TH,Phayao,TH-56,353600
+TH,Phetchabun,TH-67,363700
+TH,Phetchaburi,TH-76,373600
+TH,Phichit,TH-66,363600
+TH,Phitsanulok,TH-65,363500
+TH,Phra Nakhon Si Ayutthaya,TH-14,313400
+TH,Phrae,TH-54,353400
+TH,Phuket,TH-83,383300
+TH,Prachin Buri,TH-25,323500
+TH,Prachuap Khiri Khan,TH-77,373700
+TH,Ranong,TH-85,383500
+TH,Ratchaburi,TH-70,373000
+TH,Rayong,TH-21,323100
+TH,Roi Et,TH-45,343500
+TH,Sa Kaeo,TH-27,323700
+TH,Sakon Nakhon,TH-47,343700
+TH,Samut Prakan,TH-11,313100
+TH,Samut Sakhon,TH-74,373400
+TH,Samut Songkhram,TH-75,373500
+TH,Saraburi,TH-19,313900
+TH,Satun,TH-91,393100
+TH,Si Sa Ket,TH-33,333300
+TH,Sing Buri,TH-17,313700
+TH,Songkhla,TH-90,393000
+TH,Sukhothai,TH-64,363400
+TH,Suphan Buri,TH-72,373200
+TH,Surat Thani,TH-84,383400
+TH,Surin,TH-32,333200
+TH,Tak,TH-63,363300
+TH,Trang,TH-92,393200
+TH,Trat,TH-23,323300
+TH,Ubon Ratchathani,TH-34,333400
+TH,Udon Thani,TH-41,343100
+TH,Uthai Thani,TH-61,363100
+TH,Uttaradit,TH-53,353300
+TH,Yala,TH-95,393500
+TH,Yasothon,TH-35,333500
+TJ,Dushanbe,TJ-DU,445500
+TJ,Khatlon,TJ-KT,4b5400
+TJ,Kuhistoni Badakhshon,TJ-GB,474200
+TJ,nohiyahoi tobei jumhuri,TJ-RA,524100
+TJ,Sughd,TJ-SU,535500
+TL,Dili,TL-DI,444900
+TM,Ahal,TM-A,410000
+TM,Balkan,TM-B,420000
+TM,Dasoguz,TM-D,440000
+TM,Lebap,TM-L,4c0000
+TM,Mary,TM-M,4d0000
+TN,Beja,TN-31,333100
+TN,Ben Arous,TN-13,313300
+TN,Bizerte,TN-23,323300
+TN,Gabes,TN-81,383100
+TN,Gafsa,TN-71,373100
+TN,Jendouba,TN-32,333200
+TN,Kairouan,TN-41,343100
+TN,Kasserine,TN-42,343200
+TN,Kebili,TN-73,373300
+TN,L'Ariana,TN-12,313200
+TN,La Manouba,TN-14,313400
+TN,Le Kef,TN-33,333300
+TN,Mahdia,TN-53,353300
+TN,Medenine,TN-82,383200
+TN,Monastir,TN-52,353200
+TN,Nabeul,TN-21,323100
+TN,Sfax,TN-61,363100
+TN,Sidi Bouzid,TN-43,343300
+TN,Siliana,TN-34,333400
+TN,Sousse,TN-51,353100
+TN,Tataouine,TN-83,383300
+TN,Tozeur,TN-72,373200
+TN,Tunis,TN-11,313100
+TN,Zaghouan,TN-22,323200
+TO,Ha'apai,TO-02,303200
+TO,Tongatapu,TO-04,303400
+TO,Vava'u,TO-05,303500
+TR,Adana,TR-01,303100
+TR,Adiyaman,TR-02,303200
+TR,Afyonkarahisar,TR-03,303300
+TR,Agri,TR-04,303400
+TR,Aksaray,TR-68,363800
+TR,Amasya,TR-05,303500
+TR,Ankara,TR-06,303600
+TR,Antalya,TR-07,303700
+TR,Ardahan,TR-75,373500
+TR,Artvin,TR-08,303800
+TR,Aydin,TR-09,303900
+TR,Balikesir,TR-10,313000
+TR,Bartin,TR-74,373400
+TR,Batman,TR-72,373200
+TR,Bayburt,TR-69,363900
+TR,Bilecik,TR-11,313100
+TR,Bingol,TR-12,313200
+TR,Bitlis,TR-13,313300
+TR,Bolu,TR-14,313400
+TR,Burdur,TR-15,313500
+TR,Bursa,TR-16,313600
+TR,Canakkale,TR-17,313700
+TR,Cankiri,TR-18,313800
+TR,Corum,TR-19,313900
+TR,Denizli,TR-20,323000
+TR,Diyarbakir,TR-21,323100
+TR,Duzce,TR-81,383100
+TR,Edirne,TR-22,323200
+TR,Elazig,TR-23,323300
+TR,Erzincan,TR-24,323400
+TR,Erzurum,TR-25,323500
+TR,Eskisehir,TR-26,323600
+TR,Gaziantep,TR-27,323700
+TR,Giresun,TR-28,323800
+TR,Gumushane,TR-29,323900
+TR,Hakkari,TR-30,333000
+TR,Hatay,TR-31,333100
+TR,Igdir,TR-76,373600
+TR,Isparta,TR-32,333200
+TR,Istanbul,TR-34,333400
+TR,Izmir,TR-35,333500
+TR,Kahramanmaras,TR-46,343600
+TR,Karabuk,TR-78,373800
+TR,Karaman,TR-70,373000
+TR,Kars,TR-36,333600
+TR,Kastamonu,TR-37,333700
+TR,Kayseri,TR-38,333800
+TR,Kilis,TR-79,373900
+TR,Kirikkale,TR-71,373100
+TR,Kirklareli,TR-39,333900
+TR,Kirsehir,TR-40,343000
+TR,Kocaeli,TR-41,343100
+TR,Konya,TR-42,343200
+TR,Kutahya,TR-43,343300
+TR,Malatya,TR-44,343400
+TR,Manisa,TR-45,343500
+TR,Mardin,TR-47,343700
+TR,Mersin,TR-33,333300
+TR,Mugla,TR-48,343800
+TR,Mus,TR-49,343900
+TR,Nevsehir,TR-50,353000
+TR,Nigde,TR-51,353100
+TR,Ordu,TR-52,353200
+TR,Osmaniye,TR-80,383000
+TR,Rize,TR-53,353300
+TR,Sakarya,TR-54,353400
+TR,Samsun,TR-55,353500
+TR,Sanliurfa,TR-63,363300
+TR,Siirt,TR-56,353600
+TR,Sinop,TR-57,353700
+TR,Sirnak,TR-73,373300
+TR,Sivas,TR-58,353800
+TR,Tekirdag,TR-59,353900
+TR,Tokat,TR-60,363000
+TR,Trabzon,TR-61,363100
+TR,Tunceli,TR-62,363200
+TR,Usak,TR-64,363400
+TR,Van,TR-65,363500
+TR,Yalova,TR-77,373700
+TR,Yozgat,TR-66,363600
+TR,Zonguldak,TR-67,363700
+TT,Arima,TT-ARI,415249
+TT,Chaguanas,TT-CHA,434841
+TT,Couva-Tabaquite-Talparo,TT-CTT,435454
+TT,Diego Martin,TT-DMN,444d4e
+TT,Mayaro-Rio Claro,TT-MRC,4d5243
+TT,Penal-Debe,TT-PED,504544
+TT,Point Fortin,TT-PTF,505446
+TT,Port of Spain,TT-POS,504f53
+TT,Princes Town,TT-PRT,505254
+TT,San Fernando,TT-SFO,53464f
+TT,San Juan-Laventille,TT-SJL,534a4c
+TT,Sangre Grande,TT-SGE,534745
+TT,Siparia,TT-SIP,534950
+TT,Tobago,TT-TOB,544f42
+TT,Tunapuna-Piarco,TT-TUP,545550
+TV,Funafuti,TV-FUN,46554e
+TW,Changhua,TW-CHA,434841
+TW,Chiayi,TW-CYQ,435951
+TW,Hsinchu,TW-HSQ,485351
+TW,Hualien,TW-HUA,485541
+TW,Kaohsiung,TW-KHH,4b4848
+TW,Keelung,TW-KEE,4b4545
+TW,Kinmen,TW-KIN,4b494e
+TW,Lienchiang,TW-LIE,4c4945
+TW,Miaoli,TW-MIA,4d4941
+TW,Nantou,TW-NAN,4e414e
+TW,New Taipei,TW-NWT,4e5754
+TW,Penghu,TW-PEN,50454e
+TW,Pingtung,TW-PIF,504946
+TW,Taichung,TW-TXG,545847
+TW,Tainan,TW-TNN,544e4e
+TW,Taipei,TW-TPE,545045
+TW,Taitung,TW-TTT,545454
+TW,Taoyuan,TW-TAO,54414f
+TW,Yilan,TW-ILA,494c41
+TW,Yunlin,TW-YUN,59554e
+TZ,Arusha,TZ-01,303100
+TZ,Dar es Salaam,TZ-02,303200
+TZ,Dodoma,TZ-03,303300
+TZ,Iringa,TZ-04,303400
+TZ,Kagera,TZ-05,303500
+TZ,Kaskazini Pemba,TZ-06,303600
+TZ,Kaskazini Unguja,TZ-07,303700
+TZ,Kigoma,TZ-08,303800
+TZ,Kilimanjaro,TZ-09,303900
+TZ,Kusini Pemba,TZ-10,313000
+TZ,Kusini Unguja,TZ-11,313100
+TZ,Lindi,TZ-12,313200
+TZ,Manyara,TZ-26,323600
+TZ,Mara,TZ-13,313300
+TZ,Mbeya,TZ-14,313400
+TZ,Mjini Magharibi,TZ-15,313500
+TZ,Morogoro,TZ-16,313600
+TZ,Mtwara,TZ-17,313700
+TZ,Mwanza,TZ-18,313800
+TZ,Pwani,TZ-19,313900
+TZ,Rukwa,TZ-20,323000
+TZ,Ruvuma,TZ-21,323100
+TZ,Shinyanga,TZ-22,323200
+TZ,Singida,TZ-23,323300
+TZ,Tabora,TZ-24,323400
+TZ,Tanga,TZ-25,323500
+UA,Avtonomna Respublika Krym,UA-43,343300
+UA,Cherkaska oblast,UA-71,373100
+UA,Chernihivska oblast,UA-74,373400
+UA,Chernivetska oblast,UA-77,373700
+UA,Dnipropetrovska oblast,UA-12,313200
+UA,Donetska oblast,UA-14,313400
+UA,Ivano-Frankivska oblast,UA-26,323600
+UA,Kharkivska oblast,UA-63,363300
+UA,Khersonska oblast,UA-65,363500
+UA,Khmelnytska oblast,UA-68,363800
+UA,Kirovohradska oblast,UA-35,333500
+UA,Kyiv,UA-30,333000
+UA,Kyivska oblast,UA-32,333200
+UA,Luhanska oblast,UA-09,303900
+UA,Lvivska oblast,UA-46,343600
+UA,Mykolaivska oblast,UA-48,343800
+UA,Odeska oblast,UA-51,353100
+UA,Poltavska oblast,UA-53,353300
+UA,Rivnenska oblast,UA-56,353600
+UA,Sevastopol',UA-40,343000
+UA,Sumska oblast,UA-59,353900
+UA,Ternopilska oblast,UA-61,363100
+UA,Vinnytska oblast,UA-05,303500
+UA,Volynska oblast,UA-07,303700
+UA,Zakarpatska oblast,UA-21,323100
+UA,Zaporizka oblast,UA-23,323300
+UA,Zhytomyrska oblast,UA-18,313800
+UG,Abim,UG-314,333134
+UG,Adjumani,UG-301,333031
+UG,Agago,UG-322,333232
+UG,Alebtong,UG-323,333233
+UG,Amolatar,UG-315,333135
+UG,Amudat,UG-324,333234
+UG,Amuria,UG-216,323136
+UG,Amuru,UG-316,333136
+UG,Apac,UG-302,333032
+UG,Arua,UG-303,333033
+UG,Budaka,UG-217,323137
+UG,Bududa,UG-218,323138
+UG,Bugiri,UG-201,323031
+UG,Buikwe,UG-117,313137
+UG,Bukedea,UG-219,323139
+UG,Bukomansibi,UG-118,313138
+UG,Bukwa,UG-220,323230
+UG,Bulambuli,UG-225,323235
+UG,Buliisa,UG-416,343136
+UG,Bundibugyo,UG-401,343031
+UG,Bushenyi,UG-402,343032
+UG,Busia,UG-202,323032
+UG,Butaleja,UG-221,323231
+UG,Buvuma,UG-120,313230
+UG,Buyende,UG-226,323236
+UG,Dokolo,UG-317,333137
+UG,Gomba,UG-121,313231
+UG,Gulu,UG-304,333034
+UG,Hoima,UG-403,343033
+UG,Iganga,UG-203,323033
+UG,Isingiro,UG-419,343139
+UG,Jinja,UG-204,323034
+UG,Kaabong,UG-318,333138
+UG,Kabale,UG-404,343034
+UG,Kabarole,UG-405,343035
+UG,Kaberamaido,UG-213,323133
+UG,Kalangala,UG-101,313031
+UG,Kaliro,UG-222,323232
+UG,Kampala,UG-102,313032
+UG,Kamuli,UG-205,323035
+UG,Kamwenge,UG-413,343133
+UG,Kanungu,UG-414,343134
+UG,Kapchorwa,UG-206,323036
+UG,Kasese,UG-406,343036
+UG,Katakwi,UG-207,323037
+UG,Kayunga,UG-112,313132
+UG,Kibaale,UG-407,343037
+UG,Kiboga,UG-103,313033
+UG,Kibuku,UG-227,323237
+UG,Kiryandongo,UG-421,343231
+UG,Kisoro,UG-408,343038
+UG,Kitgum,UG-305,333035
+UG,Koboko,UG-319,333139
+UG,Kole,UG-325,333235
+UG,Kotido,UG-306,333036
+UG,Kumi,UG-208,323038
+UG,Kween,UG-228,323238
+UG,Kyankwanzi,UG-123,313233
+UG,Kyegegwa,UG-422,343232
+UG,Kyenjojo,UG-415,343135
+UG,Lira,UG-307,333037
+UG,Luuka,UG-229,323239
+UG,Luwero,UG-104,313034
+UG,Lwengo,UG-124,313234
+UG,Lyantonde,UG-114,313134
+UG,Manafwa,UG-223,323233
+UG,Maracha,UG-320,333230
+UG,Masaka,UG-105,313035
+UG,Masindi,UG-409,343039
+UG,Mayuge,UG-214,323134
+UG,Mbale,UG-209,323039
+UG,Mbarara,UG-410,343130
+UG,Mitooma,UG-423,343233
+UG,Mityana,UG-115,313135
+UG,Moroto,UG-308,333038
+UG,Moyo,UG-309,333039
+UG,Mpigi,UG-106,313036
+UG,Mubende,UG-107,313037
+UG,Mukono,UG-108,313038
+UG,Nakapiripirit,UG-311,333131
+UG,Nakaseke,UG-116,313136
+UG,Nakasongola,UG-109,313039
+UG,Namayingo,UG-230,323330
+UG,Namutumba,UG-224,323234
+UG,Napak,UG-327,333237
+UG,Nebbi,UG-310,333130
+UG,Ngora,UG-231,323331
+UG,Ntoroko,UG-424,343234
+UG,Ntungamo,UG-411,343131
+UG,Otuke,UG-329,333239
+UG,Oyam,UG-321,333231
+UG,Pader,UG-312,333132
+UG,Pallisa,UG-210,323130
+UG,Rakai,UG-110,313130
+UG,Rubirizi,UG-425,343235
+UG,Rukungiri,UG-412,343132
+UG,Sembabule,UG-111,313131
+UG,Serere,UG-232,323332
+UG,Sheema,UG-426,343236
+UG,Sironko,UG-215,323135
+UG,Soroti,UG-211,323131
+UG,Tororo,UG-212,323132
+UG,Wakiso,UG-113,313133
+UG,Yumbe,UG-313,333133
+UG,Zombo,UG-330,333330
+UM,Palmyra Atoll,UM-95,393500
+US,Alabama,US-AL,414c00
+US,Alaska,US-AK,414b00
+US,Arizona,US-AZ,415a00
+US,Arkansas,US-AR,415200
+US,California,US-CA,434100
+US,Colorado,US-CO,434f00
+US,Connecticut,US-CT,435400
+US,Delaware,US-DE,444500
+US,District of Columbia,US-DC,444300
+US,Florida,US-FL,464c00
+US,Georgia,US-GA,474100
+US,Hawaii,US-HI,484900
+US,Idaho,US-ID,494400
+US,Illinois,US-IL,494c00
+US,Indiana,US-IN,494e00
+US,Iowa,US-IA,494100
+US,Kansas,US-KS,4b5300
+US,Kentucky,US-KY,4b5900
+US,Louisiana,US-LA,4c4100
+US,Maine,US-ME,4d4500
+US,Maryland,US-MD,4d4400
+US,Massachusetts,US-MA,4d4100
+US,Michigan,US-MI,4d4900
+US,Minnesota,US-MN,4d4e00
+US,Mississippi,US-MS,4d5300
+US,Missouri,US-MO,4d4f00
+US,Montana,US-MT,4d5400
+US,Nebraska,US-NE,4e4500
+US,Nevada,US-NV,4e5600
+US,New Hampshire,US-NH,4e4800
+US,New Jersey,US-NJ,4e4a00
+US,New Mexico,US-NM,4e4d00
+US,New York,US-NY,4e5900
+US,North Carolina,US-NC,4e4300
+US,North Dakota,US-ND,4e4400
+US,Ohio,US-OH,4f4800
+US,Oklahoma,US-OK,4f4b00
+US,Oregon,US-OR,4f5200
+US,Pennsylvania,US-PA,504100
+US,Rhode Island,US-RI,524900
+US,South Carolina,US-SC,534300
+US,South Dakota,US-SD,534400
+US,Tennessee,US-TN,544e00
+US,Texas,US-TX,545800
+US,Utah,US-UT,555400
+US,Vermont,US-VT,565400
+US,Virginia,US-VA,564100
+US,Washington,US-WA,574100
+US,West Virginia,US-WV,575600
+US,Wisconsin,US-WI,574900
+US,Wyoming,US-WY,575900
+UY,Artigas,UY-AR,415200
+UY,Canelones,UY-CA,434100
+UY,Cerro Largo,UY-CL,434c00
+UY,Colonia,UY-CO,434f00
+UY,Durazno,UY-DU,445500
+UY,Flores,UY-FS,465300
+UY,Florida,UY-FD,464400
+UY,Lavalleja,UY-LA,4c4100
+UY,Maldonado,UY-MA,4d4100
+UY,Montevideo,UY-MO,4d4f00
+UY,Paysandu,UY-PA,504100
+UY,Rio Negro,UY-RN,524e00
+UY,Rivera,UY-RV,525600
+UY,Rocha,UY-RO,524f00
+UY,Salto,UY-SA,534100
+UY,San Jose,UY-SJ,534a00
+UY,Soriano,UY-SO,534f00
+UY,Tacuarembo,UY-TA,544100
+UY,Treinta y Tres,UY-TT,545400
+UZ,Andijon,UZ-AN,414e00
+UZ,Buxoro,UZ-BU,425500
+UZ,Farg'ona,UZ-FA,464100
+UZ,Jizzax,UZ-JI,4a4900
+UZ,Namangan,UZ-NG,4e4700
+UZ,Navoiy,UZ-NW,4e5700
+UZ,Qashqadaryo,UZ-QA,514100
+UZ,Qoraqalpog'iston Respublikasi,UZ-QR,515200
+UZ,Samarqand,UZ-SA,534100
+UZ,Sirdaryo,UZ-SI,534900
+UZ,Surxondaryo,UZ-SU,535500
+UZ,Toshkent,UZ-TK,544b00
+UZ,Xorazm,UZ-XO,584f00
+VC,Charlotte,VC-01,303100
+VC,Saint George,VC-04,303400
+VE,Amazonas,VE-Z,5a0000
+VE,Anzoategui,VE-B,420000
+VE,Apure,VE-C,430000
+VE,Aragua,VE-D,440000
+VE,Barinas,VE-E,450000
+VE,Bolivar,VE-F,460000
+VE,Carabobo,VE-G,470000
+VE,Cojedes,VE-H,480000
+VE,Delta Amacuro,VE-Y,590000
+VE,Distrito Capital,VE-A,410000
+VE,Falcon,VE-I,490000
+VE,Guarico,VE-J,4a0000
+VE,Lara,VE-K,4b0000
+VE,Merida,VE-L,4c0000
+VE,Miranda,VE-M,4d0000
+VE,Monagas,VE-N,4e0000
+VE,Nueva Esparta,VE-O,4f0000
+VE,Portuguesa,VE-P,500000
+VE,Sucre,VE-R,520000
+VE,Tachira,VE-S,530000
+VE,Trujillo,VE-T,540000
+VE,Vargas,VE-X,580000
+VE,Yaracuy,VE-U,550000
+VE,Zulia,VE-V,560000
+VN,An Giang,VN-44,343400
+VN,Bac Giang,VN-54,353400
+VN,Bac Kan,VN-53,353300
+VN,Bac Lieu,VN-55,353500
+VN,Bac Ninh,VN-56,353600
+VN,Ben Tre,VN-50,353000
+VN,Binh Dinh,VN-31,333100
+VN,Binh Duong,VN-57,353700
+VN,Binh Phuoc,VN-58,353800
+VN,Binh Thuan,VN-40,343000
+VN,Ca Mau,VN-59,353900
+VN,Can Tho,VN-CT,435400
+VN,Cao Bang,VN-04,303400
+VN,Da Nang,VN-DN,444e00
+VN,Dak Lak,VN-33,333300
+VN,Dien Bien,VN-71,373100
+VN,Dong Nai,VN-39,333900
+VN,Dong Thap,VN-45,343500
+VN,Gia Lai,VN-30,333000
+VN,Ha Giang,VN-03,303300
+VN,Ha Nam,VN-63,363300
+VN,Ha Noi,VN-HN,484e00
+VN,Ha Tinh,VN-23,323300
+VN,Hai Duong,VN-61,363100
+VN,Hai Phong,VN-HP,485000
+VN,Ho Chi Minh,VN-SG,534700
+VN,Hoa Binh,VN-14,313400
+VN,Hung Yen,VN-66,363600
+VN,Khanh Hoa,VN-34,333400
+VN,Kien Giang,VN-47,343700
+VN,Lai Chau,VN-01,303100
+VN,Lam Dong,VN-35,333500
+VN,Lang Son,VN-09,303900
+VN,Lao Cai,VN-02,303200
+VN,Long An,VN-41,343100
+VN,Nam Dinh,VN-67,363700
+VN,Nghe An,VN-22,323200
+VN,Ninh Binh,VN-18,313800
+VN,Ninh Thuan,VN-36,333600
+VN,Phu Tho,VN-68,363800
+VN,Phu Yen,VN-32,333200
+VN,Quang Binh,VN-24,323400
+VN,Quang Nam,VN-27,323700
+VN,Quang Ngai,VN-29,323900
+VN,Quang Ninh,VN-13,313300
+VN,Quang Tri,VN-25,323500
+VN,Soc Trang,VN-52,353200
+VN,Son La,VN-05,303500
+VN,Tay Ninh,VN-37,333700
+VN,Thai Binh,VN-20,323000
+VN,Thai Nguyen,VN-69,363900
+VN,Thanh Hoa,VN-21,323100
+VN,Thua Thien-Hue,VN-26,323600
+VN,Tien Giang,VN-46,343600
+VN,Tra Vinh,VN-51,353100
+VN,Tuyen Quang,VN-07,303700
+VN,Vinh Long,VN-49,343900
+VN,Vinh Phuc,VN-70,373000
+VN,Yen Bai,VN-06,303600
+VU,Malampa,VU-MAP,4d4150
+VU,Sanma,VU-SAM,53414d
+VU,Shefa,VU-SEE,534545
+VU,Tafea,VU-TAE,544145
+VU,Torba,VU-TOB,544f42
+WF,Uvea,WF-UV,555600
+WS,A'ana,WS-AA,414100
+WS,Atua,WS-AT,415400
+WS,Gagaifomauga,WS-GI,474900
+WS,Palauli,WS-PA,504100
+WS,Tuamasaga,WS-TU,545500
+YE,'Adan,YE-AD,414400
+YE,'Amran,YE-AM,414d00
+YE,Abyan,YE-AB,414200
+YE,Ad Dali',YE-DA,444100
+YE,Al Bayda',YE-BA,424100
+YE,Al Hudaydah,YE-HU,485500
+YE,Al Jawf,YE-JA,4a4100
+YE,Al Mahrah,YE-MR,4d5200
+YE,Al Mahwit,YE-MW,4d5700
+YE,Amanat al 'Asimah,YE-SA,534100
+YE,Dhamar,YE-DH,444800
+YE,Hadramawt,YE-HD,484400
+YE,Hajjah,YE-HJ,484a00
+YE,Ibb,YE-IB,494200
+YE,Lahij,YE-LA,4c4100
+YE,Ma'rib,YE-MA,4d4100
+YE,Raymah,YE-RA,524100
+YE,Sa'dah,YE-SD,534400
+YE,San'a',YE-SN,534e00
+YE,Shabwah,YE-SH,534800
+YE,Ta'izz,YE-TA,544100
+ZA,Eastern Cape,ZA-EC,454300
+ZA,Free State,ZA-FS,465300
+ZA,Gauteng,ZA-GT,475400
+ZA,Kwazulu-Natal,ZA-NL,4e4c00
+ZA,Limpopo,ZA-LP,4c5000
+ZA,Mpumalanga,ZA-MP,4d5000
+ZA,North-West,ZA-NW,4e5700
+ZA,Northern Cape,ZA-NC,4e4300
+ZA,Western Cape,ZA-WC,574300
+ZM,Central,ZM-02,303200
+ZM,Copperbelt,ZM-08,303800
+ZM,Eastern,ZM-03,303300
+ZM,Luapula,ZM-04,303400
+ZM,Lusaka,ZM-09,303900
+ZM,North-Western,ZM-06,303600
+ZM,Northern,ZM-05,303500
+ZM,Southern,ZM-07,303700
+ZM,Western,ZM-01,303100
+ZW,Bulawayo,ZW-BU,425500
+ZW,Harare,ZW-HA,484100
+ZW,Manicaland,ZW-MA,4d4100
+ZW,Mashonaland Central,ZW-MC,4d4300
+ZW,Mashonaland East,ZW-ME,4d4500
+ZW,Mashonaland West,ZW-MW,4d5700
+ZW,Masvingo,ZW-MV,4d5600
+ZW,Matabeleland North,ZW-MN,4d4e00
+ZW,Matabeleland South,ZW-MS,4d5300
+ZW,Midlands,ZW-MI,4d4900
