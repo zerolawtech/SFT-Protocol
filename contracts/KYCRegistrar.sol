@@ -442,9 +442,7 @@ contract KYCRegistrar {
 		@return uint8 rating code
 	 */
 	function getRating(bytes32 _id) external view returns (uint8) {
-		Investor storage i = investorData[_id];
-		require(i.expires >= now);
-		require(i.rating > 0);
+		require (investorData[_id].country != 0);
 		return investorData[_id].rating;
 	}
 
@@ -454,6 +452,7 @@ contract KYCRegistrar {
 		@return bytes3 region code
 	 */
 	function getRegion(bytes32 _id) external view returns (bytes3) {
+		require (investorData[_id].country != 0);
 		return investorData[_id].region;
 	}
 
@@ -463,6 +462,7 @@ contract KYCRegistrar {
 		@return string
 	 */
 	function getCountry(bytes32 _id) external view returns (uint16) {
+		require (investorData[_id].country != 0);
 		return investorData[_id].country;
 	}
 
@@ -472,6 +472,7 @@ contract KYCRegistrar {
 		@return uint40 expiration epoch time
 	 */
 	function getExpires(bytes32 _id) external view returns (uint40) {
+		require (investorData[_id].country != 0);
 		return investorData[_id].expires;
 	}
 
@@ -501,12 +502,7 @@ contract KYCRegistrar {
 		_id = idMap[_addr].id;
 		Investor storage i = investorData[_id];
 		require(i.country != 0, "Address not registered");
-		return (
-			_id,
-			!i.restricted && i.expires > now && !idMap[_addr].restricted,
-			i.rating,
-			i.country
-		);
+		return (_id, isPermitted(_addr), i.rating, i.country);
 	}
 
 	/**
@@ -554,8 +550,8 @@ contract KYCRegistrar {
 	function isPermitted(address _addr) public view returns (bool) {
 		if (idMap[_addr].restricted) return false;
 		Investor storage i = investorData[idMap[_addr].id];
-		if (i.country == 0) return false;
 		if (i.restricted) return false;
+		if (i.expires < now) return false;
 		if (authorityData[i.authority].restricted) return false;
 		return true;
 	}
