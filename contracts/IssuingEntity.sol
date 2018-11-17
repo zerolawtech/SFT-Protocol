@@ -39,23 +39,18 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		bool restricted;
 	}
 
-	struct Custodian {
+	struct Contract {
 		address addr;
 		bool restricted;
 	}
 
-	struct Registrar {
-		KYCRegistrar registrar;
-		bool restricted;
-	}
-
 	bool locked;
-	Registrar[] regArray;
+	Contract[] registrars;
 	uint64[8] counts;
 	uint64[8] limits;
 	mapping (uint16 => Country) countries;
 	mapping (bytes32 => Account) accounts;
-	mapping (bytes32 => Custodian) custodians;
+	mapping (bytes32 => Contract) custodians;
 	mapping (address => Token) tokens;
 	mapping (string => bytes32) documentHashes;
 
@@ -100,7 +95,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		public 
 	{
 		/* First registrar is empty so Account.regKey == 0 means it is unset. */
-		regArray.push(Registrar(KYCRegistrar(0),false));
+		registrars.push(Contract(0,false));
 		emit NewIssuingEntity(msg.sender, address(this), ownerID);
 	}
 
@@ -475,9 +470,9 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		}
 		bytes32 _id = idMap[_addr].id;
 		if (_id == 0) {
-			for (uint256 i = 1; i < regArray.length; i++) {
-				if (address(regArray[i].registrar) > 0) {
-					_id = regArray[i].registrar.getID(_addr);
+			for (uint256 i = 1; i < registrars.length; i++) {
+				if (registrars[i].addr > 0) {
+					_id = KYCRegistrar(registrars[i].addr).getID(_addr);
 					if (_id != 0) {
 						return (_id, uint8(i));
 					}
@@ -488,11 +483,11 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		if (custodians[_id].addr != 0) {
 			return (_id, 0);
 		}
-		if (address(regArray[accounts[_id].regKey].registrar) == 0)  {
-			for (i = 1; i < regArray.length; i++) {
+		if (registrars[accounts[_id].regKey].addr == 0)  {
+			for (i = 1; i < registrars.length; i++) {
 				if (
-					address(regArray[i].registrar) != 0 && 
-					_id == regArray[i].registrar.getID(_addr)
+					registrars[i].addr != 0 && 
+					_id == KYCRegistrar(registrars[i].addr).getID(_addr)
 				) {
 					return (_id, uint8(i));
 				}
@@ -539,7 +534,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 				_allowed,
 				_rating,
 				_country
-			) = regArray[_key[0]].registrar.getInvestors(_addr[0], _addr[1]);
+			) = KYCRegistrar(registrars[_key[0]].addr).getInvestors(_addr[0], _addr[1]);
 		/* Otherwise, call getInvestor at each registry */
 		} else {
 			if (_key[0] != 0) {
@@ -548,7 +543,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 					_allowed[0],
 					_rating[0],
 					_country[0]
-				) = regArray[_key[0]].registrar.getInvestor(_addr[0]);
+				) = KYCRegistrar(registrars[_key[0]].addr).getInvestor(_addr[0]);
 			}
 			if (_key[1] != 0) {
 				(
@@ -556,7 +551,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 					_allowed[1],
 					_rating[1],
 					_country[1]
-				) = regArray[_key[1]].registrar.getInvestor(_addr[1]);
+				) = KYCRegistrar(registrars[_key[1]].addr).getInvestor(_addr[1]);
 			}	
 		}
 		return (_allowed, _rating, _country);
@@ -641,7 +636,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 				_allowed,
 				_rating,
 				_country
-			) = regArray[_key].registrar.getInvestor(_owner);
+			) = KYCRegistrar(registrars[_key].addr).getInvestor(_owner);
 		}
 		uint256 _oldTotal = accounts[_id].balance;
 		if (_new > _old) {
@@ -737,15 +732,15 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	 */
 	function setRegistrar(address _registrar, bool _allowed) external returns (bool) {
 		if (!_checkMultiSig()) return false;
-		for (uint256 i = 1; i < regArray.length; i++) {
-			if (address(regArray[i].registrar) == _registrar) {
-				regArray[i].restricted = !_allowed;
+		for (uint256 i = 1; i < registrars.length; i++) {
+			if (registrars[i].addr == _registrar) {
+				registrars[i].restricted = !_allowed;
 				emit RegistrarSet(_registrar, _allowed);
 				return true;
 			}
 		}
 		if (_allowed) {
-			regArray.push(Registrar(KYCRegistrar(_registrar), false));
+			registrars.push(Contract(_registrar, false));
 			emit RegistrarSet(_registrar, _allowed);
 			return true;
 		}
@@ -758,7 +753,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		@return registrar address
 	 */
 	function getRegistrar(bytes32 _id) external view returns (address) {
-		return regArray[accounts[_id].regKey].registrar;
+		return registrars[accounts[_id].regKey].addr;
 	}
 
 	/**
@@ -927,7 +922,10 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			a.custodians[_custID] = true;
 			a.custodianCount += 1;
 			if (a.custodianCount == 1 && a.balance == 0) {
-				_increaseCount(a.rating, regArray[a.regKey].registrar.getCountry(_id[i]));	
+				_increaseCount(
+					a.rating,
+					KYCRegistrar(registrars[a.regKey].addr).getCountry(_id[i])
+				);	
 			}
 		}
 		return true;
@@ -941,7 +939,10 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		a.custodians[_custID] = false;
 		a.custodianCount -= 1;
 		if (a.custodianCount == 0 && a.balance == 0) {
-			_decreaseCount(a.rating, regArray[a.regKey].registrar.getCountry(_id));
+			_decreaseCount(
+				a.rating,
+				KYCRegistrar(registrars[a.regKey].addr).getCountry(_id)
+			);
 		}
 		return true;
 	}
