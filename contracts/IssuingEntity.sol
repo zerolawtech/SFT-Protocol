@@ -31,7 +31,6 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		uint8 regKey;
 		uint8 custodianCount;
 		bool restricted;
-		address registrar;
 		mapping (bytes32 => bool) custodians;
 	}
 
@@ -592,6 +591,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		{
 			if (ICustodian(custodians[_id[1]].addr).newInvestor(msg.sender, _id[0], _rating[0], _country[0])) {
 				accounts[_id[0]].custodianCount += 1;
+				accounts[_id[0]].custodians[_id[1]] = true;
 			}
 			
 		}
@@ -694,7 +694,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 				a.rating = _rating;
 			}
 			/* If investor account balance was 0, increase investor counts */
-			if (a.balance == 0) {
+			if (a.balance == 0 && accounts[_id].custodianCount == 0) {
 				_increaseCount(_rating, _country);
 			/* If investor account balance is now 0, reduce investor counts */
 			} else if (_value == 0 && accounts[_id].custodianCount == 0) {
@@ -778,7 +778,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		if (!_checkMultiSig()) return false;
 		bytes32 _id = ICustodian(_addr).id();
 		idMap[_addr].id = _id;
-		accounts[_id].registrar = _addr;
+		custodians[_id].addr = _addr;
 		emit CustodianAdded(_addr);
 		return true;
 	}
