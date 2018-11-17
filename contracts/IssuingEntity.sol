@@ -589,7 +589,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			!accounts[_id[0]].custodians[_id[1]]
 		)
 		{
-			if (ICustodian(custodians[_id[1]].addr).newInvestor(msg.sender, _id[0], _rating[0], _country[0])) {
+			if (ICustodian(custodians[_id[1]].addr).newInvestor(msg.sender, _id[0])) {
 				accounts[_id[0]].custodianCount += 1;
 				accounts[_id[0]].custodians[_id[1]] = true;
 			}
