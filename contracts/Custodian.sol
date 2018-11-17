@@ -102,23 +102,23 @@ contract Custodian is MultiSigMultiOwner {
 		return true;
 	}
 
-	function removeInvestors(address[] _token, bytes32[] _id) external returns (bool) {
-		require(_token.length == _id.length);
+	function removeInvestors(address _token, bytes32[] _id) external returns (bool) {
 		if (!_checkMultiSig()) return false;
-		for (uint256 i = 0; i < _token.length; i++) {
-			_removeInvestor(_token[i], _id[i]);
+		for (uint256 i = 0; i < _id.length; i++) {
+			_removeInvestor(_token, _id[i]);
 		}
 		return true;
 	}
 
 	function _removeInvestor(address _token, bytes32 _id) internal {
-		address[] storage _inv = beneficialOwners[_token][_id];
-		for (uint256 i = 0; i < _inv.length; i++) {
-			if (_inv[i] == _token) {
-				_inv[i] = _inv[_inv.length-1];
-				_inv.length -= 1;
-				if (_inv.length > 0) return;
-				require(IssuingEntity(issuerContracts[_token]).removeCustodianInvestor(_id));
+		address _issuer = issuerContracts[_token];
+		address[] storage _owner = beneficialOwners[_issuer][_id];
+		for (uint256 i = 0; i < _owner.length; i++) {
+			if (_owner[i] == _token) {
+				_owner[i] = _owner[_owner.length-1];
+				_owner.length -= 1;
+				if (_owner.length > 0) return;
+				require(IssuingEntity(_issuer).removeCustodianInvestor(_id));
 				return;
 			}
 		}
