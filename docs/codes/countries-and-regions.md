@@ -1,3 +1,6 @@
+
+*A CSV of all country and region codes is available [here](country-and-region-codes.csv).*
+
 # Country Codes
 
 Based on the [ISO-3166-1 numeric](https://en.wikipedia.org/wiki/ISO_3166-1_numeric) standard.
@@ -18,5 +21,3 @@ Becomes:
 
 * Country US
 * Region 0x414c00
-
-A CSV of all country and region codes is available [here](country-and-region-codes.csv).
