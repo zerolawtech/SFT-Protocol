@@ -62,7 +62,9 @@ contract Custodian is MultiSigMultiOwner {
 		require(t.transfer(_to, _value));
 		if (_remove) {
 			IssuingEntity i = IssuingEntity(issuerContracts[_token]);
-			_removeInvestor(_token, i.getID(_to));
+			bytes32[] memory _id = new bytes32[](1);
+			_id[0] = i.getID(_to);
+			_removeInvestors(_token, _id);
 		}
 		return true;
 	}
@@ -83,7 +85,7 @@ contract Custodian is MultiSigMultiOwner {
 				_owner.push(_token);
 			}
 		}
-		require(IssuingEntity(_issuer).addCustodianInvestors(_id));
+		require(IssuingEntity(_issuer).setCustodianInvestors(_id, true));
 		return true;
 	}
 
@@ -105,24 +107,27 @@ contract Custodian is MultiSigMultiOwner {
 
 	function removeInvestors(address _token, bytes32[] _id) external returns (bool) {
 		if (!_checkMultiSig()) return false;
-		for (uint256 i = 0; i < _id.length; i++) {
-			_removeInvestor(_token, _id[i]);
-		}
+		_removeInvestors(_token, _id);
 		return true;
 	}
 
-	function _removeInvestor(address _token, bytes32 _id) internal {
+	function _removeInvestors(address _token, bytes32[] _id) internal {
 		address _issuer = issuerContracts[_token];
-		address[] storage _owner = beneficialOwners[_issuer][_id];
-		for (uint256 i = 0; i < _owner.length; i++) {
-			if (_owner[i] == _token) {
-				_owner[i] = _owner[_owner.length-1];
-				_owner.length -= 1;
-				if (_owner.length > 0) return;
-				require(IssuingEntity(_issuer).removeCustodianInvestor(_id));
-				return;
+		bytes32[] memory _toRemove = new bytes32[](_id.length);
+
+		for (uint256 i = 0; i < _id.length; i++) {
+			address[] storage _owner = beneficialOwners[_issuer][_id[i]];
+			for (uint256 x = 0; x < _owner.length; x++) {
+				if (_owner[x] == _token) {
+					_owner[x] = _owner[_owner.length-1];
+					_owner.length -= 1;
+					if (_owner.length > 0) break;
+					_toRemove[i] = _id[i];
+					break;
+				}
 			}
 		}
+		require(IssuingEntity(_issuer).setCustodianInvestors(_toRemove, false));
 	}
 
 }

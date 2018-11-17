@@ -913,39 +913,37 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		return activeModules[_module];
 	}
 
-	function addCustodianInvestors(bytes32[] _id) external returns (bool) {
+	/**  */
+	function setCustodianInvestors(bytes32[] _id, bool _add) external returns (bool) {
 		bytes32 _custID = idMap[msg.sender].id;
 		require(custodians[_custID].addr == msg.sender);
 		for (uint256 i = 0; i < _id.length; i++) {
+			if (_id[i] == 0) continue;
 			Account storage a = accounts[_id[i]];
-			if (a.custodians[_custID]) continue;
-			a.custodians[_custID] = true;
-			a.custodianCount += 1;
-			if (a.custodianCount == 1 && a.balance == 0) {
-				_increaseCount(
-					a.rating,
-					KYCRegistrar(registrars[a.regKey].addr).getCountry(_id[i])
-				);	
+			if (a.custodians[_custID] == _add) continue;
+			a.custodians[_custID] = _add;
+			if (_add) {
+				a.custodianCount += 1;
+				if (a.custodianCount == 1 && a.balance == 0) {
+					_increaseCount(
+						a.rating,
+						KYCRegistrar(registrars[a.regKey].addr).getCountry(_id[i])
+					);	
+				}
+			} else {
+				a.custodianCount -= 1;
+				if (a.custodianCount == 0 && a.balance == 0) {
+					_decreaseCount(
+						a.rating,
+						KYCRegistrar(registrars[a.regKey].addr).getCountry(_id[i])
+					);	
+				}
 			}
 		}
 		return true;
 	}
 
-	function removeCustodianInvestor(bytes32 _id) external returns (bool) {
-		bytes32 _custID = idMap[msg.sender].id;
-		require(custodians[_custID].addr == msg.sender);
-		Account storage a = accounts[_id];
-		if (!a.custodians[_custID]) return true;
-		a.custodians[_custID] = false;
-		a.custodianCount -= 1;
-		if (a.custodianCount == 0 && a.balance == 0) {
-			_decreaseCount(
-				a.rating,
-				KYCRegistrar(registrars[a.regKey].addr).getCountry(_id)
-			);
-		}
-		return true;
-	}
+
 
 	function _increaseCount(uint8 _rating, uint16 _country) internal {
 		counts[0] = counts[0].add(1);
