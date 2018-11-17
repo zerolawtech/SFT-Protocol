@@ -29,12 +29,19 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		uint240 balance;
 		uint8 rating;
 		uint8 regKey;
+		uint8 custodianCount;
 		bool restricted;
 		address registrar;
+		mapping (bytes32 => bool) custodians;
 	}
 
 	struct Token {
 		bool set;
+		bool restricted;
+	}
+
+	struct Custodian {
+		address addr;
 		bool restricted;
 	}
 
@@ -49,6 +56,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	uint64[8] limits;
 	mapping (uint16 => Country) countries;
 	mapping (bytes32 => Account) accounts;
+	mapping (bytes32 => Custodian) custodians;
 	mapping (address => Token) tokens;
 	mapping (string => bytes32) documentHashes;
 
@@ -178,9 +186,9 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		if (!_checkMultiSig()) return false;
 		require(_country.length == _minRating.length);
 		require(_country.length == _limit.length);
+		if (!_checkMultiSig()) return false;
 		for (uint256 i = 0; i < _country.length; i++) {
 			require(_minRating[i] != 0);
 			Country storage c = countries[_country[i]];
@@ -478,7 +486,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			}
 			revert("Address not registered");
 		}
-		if (accounts[_id].registrar != 0) {
+		if (custodians[_id].addr != 0) {
 			return (_id, 0);
 		}
 		if (address(regArray[accounts[_id].regKey].registrar) == 0)  {
@@ -558,7 +566,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	/**
 		@notice Transfer tokens through the issuing entity level
 		@param _id Array of sender/receiver IDs
-		@param _rating Arracy of sender/receiver ratings
+		@param _rating Array of sender/receiver ratings
 		@param _country Array of sender/receiver countries
 		@param _value Number of tokens being transferred
 		@return bool success
@@ -575,6 +583,20 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	{
 		/* If no actual transfer of ownership, return true immediately */
 		if (_id[0] == _id[1]) return true;
+		
+		if (
+			custodians[_id[1]].addr != 0 &&
+			_rating[0] != 0 &&
+			!accounts[_id[0]].custodians[_id[1]]
+		)
+		{
+			if (ICustodian(custodians[_id[1]].addr).newInvestor(msg.sender, _id[0], _rating[0], _country[0])) {
+				accounts[_id[0]].custodianCount += 1;
+			}
+			
+		}
+
+
 		uint256 _balance = uint256(accounts[_id[0]].balance).sub(_value);
 		_setBalance(_id[0], _rating[0], _country[0], _balance);
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
@@ -673,16 +695,10 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			}
 			/* If investor account balance was 0, increase investor counts */
 			if (a.balance == 0) {
-				counts[0] = counts[0].add(1);
-				counts[_rating] = counts[_rating].add(1);
-				c.counts[0] = c.counts[0].add(1);
-				c.counts[_rating] = c.counts[_rating].add(1);
+				_increaseCount(_rating, _country);
 			/* If investor account balance is now 0, reduce investor counts */
-			} else if (_value == 0) {
-				counts[0] = counts[0].sub(1);
-				counts[_rating] = counts[_rating].sub(1);
-				c.counts[0] = c.counts[0].sub(1);
-				c.counts[_rating] = c.counts[_rating].sub(1);
+			} else if (_value == 0 && accounts[_id].custodianCount == 0) {
+				_decreaseCount(_rating, _country);
 			}
 		}
 		a.balance = uint240(_value);
@@ -906,4 +922,48 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		return activeModules[_module];
 	}
 
+	function addCustodianInvestors(bytes32[] _id) external returns (bool) {
+		bytes32 _custID = idMap[msg.sender].id;
+		require(custodians[_custID].addr == msg.sender);
+		for (uint256 i = 0; i < _id.length; i++) {
+			Account storage a = accounts[_id[i]];
+			if (a.custodians[_custID]) continue;
+			a.custodians[_custID] = true;
+			a.custodianCount += 1;
+			if (a.custodianCount == 1 && a.balance == 0) {
+				_increaseCount(a.rating, regArray[a.regKey].registrar.getCountry(_id[i]));	
+			}
+		}
+		return true;
+	}
+
+	function removeCustodianInvestor(bytes32 _id) external returns (uint8, uint16) {
+		bytes32 _custID = idMap[msg.sender].id;
+		require(custodians[_custID].addr == msg.sender);
+		Account storage a = accounts[_id];
+		uint16 _country = regArray[a.regKey].registrar.getCountry(_id);
+		if (!a.custodians[_custID]) {
+			return (a.rating, _country);
+		}
+		a.custodians[_custID] = false;
+		a.custodianCount -= 1;
+		if (a.custodianCount == 0 && a.balance == 0) {
+			_decreaseCount(a.rating, _country);
+		}
+		return (a.rating, _country);
+	}
+
+	function _increaseCount(uint8 _rating, uint16 _country) internal {
+		counts[0] = counts[0].add(1);
+		counts[_rating] = counts[_rating].add(1);
+		countries[_country].counts[0] = countries[_country].counts[0].add(1);
+		countries[_country].counts[_rating] = countries[_country].counts[_rating].add(1);
+	}
+
+	function _decreaseCount(uint8 _rating, uint16 _country) internal {
+		counts[0] = counts[0].sub(1);
+		counts[_rating] = counts[_rating].sub(1);
+		countries[_country].counts[0] = countries[_country].counts[0].sub(1);
+		countries[_country].counts[_rating] = countries[_country].counts[_rating].sub(1);
+	}
 }
