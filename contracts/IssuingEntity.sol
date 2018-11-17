@@ -26,7 +26,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	}
 
 	struct Account {
-		uint240 balance;
+		uint192 balance;
 		uint8 rating;
 		uint8 regKey;
 		uint8 custodianCount;
@@ -577,17 +577,6 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	{
 		/* If no transfer of ownership, return true immediately */
 		if (_id[0] == _id[1]) return true;
-		/*
-			If receiver is a custodian and sender is an investor, the custodian
-			contract must be notified.
-		*/
-		if (custodians[_id[1]].addr != 0 && _rating[0] != 0) {
-			if (ICustodian(custodians[_id[1]].addr).receiveTransfer(msg.sender, _id[0])) {
-				accounts[_id[0]].custodianCount += 1;
-				accounts[_id[0]].custodians[_id[1]] = true;
-			}
-		}
-
 		uint256 _balance = uint256(accounts[_id[0]].balance).sub(_value);
 		_setBalance(_id[0], _rating[0], _country[0], _balance);
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
@@ -600,6 +589,16 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			_value
 		));
 		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
+		/*
+			If receiver is a custodian and sender is an investor, notify
+			the custodian contract.
+		*/
+		if (custodians[_id[1]].addr == 0 || _rating[0] == 0) return true;
+		ICustodian c = ICustodian(custodians[_id[1]].addr);
+		if (c.receiveTransfer(msg.sender, _id[0])) {
+			accounts[_id[0]].custodianCount += 1;
+			accounts[_id[0]].custodians[_id[1]] = true;
+		}
 		return true;
 	}
 
@@ -692,7 +691,8 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 				_decrementCount(_rating, _country);
 			}
 		}
-		a.balance = uint240(_value);
+		a.balance = uint192(_value);
+		require(a.balance == _value);
 	}
 
 	/**
@@ -813,7 +813,8 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		require(token.circulatingSupply() == 0);
 		tokens[_token].set = true;
 		uint256 _balance = uint256(accounts[ownerID].balance).add(token.treasurySupply());
-		accounts[ownerID].balance = uint240(_balance);
+		accounts[ownerID].balance = uint192(_balance);
+		require(accounts[ownerID].balance == _balance);
 		emit TokenAdded(_token);
 		return true;
 	}
