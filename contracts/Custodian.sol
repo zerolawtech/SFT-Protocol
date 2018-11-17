@@ -12,7 +12,6 @@ import "./components/MultiSig.sol";
  */
 contract Custodian is MultiSigMultiOwner {
 
-	using SafeMath64 for uint64;
 
 	bytes32 public id;
 
@@ -28,7 +27,7 @@ contract Custodian is MultiSigMultiOwner {
 	 */
 	constructor(
 		address[] _owners,
-		uint64 _threshold
+		uint32 _threshold
 	)
 		MultiSigMultiOwner(_owners, _threshold)
 		public

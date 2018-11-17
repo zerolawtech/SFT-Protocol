@@ -10,7 +10,7 @@ import "./components/MultiSig.sol";
 /** @title Issuing Entity */
 contract IssuingEntity is Modular, MultiSigMultiOwner {
 
-	using SafeMath64 for uint64;
+	using SafeMath32 for uint32;
 	using SafeMath for uint256;
 
 	/*
@@ -21,12 +21,12 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	struct Country {
 		bool allowed;
 		uint8 minRating;
-		uint64[8] counts;
-		uint64[8] limits;
+		uint32[8] counts;
+		uint32[8] limits;
 	}
 
 	struct Account {
-		uint240 balance;
+		uint192 balance;
 		uint8 rating;
 		uint8 regKey;
 		uint8 custodianCount;
@@ -46,8 +46,8 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 
 	bool locked;
 	Contract[] registrars;
-	uint64[8] counts;
-	uint64[8] limits;
+	uint32[8] counts;
+	uint32[8] limits;
 	mapping (uint16 => Country) countries;
 	mapping (bytes32 => Account) accounts;
 	mapping (bytes32 => Contract) custodians;
@@ -65,9 +65,9 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		uint16 indexed country,
 		bool allowed,
 		uint8 minrating,
-		uint64[8] limits
+		uint32[8] limits
 	);
-	event InvestorLimitSet(uint16 indexed country, uint64[8] limits);
+	event InvestorLimitSet(uint16 indexed country, uint32[8] limits);
 	event NewDocumentHash(string indexed document, bytes32 documentHash);
 	event RegistrarSet(address indexed registrar, bool allowed);
 	event CustodianAdded(address indexed custodian);
@@ -89,7 +89,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	 */
 	constructor(
 		address[] _owners,
-		uint64 _threshold
+		uint32 _threshold
 	)
 		MultiSigMultiOwner(_owners, _threshold)
 		public 
@@ -112,7 +112,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		@notice Fetch total investor counts and limits
 		@return counts, limits
 	 */
-	function getInvestorCounts() external view returns (uint64[8], uint64[8]) {
+	function getInvestorCounts() external view returns (uint32[8], uint32[8]) {
 		return (counts, limits);
 	}
 
@@ -120,14 +120,14 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		@notice Fetch minrating, investor counts and limits of a country
 		@dev counts[0] and levels[0] == the sum of counts[1:] and limits[1:]
 		@param _country Country to query
-		@return uint64 minRating, uint64 arrays of counts, limits
+		@return uint32 minRating, uint32 arrays of counts, limits
 	 */
 	function getCountry(
 		uint16 _country
 	)
 		external
 		view
-		returns (uint64 _minRating, uint64[8] _count, uint64[8] _limit)
+		returns (uint32 _minRating, uint32[8] _count, uint32[8] _limit)
 	{
 		return (
 			countries[_country].minRating,
@@ -148,7 +148,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		uint16 _country,
 		bool _allowed,
 		uint8 _minRating,
-		uint64[8] _limits
+		uint32[8] _limits
 	)
 		external
 		returns (bool)
@@ -175,7 +175,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	function setCountries(
 		uint16[] _country,
 		uint8[] _minRating,
-		uint64[] _limit
+		uint32[] _limit
 	)
 		external
 		returns (bool)
@@ -204,7 +204,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		@return bool success
 	 */
 	function setInvestorLimits(
-		uint64[8] _limits
+		uint32[8] _limits
 	)
 		external
 		returns (bool)
@@ -577,17 +577,6 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	{
 		/* If no transfer of ownership, return true immediately */
 		if (_id[0] == _id[1]) return true;
-		/*
-			If receiver is a custodian and sender is an investor, the custodian
-			contract must be notified.
-		*/
-		if (custodians[_id[1]].addr != 0 && _rating[0] != 0) {
-			if (ICustodian(custodians[_id[1]].addr).receiveTransfer(msg.sender, _id[0])) {
-				accounts[_id[0]].custodianCount += 1;
-				accounts[_id[0]].custodians[_id[1]] = true;
-			}
-		}
-
 		uint256 _balance = uint256(accounts[_id[0]].balance).sub(_value);
 		_setBalance(_id[0], _rating[0], _country[0], _balance);
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
@@ -600,6 +589,16 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			_value
 		));
 		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
+		/*
+			If receiver is a custodian and sender is an investor, notify
+			the custodian contract.
+		*/
+		if (custodians[_id[1]].addr == 0 || _rating[0] == 0) return true;
+		ICustodian c = ICustodian(custodians[_id[1]].addr);
+		if (c.receiveTransfer(msg.sender, _id[0])) {
+			accounts[_id[0]].custodianCount += 1;
+			accounts[_id[0]].custodians[_id[1]] = true;
+		}
 		return true;
 	}
 
@@ -692,7 +691,8 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 				_decrementCount(_rating, _country);
 			}
 		}
-		a.balance = uint240(_value);
+		a.balance = uint192(_value);
+		require(a.balance == _value);
 	}
 
 	/**
@@ -813,7 +813,8 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		require(token.circulatingSupply() == 0);
 		tokens[_token].set = true;
 		uint256 _balance = uint256(accounts[ownerID].balance).add(token.treasurySupply());
-		accounts[ownerID].balance = uint240(_balance);
+		accounts[ownerID].balance = uint192(_balance);
+		require(accounts[ownerID].balance == _balance);
 		emit TokenAdded(_token);
 		return true;
 	}
