@@ -593,9 +593,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 				accounts[_id[0]].custodianCount += 1;
 				accounts[_id[0]].custodians[_id[1]] = true;
 			}
-			
 		}
-
 
 		uint256 _balance = uint256(accounts[_id[0]].balance).sub(_value);
 		_setBalance(_id[0], _rating[0], _country[0], _balance);
@@ -937,20 +935,17 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		return true;
 	}
 
-	function removeCustodianInvestor(bytes32 _id) external returns (uint8, uint16) {
+	function removeCustodianInvestor(bytes32 _id) external returns (bool) {
 		bytes32 _custID = idMap[msg.sender].id;
 		require(custodians[_custID].addr == msg.sender);
 		Account storage a = accounts[_id];
-		uint16 _country = regArray[a.regKey].registrar.getCountry(_id);
-		if (!a.custodians[_custID]) {
-			return (a.rating, _country);
-		}
+		if (!a.custodians[_custID]) return true;
 		a.custodians[_custID] = false;
 		a.custodianCount -= 1;
 		if (a.custodianCount == 0 && a.balance == 0) {
-			_decreaseCount(a.rating, _country);
+			_decreaseCount(a.rating, regArray[a.regKey].registrar.getCountry(_id));
 		}
-		return (a.rating, _country);
+		return true;
 	}
 
 	function _increaseCount(uint8 _rating, uint16 _country) internal {
