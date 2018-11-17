@@ -5,7 +5,7 @@ import "../open-zeppelin/SafeMath.sol";
 /** @title MultiSignature, MultiOwner Controls */
 contract MultiSigMultiOwner {
 
-	using SafeMath64 for uint64;
+	using SafeMath32 for uint32;
 
 	struct Address {
 		bytes32 id;
@@ -15,9 +15,9 @@ contract MultiSigMultiOwner {
 	struct Authority {
 		mapping (bytes4 => bool) signatures;
 		mapping (bytes32 => address[]) multiSigAuth;
-		uint64 multiSigThreshold;
-		uint64 addressCount;
-		uint64 approvedUntil;
+		uint32 multiSigThreshold;
+		uint32 addressCount;
+		uint32 approvedUntil;
 	}
 
 	bytes32 public ownerID;
@@ -40,21 +40,21 @@ contract MultiSigMultiOwner {
 	);
 	event NewAuthority (
 		bytes32 indexed id,
-		uint64 approvedUntil,
-		uint64 threshold
+		uint32 approvedUntil,
+		uint32 threshold
 	);
 	event NewAuthorityAddresses (
 		bytes32 indexed id,
 		address[] added,
-		uint64 ownerCount
+		uint32 ownerCount
 	);
 	event RemovedAuthorityAddresses (
 		bytes32 indexed id,
 		address[] removed,
-		uint64 ownerCount
+		uint32 ownerCount
 	);
-	event ApprovedUntilSet (bytes32 indexed id, uint64 approvedUntil);
-	event ThresholdSet (bytes32 indexed id, uint64 threshold);
+	event ApprovedUntilSet (bytes32 indexed id, uint32 approvedUntil);
+	event ThresholdSet (bytes32 indexed id, uint32 threshold);
 	event NewAuthorityPermissions (bytes32 indexed id, bytes4[] signatures);
 	event RemovedAuthorityPermissions (bytes32 indexed id, bytes4[] signatures);
 	
@@ -83,7 +83,7 @@ contract MultiSigMultiOwner {
 		@param _owners Array of addresses for owning authority
 		@param _threshold multisig threshold for owning authority
 	 */ 
-	constructor(address[] _owners, uint64 _threshold) public {
+	constructor(address[] _owners, uint32 _threshold) public {
 		require(_owners.length >= _threshold);
 		require(_owners.length > 0);
 		ownerID = keccak256(abi.encodePacked(address(this)));
@@ -91,7 +91,7 @@ contract MultiSigMultiOwner {
 		for (uint256 i = 0; i < _owners.length; i++) {
 			idMap[_owners[i]].id = ownerID;
 		}
-		a.addressCount = uint64(_owners.length);
+		a.addressCount = uint32(_owners.length);
 		a.multiSigThreshold = _threshold;
 		emit NewAuthority(ownerID, a.approvedUntil, _threshold);
 		emit NewAuthorityAddresses(ownerID, _owners, a.addressCount);
@@ -230,8 +230,8 @@ contract MultiSigMultiOwner {
 		bytes32 _id,
 		address[] _addr,
 		bytes4[] _signatures,
-		uint64 _approvedUntil,
-		uint64 _threshold
+		uint32 _approvedUntil,
+		uint32 _threshold
 	)
 		external
 		onlyOwner
@@ -253,7 +253,7 @@ contract MultiSigMultiOwner {
 			a.signatures[_signatures[i]] = true;
 		}
 		a.approvedUntil = _approvedUntil;
-		a.addressCount = uint64(_addr.length);
+		a.addressCount = uint32(_addr.length);
 		a.multiSigThreshold = _threshold;
 		emit NewAuthority(_id, _threshold, _approvedUntil);
 		emit NewAuthorityAddresses(_id, _addr, a.addressCount);
@@ -270,7 +270,7 @@ contract MultiSigMultiOwner {
 	 */
 	function setAuthorityApprovedUntil(
 		bytes32 _id,
-		uint64 _approvedUntil
+		uint32 _approvedUntil
 	 )
 	 	external
 		 onlyOwner
@@ -325,7 +325,7 @@ contract MultiSigMultiOwner {
 	 */
 	function setAuthorityThreshold(
 		bytes32 _id,
-		uint64 _threshold
+		uint32 _threshold
 	)
 		external
 		onlySelfAuthority(_id)
@@ -364,7 +364,7 @@ contract MultiSigMultiOwner {
 			require(idMap[_addr[i]].id == 0);
 			idMap[_addr[i]].id = _id;
 		}
-		a.addressCount = a.addressCount.add(uint64(_addr.length));
+		a.addressCount = a.addressCount.add(uint32(_addr.length));
 		emit NewAuthorityAddresses(_id, _addr, a.addressCount);
 		return true;
 	}
@@ -393,7 +393,7 @@ contract MultiSigMultiOwner {
 			require(!idMap[_addr[i]].restricted);
 			idMap[_addr[i]].restricted = true;
 		}
-		a.addressCount = a.addressCount.sub(uint64(_addr.length));
+		a.addressCount = a.addressCount.sub(uint32(_addr.length));
 		require (a.addressCount >= a.multiSigThreshold);
 		require (a.addressCount > 0);
 		emit RemovedAuthorityAddresses(_id, _addr, a.addressCount);

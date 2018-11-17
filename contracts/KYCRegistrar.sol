@@ -6,7 +6,7 @@ import "./open-zeppelin/SafeMath.sol";
 contract KYCRegistrar {
 
 	using SafeMath for uint256;
-	using SafeMath64 for uint64;
+	using SafeMath32 for uint32;
 
 	bytes32 ownerID;
 
@@ -27,8 +27,8 @@ contract KYCRegistrar {
 	struct Authority {
 		mapping (uint16 => bool) countries;
 		mapping (bytes32 => address[]) multiSigAuth;
-		uint64 multiSigThreshold;
-		uint64 addressCount;
+		uint32 multiSigThreshold;
+		uint32 addressCount;
 		bool restricted;
 	}
 
@@ -356,7 +356,7 @@ contract KYCRegistrar {
 		if (a.addressCount > 0) {
 			/* Only the owner can register addresses for an authority. */
 			require(idMap[msg.sender].id == ownerID);
-			a.addressCount = a.addressCount.add(uint64(_addr.length));
+			a.addressCount = a.addressCount.add(uint32(_addr.length));
 		}
 		_addAddresses(_id, _addr);
 		return true;
