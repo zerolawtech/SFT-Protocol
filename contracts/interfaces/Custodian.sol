@@ -12,5 +12,8 @@ interface ICustodian {
 		uint256 _value
 	) external returns (bool);
 
-	function newInvestor(address _token, bytes32 _id) external returns (bool);
+	function receiveTransfer(
+		address _token,
+		bytes32 _id
+	) external returns (bool);
 }

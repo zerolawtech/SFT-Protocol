@@ -8,15 +8,13 @@ import "./components/MultiSig.sol";
 	@title Custodian Contract
 	@dev
 		This is a bare-bones implementation of a custodian contract,
-		it should be expanded upon depending on the specific needs
-		of the owner.
+		it can be expanded upon depending on the needs of the owner.
  */
 contract Custodian is MultiSigMultiOwner {
 
 	using SafeMath64 for uint64;
 
 	bytes32 public id;
-	mapping (address => bool) public addresses;
 
 	// issuer contract => investor ID => array of token addresses
 	mapping (address => mapping(bytes32 => address[])) beneficialOwners;
@@ -46,13 +44,14 @@ contract Custodian is MultiSigMultiOwner {
 		@param _token Address of the token to transfer
 		@param _to Address of the recipient
 		@param _value Amount to transfer
+		@param _stillOwner bool is recipient still a beneficial owner?
 		@return bool success
 	 */
 	function transfer(
 		address _token,
 		address _to,
 		uint256 _value,
-		bool _remove
+		bool _stillOwner
 	)
 		external
 		returns (bool)
@@ -60,7 +59,7 @@ contract Custodian is MultiSigMultiOwner {
 		if (!_checkMultiSig()) return false;
 		SecurityToken t = SecurityToken(_token);
 		require(t.transfer(_to, _value));
-		if (_remove) {
+		if (!_stillOwner) {
 			IssuingEntity i = IssuingEntity(issuerContracts[_token]);
 			bytes32[] memory _id = new bytes32[](1);
 			_id[0] = i.getID(_to);
@@ -69,6 +68,36 @@ contract Custodian is MultiSigMultiOwner {
 		return true;
 	}
 
+	/**
+		@notice Add a new token owner
+		@dev called by IssuingEntity when tokens are transferred to a custodian
+		@param _token Token address
+		@param _id Investor ID
+		@return bool success
+	 */
+	function receiveTransfer(address _token, bytes32 _id) external returns (bool) {
+		if (issuerContracts[_token] == 0) {
+			require(SecurityToken(_token).issuer() == msg.sender);
+			issuerContracts[_token] = msg.sender;
+		} else {
+			require(issuerContracts[_token] == msg.sender);
+		}
+		address[] storage _owner = beneficialOwners[msg.sender][_id];
+		for (uint256 i = 0; i < _owner.length; i++) {
+			if (_owner[i] == _token) return false;
+		}
+		_owner.push(_token);
+		/* return true if investor previously held no tokens for this issuer */
+		return _owner.length == 1 ? true : false;
+	}
+
+	/**
+		@notice Add beneficial token owners
+		@dev Increases the investor count in the IssuingEntity contract
+		@param _token Token address
+		@param _id Array of investor IDs
+		@return bool success
+	 */
 	function addInvestors(address _token, bytes32[] _id) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		address _issuer = issuerContracts[_token];
@@ -85,32 +114,28 @@ contract Custodian is MultiSigMultiOwner {
 				_owner.push(_token);
 			}
 		}
-		require(IssuingEntity(_issuer).setCustodianInvestors(_id, true));
+		require(IssuingEntity(_issuer).setBeneficialOwners(_id, true));
 		return true;
 	}
 
-	function newInvestor(address _token, bytes32 _id) external returns (bool) {
-		if (issuerContracts[_token] == 0) {
-			require(SecurityToken(_token).issuer() == msg.sender);
-			issuerContracts[_token] = msg.sender;
-		} else {
-			require(issuerContracts[_token] == msg.sender);
-		}
-		address[] storage _owner = beneficialOwners[msg.sender][_id];
-		for (uint256 i = 0; i < _owner.length; i++) {
-			if (_owner[i] == _token) return false;
-		}
-		_owner.push(_token);
-		/* return true if investor previously held no tokens for this issuer */
-		return _owner.length == 1 ? true : false;
-	}
-
+	/**
+		@notice Remove beneficial token owners
+		@dev Decreases the investor count in the IssuingEntity contract
+		@param _token Token address
+		@param _id Array of investor IDs
+		@return bool success
+	 */
 	function removeInvestors(address _token, bytes32[] _id) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		_removeInvestors(_token, _id);
 		return true;
 	}
 
+	/**
+		@notice internal to remove beneficial token owners
+		@param _token Token address
+		@param _id Array of investor IDs
+	 */
 	function _removeInvestors(address _token, bytes32[] _id) internal {
 		address _issuer = issuerContracts[_token];
 		bytes32[] memory _toRemove = new bytes32[](_id.length);
@@ -127,7 +152,7 @@ contract Custodian is MultiSigMultiOwner {
 				}
 			}
 		}
-		require(IssuingEntity(_issuer).setCustodianInvestors(_toRemove, false));
+		require(IssuingEntity(_issuer).setBeneficialOwners(_toRemove, false));
 	}
 
 }

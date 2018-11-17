@@ -582,7 +582,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			contract must be notified.
 		*/
 		if (custodians[_id[1]].addr != 0 && _rating[0] != 0) {
-			if (ICustodian(custodians[_id[1]].addr).newInvestor(msg.sender, _id[0])) {
+			if (ICustodian(custodians[_id[1]].addr).receiveTransfer(msg.sender, _id[0])) {
 				accounts[_id[0]].custodianCount += 1;
 				accounts[_id[0]].custodians[_id[1]] = true;
 			}
@@ -686,13 +686,39 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			}
 			/* If investor account balance was 0, increase investor counts */
 			if (a.balance == 0 && accounts[_id].custodianCount == 0) {
-				_increaseCount(_rating, _country);
+				_incrementCount(_rating, _country);
 			/* If investor account balance is now 0, reduce investor counts */
 			} else if (_value == 0 && accounts[_id].custodianCount == 0) {
-				_decreaseCount(_rating, _country);
+				_decrementCount(_rating, _country);
 			}
 		}
 		a.balance = uint240(_value);
+	}
+
+	/**
+		@notice Increment investor count
+		@param _r Investor rating
+		@param _c Investor country
+		@return bool success
+	 */
+	function _incrementCount(uint8 _r, uint16 _c) internal {
+		counts[0] = counts[0].add(1);
+		counts[_r] = counts[_r].add(1);
+		countries[_c].counts[0] = countries[_c].counts[0].add(1);
+		countries[_c].counts[_r] = countries[_c].counts[_r].add(1);
+	}
+
+	/**
+		@notice Decrement investor count
+		@param _r Investor rating
+		@param _c Investor country
+		@return bool success
+	 */
+	function _decrementCount(uint8 _r, uint16 _c) internal {
+		counts[0] = counts[0].sub(1);
+		counts[_r] = counts[_r].sub(1);
+		countries[_c].counts[0] = countries[_c].counts[0].sub(1);
+		countries[_c].counts[_r] = countries[_c].counts[_r].sub(1);
 	}
 
 	/**
@@ -913,8 +939,19 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		return activeModules[_module];
 	}
 
-	/**  */
-	function setCustodianInvestors(bytes32[] _id, bool _add) external returns (bool) {
+	/**
+		@notice Add or remove an investor from a custodian's beneficial owners
+		@param _id Array of investor IDs
+		@param _add bool add or remove
+		@return bool success
+	 */
+	function setBeneficialOwners(
+		bytes32[] _id,
+		bool _add
+	)
+		external
+		returns (bool)
+	{
 		bytes32 _custID = idMap[msg.sender].id;
 		require(custodians[_custID].addr == msg.sender);
 		for (uint256 i = 0; i < _id.length; i++) {
@@ -925,7 +962,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			if (_add) {
 				a.custodianCount += 1;
 				if (a.custodianCount == 1 && a.balance == 0) {
-					_increaseCount(
+					_incrementCount(
 						a.rating,
 						KYCRegistrar(registrars[a.regKey].addr).getCountry(_id[i])
 					);	
@@ -933,7 +970,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			} else {
 				a.custodianCount -= 1;
 				if (a.custodianCount == 0 && a.balance == 0) {
-					_decreaseCount(
+					_decrementCount(
 						a.rating,
 						KYCRegistrar(registrars[a.regKey].addr).getCountry(_id[i])
 					);	
@@ -943,19 +980,5 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		return true;
 	}
 
-
-
-	function _increaseCount(uint8 _rating, uint16 _country) internal {
-		counts[0] = counts[0].add(1);
-		counts[_rating] = counts[_rating].add(1);
-		countries[_country].counts[0] = countries[_country].counts[0].add(1);
-		countries[_country].counts[_rating] = countries[_country].counts[_rating].add(1);
-	}
-
-	function _decreaseCount(uint8 _rating, uint16 _country) internal {
-		counts[0] = counts[0].sub(1);
-		counts[_rating] = counts[_rating].sub(1);
-		countries[_country].counts[0] = countries[_country].counts[0].sub(1);
-		countries[_country].counts[_rating] = countries[_country].counts[_rating].sub(1);
-	}
+	
 }
