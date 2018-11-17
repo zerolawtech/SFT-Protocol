@@ -99,7 +99,8 @@ contract Custodian is MultiSigMultiOwner {
 			if (_owner[i] == _token) return false;
 		}
 		_owner.push(_token);
-		return true;
+		/* return true if investor previously held no tokens for this issuer */
+		return _owner.length == 1 ? true : false;
 	}
 
 	function removeInvestors(address _token, bytes32[] _id) external returns (bool) {

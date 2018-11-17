@@ -580,15 +580,13 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		onlyToken
 		returns (bool)
 	{
-		/* If no actual transfer of ownership, return true immediately */
+		/* If no transfer of ownership, return true immediately */
 		if (_id[0] == _id[1]) return true;
-		
-		if (
-			custodians[_id[1]].addr != 0 &&
-			_rating[0] != 0 &&
-			!accounts[_id[0]].custodians[_id[1]]
-		)
-		{
+		/*
+			If receiver is a custodian and sender is an investor, the custodian
+			contract must be notified.
+		*/
+		if (custodians[_id[1]].addr != 0 && _rating[0] != 0) {
 			if (ICustodian(custodians[_id[1]].addr).newInvestor(msg.sender, _id[0])) {
 				accounts[_id[0]].custodianCount += 1;
 				accounts[_id[0]].custodians[_id[1]] = true;
