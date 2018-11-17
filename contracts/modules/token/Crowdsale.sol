@@ -68,7 +68,7 @@ contract CrowdsaleModule is STModuleBase {
 		require (now < crowdsaleFinish);
 		require (crowdsaleCompleted == 0);
 		require (msg.value > 0);
-		require (issuer.getId(msg.sender) != ownerID);
+		require (issuer.getID(msg.sender) != ownerID);
 		uint256 _fiat = msg.value.mul(ethFiatRate).div(1 ether);
 		_fiat = _fiat.sub(_checkExcess(fiat, fiatMax, _fiat));
 		uint256 _tokens = _fiat.div(tokenFiatRate);
@@ -155,8 +155,8 @@ contract CrowdsaleModule is STModuleBase {
 		return true;
 	}
 
-	function getBindings() external pure returns (bool, bool, bool) {
-		return (true, false, false);
+	function getBindings() external pure returns (bool[3]) {
+		return [true, false, false];
 	}
 
 }

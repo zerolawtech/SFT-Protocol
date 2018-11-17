@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 
 interface IBaseModule {
-	function getBindings() external view returns (bool, bool, bool);
+	function getBindings() external view returns (bool[3]);
 	function owner() external view returns (address);
 	function name() external view returns (string);
 }
@@ -10,7 +10,7 @@ interface IBaseModule {
 interface ISTModule {
 	function checkTransfer(
 		address[2] _addr,
-		bytes32 _authId,
+		bytes32 _authID,
 		bytes32[2] _id,
 		uint8[2] _rating,
 		uint16[2] _country,
@@ -39,10 +39,7 @@ interface ISTModule {
 	)
 		external
 		returns (bool);
-	function getBindings() external view returns (
-		bool _checkTransfer,
-		bool _transferTokens, 
-		bool _balanceChanged);
+	function getBindings() external view returns (bool[3]);
 	function token() external returns (address);
 	function owner() external view returns (address);
 }
@@ -50,7 +47,7 @@ interface ISTModule {
 interface IIssuerModule {
 	function checkTransfer(
 		address _token,
-		bytes32 _authId,
+		bytes32 _authID,
 		bytes32[2] _id,
 		uint8[2] _rating,
 		uint16[2] _country,
@@ -79,10 +76,7 @@ interface IIssuerModule {
 	)
 		external
 		returns (bool);
-	function getBindings() external view returns (
-		bool _checkTransfer,
-		bool _transferTokens, 
-		bool _balanceChanged);
+	function getBindings() external view returns (bool[3]);
 	function issuer() external returns (address);
 	function owner() external view returns (address);
 }

@@ -24,8 +24,8 @@ contract DEXModule is STModuleBase {
 		_;
 	}
 
-	function getBindings() external pure returns (bool, bool, bool) {
-		return (true, false, false);
+	function getBindings() external pure returns (bool[3]) {
+		return [true, false, false];
 	}
 
 	function checkTransfer(
@@ -77,7 +77,7 @@ contract DEXModule is STModuleBase {
 	}
 
 	function dexRelease(address _owner, uint256 _value) public returns (bool) {
-		bytes32 _id = issuer.getId(msg.sender);
+		bytes32 _id = issuer.getID(msg.sender);
 		_dexUnlock(_id, _owner, _value);
 		return true;
 	}
@@ -105,7 +105,7 @@ contract DEXModule is STModuleBase {
 		onlyUnlocked
 		returns (bool)
 	{
-		bytes32 _id = issuer.getId(msg.sender);
+		bytes32 _id = issuer.getID(msg.sender);
 		require(approved[_id]);
 		_dexUnlock(_id, _from, _value);
 		token.transferFrom(_from, _to, _value);
