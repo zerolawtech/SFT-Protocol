@@ -9,3 +9,4 @@ The following documentation files are availble:
 - [KYCRegistrar](kyc-registrar.md) - Deployment and functionality of registry contracts
 - [Custodian](custodian.md) - Development, deployment and functionality of custodian contracts
 - [Modules](modules.md) - Development, deployment, and functionality of issuer and token modules
+- [Data Standards](data-standards.md) - Generation and format standards for investor IDs and jurisdiction codes
