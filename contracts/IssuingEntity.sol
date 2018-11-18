@@ -55,7 +55,6 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	mapping (address => Token) tokens;
 	mapping (string => bytes32) documentHashes;
 
-	event NewIssuingEntity(address creator, address contractAddr, bytes32 id);
 	event TransferOwnership(
 		address indexed token,
 		bytes32 indexed from,
@@ -65,8 +64,8 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	event BeneficialOwnerSet(
 		address indexed custodian,
 		bytes32 indexed id,
-		bool owned)
-	;
+		bool owned
+	);
 	event CountryModified(
 		uint16 indexed country,
 		bool allowed,
@@ -101,8 +100,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		public 
 	{
 		/* First registrar is empty so Account.regKey == 0 means it is unset. */
-		registrars.push(Contract(0,false));
-		emit NewIssuingEntity(msg.sender, address(this), ownerID);
+		registrars.push(Contract(0, false));
 	}
 
 	/**

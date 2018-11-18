@@ -18,7 +18,7 @@ contract Custodian is MultiSigMultiOwner {
 	/* issuer contract => investor ID => token addresses */
 	mapping (address => mapping(bytes32 => address[])) beneficialOwners;
 	/* token contract => issuer contract */
-	mapping (address => address) issuerContracts;
+	mapping (address => address) issuerMap;
 
 	event ReceivedTokens(
 		address indexed issuer,
@@ -33,6 +33,11 @@ contract Custodian is MultiSigMultiOwner {
 		uint256 amount
 	);
 	event NewBeneficialOwner(
+		address indexed issuer,
+		address indexed token,
+		bytes32 indexed investorID
+	);
+	event RemovedBeneficialOwner(
 		address indexed issuer,
 		address indexed token,
 		bytes32 indexed investorID
@@ -78,12 +83,12 @@ contract Custodian is MultiSigMultiOwner {
 		SecurityToken t = SecurityToken(_token);
 		require(t.transfer(_to, _value));
 		if (!_stillOwner) {
-			IssuingEntity i = IssuingEntity(issuerContracts[_token]);
+			IssuingEntity i = IssuingEntity(issuerMap[_token]);
 			bytes32[] memory _id = new bytes32[](1);
 			_id[0] = i.getID(_to);
 			_removeInvestors(_token, _id);
 		}
-		emit SentTokens(issuerContracts[_token], _token, _to, _value);
+		emit SentTokens(issuerMap[_token], _token, _to, _value);
 		return true;
 	}
 
@@ -103,11 +108,11 @@ contract Custodian is MultiSigMultiOwner {
 		external
 		returns (bool)
 	{
-		if (issuerContracts[_token] == 0) {
+		if (issuerMap[_token] == 0) {
 			require(SecurityToken(_token).issuer() == msg.sender);
-			issuerContracts[_token] = msg.sender;
+			issuerMap[_token] = msg.sender;
 		} else {
-			require(issuerContracts[_token] == msg.sender);
+			require(issuerMap[_token] == msg.sender);
 		}
 		emit ReceivedTokens(msg.sender, _token, _id, _value);
 		address[] storage _owner = beneficialOwners[msg.sender][_id];
@@ -116,7 +121,6 @@ contract Custodian is MultiSigMultiOwner {
 		}
 		_owner.push(_token);
 		emit NewBeneficialOwner(msg.sender, _token, _id);
-	);
 		/*
 			return true if custodian did not previously hold any tokens
 			from this issuer for this investor 
@@ -133,7 +137,7 @@ contract Custodian is MultiSigMultiOwner {
 	 */
 	function addInvestors(address _token, bytes32[] _id) external returns (bool) {
 		if (!_checkMultiSig()) return false;
-		address _issuer = issuerContracts[_token];
+		address _issuer = issuerMap[_token];
 		for (uint256 i = 0; i < _id.length; i++) {
 			address[] storage _owner = beneficialOwners[_issuer][_id[i]];
 			bool _found = false;
@@ -171,7 +175,7 @@ contract Custodian is MultiSigMultiOwner {
 		@param _id Array of investor IDs
 	 */
 	function _removeInvestors(address _token, bytes32[] _id) internal {
-		address _issuer = issuerContracts[_token];
+		address _issuer = issuerMap[_token];
 		bytes32[] memory _toRemove = new bytes32[](_id.length);
 
 		for (uint256 i = 0; i < _id.length; i++) {
