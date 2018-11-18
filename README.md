@@ -20,7 +20,7 @@ SFT expands upon the ERC20 token standard. Tokens are transferred via the `trans
   - Whitelists that provide identity, region, and accreditation information of investors based on off-chain KYC/AML verification
 - [Custodian](contracts/Custodian.sol)
   - Contracts that represent an entity approved to hold tokens for multiple investors
-  - Simple base interface allows for wide customisation depending on the needs of the owner
+  - Base interface that allows for wide customisation depending on the needs of the owner
 
 ## KYCRegistrar
 
@@ -57,7 +57,13 @@ Transfers that move tokens between different addressses owned by the same entity
 
 ## Custodian
 
-TODO
+Custodian contracts allow approved entities to hold tokens on behalf of investors.  Common examples of custodians include broker/dealers and secondary markets.
+
+Custodians interact with an issuer's investor counts differently from regular investors. When an investor transfers a balance into the custodian it does not increase the overall investor count, instead the investor is now included in the list of beneficial owners represented by the custodian. Even if the investor now has a balance of 0, they will be still be included in the issuer's investor count.
+
+Custodian contracts include a `transfer` function that optionally allows them to remove an investor fom the beneficial owners when sending them tokens. They may also call `addInvestors` or `removeInvestors` in cases where beneficial ownership has changed from an action happening off-chain.
+
+Each custodian must be individually approved by an issuer before they can receive tokens. Because custodias may bypass on-chain compliance checks, it is imperative this approval only be given to known, trusted entities.
 
 *See the [Custodian](docs/custodian.md) page for in-depth details.*
 
@@ -73,7 +79,7 @@ Modules can also directly change the balance of any address. Modules that are ac
 
 When a module is no longer required it can be detached. This should always be done in order to optimize gas costs.
 
-The wide range of functionality that modules can hook into allows for many different applications. Some examples include: crowdsales, country/time based token locks, voting rights, dividend payments, decentralised trading, and bond redemption.
+The wide range of functionality that modules can hook into allows for many different applications. Some examples include: crowdsales, country/time based token locks, right of first refusal enforcement, voting rights, dividend payments, tender offers, and bond redemption.
 
 *See the [Modules](docs/modules.md) page for in-depth details.*
 
