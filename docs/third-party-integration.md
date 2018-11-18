@@ -1,5 +1,7 @@
 # Third Party Integration
 
+[Test](#test)
+
 ## KYC Registrar
 
 To setup an investor registry, deploy [KYCRegistrar.sol](../contracts/KYCRegistrar.sol). Owner addresses will then be able to add investors using `addInvestor` or approve other whitelisting authorities with `addAuthority`. See the [KYCRegistrar](./kyc-registrar.md) page for a detailed explanation of how to use this contract.
@@ -36,7 +38,7 @@ Transferring a balance between two addresses associated with the same investor I
 
 See the [SecurityToken](./security-token.md) page for a detailed explanation of how to use this contract.
 
-## Custodians
+## <a name="test"></a>Custodians
 
 To set up a custodian contract to send and receive tokens, you must deploy it and then attach it to an IssuingEntity with `IssuingEntity.addCustodian`. At this point, investors may send tokens into the custodian contract just like they would any other address.
 
