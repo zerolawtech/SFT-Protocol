@@ -14,6 +14,7 @@ interface ICustodian {
 
 	function receiveTransfer(
 		address _token,
-		bytes32 _id
+		bytes32 _id,
+		uint256 _value
 	) external returns (bool);
 }

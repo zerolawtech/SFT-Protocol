@@ -15,9 +15,17 @@ contract Custodian is MultiSigMultiOwner {
 
 	bytes32 public id;
 
-	// issuer contract => investor ID => array of token addresses
+	/* issuer contract => investor ID => token addresses */
 	mapping (address => mapping(bytes32 => address[])) beneficialOwners;
+	/* token contract => issuer contract */
 	mapping (address => address) issuerContracts;
+
+	event TokensReceived(
+		address indexed token,
+		address indexed issuer,
+		bytes32 indexed investorID,
+		uint256 amount
+	);
 
 
 	/**
@@ -72,9 +80,17 @@ contract Custodian is MultiSigMultiOwner {
 		@dev called by IssuingEntity when tokens are transferred to a custodian
 		@param _token Token address
 		@param _id Investor ID
-		@return bool success
+		@param _value Amount transferred
+		@return bool was investor already a beneficial owner of this issuer?
 	 */
-	function receiveTransfer(address _token, bytes32 _id) external returns (bool) {
+	function receiveTransfer(
+		address _token,
+		bytes32 _id,
+		uint256 _value
+	)
+		external
+		returns (bool)
+	{
 		if (issuerContracts[_token] == 0) {
 			require(SecurityToken(_token).issuer() == msg.sender);
 			issuerContracts[_token] = msg.sender;
@@ -86,7 +102,11 @@ contract Custodian is MultiSigMultiOwner {
 			if (_owner[i] == _token) return false;
 		}
 		_owner.push(_token);
-		/* return true if investor previously held no tokens for this issuer */
+		/*
+			return true if custodian did not previously hold any tokens
+			from this issuer for this investor 
+		*/
+		emit TokensReceived(_token, issuerContracts[_token], _id, _value);
 		return _owner.length == 1 ? true : false;
 	}
 
@@ -144,6 +164,9 @@ contract Custodian is MultiSigMultiOwner {
 			for (uint256 x = 0; x < _owner.length; x++) {
 				if (_owner[x] == _token) {
 					_owner[x] = _owner[_owner.length-1];
+					/*
+						underflow is impossible because for loop would not
+						start with an empty array. */
 					_owner.length -= 1;
 					if (_owner.length > 0) break;
 					_toRemove[i] = _id[i];
