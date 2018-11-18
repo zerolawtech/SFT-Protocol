@@ -26,7 +26,6 @@ contract SecurityToken is Modular {
 	mapping (address => uint256) balances;
 	mapping (address => mapping (address => uint256)) allowed;
 
-	event NewSecurityToken(address creator, address contractAddr, bytes32 id);
 	event Transfer(address indexed from, address indexed to, uint tokens);
 	event Approval(
 		address indexed tokenOwner,
@@ -61,7 +60,6 @@ contract SecurityToken is Modular {
 		symbol = _symbol;
 		balances[_issuer] = _totalSupply;
 		totalSupply = _totalSupply;
-		emit NewSecurityToken(msg.sender, address(this), ownerID);
 		emit Transfer(0, _issuer, _totalSupply);
 	}
 
