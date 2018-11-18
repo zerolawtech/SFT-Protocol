@@ -152,7 +152,7 @@ contract Custodian is MultiSigMultiOwner {
 				emit NewBeneficialOwner(_issuer, _token, _id[i]);
 			}
 		}
-		require(IssuingEntity(_issuer).setBeneficialOwners(_id, true));
+		require(IssuingEntity(_issuer).setBeneficialOwners(id, _id, true));
 		return true;
 	}
 
@@ -194,7 +194,7 @@ contract Custodian is MultiSigMultiOwner {
 				}
 			}
 		}
-		require(IssuingEntity(_issuer).setBeneficialOwners(_toRemove, false));
+		require(IssuingEntity(_issuer).setBeneficialOwners(id, _toRemove, false));
 	}
 
 }

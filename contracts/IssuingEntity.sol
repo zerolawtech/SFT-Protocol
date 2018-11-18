@@ -956,11 +956,14 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 
 	/**
 		@notice Add or remove an investor from a custodian's beneficial owners
+		@dev Only callable by a custodian or the issuer
+		@param _custID Custodian ID
 		@param _id Array of investor IDs
 		@param _add bool add or remove
 		@return bool success
 	 */
 	function setBeneficialOwners(
+		bytes32 _custID,
 		bytes32[] _id,
 		bool _add
 	)
@@ -969,8 +972,9 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	{
 		/* custodian re-entrancy guard */
 		require (!mutex);
-		bytes32 _custID = idMap[msg.sender].id;
-		require(custodians[_custID].addr == msg.sender);
+		if (custodians[_custID].addr != msg.sender) {
+			if (!_checkMultiSig()) return false;
+		}
 		for (uint256 i = 0; i < _id.length; i++) {
 			if (_id[i] == 0) continue;
 			if (_id[i] == ownerID || custodians[_id[i]].addr != 0) continue;
