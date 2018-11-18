@@ -20,11 +20,22 @@ contract Custodian is MultiSigMultiOwner {
 	/* token contract => issuer contract */
 	mapping (address => address) issuerContracts;
 
-	event TokensReceived(
-		address indexed token,
+	event ReceivedTokens(
 		address indexed issuer,
+		address indexed token,
 		bytes32 indexed investorID,
 		uint256 amount
+	);
+	event SentTokens(
+		address indexed issuer,
+		address indexed token,
+		address indexed recipient,
+		uint256 amount
+	);
+	event NewBeneficialOwner(
+		address indexed issuer,
+		address indexed token,
+		bytes32 indexed investorID
 	);
 
 
@@ -72,6 +83,7 @@ contract Custodian is MultiSigMultiOwner {
 			_id[0] = i.getID(_to);
 			_removeInvestors(_token, _id);
 		}
+		emit SentTokens(issuerContracts[_token], _token, _to, _value);
 		return true;
 	}
 
@@ -97,16 +109,18 @@ contract Custodian is MultiSigMultiOwner {
 		} else {
 			require(issuerContracts[_token] == msg.sender);
 		}
+		emit ReceivedTokens(msg.sender, _token, _id, _value);
 		address[] storage _owner = beneficialOwners[msg.sender][_id];
 		for (uint256 i = 0; i < _owner.length; i++) {
 			if (_owner[i] == _token) return false;
 		}
 		_owner.push(_token);
+		emit NewBeneficialOwner(msg.sender, _token, _id);
+	);
 		/*
 			return true if custodian did not previously hold any tokens
 			from this issuer for this investor 
 		*/
-		emit TokensReceived(_token, issuerContracts[_token], _id, _value);
 		return _owner.length == 1 ? true : false;
 	}
 
@@ -131,6 +145,7 @@ contract Custodian is MultiSigMultiOwner {
 			}
 			if (!_found) {
 				_owner.push(_token);
+				emit NewBeneficialOwner(_issuer, _token, _id[i]);
 			}
 		}
 		require(IssuingEntity(_issuer).setBeneficialOwners(_id, true));
@@ -168,6 +183,7 @@ contract Custodian is MultiSigMultiOwner {
 						underflow is impossible because for loop would not
 						start with an empty array. */
 					_owner.length -= 1;
+					emit RemovedBeneficialOwner(_issuer, _token, _id[i]);
 					if (_owner.length > 0) break;
 					_toRemove[i] = _id[i];
 					break;
