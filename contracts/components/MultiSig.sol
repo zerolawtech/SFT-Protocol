@@ -89,6 +89,7 @@ contract MultiSigMultiOwner {
 		ownerID = keccak256(abi.encodePacked(address(this)));
 		Authority storage a = authorityData[ownerID];
 		for (uint256 i = 0; i < _owners.length; i++) {
+			require(idMap[_owners[i]].id == 0);
 			idMap[_owners[i]].id = ownerID;
 		}
 		a.addressCount = uint32(_owners.length);
@@ -128,7 +129,7 @@ contract MultiSigMultiOwner {
 			It uses tx.origin to confirm that the original caller is an
 			approved authority.
 		@param _sig original msg.sig
-		@param _callHash keccack256 of original msg.callhash
+		@param _callHash keccack256 of original msg.calldata
 		@return bool - has call met multisig threshold?
 	 */
 	function checkMultiSigExternal(
@@ -219,7 +220,6 @@ contract MultiSigMultiOwner {
 
 	/**
 		@notice Add a new authority
-		@param _id Authority ID
 		@param _addr Array of addressses to register as authority
 		@param _signatures Array of bytes4 sigs this authority may call
 		@param _approvedUntil Epoch time that authority is approved until
@@ -227,7 +227,6 @@ contract MultiSigMultiOwner {
 		@return bool success
 	 */
 	function addAuthority(
-		bytes32 _id,
 		address[] _addr,
 		bytes4[] _signatures,
 		uint32 _approvedUntil,
@@ -237,11 +236,10 @@ contract MultiSigMultiOwner {
 		onlyOwner
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		require (_addr.length >= _threshold);
 		require (_addr.length > 0);
+		bytes32 _id = keccak256(abi.encodePacked(_addr));
 		Authority storage a = authorityData[_id];
 		require(a.addressCount == 0);
 		require(_id != 0);
@@ -276,9 +274,7 @@ contract MultiSigMultiOwner {
 		 onlyOwner
 		 returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		require(authorityData[_id].addressCount > 0);
 		authorityData[_id].approvedUntil = _approvedUntil;
 		emit ApprovedUntilSet(_id, _approvedUntil);
@@ -301,9 +297,7 @@ contract MultiSigMultiOwner {
 		onlyOwner
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		Authority storage a = authorityData[_id];
 		require(a.addressCount > 0);
 		for (uint256 i = 0; i < _signatures.length; i++) {
@@ -331,9 +325,7 @@ contract MultiSigMultiOwner {
 		onlySelfAuthority(_id)
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		Authority storage a = authorityData[idMap[msg.sender].id];
 		require(a.addressCount >= _threshold);
 		a.multiSigThreshold = _threshold;
@@ -355,9 +347,7 @@ contract MultiSigMultiOwner {
 		onlySelfAuthority(_id)
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		Authority storage a = authorityData[_id];
 		require(a.addressCount > 0);
 		for (uint256 i = 0; i < _addr.length; i++) {
@@ -384,9 +374,7 @@ contract MultiSigMultiOwner {
 		onlySelfAuthority(_id)
 		returns (bool)
 	{
-		if (!_checkMultiSig()) {
-			return false;
-		}
+		if (!_checkMultiSig()) return false;
 		Authority storage a = authorityData[_id];
 		for (uint256 i = 0; i < _addr.length; i++) {
 			require(idMap[_addr[i]].id == _id);
