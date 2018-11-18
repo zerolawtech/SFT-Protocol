@@ -126,3 +126,13 @@ def transfer6():
     check.equal(issuer.getInvestorCounts()[0][0],1,"Investor count is wrong")
     cust2.removeInvestors(token,[issuer.getID(a[3])])
     check.equal(issuer.getInvestorCounts()[0][0],0,"Investor count is wrong")
+
+def transfer7():
+    '''Custodian > custodian'''
+    token.transfer(a[2],1000)
+    token.transfer(cust1,500,{'from':a[2]})
+    cust1.transfer(token,cust2,500,True)
+    cust1.removeInvestors(token,[issuer.getID(a[2])])
+    check.equal(issuer.getInvestorCounts()[0][0],1,"Investor count is wrong")
+    token.transfer(a[1],500,{'from':a[2]})
+    check.equal(issuer.getInvestorCounts()[0][0],0,"Investor count is wrong")
