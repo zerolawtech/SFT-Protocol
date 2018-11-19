@@ -1,3 +1,0 @@
-# IssuingEntity
-
-TODO

@@ -1,3 +1,0 @@
-# SecurityToken
-
-TODO
