@@ -18,7 +18,7 @@ Unit testing and deployment of this project is performed with [brownie](https://
 
 ## Third-Party Integration
 
-See the [Third Party Integration](docs/third-party-integration.md) page for in-depth details.
+See the [Third Party Integration](https://sft-protocol.readthedocs.io/en/latest/third-party-integration.html) page for in-depth details.
 
 ## License
 
