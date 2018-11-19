@@ -26,19 +26,19 @@ countries of the issuer and investors.
 Components
 ----------
 
--  `SecurityToken <security-token.rst>`__
+-  `SecurityToken <contracts/SecurityToken.sol>`__
 -  ERC20 compliant tokens intended to represent a claim to ownership of
    securities
 -  Modules may be applied to each security token to add additional
    permissioning or functionality
--  `IssuingEntity <issuing-entity-rst>`__
+-  `IssuingEntity <contracts/IssuingEntity.sol>`__
 -  Central owner contract for tokens created by the same issuer
 -  Modules may be applied at this level that introduce permissioning /
    functionality to all associated security token contracts
--  `KYCRegistrar <kyc-registrar.rst>`__
+-  `KYCRegistrar <contracts/KYCRegistrar.sol>`__
 -  Whitelists that provide identity, region, and accreditation
    information of investors based on off-chain KYC/AML verification
--  `Custodian <custodian.rst>`__
+-  `Custodian <contracts/Custodian.sol>`__
 -  Contracts that represent an entity approved to hold tokens for
    multiple investors
 -  Base interface that allows for wide customisation depending on the
@@ -62,7 +62,7 @@ hash is associated to an address, and then using this ID call functions
 to query information about the investor's region and accreditation
 rating.
 
-*See the `KYCRegistrar <kyc-registrar.rst>`__ page for in-depth
+*See the `KYCRegistrar <docs/kyc-registrar.md>`__ page for in-depth
 details.*
 
 IssuingEntity
@@ -79,7 +79,7 @@ IssuingEntity contract. This contract has several key purposes:
    countries
 -  Holds a mapping of hashes for legal documents related to the issuer
 
-*See the `IssuingEntity <issuing-entity.rst>`__ page for in-depth
+*See the `IssuingEntity <docs/issuing-entity.md>`__ page for in-depth
 details.*
 
 SecurityToken
@@ -104,7 +104,7 @@ belonging to a single entity can call ``transferFrom`` and move tokens
 from any of their wallets. The issuer can use the same function to move
 any tokens between any address.
 
-*See the `SecurityToken <security-token.rst>`__ page for in-depth
+*See the `SecurityToken <docs/security-token.md>`__ page for in-depth
 details.*
 
 Custodian
@@ -122,17 +122,17 @@ the custodian. Even if the investor now has a balance of 0, they will be
 still be included in the issuer's investor count.
 
 Custodian contracts include a ``transfer`` function that optionally
-allows them to remove an investor from the beneficial owners when sending
+allows them to remove an investor fom the beneficial owners when sending
 them tokens. They may also call ``addInvestors`` or ``removeInvestors``
 in cases where beneficial ownership has changed from an action happening
 off-chain.
 
 Each custodian must be individually approved by an issuer before they
-can receive tokens. Because custodians may bypass on-chain compliance
+can receive tokens. Because custodias may bypass on-chain compliance
 checks, it is imperative this approval only be given to known, trusted
 entities.
 
-*See the `Custodian <custodian.rst>`__ page for in-depth details.*
+*See the `Custodian <docs/custodian.md>`__ page for in-depth details.*
 
 Modules
 -------
@@ -163,7 +163,7 @@ many different applications. Some examples include: crowdsales,
 country/time based token locks, right of first refusal enforcement,
 voting rights, dividend payments, tender offers, and bond redemption.
 
-*See the `Modules <modules.rst>`__ page for in-depth details.*
+*See the `Modules <docs/modules.md>`__ page for in-depth details.*
 
 Testing and Deployment
 ----------------------
@@ -174,7 +174,7 @@ Unit testing and deployment of this project is performed with
 Third-Party Integration
 -----------------------
 
-*See the `Third Party Integration <third-party-integration.rst>`__
+*See the `Third Party Integration <docs/third-party-integration.md>`__
 page for in-depth details.*
 
 License
@@ -182,21 +182,3 @@ License
 
 This project is licensed under the `Apache
 2.0 <https://www.apache.org/licenses/LICENSE-2.0.html>`__ license.
-
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-    security-token.rst
-    issuing-entity.rst
-    kyc-registrar.rst
-    custodian.rst
-    multisig.rst
-    modules.rst
-    multisig.rst
-    third-party-integration.rst
-    data-standards.rst
-
-
-    * :ref:`genindex`, :ref:`search`
