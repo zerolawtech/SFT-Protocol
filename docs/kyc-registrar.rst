@@ -1,8 +1,13 @@
-KYCRegistrar
-============
+.. _kyc-registrar:
 
-KYCRegistrar contracts ("registrars") are whitelisting contracts that
-hold information on the identity, region, and rating of investors.
+#############
+KYC Registrar
+#############
+KYCRegistrar contracts are registries that hold information on the identity, region, and rating of investors.
+
+Registries may be maintained by a single entity, or a federation of entities where each are approved to provide identification services for their specific jurisdiction. The contract owner can authorize other entities to add investors within specified countries.
+
+Contract authorities associate addresses to ID hashes that denotes the identity of the investor who owns the address. More than one address may be associated to the same hash. Anyone can call ``getID`` to see which hash is associated to an address, and then using this ID call functions to query information about the investor's region and accreditation rating.
 
 Registry contracts implement a variation of the standard
 `MultiSig <multisig.sol>`__ functionality used in other contracts within

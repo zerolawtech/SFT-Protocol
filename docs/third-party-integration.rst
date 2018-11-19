@@ -1,5 +1,8 @@
+.. _third-party-integration:
+
+#######################
 Third Party Integration
-=======================
+#######################
 
 KYC Registrar
 -------------
