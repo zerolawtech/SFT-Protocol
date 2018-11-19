@@ -24,7 +24,7 @@ SFT expands upon the ERC20 token standard. Tokens are transferred via the `trans
 
 ## KYCRegistrar
 
-KYCRegistrar contracts are registries that hold information on identity, region, and rating of investors.
+KYCRegistrar contracts are registries that hold information on the identity, region, and rating of investors.
 
 Registries may be maintained by a single entity, or a federation of entities where each are approved to provide identification services for their specific jurisdiction. The contract owner can authorize other entities to add investors within specified countries.
 
@@ -57,7 +57,7 @@ Transfers that move tokens between different addressses owned by the same entity
 
 ## Custodian
 
-Custodian contracts allow approved entities to hold tokens on behalf of investors.  Common examples of custodians include broker/dealers and secondary markets.
+Custodian contracts allow approved entities to hold tokens on behalf of investors. Common examples of custodians include broker/dealers and secondary markets.
 
 Custodians interact with an issuer's investor counts differently from regular investors. When an investor transfers a balance into the custodian it does not increase the overall investor count, instead the investor is now included in the list of beneficial owners represented by the custodian. Even if the investor now has a balance of 0, they will be still be included in the issuer's investor count.
 

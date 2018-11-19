@@ -1,12 +1,12 @@
 # MultiSig Implementation
 
-This document outlines the multi-signature, multi-owner functionality used in IssuingEntity and Custodian contracts. Multisig functionality in KYCRegistrar follows a similar implementation, you can read about the differences in the [registrar documentation](kyc-registrar.md#multisig).
+This document outlines the multi-signature, multi-owner functionality used in IssuingEntity and Custodian contracts. Multisig functionality in KYCRegistrar contracts use a similar implementation, you can read about the differences in the [registrar documentation](kyc-registrar.md).
 
-You may wish to also view the [MultiSig.sol](../contracts/components/MultiSig.sol) source code while reading this document.
+It may be useful to also view the [MultiSig.sol](../contracts/components/MultiSig.sol) source code while reading this document.
 
 ## Components
 
-Multisig contracts are based around the following key concepts:
+Multisig contracts are based around the following key components:
 
 * **Authorities** are a collection of one or more addresses permitted to call specific admin-level functionality. Each authority is assigned a unique ID.
 * The **owner** is the highest authority, capable of creating or restricted other authorities.
@@ -46,7 +46,7 @@ All multi-sig functions return a single boolean to indicate if the threshold was
 
 Calls that fail to meet the threshold will trigger an event `MultiSigCall` which includes the current call count and the threshold value. Once a caller meets the threshold the event `MultiSigCallApproved` will trigger, the call will execute, and the call count will be reset to zero.
 
-The number of calls to a function is recorded using a keccack256 of the call data. As such, it is required that each callingn address format their call data in exactly the same way.
+The number of calls to a function is recorded using a keccak hash of the call data. As such, it is required that each callingn address format their call data in exactly the same way.
 
 Repeating a multi-sig call from the same address before reaching the threshold will revert.
 
@@ -55,13 +55,13 @@ Repeating a multi-sig call from the same address before reaching the threshold w
 By calling `checkMultiSigExternal`, it is possible to implement multi-sig functionality in external contracts with the same set of authorities. The function arguments are:
 
 * `bytes4 _sig`: The original function signature being called
-* `bytes32 _callHash`: a keccack256 of the original calldata
+* `bytes32 _callHash`: a keccak hash of the original calldata
 
 To implement this in an external contract, you would use the following code:
 
     bytes32 _callHash = keccak256(msg.data);
     if (!MultiSigContract.checkMultiSigExternal(msg.sig, _callHash)) return false;
 
-`checkMultiSigExternal` relies on tx.origin to verify that the original caller is an approved authority. Permissions are chekced against the signature value in the same way as with an internal call. The recorded keccack of the call is formed by joining the address of the calling contract, the signature, and the supplied call hash. As such it is impossible to exploit the external call to advance the count on internal multisig events.
+`checkMultiSigExternal` relies on tx.origin to verify that the original caller is an approved authority. Permissions are chekced against the signature value in the same way as with an internal call. The recorded keccak hash of the call is formed by joining the address of the calling contract, the signature, and the supplied call hash. As such it is impossible to exploit the external call to advance the count on internal multisig events.
 
 An imporant security consideration: If an external contract includes a function with the same signature as a one inside the multi-sig contract, it will be impossible to set unique permissions for each function. Developers and auditors of external contracts should always keep this in mind.

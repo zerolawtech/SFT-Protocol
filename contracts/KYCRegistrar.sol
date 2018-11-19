@@ -58,14 +58,14 @@ contract KYCRegistrar {
 		bool restricted,
 		bytes32 indexed authority
 	);
-	event NewRegisteredAddress(
+	event RegisteredAddresses(
 		bytes32 indexed id,
-		address indexed addr,
+		address[] addr,
 		bytes32 indexed authority
 	);
-	event UnregisteredAddress(
+	event RestrictedAddresses(
 		bytes32 indexed id,
-		address indexed addr,
+		address[] addr,
 		bytes32 indexed authority
 	);
 
@@ -90,7 +90,40 @@ contract KYCRegistrar {
 	}
 
 	/**
-		@dev Verifyies authority permission based on country
+		@notice KYC registrar constructor
+		@param _owners Array of addresses for owning authority
+		@param _threshold multisig threshold for owning authority
+	 */ 
+	constructor (address[] _owners, uint8 _threshold) public {
+		require(_threshold <= _owners.length);
+		ownerID = keccak256(abi.encodePacked(address(this)));
+		Authority storage a = authorityData[ownerID];
+		a.multiSigThreshold = _threshold;
+		a.addressCount = uint32(_owners.length);
+		_addAddresses(ownerID, _owners);
+	}
+
+	/**
+		@notice Internal multisig functionality
+		@return bool - has call met multisig threshold?
+	 */
+	function _checkMultiSig() internal returns (bool) {
+		bytes32 _id = idMap[msg.sender].id;
+		Authority storage a = authorityData[_id];
+		bytes32 _callHash = keccak256(msg.data);
+		if (a.multiSigAuth[_callHash].length.add(1) >= a.multiSigThreshold) {
+			delete a.multiSigAuth[_callHash];
+			return true;
+		}
+		for (uint256 i = 0; i < a.multiSigAuth[_callHash].length; i++) {
+			require(a.multiSigAuth[_callHash][i] != msg.sender);
+		}
+		a.multiSigAuth[_callHash].push(msg.sender);
+		return false;
+	}
+
+	/**
+		@notice Verifyies authority permission based on country
 		@param _country Country relating to the authority's action
 	 */
 	function _authorityCheck(uint16 _country) internal view {
@@ -105,64 +138,25 @@ contract KYCRegistrar {
 	}
 
 	/**
-		@notice KYC registrar constructor
-		@param _owners Array of addresses for owning authority
-		@param _threshold multisig threshold for owning authority
-	 */ 
-	constructor (address[] _owners, uint8 _threshold) public {
-		require(_threshold <= _owners.length);
-		ownerID = keccak256(abi.encodePacked(address(this)));
-		Authority storage a = authorityData[ownerID];
-		a.multiSigThreshold = _threshold;
-		a.addressCount = uint8(_owners.length);
-		_addAddresses(ownerID, _owners);
-	}
-
-	/**
-		@notice Add investor to this registrar
-		@dev
-			Investor ID is a hash formed via a concatenation of PII
-			Country and region codes are based on the ISO 3166 standard
-			https://github.com/iamdefinitelyahuman/security-token/tree/master/docs/codes
-		@param _id Investor ID
-		@param _country Investor country code
-		@param _region Investor region code
-		@param _rating Investor rating (accreditted, qualified, etc)
-		@param _expires Registry expiration in epoch time
-		@param _addr Array of addresses to register to investor
-		@return bool success
-	*/
-	function addInvestor(
-		bytes32 _id,
-		uint16 _country,
-		bytes3 _region,
-		uint8 _rating,
-		uint40 _expires,
-		address[] _addr
-	 )
-		external
-		returns (bool)
-	{
-		_authorityCheck(_country);
-		require(_rating > 0);
-		require(_expires > now);
-		require(authorityData[_id].addressCount == 0);
-		if (!_checkMultiSig()) return false;
-		Investor storage i = investorData[_id];
-		i.region = _region;
-		i.rating = _rating;
-		i.country = _country;
-		i.expires = _expires;
-		emit NewInvestor(
-			_id, 
-			_country, 
-			_region,
-			_rating, 
-			_expires,
-			idMap[msg.sender].id
+		@notice Internal function to add new addresses
+		@param _id investor or authority ID
+		@param _addr array of addresses
+	 */
+	function _addAddresses(bytes32 _id, address[] _addr) internal {
+		require(
+			investorData[_id].country != 0 ||
+			authorityData[_id].addressCount > 0
 		);
-		_addAddresses(_id, _addr);
-		return true;
+		for (uint256 i = 0; i < _addr.length; i++) {
+			if (idMap[_addr[i]].id == _id && idMap[_addr[i]].restricted) {
+				idMap[_addr[i]].restricted = false;
+			} else if (idMap[_addr[i]].id == 0) {
+				idMap[_addr[i]].id = _id;
+			} else {
+				revert();
+			}
+		}
+		emit RegisteredAddresses(_id, _addr, idMap[msg.sender].id);
 	}
 
 	/**
@@ -173,6 +167,7 @@ contract KYCRegistrar {
 	 */
 	function addAuthority(
 		address[] _addr,
+		uint16[] _countries,
 		uint8 _threshold
 	)
 		external
@@ -187,8 +182,11 @@ contract KYCRegistrar {
 		if (!_checkMultiSig()) return false;
 		a.addressCount = uint8(_addr.length);
 		a.multiSigThreshold = _threshold;
-		emit NewAuthority(_id);
 		_addAddresses(_id, _addr);
+		for (uint256 i = 0; i < _countries.length; i++) {
+			a.countries[_countries[i]] = true;
+		}
+		emit NewAuthority(_id);
 		return true;
 	}
 
@@ -263,22 +261,53 @@ contract KYCRegistrar {
 	}
 
 	/**
-		@notice Internal multisig functionality
-		@return bool - has call met multisig threshold?
-	 */
-	function _checkMultiSig() internal returns (bool) {
-		bytes32 _id = idMap[msg.sender].id;
-		Authority storage a = authorityData[_id];
-		bytes32 _callHash = keccak256(msg.data);
-		if (a.multiSigAuth[_callHash].length.add(1) >= a.multiSigThreshold) {
-			delete a.multiSigAuth[_callHash];
-			return true;
-		}
-		for (uint256 i = 0; i < a.multiSigAuth[_callHash].length; i++) {
-			require(a.multiSigAuth[_callHash][i] != msg.sender);
-		}
-		a.multiSigAuth[_callHash].push(msg.sender);
-		return false;
+		@notice Add investor to this registrar
+		@dev
+			Investor ID is a hash formed via a concatenation of PII
+			Country and region codes are based on the ISO 3166 standard
+			https://github.com/iamdefinitelyahuman/security-token/tree/master/docs/codes
+		@param _id Investor ID
+		@param _country Investor country code
+		@param _region Investor region code
+		@param _rating Investor rating (accreditted, qualified, etc)
+		@param _expires Registry expiration in epoch time
+		@param _addr Array of addresses to register to investor
+		@return bool success
+	*/
+	function addInvestor(
+		bytes32 _id,
+		uint16 _country,
+		bytes3 _region,
+		uint8 _rating,
+		uint40 _expires,
+		address[] _addr
+	 )
+		external
+		returns (bool)
+	{
+		_authorityCheck(_country);
+		require(_rating > 0);
+		require(_expires > now);
+		require(authorityData[_id].addressCount == 0);
+		if (!_checkMultiSig()) return false;
+		investorData[_id] = Investor(
+			idMap[msg.sender].id,
+			_region,
+			_rating,
+			_country,
+			_expires,
+			false
+		);
+		emit NewInvestor(
+			_id, 
+			_country, 
+			_region,
+			_rating, 
+			_expires,
+			idMap[msg.sender].id
+		);
+		_addAddresses(_id, _addr);
+		return true;
 	}
 
 	/**
@@ -302,6 +331,7 @@ contract KYCRegistrar {
 	{
 		require(investorData[_id].country != 0);
 		if (!_checkMultiSig()) return false;
+		investorData[_id].authority = idMap[msg.sender].id;
 		investorData[_id].region = _region;
 		investorData[_id].rating = _rating;
 		investorData[_id].expires = _expires;
@@ -316,7 +346,7 @@ contract KYCRegistrar {
 	}
 
 	/** 
-		@notice Set or remove an entity's restricted status
+		@notice Set or remove an investor's restricted status
 		@dev This modifies restriciton on all addresses attached to the ID
 		@param _id Investor ID
 		@param _permitted Permission bool
@@ -337,8 +367,44 @@ contract KYCRegistrar {
 		return true;
 	}
 
+	/** 
+		@notice Modify an investor's registering authority
+		@dev
+			This function is used by the owner to reassign investors to an
+			unrestricted authority if their original authority was restricted.
+		@param _id Investor ID
+		@param _permitted Permission bool
+		@return bool success
+	 */
+	function setInvestorAuthority(
+		bytes32[] _id,
+		bytes32 _authID
+	)
+		external
+		onlyOwner
+		returns (bool)
+	{
+		require(authorityData[_authID].addressCount > 0);
+		if (!_checkMultiSig()) return false;
+		for (uint256 i = 0; i < _id.length; i++) {
+			require(investorData[_id[i]].country != 0);
+			Investor storage inv = investorData[_id[i]];
+			inv.authority = _authID;
+			emit UpdatedInvestor(
+				_id[i],
+				inv.region,
+				inv.rating,
+				inv.expires,
+				_authID
+			);
+		}
+	}
+
 	/**
 		@notice Register addresseses to an entity
+		@dev
+			Can be used to add new addresses or remove restrictions
+			from already associated addresses
 		@param _id Entity's ID
 		@param _addr Array of addresses
 		@return bool success
@@ -348,7 +414,6 @@ contract KYCRegistrar {
 		address[] _addr
 	)
 		external
-		onlyAuthority(_id)
 		returns (bool)
 	{
 		if (!_checkMultiSig()) return false;
@@ -357,6 +422,8 @@ contract KYCRegistrar {
 			/* Only the owner can register addresses for an authority. */
 			require(idMap[msg.sender].id == ownerID);
 			a.addressCount = a.addressCount.add(uint32(_addr.length));
+		} else {
+			_authorityCheck(investorData[_id].country);
 		}
 		_addAddresses(_id, _addr);
 		return true;
@@ -365,121 +432,40 @@ contract KYCRegistrar {
 	/**
 		@notice Flags addresses as restricted instead of removing them
 		@dev
-			Address associations can never be fully removed, only restricted.
-			If an address could be fully removed it would then be possible to
-			attach it to another ID, which could allow for non-compliant token
-			transfers. Restricting an address cannot be undone.
+			Address associations can only be restricted, never fully removed.
+			If an association were removed it would then be possible to attach
+			the address to another ID which could allow for non-compliant token
+			transfers.
+		@param _id Entity ID
 		@param _addr Array of addresses
 		@return bool success
 	 */
-	function unregisterAddresses(address[] _addr) external returns (bool) {
+	function restrictAddresses(bytes32 _id, address[] _addr) external returns (bool) {
+		
 		if (!_checkMultiSig()) return false;
+		if (authorityData[_id].addressCount > 0) {
+			/* Only the owner can unregister addresses for an authority. */
+			require(idMap[msg.sender].id == ownerID);
+			Authority storage a = authorityData[_id];
+			a.addressCount = a.addressCount.sub(uint32(_addr.length));
+			require(a.addressCount >= a.multiSigThreshold);
+			require(a.addressCount > 0);
+		} else {
+			_authorityCheck(investorData[_id].country);
+		}
 		for (uint256 i = 0; i < _addr.length; i++) {
-			require(idMap[_addr[i]].id != 0);
-			if (authorityData[idMap[_addr[i]].id].addressCount > 0) {
-				/* Only the owner can unregister addresses for an authority. */
-				require(idMap[msg.sender].id == ownerID);
-				Authority storage a = authorityData[idMap[_addr[i]].id];
-				require(a.addressCount > a.multiSigThreshold);
-				require(a.addressCount > 1);
-				a.addressCount = a.addressCount.sub(1);
-			} else {
-				_authorityCheck(investorData[idMap[_addr[i]].id].country);
-			}
+			require(idMap[_addr[i]].id == _id);
+			require(!idMap[_addr[i]].restricted);
 			idMap[_addr[i]].restricted = true;
-			emit UnregisteredAddress(
-				idMap[_addr[i]].id,
-				_addr[i],
-				idMap[msg.sender].id
-			);
 		}
+		emit RestrictedAddresses(_id, _addr, idMap[msg.sender].id);
 		return true;
-	}
-
-	/**
-		@notice Internal function to add new addresses
-		@param _id investor or authority ID
-		@param _addr array of addresses
-	 */
-	function _addAddresses(bytes32 _id, address[] _addr) internal {
-		require(
-			investorData[_id].country != 0 ||
-			authorityData[_id].addressCount > 0
-		);
-		for (uint256 i = 0; i < _addr.length; i++) {
-			require(idMap[_addr[i]].id == 0);
-			idMap[_addr[i]].id = _id;
-			emit NewRegisteredAddress(
-				_id,
-				_addr[i],
-				idMap[msg.sender].id
-			);
-		}
-	}
-
-	/**
-		@notice Generate a unique investor ID
-		@dev https://github.com/iamdefinitelyahuman/security-token/tree/master/docs/codes/investor-id.md
-		@param _idString ID string to generate hash from
-		@return bytes32 investor ID hash
-	 */
-	function generateID(string _idString) external pure returns (bytes32) {
-		return keccak256(abi.encodePacked(_idString));
-	}
-
-	/**
-		@notice Fetch investor ID from an address
-		@param _addr Address to query
-		@return bytes32 investor ID
-	 */
-	function getID(address _addr) external view returns (bytes32) {
-		return idMap[_addr].id;
-	}
-
-	/**
-		@notice Fetch investor rating from an ID
-		@param _id Investor ID
-		@return uint8 rating code
-	 */
-	function getRating(bytes32 _id) external view returns (uint8) {
-		require (investorData[_id].country != 0);
-		return investorData[_id].rating;
-	}
-
-	/**
-		@notice Fetch investor region from an ID
-		@param _id Investor ID
-		@return bytes3 region code
-	 */
-	function getRegion(bytes32 _id) external view returns (bytes3) {
-		require (investorData[_id].country != 0);
-		return investorData[_id].region;
-	}
-
-	/**
-		@notice Fetch investor country from an ID
-		@param _id Investor ID
-		@return string
-	 */
-	function getCountry(bytes32 _id) external view returns (uint16) {
-		require (investorData[_id].country != 0);
-		return investorData[_id].country;
-	}
-
-	/**
-		@notice Fetch investor KYC expiration from an ID
-		@param _id Investor ID
-		@return uint40 expiration epoch time
-	 */
-	function getExpires(bytes32 _id) external view returns (uint40) {
-		require (investorData[_id].country != 0);
-		return investorData[_id].expires;
 	}
 
 	/**
 		@notice Fetch investor information using an address
 		@dev
-			This call is increases gas efficiency around token transfers
+			This call increases gas efficiency around token transfers
 			by minimizing the amount of calls to the registrar
 		@param _addr Address to query
 		@return bytes32 investor ID
@@ -543,6 +529,55 @@ contract KYCRegistrar {
 	}
 	
 	/**
+		@notice Fetch investor ID from an address
+		@param _addr Address to query
+		@return bytes32 investor ID
+	 */
+	function getID(address _addr) external view returns (bytes32) {
+		return idMap[_addr].id;
+	}
+
+	/**
+		@notice Fetch investor rating from an ID
+		@param _id Investor ID
+		@return uint8 rating code
+	 */
+	function getRating(bytes32 _id) external view returns (uint8) {
+		require (investorData[_id].country != 0);
+		return investorData[_id].rating;
+	}
+
+	/**
+		@notice Fetch investor region from an ID
+		@param _id Investor ID
+		@return bytes3 region code
+	 */
+	function getRegion(bytes32 _id) external view returns (bytes3) {
+		require (investorData[_id].country != 0);
+		return investorData[_id].region;
+	}
+
+	/**
+		@notice Fetch investor country from an ID
+		@param _id Investor ID
+		@return string
+	 */
+	function getCountry(bytes32 _id) external view returns (uint16) {
+		require (investorData[_id].country != 0);
+		return investorData[_id].country;
+	}
+
+	/**
+		@notice Fetch investor KYC expiration from an ID
+		@param _id Investor ID
+		@return uint40 expiration epoch time
+	 */
+	function getExpires(bytes32 _id) external view returns (uint40) {
+		require (investorData[_id].country != 0);
+		return investorData[_id].expires;
+	}
+	
+	/**
 		@notice Check if an an investor and address are permitted
 		@param _addr Address to query
 		@return bool permission
@@ -554,6 +589,16 @@ contract KYCRegistrar {
 		if (i.expires < now) return false;
 		if (authorityData[i.authority].restricted) return false;
 		return true;
+	}
+
+	/**
+		@notice Generate a unique investor ID
+		@dev https://github.com/iamdefinitelyahuman/security-token/tree/master/docs/codes/investor-id.md
+		@param _idString ID string to generate hash from
+		@return bytes32 investor ID hash
+	 */
+	function generateID(string _idString) external pure returns (bytes32) {
+		return keccak256(abi.encodePacked(_idString));
 	}
 
 }
