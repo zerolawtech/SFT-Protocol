@@ -10,12 +10,12 @@ Registries may be maintained by a single entity, or a federation of entities whe
 Contract authorities associate addresses to ID hashes that denotes the identity of the investor who owns the address. More than one address may be associated to the same hash. Anyone can call ``getID`` to see which hash is associated to an address, and then using this ID call functions to query information about the investor's region and accreditation rating.
 
 Registry contracts implement a variation of the standard
-`MultiSig <multisig.sol>`__ functionality used in other contracts within
+:ref:`multisig` functionality used in other contracts within
 the protocol. This document assumes familiarity with the standard
 multi-sig implementation, and will only highlight the differences.
 
 It may be useful to also view the
-`KYCRegistrar.sol <../contracts/components/KYCRegistrar.sol>`__ source
+`KYCRegistrar.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/KYCRegistrar.sol>`__ source
 code while reading this document.
 
 Components
@@ -60,8 +60,7 @@ After verifying an investor's KYC/AML, an authority may call
 ``addInvestor`` to add the investor to the registrar.
 
 Each investor is identified in the registrar via a unique ID hash. Their
-country, region, and investor rating are also recorded on-chain. See the
-`Data Standards <data-standards.md>`__ documentation for detailed
+country, region, and investor rating are also recorded on-chain. See the :ref:`data-standards` documentation for detailed
 information on how this information is generated and formatted.
 
 Investors are also assigned an expiration time for their rating. This is
@@ -77,7 +76,7 @@ Issuer Integration
 ------------------
 
 Issuers must associate their
-`IssuingEntity <../contracts/IssuingEntity.sol>`__ contract with one or
+`IssuingEntity <https://github.com/SFT-Protocol/security-token/tree/master/contracts/IssuingEntity.sol>`__ contract with one or
 more registrars in order to alow investors to hold their tokens. This is
 accomplished by calling ``IssuingEntity.setRegistrar``.
 
@@ -90,7 +89,7 @@ IssuingEntity contracts primarily rely on ``getInvestor`` and
 ``getInvestors`` to retrieve investor information in the most gas
 efficient manner possible.
 
-See the `Third Party Integration <third-party-integration.md>`__ page
+See the :ref:`third-party-integration` page
 for detailed information on how to integrate contracts within the
 protocol.
 
@@ -118,7 +117,7 @@ restrict the address of the lost key and add one or more new addresses
 that the investor controls. The investor may retrieve tokens from the
 lost address either with assistance from the issuer or by using the
 ``SecurityToken.transferFrom`` function. See the
-`SecurityToken <security-token.md>`__ documentation for more information
+:ref:`security-token` documentation for more information
 on this process.
 
 Compromised Authority

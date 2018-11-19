@@ -1,13 +1,16 @@
+.. _multisig:
+
+#######################
 MultiSig Implementation
-=======================
+#######################
 
 This document outlines the multi-signature, multi-owner functionality
 used in IssuingEntity and Custodian contracts. Multisig functionality in
 KYCRegistrar contracts use a similar implementation, you can read about
-the differences in the `registrar documentation <kyc-registrar.md>`__.
+the differences in the :ref:`kyc-registrar`.
 
 It may be useful to also view the
-`MultiSig.sol <../contracts/components/MultiSig.sol>`__ source code
+`MultiSig.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/components/MultiSig.sol>`__ source code
 while reading this document.
 
 Components
@@ -76,7 +79,7 @@ authority, this association may never be fully removed**. Once an
 address is removed, that address is now forever unavailable within the
 protocol. This is necessary to prevent an address from later being
 associated with a different entity, which could allow for a variety of
-non-compliant actions. See the `KYCRegistrar <kyc-registrar.md>`__
+non-compliant actions. See the :ref:`kyc-registrar`
 documentation for more information on this concept.
 
 Calling MultiSig Functions

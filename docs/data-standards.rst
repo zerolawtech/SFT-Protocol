@@ -1,5 +1,8 @@
+.. _data-standards:
+
+#######################
 Investor Data Standards
-=======================
+#######################
 
 The following generation and format standards should be followed across
 the SFT protocol to ensure interoperability between network
@@ -15,12 +18,7 @@ For legal entities, the hash is generated from their `Global Legal
 Entity Identifier
 (LEI) <https://www.gleif.org/en/about-lei/iso-17442-the-lei-code-structure>`__:
 
-    The International Organization for Standardization (ISO) 17442
-    standard defines a set of attributes or legal entity reference data
-    that are the most essential elements of identification. The Legal
-    Entity Identifier (LEI) code itself is neutral, with no embedded
-    intelligence or country codes that could create unnecessary
-    complexity for users.
+*The International Organization for Standardization (ISO) 1744standard defines a set of attributes or legal entity reference data that are the most essential elements of identification. The Legal Entity Identifier (LEI) code itself is neutral, with no embedded intelligence or country codes that could create unnecessary complexity for users.*
 
 For natural persons, a hash is produced from a concatenation of the
 following:
@@ -43,8 +41,8 @@ Based on the `ISO-3166-1
 numeric <https://en.wikipedia.org/wiki/ISO_3166-1_numeric>`__ standard.
 Country codes are stored as a uint16 and follow the standard exactly.
 
-*A CSV of country and region codes is available
-`here <country-and-region-codes.csv>`__.*
+A CSV of country and region codes is available
+`here <https://github.com/SFT-Protocol/security-token/tree/master/docs/country-and-region-codes.csv>`__.
 
 Region Codes
 ------------
@@ -71,5 +69,5 @@ A quick example to generate region codes using python:
 -  Original code: US-AL
 -  Resulting bytes32: 0x414c00
 
-*A CSV of country and region codes is available
-`here <country-and-region-codes.csv>`__.*
+A CSV of country and region codes is available
+`here <https://github.com/SFT-Protocol/security-token/tree/master/docs/country-and-region-codes.csv>`__.

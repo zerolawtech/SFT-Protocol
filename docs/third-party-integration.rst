@@ -8,7 +8,7 @@ KYC Registrar
 -------------
 
 To setup an investor registry, deploy
-`KYCRegistrar.sol <../contracts/KYCRegistrar.sol>`__. Owner addresses
+`KYCRegistrar.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/KYCRegistrar.sol>`__. Owner addresses
 will then be able to add investors using ``addInvestor`` or approve
 other whitelisting authorities with ``addAuthority``. See the
 `KYCRegistrar <./kyc-registrar.md>`__ page for a detailed explanation of
@@ -20,11 +20,11 @@ Issuing Tokens
 Issuing tokens and being able to transfer them requires the following
 steps:
 
-1. Deploy `IssuingEntity.sol <../contracts/IssuingEntity.sol>`__.
+1. Deploy `IssuingEntity.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/IssuingEntity.sol>`__.
 2. Call ``IssuingEntity.setRegistrar`` to add one or more investor
    registries. You may maintain your own registry and/or use those
    belonging to trusted third parties.
-3. Deploy `SecurityToken.sol <../contracts/SecurityToken.sol>`__. Enter
+3. Deploy `SecurityToken.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/SecurityToken.sol>`__. Enter
    the address of the issuer contract from step 1 in the constructor.
    The total supply of tokens will be initially creditted to the issuer.
 4. Call ``IssuingEntity.addToken`` to attach the token to the issuer.
