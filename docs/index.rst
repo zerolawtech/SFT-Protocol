@@ -29,7 +29,7 @@ Components
 4. :ref:`custodian`
 
     a. Contracts that represent an entity approved to hold tokens for multiple investors
-    b. Base interface that allows for wide customisation depending on the needs of the owner
+    b. Base interface that allows for wide customization depending on the needs of the owner
 
 5. :ref:`modules`
     a. Wide range of functionality that modules can hook into allows for many different applications

@@ -10,4 +10,4 @@ Security Token
    -  Issuer imposed limits on investor counts: global, country specific, and accreditation rating specific
    -  Optional permissions added via modules applied at the SecurityToken and IssuingEntity level
 
-   Transfers that move tokens between different addressses owned by the same entity (as identified in the KYC registrar) are not as heavily restricted because there is no change of ownership. Any address belonging to a single entity can call ``transferFrom`` and move tokens from any of their wallets. The issuer can use the same function to move any tokens between any address.
+   Transfers that move tokens between different addresses owned by the same entity (as identified in the KYC registrar) are not as heavily restricted because there is no change of ownership. Any address belonging to a single entity can call ``transferFrom`` and move tokens from any of their wallets. The issuer can use the same function to move any tokens between any address.

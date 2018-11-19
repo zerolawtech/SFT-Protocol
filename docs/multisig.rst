@@ -30,11 +30,11 @@ Multisig contracts are based around the following key components:
 Initial Setup
 -------------
 
-Contracts that implement multisig require 2 arguments in the
+Contracts that implement multi-sig require 2 arguments in the
 constructor:
 
 -  ``address[] _owners``: One or more addresses to associate with the
-   contract owner. The address deploying the contract is not implicitely
+   contract owner. The address deploying the contract is not implicitly
    included within the owner list.
 -  ``uint32 _threshold``: The number of calls required for the owner to
    perform a multi-sig action.
@@ -59,7 +59,7 @@ After deployment the owner may designate authorities using the
 -  ``uint32 _threshold``: The number of calls required by this authority
    to perform a multi-sig action.
 
-Authorities differ from the owner in that they must be explicitely
+Authorities differ from the owner in that they must be explicitly
 approved to call functions within the contract. These permissions may be
 modified by the owner via a call to ``setAuthoritySignatures``. You can
 check if an authority is permitted to call a specific function with the
@@ -101,7 +101,7 @@ value. Once a caller meets the threshold the event
 call count will be reset to zero.
 
 The number of calls to a function is recorded using a keccak hash of the
-call data. As such, it is required that each callingn address format
+call data. As such, it is required that each calling address format
 their call data in exactly the same way.
 
 Repeating a multi-sig call from the same address before reaching the
@@ -126,14 +126,14 @@ code:
     if (!MultiSigContract.checkMultiSigExternal(msg.sig, _callHash)) return false;
 
 ``checkMultiSigExternal`` relies on tx.origin to verify that the
-original caller is an approved authority. Permissions are chekced
+original caller is an approved authority. Permissions are checked
 against the signature value in the same way as with an internal call.
 The recorded keccak hash of the call is formed by joining the address of
 the calling contract, the signature, and the supplied call hash. As such
 it is impossible to exploit the external call to advance the count on
 internal multisig events.
 
-An imporant security consideration: If an external contract includes a
+An important security consideration: If an external contract includes a
 function with the same signature as a one inside the multi-sig contract,
 it will be impossible to set unique permissions for each function.
 Developers and auditors of external contracts should always keep this in

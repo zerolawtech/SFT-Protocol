@@ -108,7 +108,7 @@ resubmit their KYC/AML to an authority within the new country, receive a
 new ID hash attached to a new address, and transfer their tokens from
 their old address to the new one. Their old ID may then be restricted.
 
-Lost Invesor Private Key
+Lost Investor Private Key
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 An investor who has lost a private key should contact the registry

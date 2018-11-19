@@ -11,7 +11,7 @@ To setup an investor registry, deploy
 `KYCRegistrar.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/KYCRegistrar.sol>`__. Owner addresses
 will then be able to add investors using ``addInvestor`` or approve
 other whitelisting authorities with ``addAuthority``. See the
-`KYCRegistrar <./kyc-registrar.md>`__ page for a detailed explanation of
+:ref:`kyc-registrar` page for a detailed explanation of
 how to use this contract.
 
 Issuing Tokens
@@ -43,8 +43,8 @@ IssuingEntity contract.
 
 You can also introduce further limitations on investor counts or attach
 optional modules to add more bespoke functionality. See the
-`IssuingEntity <./issuing-entity.md>`__ and
-`SecurityToken <./security-token.md>`__ pages for detailed explanations
+:ref:`issuing-entity` and
+:ref:`security-token` pages for detailed explanations
 of how to use these contracts.
 
 Transferring Tokens
@@ -68,9 +68,9 @@ contract.
 
 Restrictions imposed on investor limits, approved countries and minimum
 ratings are only checked when receiving tokens. Unless an address has
-been explicitely blocked, it will always be able to send an existing
+been explicitly blocked, it will always be able to send an existing
 balance. For example, an investor may purchase tokens that are only
-require being accreditted, and then later their accreditation status
+require being accredited, and then later their accreditation status
 expires. The investor may still transfer the tokens they already have,
 but may not receive any more tokens.
 
@@ -81,7 +81,7 @@ change of ownership. An investor with multiple addresses may call
 first using the ``approve`` method. The issuer can also use
 ``transferFrom`` to move any investor's tokens, without prior approval.
 
-See the `SecurityToken <./security-token.md>`__ page for a detailed
+See the :ref:`security-token` page for a detailed
 explanation of how to use this contract.
 
 Custodians
@@ -93,8 +93,8 @@ deploy it and then attach it to an IssuingEntity with
 into the custodian contract just like they would any other address.
 
 The ``Custodian.transfer`` function allows you to send tokens out of the
-contract. You may modify the list of benficial owners using
+contract. You may modify the list of beneficial owners using
 ``addInvestors`` and ``removeInvestors``.
 
-See the `Custodian <./custodian.md>`__ page for a detailed explanation
+See the :ref:`custodian` page for a detailed explanation
 of how to use this contract.
