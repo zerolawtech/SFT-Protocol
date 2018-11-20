@@ -3,6 +3,7 @@
 #############
 KYC Registrar
 #############
+
 KYCRegistrar contracts are registries that hold information on the identity, region, and rating of investors.
 
 Registries may be maintained by a single entity, or a federation of entities where each are approved to provide identification services for their specific jurisdiction. The contract owner can authorize other entities to add investors within specified countries.
@@ -15,7 +16,7 @@ the protocol. This document assumes familiarity with the standard
 multi-sig implementation, and will only highlight the differences.
 
 It may be useful to also view the
-`KYCRegistrar.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/KYCRegistrar.sol>`__ source
+`KYCRegistrar.sol<https://github.com/SFT-Protocol/security-token/tree/master/contracts/KYCRegistrar.sol>`__ source
 code while reading this document.
 
 Components

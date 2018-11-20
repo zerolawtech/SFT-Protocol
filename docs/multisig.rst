@@ -4,10 +4,10 @@
 MultiSig Implementation
 #######################
 
-This document outlines the multi-signature, multi-owner functionality
+This section outlines the multi-signature, multi-owner functionality
 used in IssuingEntity and Custodian contracts. Multisig functionality in
 KYCRegistrar contracts use a similar implementation, you can read about
-the differences in the :ref:`kyc-registrar`.
+the differences in the :ref:`kyc-registrar` section.
 
 It may be useful to also view the
 `MultiSig.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/components/MultiSig.sol>`__ source code
@@ -30,7 +30,7 @@ Multisig contracts are based around the following key components:
 Deployment
 ==========
 
-Contracts that implement multi-sig require 2 arguments in the
+Deploying a contract that implements multi-sig requires 2 arguments in the
 constructor:
 
 -  ``address[] _owners``: One or more addresses to associate with the
@@ -38,6 +38,8 @@ constructor:
    included within the owner list.
 -  ``uint32 _threshold``: The number of calls required for the owner to
    perform a multi-sig action.
+
+The owner is assigned an ID by generated as a keccak of the contract address. This is available from the public getter ``ownerID``.
 
 The owner has the highest level of control over the contract. Associated
 addresses may always call any admin-level functionality.
