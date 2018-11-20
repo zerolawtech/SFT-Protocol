@@ -12,9 +12,6 @@ import "./components/MultiSig.sol";
  */
 contract Custodian is MultiSigMultiOwner {
 
-
-	bytes32 public id;
-
 	/* issuer contract => investor ID => token addresses */
 	mapping (address => mapping(bytes32 => address[])) beneficialOwners;
 	/* token contract => issuer contract */
@@ -56,7 +53,7 @@ contract Custodian is MultiSigMultiOwner {
 		MultiSigMultiOwner(_owners, _threshold)
 		public
 	{
-		id = keccak256(abi.encodePacked(address(this)));
+
 	}
 
 	/**
@@ -152,7 +149,7 @@ contract Custodian is MultiSigMultiOwner {
 				emit NewBeneficialOwner(_issuer, _token, _id[i]);
 			}
 		}
-		require(IssuingEntity(_issuer).setBeneficialOwners(id, _id, true));
+		require(IssuingEntity(_issuer).setBeneficialOwners(ownerID, _id, true));
 		return true;
 	}
 
@@ -194,7 +191,7 @@ contract Custodian is MultiSigMultiOwner {
 				}
 			}
 		}
-		require(IssuingEntity(_issuer).setBeneficialOwners(id, _toRemove, false));
+		require(IssuingEntity(_issuer).setBeneficialOwners(ownerID, _toRemove, false));
 	}
 
 }

@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 
 interface ICustodian {
 
-	function id() external view returns (bytes32);
+	function ownerID() external view returns (bytes32);
 	function addresses(address) external view returns (bool);
 
 	function transfer(

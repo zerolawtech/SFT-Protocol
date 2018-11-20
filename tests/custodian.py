@@ -106,7 +106,7 @@ def transfer6():
     cust1.transfer(token,a[2],1000,True)
     token.transfer(issuer,1000,{'from':a[2]})
     check.equal(issuer.getInvestorCounts()[0][0],1,"Investor count is wrong")
-    issuer.setBeneficialOwners(cust1.id(), [issuer.getID(a[2])], False)
+    issuer.setBeneficialOwners(cust1.ownerID(), [issuer.getID(a[2])], False)
     #cust1.removeInvestors(token,[issuer.getID(a[2])])
     check.equal(issuer.getInvestorCounts()[0][0],0,"Investor count is wrong")
     cust2.addInvestors(token,[issuer.getID(a[2]),issuer.getID(a[3])])

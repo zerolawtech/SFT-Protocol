@@ -807,7 +807,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	 */
 	function addCustodian(address _addr) external returns (bool) {
 		if (!_checkMultiSig()) return false;
-		bytes32 _id = ICustodian(_addr).id();
+		bytes32 _id = ICustodian(_addr).ownerID();
 		idMap[_addr].id = _id;
 		custodians[_id].addr = _addr;
 		emit CustodianAdded(_addr);
