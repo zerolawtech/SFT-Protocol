@@ -14,7 +14,7 @@ contract KYCRegistrar {
 		bytes32 id;
 		bool restricted;
 	}
-	
+
 	struct Investor {
 		bytes32 authority;
 		bytes3 region;
@@ -85,7 +85,7 @@ contract KYCRegistrar {
 		@param _id ID of investor that the authority is modifying
 	 */
 	modifier onlyAuthority(bytes32 _id) {
-		_authorityCheck(investorData[_id].country);	
+		_authorityCheck(investorData[_id].country);
 		_;
 	}
 
@@ -93,7 +93,7 @@ contract KYCRegistrar {
 		@notice KYC registrar constructor
 		@param _owners Array of addresses for owning authority
 		@param _threshold multisig threshold for owning authority
-	 */ 
+	 */
 	constructor (address[] _owners, uint8 _threshold) public {
 		require(_threshold <= _owners.length);
 		ownerID = keccak256(abi.encodePacked(address(this)));
@@ -236,7 +236,7 @@ contract KYCRegistrar {
 		return true;
 	}
 
-	/** 
+	/**
 		@notice Set or remove an authority's restricted status
 		@dev
 			Restricting an authority will also restrict every investor that
@@ -252,7 +252,7 @@ contract KYCRegistrar {
 		external
 		onlyOwner
 		returns (bool)
-	{	
+	{
 		require(authorityData[_id].addressCount > 0);
 		if (!_checkMultiSig()) return false;
 		authorityData[_id].restricted = !_permitted;
@@ -299,10 +299,10 @@ contract KYCRegistrar {
 			false
 		);
 		emit NewInvestor(
-			_id, 
-			_country, 
+			_id,
+			_country,
 			_region,
-			_rating, 
+			_rating,
 			_expires,
 			idMap[msg.sender].id
 		);
@@ -345,7 +345,7 @@ contract KYCRegistrar {
 		return true;
 	}
 
-	/** 
+	/**
 		@notice Set or remove an investor's restricted status
 		@dev This modifies restriciton on all addresses attached to the ID
 		@param _id Investor ID
@@ -359,7 +359,7 @@ contract KYCRegistrar {
 		external
 		onlyAuthority(_id)
 		returns (bool)
-	{	
+	{
 		require(investorData[_id].country != 0);
 		if (!_checkMultiSig()) return false;
 		investorData[_id].restricted = !_permitted;
@@ -367,13 +367,13 @@ contract KYCRegistrar {
 		return true;
 	}
 
-	/** 
+	/**
 		@notice Modify an investor's registering authority
 		@dev
 			This function is used by the owner to reassign investors to an
 			unrestricted authority if their original authority was restricted.
 		@param _id Investor ID
-		@param _permitted Permission bool
+		@param _authID Authority ID
 		@return bool success
 	 */
 	function setInvestorAuthority(
@@ -441,7 +441,7 @@ contract KYCRegistrar {
 		@return bool success
 	 */
 	function restrictAddresses(bytes32 _id, address[] _addr) external returns (bool) {
-		
+
 		if (!_checkMultiSig()) return false;
 		if (authorityData[_id].addressCount > 0) {
 			/* Only the owner can unregister addresses for an authority. */
@@ -527,7 +527,7 @@ contract KYCRegistrar {
 			uint16[2]([f.country, t.country])
 		);
 	}
-	
+
 	/**
 		@notice Fetch investor ID from an address
 		@param _addr Address to query
@@ -576,7 +576,7 @@ contract KYCRegistrar {
 		require (investorData[_id].country != 0);
 		return investorData[_id].expires;
 	}
-	
+
 	/**
 		@notice Check if an an investor and address are permitted
 		@param _addr Address to query
