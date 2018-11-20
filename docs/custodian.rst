@@ -8,7 +8,7 @@ Custodian contracts allow approved entities to hold tokens on behalf of multiple
 
 Custodian contracts include the standard SFT protocol :ref:`multisig`.
 
-It may be useful to also view the `Custodian.sol<https://github.com/SFT-Protocol/security-token/tree/master/contracts/Custodian.sol>`__ source code while reading this document.
+It may be useful to also view the `Custodian.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/Custodian.sol>`__ source code while reading this document.
 
 Components
 ==========

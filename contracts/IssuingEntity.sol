@@ -342,7 +342,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 	{	
 		require(tokens[_token].set);
 		/* If issuer is not the authority, check the sender is not restricted */
-		if (_id[0] != ownerID) {
+		if (_authID != ownerID) {
 			require(!locked, "Transfers locked: Issuer");
 			require(!tokens[_token].restricted, "Transfers locked: Token");
 			require(!accounts[_id[0]].restricted, "Sender restricted: Issuer");

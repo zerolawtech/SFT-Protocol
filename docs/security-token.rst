@@ -8,7 +8,7 @@ Each SecurityToken contract represents a single, fungible class of securities fr
 
 Token contracts are associated to an :ref:`issuing-entity` and also implement :ref:`modules` functionality. Permissioning around transfers is achieved through these components. See the respective documents for more detailed information.
 
-It may be useful to also view the `SecurityToken.sol<https://github.com/SFT-Protocol/security-token/tree/master/contracts/SecurityToken.sol>`__ source code while reading this document.
+It may be useful to also view the `SecurityToken.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/SecurityToken.sol>`__ source code while reading this document.
 
 Components
 ==========
@@ -57,12 +57,10 @@ Additionally there are two more functions relating to the total supply:
 * ``treasurySupply``: Returns the number of tokens held by the issuer.
 * ``circulatingSupply``: Returns the total supply, less the amount held by the issuer.
 
-Tokens held by the issuer will always be at the address of the IssuingEntity contract.  A call to ``SecurityToken.treasurySupply()`` will return the same result as ``SecurityToken.balanceOf(SecurityToken.issuer())``.
-
 Token Transfers
 ---------------
 
-Token transfers happen using the standard ``transfer`` and ``transferFrom`` functions.  Before a transfer can succeed it must pass a series of checks:
+Token transfers occur via the standard ``transfer`` and ``transferFrom`` functions.  For a transfer to succeed it must first pass a series of checks:
 
 * The tokens cannot be locked.
 * The sender must have a sufficient balance.
@@ -71,23 +69,27 @@ Token transfers happen using the standard ``transfer`` and ``transferFrom`` func
 * The transfer must not result in any issuer-imposed investor limits being exceeded.
 * The transfer must be permitted by all active modules.
 
-The ``checkTransfer`` function can be used to check if a transfer is permitted without attempting it.
+The ``checkTransfer`` function is used to check if a transfer will succeed without attempting it.
 
-Transfers between two addresses that are associated to the same ID do not undergo the same level of restrictions, as there is no actual change of ownership occuring.
+Transfers between two addresses that are associated to the same ID do not undergo the same level of restrictions, as there is no change of ownership occuring.
 
 All transfers will log the ``Transfer`` event. Transfers where there is a change of ownership will also log``IssuingEntity.TransferOwnership``.
 
-
-Approve and TransferFrom
-------------------------
-
 Users may call ``approve`` and ``transferFrom`` in the same way that they would a normal ERC20.  Approval may be given to any address, but a transfer can only be initiated by an address that is known by one of the associated registrars. The same transfer checks also apply for both the sender and receiver, as if the transfer was done directly.
 
-Under certain conditions ``transferFrom`` may be called without prior approval:
+If the caller and sender addresses are both associated to the same ID, ``transferFrom`` may be called without giving prior approval. In this way an investor can easily recover tokens when a private key is lost or compromised.
 
-* If the caller and the spender are both addresses associated to the same 
+Issuer Balances and Token Transfers
+-----------------------------------
 
+Tokens held by the issuer will always be at the address of the IssuingEntity contract.  A call to ``SecurityToken.treasurySupply()`` will return the same result as ``SecurityToken.balanceOf(SecurityToken.issuer())``.
 
+Because of this, the following non-standard behaviours exist:
+
+* Any address associated with the issuer can transfer tokens from the IssuingEntity contract using ``transfer``.
+* Attempting to send tokens to any address associated with the issuer will result in the tokens being sent to the IssuingEntity contract.
+
+The issuer may call ``transferFrom`` to move tokens between any addresses without prior approval. Transfers of this type must still pass the normal checks, with the exception that the sending address may be restricted.  In this way the issuer can aid investors with token recovery in the event of a lost or compromised private key, or force a transfer in the event of a court order or sanction.
 
 Integration
 ===========

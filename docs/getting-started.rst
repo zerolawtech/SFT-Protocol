@@ -1,11 +1,13 @@
-.. _third-party-integration:
+.. _getting-started:
 
-#######################
-Third Party Integration
-#######################
+###############
+Getting Started
+###############
+
+This is a quick explanation of the minimum steps required to deploy and use each contract of the protocol.
 
 KYC Registrar
--------------
+=============
 
 To setup an investor registry, deploy
 `KYCRegistrar.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/KYCRegistrar.sol>`__. Owner addresses
@@ -15,7 +17,7 @@ other whitelisting authorities with ``addAuthority``. See the
 how to use this contract.
 
 Issuing Tokens
---------------
+==============
 
 Issuing tokens and being able to transfer them requires the following
 steps:
@@ -48,7 +50,7 @@ optional modules to add more bespoke functionality. See the
 of how to use these contracts.
 
 Transferring Tokens
--------------------
+===================
 
 SecurityToken.sol is based on the `ERC20 Token
 Standard <https://theethereum.wiki/w/index.php/ERC20_Token_Standard>`__.
@@ -56,11 +58,9 @@ Token transfers may be performed in the same ways as any token using
 this standard. However, in order to send or receive tokens you must
 also:
 
--  Be approved in one of the KYC registries associated to the token
-   issuer
--  Meet the approved country and rating requirements as set by the
-   issuer
--  Pass any additional checks set by the issuer
+* Be approved in one of the KYC registries associated to the token issuer
+* Meet the approved country and rating requirements as set by the issuer
+* Pass any additional checks set by the issuer
 
 You can check if a transfer will succeed without performing a
 transaction by calling the ``checkTransfer`` function of the token
@@ -85,7 +85,7 @@ See the :ref:`security-token` page for a detailed
 explanation of how to use this contract.
 
 Custodians
-----------
+==========
 
 To set up a custodian contract to send and receive tokens, you must
 deploy it and then attach it to an IssuingEntity with
