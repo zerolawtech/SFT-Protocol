@@ -56,12 +56,11 @@ Contents
 
 .. toctree::    :maxdepth: 2
 
-    security-token.rst
-    issuing-entity.rst
     kyc-registrar.rst
+    issuing-entity.rst
+    security-token.rst
     custodian.rst
     multisig.rst
     modules.rst
-    multisig.rst
     third-party-integration.rst
     data-standards.rst

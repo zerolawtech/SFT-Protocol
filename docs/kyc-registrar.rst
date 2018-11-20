@@ -37,11 +37,26 @@ Registrars are based on the following key components:
 -  **Issuers** are entities that have created security tokens, who rely
    on registrars for information about their token holders.
 
-Authorities
------------
+Deployment
+----------
 
-The initial owner addresses and threshold are set during deployment. The
-owner ID is generated as a keccak of the contract address.
+Deploying KYCRegistrar requires 2 arguments in the constructor:
+
+-  ``address[] _owners``: One or more addresses to associate with the
+   contract owner. The address deploying the contract is not implicitly
+   included within the owner list.
+-  ``uint32 _threshold``: The number of calls required for the owner to
+   perform a multi-sig action.
+
+The ID of the owner is generated as a keccak of the contract address and available from the public getter ``ownerID``.
+
+Functionality
+-------------
+
+Registrar functionality involves adding, modifying, or restricting permissions of authorities or investors.
+
+Authorities
+~~~~~~~~~~~
 
 The owner may designate authorities using the ``addAuthority`` function.
 Authorities do not require explicit permission to call any contract
@@ -54,7 +69,7 @@ Once an authority has been designated they may use ``registerAddresses``
 or ``restrictAddresses`` to modify their associated addresses.
 
 Investors
----------
+~~~~~~~~~
 
 After verifying an investor's KYC/AML, an authority may call
 ``addInvestor`` to add the investor to the registrar.
@@ -72,8 +87,8 @@ Similar to authorities, addresses associated with investors are assigned
 and restricted via calls to ``registerAddresses`` or
 ``restrictAddresses``.
 
-Issuer Integration
-------------------
+Integration
+-----------
 
 Issuers must associate their
 `IssuingEntity <https://github.com/SFT-Protocol/security-token/tree/master/contracts/IssuingEntity.sol>`__ contract with one or
@@ -96,9 +111,6 @@ protocol.
 Security Considerations
 -----------------------
 
-Here we outline several unfavorable situations that may occur, and
-guidelines for how to handle them.
-
 Investor Changes Country
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -109,7 +121,7 @@ new ID hash attached to a new address, and transfer their tokens from
 their old address to the new one. Their old ID may then be restricted.
 
 Lost Investor Private Key
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An investor who has lost a private key should contact the registry
 authority and verify their identity off-chain. The authority can then

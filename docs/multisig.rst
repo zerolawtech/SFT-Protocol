@@ -27,7 +27,7 @@ Multisig contracts are based around the following key components:
    of required calls to a function before it executes. This value cannot
    be greater the number of addresses associated with the authority.
 
-Initial Setup
+Deployment
 -------------
 
 Contracts that implement multi-sig require 2 arguments in the

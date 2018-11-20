@@ -18,7 +18,7 @@ For legal entities, the hash is generated from their `Global Legal
 Entity Identifier
 (LEI) <https://www.gleif.org/en/about-lei/iso-17442-the-lei-code-structure>`__:
 
-*The International Organization for Standardization (ISO) 1744standard defines a set of attributes or legal entity reference data that are the most essential elements of identification. The Legal Entity Identifier (LEI) code itself is neutral, with no embedded intelligence or country codes that could create unnecessary complexity for users.*
+*The International Organization for Standardization (ISO) 1744 standard defines a set of attributes or legal entity reference data that are the most essential elements of identification. The Legal Entity Identifier (LEI) code itself is neutral, with no embedded intelligence or country codes that could create unnecessary complexity for users.*
 
 For natural persons, a hash is produced from a concatenation of the
 following:
@@ -48,9 +48,7 @@ Region Codes
 ------------
 
 Based on the `ISO 3166-2 <https://en.wikipedia.org/wiki/ISO_3166-2>`__
-standard.
-
-Region codes are stored as a bytes3 and are generated in the following
+standard. Region codes are stored as a bytes3 and are generated in the following
 way:
 
 1. Convert each character of the ISO 3166-2 code to it's hexadecimal
