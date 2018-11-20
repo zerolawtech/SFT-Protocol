@@ -33,6 +33,35 @@ After the contract is deployed it must be associated with the issuer via
 Functionality
 =============
 
+SecurityToken expands upon and is fully compatible with the `ERC20 Token
+Standard <https://theethereum.wiki/w/index.php/ERC20_Token_Standard>`__.
+
+Total Supply
+------------
+
+There are three view functions relating to the total supply:
+
+-  ``totalSupply``: Returns the total supply of tokens.
+-  ``treasurySupply``: Returns the number of tokens held by the issuer.
+-  ``circulatingSupply``: Returns the total supply, less the amount held by the issuer.
+
+
+Balances and Allowances
+--------------------------------
+
+The standard ERC20 functions are available:
+
+-  ``balanceOf``: Returns the token balance for a given address.
+-  ``allowance``: Returns the number of tokens that a given address is approved to transfer for another address.
+
+
+Token Transfers
+-----------------
+
+
+
+
+
 Integration
 ===========
 
