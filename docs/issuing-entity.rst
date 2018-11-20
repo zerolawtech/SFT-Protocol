@@ -39,6 +39,8 @@ The ID of the owner is generated as a keccak of the contract address and availab
 Functionality
 =============
 
+TODO
+
 Integration
 ===========
 
