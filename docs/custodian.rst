@@ -12,3 +12,18 @@ Custodian contracts include a ``transfer`` function that optionally allows them 
 
 They may also call ``addInvestors`` or ``removeInvestors``   in cases where beneficial ownership has changed from an action happening off-chain.
 Each custodian must be individually approved by an issuer before they can receive tokens. Because custodians may bypass on-chain compliance checks, it is imperative this approval only be given to known, trusted entities.
+
+Components
+==========
+
+Deployment
+==========
+
+Functionality
+=============
+
+Integration
+===========
+
+Security Considerations
+=======================

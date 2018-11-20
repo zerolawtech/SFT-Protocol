@@ -3,10 +3,34 @@
 ##############
 Issuing Entity
 ##############
+IssuingEntity contracts hold shared compliance logic for all security tokens created by a single issuer.
 
-Before an issuer can create a security token they must deploy an IssuingEntity contract. This contract has several key purposes:
+Each issuer contract implements :ref:`multisig` and :ref:`modules` functionality. See the respective documents for detailed information on these components.
 
--  Holds a whitelist of associated KYC registries that investor data can be pulled from
--  Tracks investor counts and total balances across all security tokens deployed by the issuer
--  Enforces permissions relating to investor limits and authorized countries
--  Holds a mapping of hashes for legal documents related to the issuer
+It may be useful to also view the `IsssuingEntity.sol<https://github.com/SFT-Protocol/security-token/tree/master/contracts/IssuingEntity.sol>`__ source code while reading this document.
+
+Components
+==========
+
+IssuingEntity contracts are based on the following key components:
+
+-  **Issuers** are entities that create tokenized securities using the
+   protocol. Each issuer owns one IssuingEntity contract and one or more
+   SecurityToken contracts.
+-  **Security tokens**, or just tokens, are ERC-20 compliant tokens created by
+   an issuer.
+-  **Registrars** are whitelist contracts that associate ethereum addresses
+   to specific investors.
+
+Deployment
+==========
+
+Functionality
+=============
+
+Integration
+===========
+
+Security Considerations
+=======================
+

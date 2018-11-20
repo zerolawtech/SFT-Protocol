@@ -19,7 +19,7 @@ It may be useful to also view the
 code while reading this document.
 
 Components
-----------
+==========
 
 Registrars are based on the following key components:
 
@@ -38,7 +38,7 @@ Registrars are based on the following key components:
    on registrars for information about their token holders.
 
 Deployment
-----------
+==========
 
 Deploying KYCRegistrar requires 2 arguments in the constructor:
 
@@ -51,12 +51,12 @@ Deploying KYCRegistrar requires 2 arguments in the constructor:
 The ID of the owner is generated as a keccak of the contract address and available from the public getter ``ownerID``.
 
 Functionality
--------------
+=============
 
 Registrar functionality involves adding, modifying, or restricting permissions of authorities or investors.
 
 Authorities
-~~~~~~~~~~~
+-----------
 
 The owner may designate authorities using the ``addAuthority`` function.
 Authorities do not require explicit permission to call any contract
@@ -69,7 +69,7 @@ Once an authority has been designated they may use ``registerAddresses``
 or ``restrictAddresses`` to modify their associated addresses.
 
 Investors
-~~~~~~~~~
+---------
 
 After verifying an investor's KYC/AML, an authority may call
 ``addInvestor`` to add the investor to the registrar.
@@ -88,7 +88,7 @@ and restricted via calls to ``registerAddresses`` or
 ``restrictAddresses``.
 
 Integration
------------
+===========
 
 Issuers must associate their
 `IssuingEntity <https://github.com/SFT-Protocol/security-token/tree/master/contracts/IssuingEntity.sol>`__ contract with one or
@@ -109,10 +109,10 @@ for detailed information on how to integrate contracts within the
 protocol.
 
 Security Considerations
------------------------
+=======================
 
 Investor Changes Country
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 An investor who changes their legal country of residence will
 necessarily alter their ID hash. In this case the investor should
@@ -121,7 +121,7 @@ new ID hash attached to a new address, and transfer their tokens from
 their old address to the new one. Their old ID may then be restricted.
 
 Lost Investor Private Key
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 An investor who has lost a private key should contact the registry
 authority and verify their identity off-chain. The authority can then
@@ -133,7 +133,7 @@ lost address either with assistance from the issuer or by using the
 on this process.
 
 Compromised Authority
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 If an authority has been compromised or found to be acting in bad faith,
 the owner may apply a broad restriction upon them using
@@ -147,7 +147,7 @@ upon them may be removed by calling either ``updateInvestor`` or
 ``setInvestorAuthority``.
 
 Compromised Owner
-~~~~~~~~~~~~~~~~~
+-----------------
 
 If the owner is compromised or found to be acting in bad faith, issuers
 can remove the registrar by calling ``IssuingEntity.setRegistrar``. This

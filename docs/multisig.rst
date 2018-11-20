@@ -14,7 +14,7 @@ It may be useful to also view the
 while reading this document.
 
 Components
-----------
+==========
 
 Multisig contracts are based around the following key components:
 
@@ -28,7 +28,7 @@ Multisig contracts are based around the following key components:
    be greater the number of addresses associated with the authority.
 
 Deployment
--------------
+==========
 
 Contracts that implement multi-sig require 2 arguments in the
 constructor:
@@ -41,6 +41,9 @@ constructor:
 
 The owner has the highest level of control over the contract. Associated
 addresses may always call any admin-level functionality.
+
+Functionality
+=============
 
 Designating Authorities
 -----------------------
@@ -107,8 +110,8 @@ their call data in exactly the same way.
 Repeating a multi-sig call from the same address before reaching the
 threshold will revert.
 
-Implementing MultiSig in External Contracts
--------------------------------------------
+Integration
+===========
 
 By calling ``checkMultiSigExternal``, it is possible to implement
 multi-sig functionality in external contracts with the same set of
