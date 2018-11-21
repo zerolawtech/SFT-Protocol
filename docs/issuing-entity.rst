@@ -39,6 +39,28 @@ The ID of the owner is generated as a keccak of the contract address and availab
 Functionality
 =============
 
+Although this is by far the largest contract in the protocol, the majority of the functionality is accessed indirectly through other contracts.
+
+
+Investor Restrictions
+---------------------
+
+Issuers may limit the number of investors based on the following:
+
+* Country
+* Investor Rating
+
+The issuer must explicitely approve each country from which investors are allowed to purchase tokens. This is done by calling ``setCountry`` or ``setCountries``, depending on 
+
+
+Document Hashes
+---------------
+
+Tokens, Custodians, Registrars
+------------------------------
+
+
+
 TODO
 
 Integration

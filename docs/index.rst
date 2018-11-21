@@ -61,3 +61,4 @@ Contents
     modules.rst
     security-considerations.rst
     data-standards.rst
+    glossary.rst

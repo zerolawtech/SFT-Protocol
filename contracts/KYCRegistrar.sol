@@ -265,7 +265,7 @@ contract KYCRegistrar {
 		@dev
 			Investor ID is a hash formed via a concatenation of PII
 			Country and region codes are based on the ISO 3166 standard
-			https://github.com/iamdefinitelyahuman/security-token/tree/master/docs/codes
+			https://sft-protocol.readthedocs.io/en/latest/data-standards.html
 		@param _id Investor ID
 		@param _country Investor country code
 		@param _region Investor region code
@@ -593,7 +593,7 @@ contract KYCRegistrar {
 
 	/**
 		@notice Generate a unique investor ID
-		@dev https://github.com/iamdefinitelyahuman/security-token/tree/master/docs/codes/investor-id.md
+		@dev https://sft-protocol.readthedocs.io/en/latest/data-standards.html
 		@param _idString ID string to generate hash from
 		@return bytes32 investor ID hash
 	 */

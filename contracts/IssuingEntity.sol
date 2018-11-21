@@ -801,7 +801,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		@dev
 			Custodians are entities such as broker or exchanges that are approved
 			to hold tokens for 1 or more beneficial owners.
-			https://github.com/iamdefinitelyahuman/security-token/blob/master/docs/custodian.md
+			https://sft-protocol.readthedocs.io/en/latest/custodian.html
 		@param _addr address of custodian contract
 		@return bool success
 	 */
@@ -897,7 +897,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 			Modules have a lot of permission and flexibility in what they
 			can do. Only attach a module that has been properly auditted and
 			where you understand exactly what it is doing.
-			https://github.com/iamdefinitelyahuman/security-token/blob/master/docs/modules.md
+			https://sft-protocol.readthedocs.io/en/latest/modules.html
 		@param _target Address of the contract where the module is attached
 		@param _module Address of the module contract
 		@return bool success
