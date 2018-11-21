@@ -94,7 +94,7 @@ contract KYCRegistrar {
 		@param _owners Array of addresses for owning authority
 		@param _threshold multisig threshold for owning authority
 	 */
-	constructor (address[] _owners, uint8 _threshold) public {
+	constructor (address[] _owners, uint32 _threshold) public {
 		require(_threshold <= _owners.length);
 		ownerID = keccak256(abi.encodePacked(address(this)));
 		Authority storage a = authorityData[ownerID];
@@ -141,8 +141,15 @@ contract KYCRegistrar {
 		@notice Internal function to add new addresses
 		@param _id investor or authority ID
 		@param _addr array of addresses
+		@return number of new addresses (not previous restricted)
 	 */
-	function _addAddresses(bytes32 _id, address[] _addr) internal {
+	function _addAddresses(
+		bytes32 _id,
+		address[] _addr
+	)
+		internal
+		returns (uint32 _count) 
+	{
 		require(
 			investorData[_id].country != 0 ||
 			authorityData[_id].addressCount > 0
@@ -152,23 +159,26 @@ contract KYCRegistrar {
 				idMap[_addr[i]].restricted = false;
 			} else if (idMap[_addr[i]].id == 0) {
 				idMap[_addr[i]].id = _id;
+				_count = _count.add(1);
 			} else {
 				revert();
 			}
 		}
 		emit RegisteredAddresses(_id, _addr, idMap[msg.sender].id);
+		return _count;
 	}
 
 	/**
 		@notice Add a new authority to this registrar
 		@param _addr Array of addressses to register as authority
+		@param _countries Array of country codes the authority is approved for
 		@param _threshold Minimum number of calls to a method for multisigk
 		@return bool success
 	 */
 	function addAuthority(
 		address[] _addr,
 		uint16[] _countries,
-		uint8 _threshold
+		uint32 _threshold
 	)
 		external
 		onlyOwner
@@ -178,11 +188,10 @@ contract KYCRegistrar {
 		require(investorData[_id].country == 0);
 		Authority storage a = authorityData[_id];
 		require(authorityData[_id].addressCount == 0);
-		require(_addr.length >= _threshold);
 		if (!_checkMultiSig()) return false;
-		a.addressCount = uint8(_addr.length);
+		a.addressCount = _addAddresses(_id, _addr);
+		require(a.addressCount >= _threshold);
 		a.multiSigThreshold = _threshold;
-		_addAddresses(_id, _addr);
 		for (uint256 i = 0; i < _countries.length; i++) {
 			a.countries[_countries[i]] = true;
 		}
@@ -198,7 +207,7 @@ contract KYCRegistrar {
 	 */
 	function setAuthorityThreshold(
 		bytes32 _id,
-		uint8 _threshold
+		uint32 _threshold
 	)
 		external
 		onlyOwner
@@ -421,11 +430,11 @@ contract KYCRegistrar {
 		if (a.addressCount > 0) {
 			/* Only the owner can register addresses for an authority. */
 			require(idMap[msg.sender].id == ownerID);
-			a.addressCount = a.addressCount.add(uint32(_addr.length));
+			a.addressCount = a.addressCount.add(_addAddresses(_id, _addr));
 		} else {
 			_authorityCheck(investorData[_id].country);
+			_addAddresses(_id, _addr);
 		}
-		_addAddresses(_id, _addr);
 		return true;
 	}
 
