@@ -32,9 +32,6 @@ Functionality
 Integration
 ===========
 
-Security Considerations
-=======================
-
 Old text
 ========
 

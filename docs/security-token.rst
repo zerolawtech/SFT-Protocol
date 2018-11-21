@@ -84,7 +84,7 @@ Issuer Balances and Token Transfers
 
 Tokens held by the issuer will always be at the address of the IssuingEntity contract.  A call to ``SecurityToken.treasurySupply()`` will return the same result as ``SecurityToken.balanceOf(SecurityToken.issuer())``.
 
-Because of this, the following non-standard behaviours exist:
+As a result of this, the following non-standard behaviours exist:
 
 * Any address associated with the issuer can transfer tokens from the IssuingEntity contract using ``transfer``.
 * Attempting to send tokens to any address associated with the issuer will result in the tokens being sent to the IssuingEntity contract.
@@ -94,5 +94,6 @@ The issuer may call ``transferFrom`` to move tokens between any addresses withou
 Integration
 ===========
 
-Security Considerations
-=======================
+After the contract is deployed it must be associated with the issuer via
+``IssuingEntity.addToken``. Token transfers are not possible until this is done.
+

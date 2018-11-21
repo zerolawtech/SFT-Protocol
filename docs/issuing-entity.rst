@@ -43,7 +43,3 @@ TODO
 
 Integration
 ===========
-
-Security Considerations
-=======================
-
