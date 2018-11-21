@@ -41,27 +41,55 @@ Functionality
 
 Although this is by far the largest contract in the protocol, the majority of the functionality is accessed indirectly through other contracts.
 
+Adding and Restricting Tokens
+-----------------------------
+An issuer must associate :ref:`security-token` contracts with their IssuingEntity contract before transfers are possible.  This is done via ``addToken``.
 
-Investor Restrictions
+Tokens may be individually locked or unlocked with ``setTokenRestriction``.  All tokens can be locked or unlocked in a single call with ``setGlobalRestriction``.
+
+Identifying Investors
 ---------------------
 
-Issuers may limit the number of investors based on the following:
+Investors must be identified via a :ref:`kyc-registrar` before they can send or receive tokens. To allow this, an issuer must associate one or more registries with ``setRegistrar``.
 
-* Country
-* Investor Rating
+The following view functions can be used to obtain investor information:
 
-The issuer must explicitely approve each country from which investors are allowed to purchase tokens. This is done by calling ``setCountry`` or ``setCountries``, depending on 
+* ``getID``: Returns the investor ID associated with an address.
+* ``getInvestorRegistrar``: Returns the registrar address that an investor ID is associated with.
 
+It is also possible to remove a registrar using ``setRegistrar``. Once removed, any investors that were identified through that registrar will be unable to send or receive tokens until they are identified through another associated registrar. Transfer attempts will revert with the message "Registrar restricted".
+
+Investors may be restricted by the issuer with ``setInvestorRestriction``. This can only be used to block an investor that would otherwise be able to hold the tokens, it cannot be used to whitelist investors who are not listed in an associated registrar.
+
+Setting Investor Limits
+-----------------------
+
+Investor limits can be set globally, by country, by investor rating, or by a combination. Some possible examples:
+
+* Maximum of 2000 total investors, of which 150 may be from the USA, of which 35 of may be unaccreditted.
+* No limit on total investors, maximum of 150 per country in the European Union, all investors must be accreditted, USA investors are blocked
+
+All investor limits are stored in uint32[8] arrays. The first value in each array is the total limit, the remaining value correspond to the limits for each investor rating.  A value of 0 means there is no limit.
+
+Global limits are set or modified using ``setInvestorLimits``. Current investor counts and limits can be viewed by calling ``getInvestorCounts``.
+
+The issuer must explicitely approve each country from which investors are allowed to purchase tokens. This is done with one of two functions, depending on which additional limitations are to be set:
+
+* ``setCountry``: Approves one country per call and can set specific limits for each investor rating. Can also be used to restrict a previously approved country.
+* ``setCountries``: Approves many countries at once but can only set a total investor limit per country.
+
+It is possible for an issuer to set a limit that is lower than the current investor count. When a limit is met or exceeded existing investors are still able to receive tokens, but new investors are blocked.
+
+Custodians
+----------
 
 Document Hashes
 ---------------
 
-Tokens, Custodians, Registrars
-------------------------------
+An issuer can record the bytes32 hash of a legal document using ``setDocumentHash``. The hash is stored in a (string => bytes32) mapping and can be queried later using ``getDocumentHash``.  Once a hash is recorded, the issuer can then distrubute the document electronically and investors can verify the authenticity by generating the hash themselves and comparing it to the blockchain record.
 
-
-
-TODO
+Modules
+-------
 
 Integration
 ===========

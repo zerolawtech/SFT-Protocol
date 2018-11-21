@@ -475,7 +475,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		bytes32 _id = idMap[_addr].id;
 		if (_id == 0) {
 			for (uint256 i = 1; i < registrars.length; i++) {
-				if (registrars[i].addr > 0) {
+				if (!registrars[i].restricted) {
 					_id = KYCRegistrar(registrars[i].addr).getID(_addr);
 					if (_id != 0) {
 						return (_id, uint8(i));
@@ -487,14 +487,20 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		if (custodians[_id].addr != 0) {
 			return (_id, 0);
 		}
-		if (registrars[accounts[_id].regKey].addr == 0)  {
+		if (
+			accounts[_id].regKey == 0 ||
+			registrars[accounts[_id].regKey].restricted
+		) {
 			for (i = 1; i < registrars.length; i++) {
 				if (
-					registrars[i].addr != 0 && 
+					!registrars[i].restricted && 
 					_id == KYCRegistrar(registrars[i].addr).getID(_addr)
 				) {
 					return (_id, uint8(i));
 				}
+			}
+			if (registrars[accounts[_id].regKey].restricted) {
+				revert("Registrar restricted");
 			}
 			revert("Address not registered");
 		}
@@ -792,7 +798,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		@param _id Investor ID
 		@return registrar address
 	 */
-	function getRegistrar(bytes32 _id) external view returns (address) {
+	function getInvestorRegistrar(bytes32 _id) external view returns (address) {
 		return registrars[accounts[_id].regKey].addr;
 	}
 
