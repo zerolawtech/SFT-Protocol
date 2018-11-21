@@ -4,7 +4,7 @@
 Glossary
 #######################
 
-* **Authority**: A collection of one or more addresses permitted to call specific admin-level functionality in a multisig contract. Each authority is assigned a unique ID.
+* **Authority**: A collection of one or more addresses permitted to call specific admin-level functionality in a multisig contract.
 * **Entity**: A participant in the SFT protocol. Entity may refer to natural persons or corporations.
 * **Issuer**: An entity that creates and sells security tokens.
 * **IssuingEntity**: A contract owned by an issuer that holds shared compliance logic for all security tokens created by that issuer.
@@ -13,4 +13,4 @@ Glossary
 * **Rating**: A number assigned to each investor that corresponds to their accreditation status.
 * **Region**: Refers to the state, province, or other principal subdivision that an investor resides in.
 * **Threshold**: The number of required calls from an authority to an admin-level function before it executes. This value cannot be greater the number of addresses associated with the authority.
-* **Registrars**: A whitelist contract that associates ethereum addresses to specific investors.
+* **Registrar**: A whitelist contract that associates ethereum addresses to specific investors.

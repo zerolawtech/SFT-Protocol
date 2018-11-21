@@ -14,13 +14,13 @@ Components
 
 1. :ref:`security-token`
 
-    a. ERC20 compliant tokens intended to represent a claim to ownership of securities
-    b. Modules may be applied to each security token to add additional permissioning or functionality
+    * ERC20 compliant tokens intended to represent a claim to ownership of securities
+    * Modules may be applied to each security token to add additional permissioning or functionality
 
 2. :ref:`issuing-entity`
 
-    a. Central owner contract for tokens created by the same issuer
-    b. Modules may be applied at this level that introduce permissioning / functionality to all associated security token contracts
+    * Central owner contract for tokens created by the same issuer
+    * Modules may be applied at this level that introduce permissioning / functionality to all associated security token contracts
 
 3. :ref:`kyc-registrar`
 
@@ -28,13 +28,18 @@ Components
 
 4. :ref:`custodian`
 
-    a. Contracts that represent an entity approved to hold tokens for multiple investors
-    b. Base interface that allows for wide customization depending on the needs of the owner
+    * Contracts that represent an entity approved to hold tokens for multiple investors
+    * Base interface that allows for wide customization depending on the needs of the owner
 
 5. :ref:`modules`
 
-    a. Wide range of functionality that modules can hook into allows for many different applications
+    * Optional additional contracts that can attach into IssuingEntity and SecurityToken
+    * Wide range of functionality is possible depending on where the modules hook into
 
+Source Code
+===========
+
+The SFT Protocol is open source. You can view the code on `github <https://github.com/SFT-Protocol/security-token>`__.
 
 Testing and Deployment
 ======================
