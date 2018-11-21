@@ -4,14 +4,12 @@
 Security Token
 ##############
 
-Each SecurityToken contract represents a single, fungible class of securities from an issuer. The contracts conforms to the ERC20 standard, with an additional ``checkTransfer`` function available to verify if a transfer will succeed.
+Each SecurityToken contract represents a single, fungible class of securities from an issuer. The contracts conforms to the `ERC20 Token
+Standard <https://theethereum.wiki/w/index.php/ERC20_Token_Standard>`__., with an additional ``checkTransfer`` function available to verify if a transfer will succeed.
 
 Token contracts are associated to an :ref:`issuing-entity` and also implement :ref:`modules` functionality. Permissioning around transfers is achieved through these components. See the respective documents for more detailed information.
 
 It may be useful to also view the `SecurityToken.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/SecurityToken.sol>`__ source code while reading this document.
-
-Components
-==========
 
 Deployment
 ==========
@@ -23,20 +21,14 @@ Deployment
     * ``_symbol``: The ticker symbol for the token.
     * ``_totalSupply``: The initial total supply of tokens to create.
 
-The total supply of tokens is assigned to the issuer at the time of creation,
-with a ``Transfer`` event logged to show them as moving from 0x00.
+    The total supply of tokens is assigned to the issuer at the time of creation,
+    with a ``Transfer`` event logged to show them as moving from 0x00.
 
-After the contract is deployed it must be associated with the issuer via
-``IssuingEntity.addToken``. Token transfers are not possible until this is done.
-
-Methods
-=======
-
-SecurityToken expands upon and is fully compatible with the `ERC20 Token
-Standard <https://theethereum.wiki/w/index.php/ERC20_Token_Standard>`__.
+    After the contract is deployed it must be associated with the issuer via
+    ``IssuingEntity.addToken``. Token transfers are not possible until this is done.
 
 Constants
----------
+=========
 
 The following public variables cannot be changed after creation, and can be considered constants.
 
@@ -58,10 +50,10 @@ The following public variables cannot be changed after creation, and can be cons
 
 .. method:: SecurityToken.issuer
 
-    The address of the associated IssuingEntity contract
+    The address of the associated IssuingEntity contract.
 
 Total Supply and Tokens Balances
---------------------------------
+================================
 
 .. method:: SecurityToken.totalSupply
 
@@ -81,7 +73,7 @@ Total Supply and Tokens Balances
 
 
 Token Transfers
----------------
+===============
 
 .. method:: SecurityToken.checkTransfer(address _from, address _to, uint256 _value)
 
@@ -117,11 +109,11 @@ Token Transfers
         If the caller and sender addresses are both associated to the same ID, ``transferFrom`` may be called without giving prior approval. In this way an investor can easily recover tokens when a private key is lost or compromised.
 
 Issuer Balances and Token Transfers
------------------------------------
+===================================
 
 Tokens held by the issuer will always be at the address of the IssuingEntity contract.  ``SecurityToken.treasurySupply()`` will return the same result as ``SecurityToken.balanceOf(SecurityToken.issuer())``.
 
-As a result of this, the following non-standard behaviours exist:
+As a result, the following non-standard behaviours exist:
 
 * Any address associated with the issuer can transfer tokens from the IssuingEntity contract using ``transfer``.
 * Attempting to send tokens to any address associated with the issuer will result in the tokens being sent to the IssuingEntity contract.
