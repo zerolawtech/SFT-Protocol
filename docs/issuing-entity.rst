@@ -26,6 +26,8 @@ IssuingEntity contracts are based on the following key components:
 Deployment
 ==========
 
+.. method:: IssuingEntity.constructor(address[] _owners, uint32 _threshold,address[] _owners, uint32 _threshold)
+
 Deploying an IssuingEntity contract requires 2 arguments in the constructor:
 
 -  ``address[] _owners``: One or more addresses to associate with the
@@ -82,6 +84,11 @@ It is possible for an issuer to set a limit that is lower than the current inves
 
 Custodians
 ----------
+
+* ``addCustodian``: Approves a custodian contract to send and receive tokens associated with the issuer.
+* ``setBeneficialOwners``: Modifies the list of beneficial owners associated with the custodian.
+* ``setInvestorRestriction``: Can be used by the issuer to restrict or unrestrict a custodian.
+
 
 Document Hashes
 ---------------
