@@ -8,7 +8,7 @@ KYCRegistrar contracts are registries that hold information on the identity, reg
 
 Registries may be maintained by a single entity, or a federation of entities where each are approved to provide identification services for their specific jurisdiction. The contract owner can authorize other entities to add investors within specified countries.
 
-Contract authorities associate addresses to ID hashes that denotes the identity of the investor who owns the address. More than one address may be associated to the same hash. Anyone can call ``getID`` to see which hash is associated to an address, and then using this ID call functions to query information about the investor's region and accreditation rating.
+Contract authorities associate addresses to ID hashes that denotes the identity of the investor who owns the address. More than one address may be associated to the same hash. Anyone can call ``KYCRegistrar.getID`` to see which hash is associated to an address, and then using this ID call functions to query information about the investor's region and accreditation rating.
 
 Registry contracts implement a variation of the standard :ref:`multisig` functionality used in other contracts within the protocol. This document assumes familiarity with the standard multi-sig implementation, and will only highlight the differences.
 
@@ -19,11 +19,8 @@ Deployment
 
 .. method:: KYCRegistrar.constructor(address[] _owners, uint32 _threshold)
 
-    * ``_owners``: One or more addresses to associate with the
-    contract owner. The address deploying the contract is not implicitly
-    included within the owner list
-    * ``_threshold``: The number of calls required for the owner to
-    perform a multi-sig action. Cannot exceed the length of ``_owners``
+    * ``_owners``: One or more addresses to associate with the contract owner. The address deploying the contract is not implicitly included within the owner list.
+    * ``_threshold``: The number of calls required for the owner to perform a multi-sig action. Cannot exceed the length of ``_owners``.
 
     The ID of the owner is generated as a keccak of the contract address and available from the public getter ``ownerID``.
 
@@ -38,11 +35,9 @@ Only the owner may add, modify, or restrict other authorities.
 
     Creates a new authority.
 
-    * ``address[] _owners``: One or more addresses to associate with the
-    authority
+    * ``address[] _owners``: One or more addresses to associate with the authority
     * ``uint16[] _countries``: Countries that the authority is approved to act in
-    * ``uint32 _threshold``: The number of calls required for the authority to
-    perform a multi-sig action. Cannot exceed the length of ``_owners``
+    * ``uint32 _threshold``: The number of calls required for the authority to perform a multi-sig action. Cannot exceed the length of ``_owners``
 
     Authorities do not require explicit permission to call any contract functions. However, they may only add, modify or restrict investors in countries that they have been approved to operate in.
 
@@ -143,7 +138,7 @@ Getting Investor Info
 
 .. method:: KYCRegistrar.getInvestors(address _from, address _to)
 
-    The two investor version of ``getInvestor``. Also used to maximize gas efficiency.
+    The two investor version of ``KYCRegistrar.getInvestor``. Also used to maximize gas efficiency.
 
 .. method:: KYCRegistrar.getRating(bytes32 _id)
 
