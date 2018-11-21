@@ -52,8 +52,8 @@ The following public variables cannot be changed after creation, and can be cons
 
     The address of the associated IssuingEntity contract.
 
-Total Supply and Tokens Balances
-================================
+Total Supply and Balances
+=========================
 
 .. method:: SecurityToken.totalSupply
 
@@ -104,12 +104,12 @@ Token Transfers
 
 .. method:: SecurityToken.transferFrom(address _from, address _to, uint256 _value)
 
-        Transfers ``_value`` tokens from ``_from`` to ``_to``.
+    Transfers ``_value`` tokens from ``_from`` to ``_to``.
 
-        If the caller and sender addresses are both associated to the same ID, ``transferFrom`` may be called without giving prior approval. In this way an investor can easily recover tokens when a private key is lost or compromised.
+    If the caller and sender addresses are both associated to the same ID, ``transferFrom`` may be called without giving prior approval. In this way an investor can easily recover tokens when a private key is lost or compromised.
 
-Issuer Balances and Token Transfers
-===================================
+Issuer Balances and Transfers
+=============================
 
 Tokens held by the issuer will always be at the address of the IssuingEntity contract.  ``SecurityToken.treasurySupply()`` will return the same result as ``SecurityToken.balanceOf(SecurityToken.issuer())``.
 
