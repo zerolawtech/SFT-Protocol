@@ -4,31 +4,18 @@
 MultiSig Implementation
 #######################
 
-This section outlines the multi-signature, multi-owner functionality
-used in IssuingEntity and Custodian contracts. Multisig functionality in
-KYCRegistrar contracts use a similar implementation, you can read about
-the differences in the :ref:`kyc-registrar` section.
+:ref:`issuing-entity` and :ref:`custodian` contracts both implement a common multisig functionality that allows the contract owner to designate other authorities the ability to call specific admin-level contract methods.
+
+:ref:`kyc-registrar` contracts use a slightly modified implementation.
 
 It may be useful to also view the
 `MultiSig.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/components/MultiSig.sol>`__ source code
 while reading this document.
 
-Components
-==========
-
-Multisig contracts are based around the following key components:
-
--  **Authorities** are a collection of one or more addresses permitted
-   to call specific admin-level functionality. Each authority is
-   assigned a unique ID.
--  The **owner** is the highest authority, capable of creating or
-   restricted other authorities.
--  Each authority has a unique **threshold** value, which is the number
-   of required calls to a function before it executes. This value cannot
-   be greater the number of addresses associated with the authority.
-
 Deployment
 ==========
+
+The **owner** is declared during deployment. The owner is the highest contract authority, impossible to restrict and the only entity capable of creating or restricting other authorities on the contract.
 
 .. method:: MultiSig.constructor(address[] _owners, uint32 _threshold,address[] _owners, uint32 _threshold)
 
@@ -39,13 +26,18 @@ Deployment
 
     The owner has the highest level of control over the contract. Associated addresses may always call any admin-level functionality.
 
-
-Designating Authorities
-=======================
+Working With Authorities
+========================
 
 **Authorities** are known, trusted entities that are permitted to add, modify, or restrict investors within the registrar. Authorities are assigned a unique ID and associated with one or more addresses.
 
-Only the owner may add, modify, or restrict other authorities.
+Authorities differ from the owner in that they must be explicitly
+approved to call functions within the contract. These permissions may be
+modified by the owner via a call to ``MultiSig.setAuthoritySignatures``. You can
+check if an authority is permitted to call a specific function with the
+view function ``MultiSig.isApprovedAuthority``.
+
+Only the owner may add, modify or restrict other authorities.
 
 .. method:: MultiSig.addAuthority(address[] _addr, bytes4[] _signatures, uint32 _approvedUntil, uint32 _threshold)
 
@@ -72,39 +64,26 @@ Only the owner may add, modify, or restrict other authorities.
 
 .. method:: MultiSig.addAuthorityAddresses(bytes32 _id, address[] _addr)
 
+    Associates addresses with an authority. Can be called by any authority to add to their own addresses, or by the owner to add addresses for any authority. Can also be used to re-approve a previously restricted address that is already associated to the authority.
+
 .. method:: MultiSig.removeAuthorityAddresses(bytes32 _id, address[] _addr)
+
+    Restricts addresses that are associated with an authority. Can be called by any authority to restrict to their own addresses, or by the owner to restrict addresses for any authority.
+
+    Once an address has been assigned to an authority, this association may never be removed. If an association were removed it would then be possible to assign that same address to a different investor. This could be used to circumvent various contract restricions.
 
 .. method:: MultiSig.isApprovedAuthority(address _addr, bytes4 _sig)
 
-Authorities differ from the owner in that they must be explicitly
-approved to call functions within the contract. These permissions may be
-modified by the owner via a call to ``setAuthoritySignatures``. You can
-check if an authority is permitted to call a specific function with the
-view function ``isApprovedAuthority``.
+    Returns true if the authority associated with the given address is permitted to call the method with the given signature.
 
-Authorities may also be given a time-based restriction, either at the
-time of creation or by calling ``setAuthorityApprovedUntil``. The owner
-can also restrict an authority by calling this function and setting
-``_approvedUntil`` to 0.
+Implementing MultiSig
+=====================
 
-Authorities may add or remove associated addresses with
-``addAuthorityAddresses`` or ``removeAuthorityAddresses``. The owner may
-call this function to add or remove addresses for any authority.
-
-It is important to note that **once an address has been associated to an
-authority, this association may never be fully removed**. Once an
-address is removed, that address is now forever unavailable within the
-protocol. This is necessary to prevent an address from later being
-associated with a different entity, which could allow for a variety of
-non-compliant actions. See the :ref:`kyc-registrar`
-documentation for more information on this concept.
-
-Calling MultiSig Functions
-==========================
+Multisig functionality can be implemented within any contract method as well as in external contracts.
 
 .. method:: MultiSig._checkMultiSig()
 
-    Internal functionn, used to implement multisig within a function in the same contract.
+    Internal function, used to implement multisig within a function in the same contract.
 
     All multi-sig functions return a single boolean to indicate if the threshold was met and the call succeeded. Functions that implement multi-sig include the following line of code, either at the start orafter the initial require statements:
 

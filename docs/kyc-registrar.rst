@@ -17,6 +17,8 @@ It may be useful to also view the `KYCRegistrar.sol <https://github.com/SFT-Prot
 Deployment
 ==========
 
+The **owner** is declared during deployment. The owner is the highest contract authority, impossible to restrict and the only entity capable of creating or restricting other authorities on the contract.
+
 .. method:: KYCRegistrar.constructor(address[] _owners, uint32 _threshold)
 
     * ``_owners``: One or more addresses to associate with the contract owner. The address deploying the contract is not implicitly included within the owner list.
@@ -29,7 +31,7 @@ Working with Authorities
 
 **Authorities** are known, trusted entities that are permitted to add, modify, or restrict investors within the registrar. Authorities are assigned a unique ID and associated with one or more addresses.
 
-Only the owner may add, modify, or restrict other authorities.
+Only the owner may add, modify or restrict other authorities.
 
 .. method:: KYCRegistrar.addAuthority(address[] _addr, uint16[] _countries, uint32 _threshold)
 
@@ -107,7 +109,7 @@ Authorites may add, modify, or restrict investors in any country that they have 
 Adding and Restricting Addresses
 ================================
 
-Each authority and investor has one or more addresses associated to them. Once an addresses has been assigned to an ID, this association may never be removed. If an association were removed it would then be possible to assign that same address to a different investor. This could be used to circumvent transfer restrictions on tokens, allowing for non-compliant token ownership.
+Each authority and investor has one or more addresses associated to them. Once an address has been assigned to an ID, this association may never be removed. If an association were removed it would then be possible to assign that same address to a different investor. This could be used to circumvent transfer restrictions on tokens, allowing for non-compliant token ownership.
 
 In situations of a lost or compromised private key the address may instead be flagged as restricted. In this case any tokens in the restricted address can be retrieved using another associated, unrestricted address.
 
