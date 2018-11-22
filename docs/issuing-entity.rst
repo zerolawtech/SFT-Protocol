@@ -4,48 +4,33 @@
 Issuing Entity
 ##############
 
-IssuingEntity contracts hold shared compliance logic for all security tokens created by a single issuer.
+IssuingEntity contracts hold shared compliance logic for all security tokens created by a single issuer. They are the central contract that an issuer uses to connect and interact with registrars, tokens and custodians.
 
 Each issuer contract includes standard SFT protocol :ref:`multisig` and :ref:`modules` functionality. See the respective documents for detailed information on these components.
 
 It may be useful to also view the `IsssuingEntity.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/IssuingEntity.sol>`__ source code while reading this document.
 
-Components
-==========
-
-IssuingEntity contracts are based on the following key components:
-
--  **Issuers** are entities that create tokenized securities using the
-   protocol. Each issuer owns one IssuingEntity contract and one or more
-   SecurityToken contracts.
--  **Security tokens**, or just tokens, are ERC-20 compliant tokens created by
-   an issuer.
--  **Registrars** are whitelist contracts that associate ethereum addresses
-   to specific investors.
-
 Deployment
 ==========
 
-.. method:: IssuingEntity.constructor(address[] _owners, uint32 _threshold,address[] _owners, uint32 _threshold)
+The constructor declares the owner as per standard :ref:`multisig`.
 
-    * ``address[] _owners``: One or more addresses to associate with the contract owner. The address deploying the contract is not implicitly included within the owner list.
-    * ``uint32 _threshold``: The number of calls required for the owner to perform a multi-sig action.
+.. method:: IssuingEntity.constructor(address[] _owners, uint32 _threshold)
+
+    * ``_owners``: One or more addresses to associate with the contract owner. The address deploying the contract is not implicitly included within the owner list.
+    * ``_threshold``: The number of calls required for the owner to perform a multi-sig action.
 
     The ID of the owner is generated as a keccak of the contract address and available from the public getter ``ownerID``.
 
-Functionality
-=============
-
-Although this is by far the largest contract in the protocol, the majority of the functionality is accessed indirectly through other contracts.
-
 Adding and Restricting Tokens
------------------------------
+=============================
+
 An issuer must associate :ref:`security-token` contracts with their IssuingEntity contract before transfers are possible.  This is done via ``addToken``.
 
 Tokens may be individually locked or unlocked with ``setTokenRestriction``.  All tokens can be locked or unlocked in a single call with ``setGlobalRestriction``.
 
 Identifying Investors
----------------------
+=====================
 
 Investors must be identified via a :ref:`kyc-registrar` before they can send or receive tokens. To allow this, an issuer must associate one or more registries with ``setRegistrar``.
 
@@ -59,7 +44,7 @@ It is also possible to remove a registrar using ``setRegistrar``. Once removed, 
 Investors may be restricted by the issuer with ``setInvestorRestriction``. This can only be used to block an investor that would otherwise be able to hold the tokens, it cannot be used to whitelist investors who are not listed in an associated registrar.
 
 Setting Investor Limits
------------------------
+=======================
 
 Investor limits can be set globally, by country, by investor rating, or by a combination. Some possible examples:
 
@@ -78,7 +63,7 @@ The issuer must explicitely approve each country from which investors are allowe
 It is possible for an issuer to set a limit that is lower than the current investor count. When a limit is met or exceeded existing investors are still able to receive tokens, but new investors are blocked.
 
 Custodians
-----------
+==========
 
 * ``addCustodian``: Approves a custodian contract to send and receive tokens associated with the issuer.
 * ``setBeneficialOwners``: Modifies the list of beneficial owners associated with the custodian.
@@ -86,12 +71,27 @@ Custodians
 
 
 Document Hashes
----------------
+===============
 
 An issuer can record the bytes32 hash of a legal document using ``setDocumentHash``. The hash is stored in a (string => bytes32) mapping and can be queried later using ``getDocumentHash``.  Once a hash is recorded, the issuer can then distrubute the document electronically and investors can verify the authenticity by generating the hash themselves and comparing it to the blockchain record.
 
 Modules
--------
+=======
 
-Integration
-===========
+.. method:: IssuingEntity.balanceOf(bytes32 _id)
+
+.. method:: IssuingEntity.getInvestorCounts()
+
+.. method:: IssuingEntity.getCountry(uint16 _country)
+
+.. method:: IssuingEntity.setCountry(uint16 _country, bool _allowed, uint8 _minRating, uint32[8] _limits)
+
+.. method:: IssuingEntity.setCountries(uint16[] _country, bool _allowed, uint8[] _minRating, uint32[] _limit)
+
+.. method:: IssuingEntity.setInvestorLimits(uint32[8] _limits)
+
+.. method:: IssuingEntity.checkTransfer(address _token, address _auth, address _from, address _to, uint256 _value)
+
+.. method:: IssuingEntity.checkTransferView(address _token, address _from, address _to, uint256 _value)
+
+.. method:: IssuingEntity.getID(address _addr)

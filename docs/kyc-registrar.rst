@@ -37,9 +37,9 @@ Only the owner may add, modify or restrict other authorities.
 
     Creates a new authority.
 
-    * ``address[] _owners``: One or more addresses to associate with the authority
-    * ``uint16[] _countries``: Countries that the authority is approved to act in
-    * ``uint32 _threshold``: The number of calls required for the authority to perform a multi-sig action. Cannot exceed the length of ``_owners``
+    * ``_owners``: One or more addresses to associate with the authority
+    * ``_countries``: Countries that the authority is approved to act in
+    * ``_threshold``: The number of calls required for the authority to perform a multi-sig action. Cannot exceed the length of ``_owners``
 
     Authorities do not require explicit permission to call any contract functions. However, they may only add, modify or restrict investors in countries that they have been approved to operate in.
 

@@ -10,21 +10,17 @@ Custodian contracts include the standard SFT protocol :ref:`multisig`.
 
 It may be useful to also view the `Custodian.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/Custodian.sol>`__ source code while reading this document.
 
-Components
-==========
-
 Deployment
 ==========
 
-Deploying a Custodian contract requires 2 arguments in the constructor:
+The constructor declares the owner as per standard :ref:`multisig`.
 
--  ``address[] _owners``: One or more addresses to associate with the
-   contract owner. The address deploying the contract is not implicitly
-   included within the owner list.
--  ``uint32 _threshold``: The number of calls required for the owner to
-   perform a multi-sig action.
+.. method:: IssuingEntity.constructor(address[] _owners, uint32 _threshold)
 
-The ID of the owner is generated as a keccak of the contract address and available from the public getter ``ownerID``.
+    * ``_owners``: One or more addresses to associate with the contract owner. The address deploying the contract is not implicitly included within the owner list.
+    * ``_threshold``: The number of calls required for the owner to perform a multi-sig action.
+
+    The ID of the owner is generated as a keccak of the contract address and available from the public getter ``ownerID``.
 
 Functionality
 =============

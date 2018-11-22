@@ -17,10 +17,10 @@ Deployment
 
 The **owner** is declared during deployment. The owner is the highest contract authority, impossible to restrict and the only entity capable of creating or restricting other authorities on the contract.
 
-.. method:: MultiSig.constructor(address[] _owners, uint32 _threshold,address[] _owners, uint32 _threshold)
+.. method:: MultiSig.constructor(address[] _owners, uint32 _threshold)
 
-    * ``address[] _owners``: One or more addresses to associate with the contract owner. The address deploying the contract is not implicitly included within the owner list.
-    * ``uint32 _threshold``: The number of calls required for the owner to perform a multi-sig action.
+    * ``_owners``: One or more addresses to associate with the contract owner. The address deploying the contract is not implicitly included within the owner list.
+    * ``_threshold``: The number of calls required for the owner to perform a multi-sig action.
 
     The ID of the owner is generated as a keccak of the contract address and available from the public getter ``ownerID``.
 
