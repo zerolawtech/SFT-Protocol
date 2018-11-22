@@ -8,7 +8,7 @@ import "./components/Modular.sol";
 import "./components/MultiSig.sol";
 
 /** @title Issuing Entity */
-contract IssuingEntity is Modular, MultiSigMultiOwner {
+contract IssuingEntity is Modular, MultiSig {
 
 	using SafeMath32 for uint32;
 	using SafeMath for uint256;
@@ -96,7 +96,7 @@ contract IssuingEntity is Modular, MultiSigMultiOwner {
 		address[] _owners,
 		uint32 _threshold
 	)
-		MultiSigMultiOwner(_owners, _threshold)
+		MultiSig(_owners, _threshold)
 		public 
 	{
 		/* First registrar is empty so Account.regKey == 0 means it is unset. */
