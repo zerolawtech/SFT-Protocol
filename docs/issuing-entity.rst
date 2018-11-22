@@ -28,15 +28,10 @@ Deployment
 
 .. method:: IssuingEntity.constructor(address[] _owners, uint32 _threshold,address[] _owners, uint32 _threshold)
 
-Deploying an IssuingEntity contract requires 2 arguments in the constructor:
+    * ``address[] _owners``: One or more addresses to associate with the contract owner. The address deploying the contract is not implicitly included within the owner list.
+    * ``uint32 _threshold``: The number of calls required for the owner to perform a multi-sig action.
 
--  ``address[] _owners``: One or more addresses to associate with the
-   contract owner. The address deploying the contract is not implicitly
-   included within the owner list.
--  ``uint32 _threshold``: The number of calls required for the owner to
-   perform a multi-sig action.
-
-The ID of the owner is generated as a keccak of the contract address and available from the public getter ``ownerID``.
+    The ID of the owner is generated as a keccak of the contract address and available from the public getter ``ownerID``.
 
 Functionality
 =============
