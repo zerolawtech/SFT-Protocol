@@ -94,3 +94,45 @@ interface IIssuerModule {
 		external
 		returns (bool);
 }
+
+interface ICustodianModule {
+	function getBindings() external view returns (bytes4[]);
+	function owner() external view returns (address);
+	function name() external view returns (string);
+
+	/* 0xc221a3b5 */
+	function sentTokens(
+		address _token,
+		address _to,
+		uint256 _value,
+		bool _stillOwner
+	)
+		external
+		returns (bool);
+
+	/* 0x081e5f03 */
+	function receivedTokens(
+		address _token,
+		bytes32 _id,
+		uint256 _value,
+		bool _newOwner
+	)
+		external
+		returns (bool);
+	
+	/* 0xf8324d5a */
+	function addedInvestors(
+		address _token,
+		bytes32[] _id
+	)
+		external
+		returns (bool);
+	
+	/* 0x9898b82e */
+	function removedInvestors(
+		address _token,
+		bytes32[] _id
+	)
+		external
+		returns (bool);
+}

@@ -85,6 +85,8 @@ contract Custodian is Modular, MultiSig {
 			_id[0] = i.getID(_to);
 			_removeInvestors(_token, _id);
 		}
+		/* bytes4 signature for custodian module sentTokens() */
+		_callModules(0xc221a3b5, msg.data);
 		emit SentTokens(issuerMap[_token], _token, _to, _value);
 		return true;
 	}
@@ -113,16 +115,25 @@ contract Custodian is Modular, MultiSig {
 		}
 		emit ReceivedTokens(msg.sender, _token, _id, _value);
 		address[] storage _owner = beneficialOwners[msg.sender][_id];
+		bool _known;
 		for (uint256 i = 0; i < _owner.length; i++) {
-			if (_owner[i] == _token) return false;
+			if (_owner[i] == _token) {
+				_known = true;
+				break;
+			}
 		}
-		_owner.push(_token);
-		emit NewBeneficialOwner(msg.sender, _token, _id);
+		if (!_known) {
+			_owner.push(_token);
+			emit NewBeneficialOwner(msg.sender, _token, _id);
+			_known = _owner.length > 1;
+		}
+		/* bytes4 signature for custodian module receivedTokens() */
+		_callModules(0x081e5f03, abi.encode(_token, _id, _value, !_known));
 		/*
 			return true if custodian did not previously hold any tokens
 			from this issuer for this investor 
 		*/
-		return _owner.length == 1 ? true : false;
+		return !_known;
 	}
 
 	/**
@@ -137,7 +148,7 @@ contract Custodian is Modular, MultiSig {
 		address _issuer = issuerMap[_token];
 		for (uint256 i = 0; i < _id.length; i++) {
 			address[] storage _owner = beneficialOwners[_issuer][_id[i]];
-			bool _found = false;
+			bool _found;
 			for (uint256 x = 0; x < _owner.length; x++) {
 				if (_owner[x] == _token) {
 					_found = true;
@@ -150,6 +161,8 @@ contract Custodian is Modular, MultiSig {
 			}
 		}
 		require(IssuingEntity(_issuer).setBeneficialOwners(ownerID, _id, true));
+		/* bytes4 signature for custodian module addedInvestors() */
+		_callModules(0xf8324d5a, msg.data);
 		return true;
 	}
 
@@ -163,6 +176,8 @@ contract Custodian is Modular, MultiSig {
 	function removeInvestors(address _token, bytes32[] _id) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		_removeInvestors(_token, _id);
+		/* bytes4 signature for custodian module removedInvestors() */
+		_callModules(0x9898b82e, msg.data);
 		return true;
 	}
 
@@ -174,7 +189,6 @@ contract Custodian is Modular, MultiSig {
 	function _removeInvestors(address _token, bytes32[] _id) internal {
 		address _issuer = issuerMap[_token];
 		bytes32[] memory _toRemove = new bytes32[](_id.length);
-
 		for (uint256 i = 0; i < _id.length; i++) {
 			address[] storage _owner = beneficialOwners[_issuer][_id[i]];
 			for (uint256 x = 0; x < _owner.length; x++) {
