@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "./open-zeppelin/SafeMath.sol";
 import "./KYCRegistrar.sol";
 import "./SecurityToken.sol";
-import "./interfaces/Custodian.sol";
+import "./Custodian.sol";
 import "./components/Modular.sol";
 import "./components/MultiSig.sol";
 
@@ -594,7 +594,7 @@ contract IssuingEntity is Modular, MultiSig {
 			the custodian contract.
 		*/
 		if (custodians[_id[1]].addr != 0) {
-			ICustodian c = ICustodian(custodians[_id[1]].addr);
+			Custodian c = Custodian(custodians[_id[1]].addr);
 			mutex = true;
 			if (c.receiveTransfer(msg.sender, _id[0], _value) && _rating[0] > 0) {
 				accounts[_id[0]].custodianCount = accounts[_id[0]].custodianCount.add(1);
@@ -811,7 +811,7 @@ contract IssuingEntity is Modular, MultiSig {
 	 */
 	function addCustodian(address _custodian) external returns (bool) {
 		if (!_checkMultiSig()) return false;
-		bytes32 _id = ICustodian(_custodian).ownerID();
+		bytes32 _id = Custodian(_custodian).ownerID();
 		idMap[_custodian].id = _id;
 		custodians[_id].addr = _custodian;
 		emit CustodianAdded(_custodian);

@@ -185,7 +185,7 @@ contract KYCRegistrar {
 		returns (bool)
 	{
 		bytes32 _id = keccak256(abi.encodePacked(address(this),_addr[0]));
-		require(investorData[_id].country == 0);
+		require(investorData[_id].authority == 0);
 		Authority storage a = authorityData[_id];
 		require(authorityData[_id].addressCount == 0);
 		if (!_checkMultiSig()) return false;
@@ -298,6 +298,7 @@ contract KYCRegistrar {
 		require(_rating > 0);
 		require(_expires > now);
 		require(authorityData[_id].addressCount == 0);
+		require(investorData[_id].authority == 0);
 		if (!_checkMultiSig()) return false;
 		investorData[_id] = Investor(
 			idMap[msg.sender].id,

@@ -9,5 +9,5 @@ def deploy():
     issuer.addToken(token)
     issuer.setRegistrar(kyc, True)
     for count,country,rating in [(c,i[0],i[1]) for c,i in enumerate(itertools.product([1,2,3], [1,2]), start=2)]:
-        kyc.addInvestor(b"investor"+str(count).encode(), country, b'aws', rating, 9999999999, [accounts[count]])
+        kyc.addInvestor("investor"+str(count), country, 'aws', rating, 9999999999, [accounts[count]])
     issuer.setCountries([1,2,3],[1,1,1],[0,0,0])

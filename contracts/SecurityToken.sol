@@ -330,7 +330,7 @@ contract SecurityToken is Modular {
 		balances[_addr[0]] = balances[_addr[0]].sub(_value);
 		balances[_addr[1]] = balances[_addr[1]].add(_value);
 		require(issuer.transferTokens(_id, _rating, _country, _value));
-		/* bytes4 signature for token module transferTokens() is 0x35a341da */
+		/* bytes4 signature for token module transferTokens() */
 		_callModules(0x35a341da, abi.encode(
 			_addr,
 			_id,

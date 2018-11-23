@@ -6,7 +6,7 @@ Custodian
 
 Custodian contracts allow approved entities to hold tokens on behalf of multiple investors. Common examples of custodians include broker/dealers and secondary markets. The contract in it's current form can be considered a base contract, depending on the needs of the owner it may be expanded upon in a variety of ways.
 
-Custodian contracts include the standard SFT protocol :ref:`multisig`.
+Custodian contracts include the standard SFT protocol :ref:`multisig` and :ref:`modules` functionality. See the respective documents for detailed information on these components.
 
 It may be useful to also view the `Custodian.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/Custodian.sol>`__ source code while reading this document.
 
@@ -73,6 +73,10 @@ As one of the purposes of custodians is to facilitate off-chain transfers of own
 
     * ``_token``: Contract address of the token to remove benefical owners from.
     * ``_id``: Array of investor IDs.
+
+
+Modules
+=======
 
 
 Contract Customization

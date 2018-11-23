@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../interfaces/STModule.sol";
+import "../interfaces/Modules.sol";
 
 
 /** @title Modular Functionality for IssuingEntity and SecurityToken */
@@ -59,6 +59,12 @@ contract Modular {
 		revert();
 	}
 
+	/**
+		@notice Internal to modify module hooks mapping
+		@param _idx modules array index
+		@param _hooks bytes4 array
+		@param _set value to apply to mapping
+	 */
 	function _setHooks(uint256 _idx, bytes4[] _hooks, bool _set) private {
 		for (uint256 i = 0; i < _hooks.length; i++) {
 			modules[_idx].hooks[_hooks[i]] = _set;
