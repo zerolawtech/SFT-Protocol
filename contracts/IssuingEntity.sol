@@ -604,8 +604,6 @@ contract IssuingEntity is Modular, MultiSig {
 			mutex = false;
 		}
 		
-		
-		
 		uint256 _balance = uint256(accounts[_id[0]].balance).sub(_value);
 		_setBalance(_id[0], _rating[0], _country[0], _balance);
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
@@ -630,7 +628,7 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _new New balance
 		@return id, rating, and country of the affected investor
 	 */
-	function balanceChanged(
+	function modifyBalance(
 		address _owner,
 		uint256 _old,
 		uint256 _new
@@ -808,15 +806,15 @@ contract IssuingEntity is Modular, MultiSig {
 			Custodians are entities such as broker or exchanges that are approved
 			to hold tokens for 1 or more beneficial owners.
 			https://sft-protocol.readthedocs.io/en/latest/custodian.html
-		@param _addr address of custodian contract
+		@param _custodian address of custodian contract
 		@return bool success
 	 */
-	function addCustodian(address _addr) external returns (bool) {
+	function addCustodian(address _custodian) external returns (bool) {
 		if (!_checkMultiSig()) return false;
-		bytes32 _id = ICustodian(_addr).ownerID();
-		idMap[_addr].id = _id;
-		custodians[_id].addr = _addr;
-		emit CustodianAdded(_addr);
+		bytes32 _id = ICustodian(_custodian).ownerID();
+		idMap[_custodian].id = _id;
+		custodians[_id].addr = _custodian;
+		emit CustodianAdded(_custodian);
 		return true;
 	}
 

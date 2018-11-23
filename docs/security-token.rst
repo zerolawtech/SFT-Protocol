@@ -9,6 +9,8 @@ Standard <https://theethereum.wiki/w/index.php/ERC20_Token_Standard>`__., with a
 
 Token contracts are associated to an :ref:`issuing-entity` and also implement :ref:`modules` functionality. Permissioning around transfers is achieved through these components. See the respective documents for more detailed information.
 
+This documentation only explains contract methods that are meant to be accessed directly. External methods that will revert unless called through another contract, such as IssuingEntity or modules, are not included.
+
 It may be useful to also view the `SecurityToken.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/SecurityToken.sol>`__ source code while reading this document.
 
 Deployment
@@ -21,11 +23,9 @@ Deployment
     * ``_symbol``: The ticker symbol for the token.
     * ``_totalSupply``: The initial total supply of tokens to create.
 
-    The total supply of tokens is assigned to the issuer at the time of creation,
-    with a ``Transfer`` event logged to show them as moving from 0x00.
+    The total supply of tokens is assigned to the issuer at the time of creation, with a ``Transfer`` event logged to show them as moving from 0x00.
 
-    After the contract is deployed it must be associated with the issuer via
-    ``IssuingEntity.addToken``. Token transfers are not possible until this is done.
+    After the contract is deployed it must be associated with the issuer via ``IssuingEntity.addToken``. Token transfers are not possible until this is done.
 
 Constants
 =========
@@ -115,10 +115,19 @@ Tokens held by the issuer will always be at the address of the IssuingEntity con
 
 As a result, the following non-standard behaviours exist:
 
-* Any address associated with the issuer can transfer tokens from the IssuingEntity contract using ``transfer``.
+* Any address associated with the issuer can transfer tokens from the IssuingEntity contract using ``SecurityToken.transfer``.
 * Attempting to send tokens to any address associated with the issuer will result in the tokens being sent to the IssuingEntity contract.
 
-The issuer may call ``transferFrom`` to move tokens between any addresses without prior approval. Transfers of this type must still pass the normal checks, with the exception that the sending address may be restricted.  In this way the issuer can aid investors with token recovery in the event of a lost or compromised private key, or force a transfer in the event of a court order or sanction.
+The issuer may call ``SecurityToken.transferFrom`` to move tokens between any addresses without prior approval. Transfers of this type must still pass the normal checks, with the exception that the sending address may be restricted.  In this way the issuer can aid investors with token recovery in the event of a lost or compromised private key, or force a transfer in the event of a court order or sanction.
+
+Modules
+=======
+
+Modules are attached and detached via :ref:`issuing-entity`.
+
+.. method:: SecurityToken.isActiveModule(address _module)
+
+    Returns true if a module is currently active on the token.  Modules that are active on the IssuingEntity are also considered active on tokens.
 
 Integration
 ===========

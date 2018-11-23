@@ -369,7 +369,7 @@ contract SecurityToken is Modular {
 			bytes32 _id,
 			uint8 _rating,
 			uint16 _country
-		) = issuer.balanceChanged(_owner, _old, _value);
+		) = issuer.modifyBalance(_owner, _old, _value);
 		/* bytes4 signature for token module balanceChanged() */
 		_callModules(2, 0x4268353d, abi.encode(
 			_owner,
