@@ -100,17 +100,37 @@ interface ICustodianModule {
 	function owner() external view returns (address);
 	function name() external view returns (string);
 
-	/* 0xc221a3b5 */
+	/**
+		@notice Custodian sent tokens
+		@dev
+			Called after a successful token transfer from the custodian.
+			Use 0x7ffebabc as the hook value for this method.
+		@param _token Token address
+		@param _id Recipient ID
+		@param _value Amount of tokens transfered
+		@param _stillOwner Is recipient still a beneficial owner for this token?
+		@return bool success
+	 */
 	function sentTokens(
 		address _token,
-		address _to,
+		bytes32 _id,
 		uint256 _value,
 		bool _stillOwner
 	)
 		external
 		returns (bool);
 
-	/* 0x081e5f03 */
+	/**
+		@notice Custodian received tokens
+		@dev
+			Called after a successful token transfer to the custodian.
+			Use 0x081e5f03 as the hook value for this method.
+		@param _token Token address
+		@param _id Recipient ID
+		@param _value Amount of tokens transfered
+		@param _newOwner Is recipient a new beneficial owner for this token?
+		@return bool success
+	 */
 	function receivedTokens(
 		address _token,
 		bytes32 _id,
@@ -120,7 +140,16 @@ interface ICustodianModule {
 		external
 		returns (bool);
 	
-	/* 0xf8324d5a */
+	/**
+		@notice Custodian added new beneficial owners
+		@dev
+			Called after new beneficial owners are added to a custodian.
+			Note that these may not actually be new beneficial owners.
+			Use 0xf8324d5a as the hook value for this method.
+		@param _token Token address
+		@param _id Array of investor IDs to add
+		@return bool success
+	 */
 	function addedInvestors(
 		address _token,
 		bytes32[] _id
@@ -128,7 +157,16 @@ interface ICustodianModule {
 		external
 		returns (bool);
 	
-	/* 0x9898b82e */
+	/**
+		@notice Custodian removed beneficial owners
+		@dev
+			Called after beneficial owners are removed from a custodian.
+			Note that these may not actually be existing beneficial owners.
+			Use 0x9898b82e as the hook value for this method.
+		@param _token Token address
+		@param _id Array of investor IDs to add
+		@return bool success
+	 */
 	function removedInvestors(
 		address _token,
 		bytes32[] _id

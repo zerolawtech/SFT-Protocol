@@ -84,4 +84,13 @@ contract Modular {
 		}
 	}
 
+	/**
+		@notice Determines if a module is active on this issuing entity
+		@param _module Deployed module address
+		@return bool
+	 */
+	function isActiveModule(address _module) public view returns (bool) {
+		return activeModules[_module];
+	}
+
 }

@@ -85,7 +85,7 @@ See the :ref:`custodian` documentation for more information on how custodians in
 
     Once a custodian is approved, they can be restricted with ``IssuingEntity.setInvestorRestriction``.
 
-    .. warning:: Custodians may facilitate off-chain transfers of ownership that bypass on-chain compliance checks. It is imperative this approval only be given to known, trusted entities. If the custodian has modified their smart contract it should be auditted by the issuer or a trusted third party before approval is given.
+    .. warning:: Custodians may facilitate off-chain transfers of ownership that bypass on-chain compliance checks. It is imperative this approval only be given to known, trusted entities who have deployed a verified, audited custodian contract.
 
 .. method:: IssuingEntity.setBeneficialOwners(bytes32 _custID, bytes32[] _id, bool _add)
 

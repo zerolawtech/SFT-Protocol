@@ -950,15 +950,6 @@ contract IssuingEntity is Modular, MultiSig {
 	}
 
 	/**
-		@notice Determines if a module is active on this issuing entity
-		@param _module Deployed module address
-		@return bool
-	 */
-	function isActiveModule(address _module) external view returns (bool) {
-		return activeModules[_module];
-	}
-
-	/**
 		@notice Add or remove an investor from a custodian's beneficial owners
 		@dev Only callable by a custodian or the issuer
 		@param _custID Custodian ID
