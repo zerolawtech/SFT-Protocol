@@ -42,7 +42,7 @@ contract STModuleBase {
 		return address(token);
 	}
 
-	function getBindings() external view returns (bytes4[]) {
+	function getHooks() external view returns (bytes4[]) {
 		return hooks;
 	}
 
@@ -84,7 +84,7 @@ contract IssuerModuleBase {
 		return address(issuer);
 	}
 
-	function getBindings() external view returns (bytes4[]) {
+	function getHooks() external view returns (bytes4[]) {
 		return hooks;
 	}
 

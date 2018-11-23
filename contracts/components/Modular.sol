@@ -26,7 +26,7 @@ contract Modular {
 		require (!activeModules[_module]);
 		IBaseModule b = IBaseModule(_module);
 		require (b.owner() == address(this));
-		bytes4[] memory _hooks = b.getBindings();
+		bytes4[] memory _hooks = b.getHooks();
 		activeModules[_module] = true;
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (modules[i].module == 0) {
@@ -49,7 +49,7 @@ contract Modular {
 	function _detachModule(address _module) internal {
 		for (uint256 i = 0; i < modules.length; i++) {
 			if (modules[i].module == _module) {
-				_setHooks(i, IBaseModule(modules[i].module).getBindings(), false);
+				_setHooks(i, IBaseModule(modules[i].module).getHooks(), false);
 				modules[i].module = 0;
 				activeModules[_module] = false;
 				emit ModuleDetached(_module);
