@@ -29,7 +29,7 @@ contract IssuingEntity is Modular, MultiSig {
 		uint192 balance;
 		uint8 rating;
 		uint8 regKey;
-		uint8 custodianCount;
+		uint32 custodianCount;
 		bool restricted;
 		mapping (bytes32 => bool) custodians;
 	}
@@ -597,7 +597,7 @@ contract IssuingEntity is Modular, MultiSig {
 			ICustodian c = ICustodian(custodians[_id[1]].addr);
 			mutex = true;
 			if (c.receiveTransfer(msg.sender, _id[0], _value) && _rating[0] > 0) {
-				accounts[_id[0]].custodianCount += 1;
+				accounts[_id[0]].custodianCount = accounts[_id[0]].custodianCount.add(1);
 				accounts[_id[0]].custodians[_id[1]] = true;
 				emit BeneficialOwnerSet(address(c), _id[0], true);
 			}
@@ -987,7 +987,7 @@ contract IssuingEntity is Modular, MultiSig {
 			a.custodians[_custID] = _add;
 			emit BeneficialOwnerSet(msg.sender, _id[i], _add);
 			if (_add) {
-				a.custodianCount += 1;
+				a.custodianCount = a.custodianCount.add(1);
 				if (a.custodianCount == 1 && a.balance == 0) {
 					_incrementCount(
 						a.rating,
@@ -995,7 +995,7 @@ contract IssuingEntity is Modular, MultiSig {
 					);	
 				}
 			} else {
-				a.custodianCount -= 1;
+				a.custodianCount = a.custodianCount.sub(1);
 				if (a.custodianCount == 0 && a.balance == 0) {
 					_decrementCount(
 						a.rating,

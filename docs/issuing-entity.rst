@@ -71,13 +71,11 @@ Identifying Investors
 Custodians
 ==========
 
-**Custodian** are entities that are approved to hold tokens on behalf of multiple investors. Common examples of custodians include broker/dealers and secondary markets.
+**Custodian** are entities that are approved to hold tokens on behalf of multiple investors. Common examples of custodians include broker/dealers and secondary markets. Each custodian must be individually approved by an issuer before they can receive tokens.
 
 Custodians interact with an issuer's investor counts differently from regular investors. When an investor transfers a balance into a custodian it does not increase the overall investor count, instead the investor is now included in the list of beneficial owners represented by the custodian. Even if the investor now has a balance of 0, they will be still be included in the issuer's investor count.
 
 Each time a beneficial owner is added or removed from a custodian, the ``BeneficialOwnerSet`` event will fire. Filtering for this event can be used to keep an up-to-date record of which investors have tokens held by a custodian.
-
-Each custodian must be individually approved by an issuer before they can receive tokens. Because custodians may bypass on-chain compliance checks relating to investor limits, it is imperative this approval only be given to known, trusted entities.
 
 See the :ref:`custodian` documentation for more information on how custodians interact with the IssuingEntity contract.
 
@@ -86,6 +84,8 @@ See the :ref:`custodian` documentation for more information on how custodians in
     Approves a custodian contract to send and receive tokens associated with the issuer.
 
     Once a custodian is approved, they can be restricted with ``IssuingEntity.setInvestorRestriction``.
+
+    .. warning:: Custodians may facilitate off-chain transfers of ownership that bypass on-chain compliance checks. It is imperative this approval only be given to known, trusted entities. If the custodian has modified their smart contract it should be auditted by the issuer or a trusted third party before approval is given.
 
 .. method:: IssuingEntity.setBeneficialOwners(bytes32 _custID, bytes32[] _id, bool _add)
 
@@ -177,3 +177,6 @@ See the :ref:`modules` documentation for more information.
 .. method:: IssuingEntity.isActiveModule(address _module)
 
     Returns true if a module is currently active on the contract. Modules that are active on a token will return false.
+
+Integration
+===========
