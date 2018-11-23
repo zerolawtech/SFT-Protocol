@@ -7,6 +7,7 @@ import "../IssuingEntity.sol";
 contract STModuleBase {
 
 	bytes32 public ownerID;
+	bytes4[] hooks;
 	IssuingEntity public issuer;
 	SecurityToken public token;
 
@@ -41,12 +42,17 @@ contract STModuleBase {
 		return address(token);
 	}
 
+	function getBindings() external view returns (bytes4[]) {
+		return hooks;
+	}
+
 }
 
 /** @title IssuingEntity Module Base Contract */
 contract IssuerModuleBase {
 
 	bytes32 public ownerID;
+	bytes4[] hooks;
 	IssuingEntity public issuer;
 
 	/** @dev Check that call originates from issuer or token contract */
@@ -76,6 +82,10 @@ contract IssuerModuleBase {
 	*/
 	function owner() public view returns (address) {
 		return address(issuer);
+	}
+
+	function getBindings() external view returns (bytes4[]) {
+		return hooks;
 	}
 
 }

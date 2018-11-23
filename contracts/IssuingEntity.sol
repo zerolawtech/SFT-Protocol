@@ -423,7 +423,7 @@ contract IssuingEntity is Modular, MultiSig {
 			}
 		}
 		/* bytes4 signature for issuer module checkTransfer() */
-		_callModules(0, 0x47fca5df, abi.encode(
+		_callModules(0x47fca5df, abi.encode(
 			_token,
 			_authID,
 			_id,
@@ -609,7 +609,7 @@ contract IssuingEntity is Modular, MultiSig {
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
 		_setBalance(_id[1], _rating[1], _country[1], _balance);
 		/* bytes4 signature for token module transferTokens() */
-		_callModules(1, 0x0cfb54c9, abi.encode(
+		_callModules(0x0cfb54c9, abi.encode(
 			msg.sender,
 			_id, _rating,
 			_country,
@@ -663,7 +663,7 @@ contract IssuingEntity is Modular, MultiSig {
 		}
 		_setBalance(_id, _rating, _country, _newTotal);
 		/* bytes4 signature for token module balanceChanged() */
-		_callModules(2, 0x4268353d, abi.encode(
+		_callModules(0x4268353d, abi.encode(
 			msg.sender,
 			_id,
 			_rating,

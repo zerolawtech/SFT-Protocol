@@ -24,6 +24,8 @@ contract CheckpointModule is STModuleBase {
 		require (_time >= now);
 		totalSupply = token.totalSupply();
 		time = _time;
+		hooks.push(0x35a341da);
+		hooks.push(0x4268353d);
 	}
 
 	function _getBalance(address _owner) internal view returns (uint256) {
@@ -82,10 +84,6 @@ contract CheckpointModule is STModuleBase {
 			zeroBalance[_addr] = true;
 		}
 		return true;
-	}
-
-	function getBindings() external pure returns (bool[3]) {
-		return [false, true, true];
 	}
 
 }

@@ -10,7 +10,7 @@ import "./components/MultiSig.sol";
 		This is a bare-bones implementation of a custodian contract,
 		it can be expanded upon depending on the needs of the owner.
  */
-contract Custodian is MultiSig {
+contract Custodian is Modular, MultiSig {
 
 	/* issuer contract => investor ID => token addresses */
 	mapping (address => mapping(bytes32 => address[])) beneficialOwners;

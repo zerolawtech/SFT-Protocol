@@ -8,6 +8,16 @@ contract CountryLockModule is STModuleBase {
 	string public name = "CountryTimeLock";
 	mapping (uint16 => uint256) public countryLock;
 
+	constructor(
+		address _token,
+		address _issuer
+	)
+		STModuleBase(_token, _issuer)
+		public
+	{
+		hooks.push(0x70aaf928);
+	}
+
 	function modifyCountryLock(uint16 _country, uint256 _epochTime) public onlyIssuer {
 		countryLock[_country] = _epochTime;
 	}
@@ -26,10 +36,6 @@ contract CountryLockModule is STModuleBase {
 	{
 		require (countryLock[_country[0]] < now);
 		require (countryLock[_country[1]] < now);
-	}
-
-	function getBindings() external pure returns (bool[3]) {
-		return [true, false, false];
 	}
 
 }

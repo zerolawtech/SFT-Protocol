@@ -61,6 +61,7 @@ contract CrowdsaleModule is STModuleBase {
 		tokensMax = _tokensMax;	
 		bonusTimes = _bonusTimes;
 		bonusPct = _bonusPct;
+		hooks.push(0x70aaf928);
 	}
 
 	function () public payable {
@@ -153,10 +154,6 @@ contract CrowdsaleModule is STModuleBase {
 	{
 		require (_authID == ownerID);
 		return true;
-	}
-
-	function getBindings() external pure returns (bool[3]) {
-		return [true, false, false];
 	}
 
 }

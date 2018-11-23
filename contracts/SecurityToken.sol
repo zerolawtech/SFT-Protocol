@@ -211,7 +211,7 @@ contract SecurityToken is Modular {
 		}
 		require(balances[_addr[0]] >= _value, "Insufficient Balance");
 		/* bytes4 signature for token module checkTransfer() */
-		_callModules(0, 0x70aaf928, abi.encode(
+		_callModules(0x70aaf928, abi.encode(
 			_addr,
 			_authID,
 			_id,
@@ -330,8 +330,8 @@ contract SecurityToken is Modular {
 		balances[_addr[0]] = balances[_addr[0]].sub(_value);
 		balances[_addr[1]] = balances[_addr[1]].add(_value);
 		require(issuer.transferTokens(_id, _rating, _country, _value));
-		/* bytes4 signature for token module transferTokens() */
-		_callModules(1, 0x35a341da, abi.encode(
+		/* bytes4 signature for token module transferTokens() is 0x35a341da */
+		_callModules(0x35a341da, abi.encode(
 			_addr,
 			_id,
 			_rating,
@@ -371,7 +371,7 @@ contract SecurityToken is Modular {
 			uint16 _country
 		) = issuer.modifyBalance(_owner, _old, _value);
 		/* bytes4 signature for token module balanceChanged() */
-		_callModules(2, 0x4268353d, abi.encode(
+		_callModules(0x4268353d, abi.encode(
 			_owner,
 			_id,
 			_rating,
