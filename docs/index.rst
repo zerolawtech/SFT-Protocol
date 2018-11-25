@@ -67,17 +67,17 @@ This project is licensed under the `Apache 2.0 <https://www.apache.org/licenses/
 Contents
 ========
 
-:ref:`Keyword Index <genindex>`, :ref:`Search Page <search>`
+:ref:`Keyword Index <genindex>`, :ref:`Glossary <glossary>`
 
 .. toctree::    :maxdepth: 2
 
     getting-started.rst
-    kyc-registrar.rst
-    issuing-entity.rst
     security-token.rst
+    issuing-entity.rst
+    kyc-registrar.rst
     custodian.rst
+    security-considerations.rst
     multisig.rst
     modules.rst
-    security-considerations.rst
     data-standards.rst
     glossary.rst
