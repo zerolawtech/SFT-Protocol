@@ -35,7 +35,6 @@ interface ISTModule {
 		uint256 _value
 	)
 		external
-		view
 		returns (bool);
 	
 	/* 0x4268353d */
@@ -78,7 +77,6 @@ interface IIssuerModule {
 		uint256 _value
 	)
 		external
-		view
 		returns (bool);
 	
 	/* 0x4268353d */

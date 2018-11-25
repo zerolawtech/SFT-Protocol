@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../interfaces/Modules.sol";
+import "../interfaces/IModules.sol";
 
 
 /** @title Modular Functionality */
