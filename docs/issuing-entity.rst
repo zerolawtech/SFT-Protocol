@@ -24,6 +24,15 @@ The constructor declares the owner as per standard :ref:`multisig`.
 
     The ID of the owner is generated as a keccak of the contract address and available from the public getter ``ownerID``.
 
+Constants
+=========
+
+The following public variables cannot be changed after contract deployment.
+
+.. method:: SecurityToken.ownerID
+
+    The bytes32 ID hash of the issuer.
+
 Adding and Restricting Tokens
 =============================
 
@@ -156,6 +165,8 @@ Document Verification
 
     Returns a recorded document hash.
 
+.. _issuing-entity-modules:
+
 Modules
 =======
 
@@ -172,7 +183,7 @@ See the :ref:`modules` documentation for more information.
 
 .. method:: IssuingEntity.detachModule(address _target, address _module)
 
-    Detaches a module.
+    Detaches a module. A module may call to detach itself, but not other modules.
 
 .. method:: IssuingEntity.isActiveModule(address _module)
 

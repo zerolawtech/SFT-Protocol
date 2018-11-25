@@ -74,6 +74,7 @@ As one of the purposes of custodians is to facilitate off-chain transfers of own
     * ``_token``: Contract address of the token to remove benefical owners from.
     * ``_id``: Array of investor IDs.
 
+.. _custodian-modules:
 
 Modules
 =======
@@ -84,7 +85,7 @@ Modules
 
 .. method:: Custodian.detachModule(address _module)
 
-    Detaches a module.
+    Detaches a module. A module may call to detach itself but not other modules.
 
 .. method:: Custodian.isActiveModule(address _module)
 

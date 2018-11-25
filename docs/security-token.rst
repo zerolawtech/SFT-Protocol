@@ -30,7 +30,7 @@ Deployment
 Constants
 =========
 
-The following public variables cannot be changed after creation, and can be considered constants.
+The following public variables cannot be changed after contract deployment.
 
 .. method:: SecurityToken.name
 
@@ -119,6 +119,8 @@ As a result, the following non-standard behaviours exist:
 * Attempting to send tokens to any address associated with the issuer will result in the tokens being sent to the IssuingEntity contract.
 
 The issuer may call ``SecurityToken.transferFrom`` to move tokens between any addresses without prior approval. Transfers of this type must still pass the normal checks, with the exception that the sending address may be restricted.  In this way the issuer can aid investors with token recovery in the event of a lost or compromised private key, or force a transfer in the event of a court order or sanction.
+
+.. _sucurity-token-modules:
 
 Modules
 =======
