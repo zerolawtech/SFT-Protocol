@@ -88,13 +88,13 @@ Each time a beneficial owner is added or removed from a custodian, the ``Benefic
 
 See the :ref:`custodian` documentation for more information on how custodians interact with the IssuingEntity contract.
 
+.. warning:: Custodians may facilitate off-chain transfers of ownership that bypass on-chain compliance checks. It is imperative this approval only be given to known, trusted entities who have deployed a verified, audited custodian contract.
+
 .. method:: IssuingEntity.addCustodian(address _custodian)
 
     Approves a custodian contract to send and receive tokens associated with the issuer.
 
     Once a custodian is approved, they can be restricted with ``IssuingEntity.setInvestorRestriction``.
-
-    .. warning:: Custodians may facilitate off-chain transfers of ownership that bypass on-chain compliance checks. It is imperative this approval only be given to known, trusted entities who have deployed a verified, audited custodian contract.
 
 .. method:: IssuingEntity.setBeneficialOwners(bytes32 _custID, bytes32[] _id, bool _add)
 
@@ -104,7 +104,7 @@ See the :ref:`custodian` documentation for more information on how custodians in
     * ``_id``: Array of investor IDs
     * ``_add``: Permission bool
 
-    This can only be called via the custodian's contract, or by the issuer. An issuer should only use this method in a case where a custodian has been found to be acting in bad-faith.
+    This can only be called via the custodian's contract, or by the issuer. An issuer should only use this method in a case where a custodian has been found to be acting in bad faith.
 
 
 Setting Investor Limits

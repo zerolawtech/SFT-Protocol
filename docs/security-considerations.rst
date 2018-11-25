@@ -8,7 +8,7 @@ A fully realized implementation of the SFT protocol involves many interconnected
 
 We have compiled a list of possible scenarios and solutions below. If you can imagine an issue that is not mentioned here, please contact us so we can discuss it and add it to the list.
 
-.. note:: In this section we provide technical solutions to problems, however many of these situations will also have a legal component. The nature of security tokens means that every involved entity is easily identified, so when someone is acting in bad-faith it is possible that resolution will be the result of a court order. Issuers must keep in mind that although technically they can transfer any investor's tokens without approval, this does not mean that legally they are always allowed to.
+.. note:: In this section we provide technical solutions to problems, however many of these situations will also have a legal component. The nature of security tokens means that every involved entity is easily identified, so when someone is acting in bad faith it is possible that resolution will be the result of a court order. Issuers must keep in mind that although technically they can transfer any investor's tokens without approval, this does not mean that legally they are always allowed to.
 
 Investor Changes Country
 ------------------------
@@ -17,7 +17,13 @@ An investor who changes their legal country of residence will necessarily alter 
 
 Investor is Sanctioned
 ----------------------
+
 If an investor is sanctioned or otherwise has their assets legally frozen, a registrar can use ``KYCRegistrar.setInvestorRestriction`` to block them from transferring any of their tokens.
+
+Court Ordered Transfer of Assets
+--------------------------------
+
+In cases such as a lawsuit or the execution of a will, an issuer may be legally required to perform a token transfer. This is possible using ``SecurityToken.transferFrom``.
 
 Lost Investor Private Key
 -------------------------
@@ -50,4 +56,18 @@ Compromised Issuer/Custodian Authority
 
 If an IssungEntity or Custodian authority is hacked or found to be acting in bad faith, the owner can restrict the authority using ``IssuingEntity.setAuthorityApprovedUntil``. Further actions will depend on the severity of the actions performed by the compromised account prior to it being frozen.
 
-This situation can be mitigated agiainst with multi-sig requirements, method permissioning, and temporary approval to authorities.
+This situation can be mitigated against with multi-sig requirements, method permissioning, and temporary approval to authorities.
+
+Compromised Custodian
+---------------------
+
+If a custodian is hacked or found to be acting in bad faith, an issuer may block them with ``IssuingEntity.setInvestorRestriction``. They may then use ``IssuingEntity.setBeneficialOwners`` to remove the custodian from the list of beneficial owners, and ``SecurityToken.transferFrom`` to seize any tokens held by the custodian.
+
+A list of beneficial owners can be obtained by filtering for the ``BeneficialOwnerSet`` event.
+
+Compromised Issuer
+------------------
+
+As an issuer is the highest authority over their own tokens, a fully compromised issuer is a difficult situation to overcome.  Issuers should always follow strict security practices such as keeping the original owner private keys in cold storage, isolating function authority via permissioning, and using strict multi-sig requirements.
+
+If an IssuingEntity contract is compromised the best course of action will be to immediately notify all investors and custodians and halt secondary trading.  The issuer will have to deploy new contracts and reissue tokens based on a determined historic state of the blockchain.
