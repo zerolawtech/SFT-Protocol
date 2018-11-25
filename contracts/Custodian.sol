@@ -156,9 +156,11 @@ contract Custodian is Modular, MultiSig {
 	{
 		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
 		address _issuer = issuerMap[_token];
+		bool _newBool;
+		bytes32[] memory _newID = new bytes32[](_id.length);
 		for (uint256 i = 0; i < _id.length; i++) {
 			address[] storage _owner = beneficialOwners[_issuer][_id[i]];
-			bool _found;
+			bool _found = false;
 			for (uint256 x = 0; x < _owner.length; x++) {
 				if (_owner[x] == _token) {
 					_found = true;
@@ -166,13 +168,20 @@ contract Custodian is Modular, MultiSig {
 				}
 			}
 			if (!_found) {
+				_newID[i] = _id[i];
+				_newBool = true;
 				_owner.push(_token);
 				emit NewBeneficialOwner(_issuer, _token, _id[i]);
 			}
 		}
-		require(IssuingEntity(_issuer).setBeneficialOwners(ownerID, _id, true));
-		/* bytes4 signature for custodian module addedInvestors() */
-		_callModules(0xf8324d5a, msg.data);
+		if (_newBool) {
+			require(IssuingEntity(_issuer).setBeneficialOwners(ownerID,
+				_newID,
+				true
+			));
+			/* bytes4 signature for custodian module addedInvestors() */
+			_callModules(0xf8324d5a, abi.encode(_token, _newID));
+		}
 		return true;
 	}
 
@@ -191,9 +200,15 @@ contract Custodian is Modular, MultiSig {
 		returns (bool)
 	{
 		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
-		_removeInvestors(_token, _id);
-		/* bytes4 signature for custodian module removedInvestors() */
-		_callModules(0x9898b82e, msg.data);
+		(bool _rBool, bytes32[] memory _rID) = _removeInvestors(_token, _id);
+		if (_rBool) {
+			/* bytes4 signature for custodian module removedInvestors() */
+			_callModules(0x9898b82e, abi.encode(_token, _rID));
+			return;
+		}
+		
+		
+		
 		return true;
 	}
 
@@ -202,30 +217,46 @@ contract Custodian is Modular, MultiSig {
 		@param _token Token address
 		@param _id Array of investor IDs
 	 */
-	function _removeInvestors(address _token, bytes32[] _id) internal {
+	function _removeInvestors(
+		address _token,
+		bytes32[] _id
+	)
+		internal
+		returns (bool, bytes32[])
+	{
 		address _issuer = issuerMap[_token];
-		bytes32[] memory _toRemove = new bytes32[](_id.length);
-		for (uint256 i = 0; i < _id.length; i++) {
+		bool _zeroBool;
+		bytes32[] memory _zeroID = new bytes32[](_id.length);
+		bool _removeBool;
+		bytes32[] memory _removeID = new bytes32[](_id.length);
+			for (uint256 i = 0; i < _id.length; i++) {
 			address[] storage _owner = beneficialOwners[_issuer][_id[i]];
 			for (uint256 x = 0; x < _owner.length; x++) {
 				if (_owner[x] == _token) {
 					_owner[x] = _owner[_owner.length-1];
 					/*
 						underflow is impossible because for loop would not
-						start with an empty array. */
+						start with an empty array.
+					*/
 					_owner.length -= 1;
 					emit RemovedBeneficialOwner(_issuer, _token, _id[i]);
+					_removeBool = true;
+					_removeID[i] = _id[i];
 					if (_owner.length > 0) break;
-					_toRemove[i] = _id[i];
+					_zeroBool = true;
+					_zeroID[i] = _id[i];
 					break;
 				}
 			}
 		}
-		require(IssuingEntity(_issuer).setBeneficialOwners(
-			ownerID,
-			_toRemove,
-			false
-		));
+		if (_zeroBool) {
+			require(IssuingEntity(_issuer).setBeneficialOwners(
+				ownerID,
+				_zeroID,
+				false
+			));
+		}
+		return (_removeBool, _removeID);
 	}
 
 	/**
