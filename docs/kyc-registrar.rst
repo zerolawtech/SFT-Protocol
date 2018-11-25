@@ -8,7 +8,7 @@ KYCRegistrar contracts are registries that hold information on the identity, reg
 
 Registries may be maintained by a single entity, or a federation of entities where each are approved to provide identification services for their specific jurisdiction. The contract owner can authorize other entities to add investors within specified countries.
 
-Contract authorities associate addresses to ID hashes that denotes the identity of the investor who owns the address. More than one address may be associated to the same hash. Anyone can call ``KYCRegistrar.getID`` to see which hash is associated to an address, and then using this ID call functions to query information about the investor's region and accreditation rating.
+Contract authorities associate addresses to ID hashes that denote the identity of the investor who owns the address. More than one address may be associated to the same hash. Anyone can call ``KYCRegistrar.getID`` to see which hash is associated to an address, and then using this ID call functions to query information about the investor's region and accreditation rating.
 
 Registry contracts implement a variation of the standard :ref:`multisig` functionality used in other contracts within the protocol. This document assumes familiarity with the standard multi-sig implementation, and will only highlight the differences.
 

@@ -38,7 +38,7 @@ Modules hook into specific methods within the contract they are applied to by ad
         /* other functionality */
         hooks.push(0x35a341da);
         hooks.push(0x4268353d);
-	}
+    }
 
 The signatures are those of methods within the module that should be called. They are unique depending on the type of contract the module will attach to.  Possible hook points and their corresponding methods include:
 
@@ -134,11 +134,21 @@ Custodian
 
     Called after a custodian has sent tokens.
 
+    * ``_token``: Address of token that was transferred.
+    * ``_id``: ID of the recipient.
+    * ``_value``: Number of tokens that were transferred.
+    * ``_stillOwner``: Is the recipient still a beneficial owner for this token?
+
 .. method:: CustodianModule.receivedTokens(address _token, bytes32 _id, uint256 _value, bool _newOwner)
 
     * Hook signature: ``0x081e5f03``
 
     Called after a custodian has received tokens.
+
+    * ``_token``: Address of token that was transferred.
+    * ``_id``: ID of the sender.
+    * ``_value``: Number of tokens that were transferred.
+    * ``_stillOwner``: Is the sender a new beneficial owner for this token?
 
 .. method:: CustodianModule.addedInvestors(address _token, bytes32[] _id)
 
@@ -146,14 +156,68 @@ Custodian
 
     Called after a custodian has added one or more beneficial owners to a token.
 
+    * ``_token``: Address of the token new owners are to be added to.
+    * ``_id``: Array of added investor IDs. May contain 0x00 entries, these should be ignored.
+
 .. method:: CustodianModule.removedInvestors(address _token, bytes32[] _id)
 
     * Hook signature: ``0x9898b82e``
 
     Called after a custodian has removed one or more beneficial owners from a token.
 
+    * ``_token``: Address of the token new owners are to be removed from.
+    * ``_id``: Array of removed investor IDs.  May contain 0x00 entries, these should be ignored.
 
-Modules can also directly change the balance of any address. Modules that are active at the IssuingEntity level can call this function on any security token, modules at the SecurityToken level can only call it on the token they are attached to.
+Calling Parent Methods
+======================
 
+Once attached, modules are permitted to call certain methods in the parent contract.
 
-The wide range of functionality that modules can hook into allows for many different applications. Some examples include: crowdsales, country/time based token locks, right of first refusal enforcement, voting rights, dividend payments, tender offers, and bond redemption.
+.. note:: When a module calls into the parent contract, it will still trigger any of it's own methods hooked into the called method. With poor contract design you can create infinite loops and effectively break the parent contract functionality as long as the module is attached.
+
+SecurityToken
+-------------
+
+Any module applied to an IssuingEntity contract may also call the following methods on any token belonging to that issuer.  See :ref:`security-token` for more detailed information on these methods.
+
+.. method:: SecurityToken.transferFrom(address _from, address _to, uint256 _value)
+
+    Transfers tokens between two addresses. A module calling ``transferFrom`` has the same level of authority as if the call was from the issuer.
+
+    Calling this method will also call any hooked in ``checkTransfer`` and ``transferTokens`` methods.
+
+.. method:: SecurityToken.modifyBalance(address _owner, uint256 _value)
+
+    Sets the balance of ``_owner`` to ``_value`` and modifies ``totalSupply`` accordingly. This method is only callable by a module.
+
+    Calling this method will also call any hooked in ``balanceChanged`` methods.
+
+Custodian
+---------
+
+See :ref:`custodian` for more detailed information on these methods.
+
+.. method:: Custodian.transfer(address _token, address _to, uint256 _value, bool _stillOwner)
+
+    Transfers tokens from the custodian to an investor.
+
+    Calling this method will also call any hooked in ``sentTokens`` methods.
+
+.. method:: Custodian.addInvestors(address _token, bytes32[] _id)
+
+    Adds investors to the list of beneficial owners for a token.
+
+    Calling this method will also call any hooked in ``addedInvestors`` methods.
+
+.. method:: Custodian.removeInvestors(address _token, bytes32[] _id)
+
+    Removes investors from the list of beneficial owners for a token.
+
+    Calling this method will also call any hooked in ``removedInvestors`` methods.
+
+Use Cases
+=========
+
+The wide range of functionality that modules can hook into, combined with their high level of authority, allows for many different applications. Some examples include: crowdsales, country/time based token locks, right of first refusal enforcement, voting rights, dividend payments, tender offers, and bond redemption.
+
+We have included some sample modules on `GitHub <https://github.com/SFT-Protocol/security-token/tree/master/contracts/modules>`__ as examples to help understand module development and demonstrate the range of available functionality.

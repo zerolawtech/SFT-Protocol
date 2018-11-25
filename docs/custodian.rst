@@ -8,6 +8,8 @@ Custodian contracts allow approved entities to hold tokens on behalf of multiple
 
 Custodian contracts include the standard SFT protocol :ref:`multisig` and :ref:`modules` functionality. See the respective documents for detailed information on these components.
 
+This documentation only explains contract methods that are meant to be accessed directly. External methods that will revert unless called through another contract, such as IssuingEntity or modules, are not included.
+
 It may be useful to also view the `Custodian.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/Custodian.sol>`__ source code while reading this document.
 
 Deployment
@@ -38,16 +40,6 @@ To maintain accurate beneficial owner records, custodians must initiate all toke
 
     The ``_stillOwner`` boolean is only used to remove investors from the list of beneficial owners. If it is set to true but the recipient was not previously listed, they will not be added.
 
-.. method:: Custodian.receiveTransfer(address _token, bytes32 _id, uint256 _value)
-
-    Called by IssuingEntity when tokens are sent to a custodian.
-
-    * ``_token``: Contract address of the token being received.
-    * ``_id``: ID of the token sender
-    * ``_value``: Number of tokens being transferred
-
-    This method may be modified to introduce extra functionality according to the needs of the custodian.
-
 Beneficial Owners
 =================
 
@@ -67,12 +59,16 @@ As one of the purposes of custodians is to facilitate off-chain transfers of own
     * ``_token``: Contract address of the token to add benefical owners to.
     * ``_id``: Array of investor IDs.
 
+    Calling this method with an investor ID that is already a beneficial owner will not cause it to throw.
+
 .. method:: Custodian.removeInvestors(address _token, bytes32[] _id)
 
     Removes beneficial owners from a token.
 
     * ``_token``: Contract address of the token to remove benefical owners from.
     * ``_id``: Array of investor IDs.
+
+    Calling this method with an investor ID that is not a beneficial owner will not cause it to throw.
 
 .. _custodian-modules:
 

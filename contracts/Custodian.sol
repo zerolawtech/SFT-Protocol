@@ -4,12 +4,7 @@ import "./open-zeppelin/SafeMath.sol";
 import "./SecurityToken.sol";
 import "./components/MultiSig.sol";
 
-/**
-	@title Custodian Contract
-	@dev
-		This is a bare-bones implementation of a custodian contract,
-		it can be expanded upon depending on the needs of the owner.
- */
+/** @title Custodian Contract */
 contract Custodian is Modular, MultiSig {
 
 	/* issuer contract => investor ID => token addresses */
