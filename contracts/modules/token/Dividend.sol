@@ -30,7 +30,7 @@ contract DividendModule is CheckpointModule {
 		
 	}
 
-	function issueDividend(uint256 _claimPeriod) public onlyIssuer payable {
+	function issueDividend(uint256 _claimPeriod) public onlyAuthority payable {
 		require (dividendTime < now);
 		require (claimExpiration == 0);
 		require (msg.value > 0);
@@ -59,7 +59,7 @@ contract DividendModule is CheckpointModule {
 		}
 	}
 
-	function closeDividend() public onlyIssuer {
+	function closeDividend() public onlyAuthority {
 		require (claimExpiration > 0);
 		require (now > claimExpiration || address(this).balance == 0);
 		emit DividendExpired(address(this).balance);

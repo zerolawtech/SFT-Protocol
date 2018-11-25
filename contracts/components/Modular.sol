@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "../interfaces/Modules.sol";
 
 
-/** @title Modular Functionality for IssuingEntity and SecurityToken */
+/** @title Modular Functionality */
 contract Modular {
 
 	struct Module {
@@ -25,7 +25,7 @@ contract Modular {
 	function _attachModule(address _module) internal {
 		require (!activeModules[_module]);
 		IBaseModule b = IBaseModule(_module);
-		require (b.owner() == address(this));
+		require (b.getOwner() == address(this));
 		bytes4[] memory _hooks = b.getHooks();
 		activeModules[_module] = true;
 		for (uint256 i = 0; i < modules.length; i++) {
@@ -85,7 +85,7 @@ contract Modular {
 	}
 
 	/**
-		@notice Determines if a module is active on this issuing entity
+		@notice Determines if a module is active on this contract
 		@param _module Deployed module address
 		@return bool
 	 */

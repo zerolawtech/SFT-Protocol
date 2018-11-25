@@ -81,7 +81,7 @@ contract CrowdsaleModule is STModuleBase {
 		}
 		_tokens = _tokens.sub(_checkExcess(tokens, tokensMax, _tokens));
 		receiver.transfer(address(this).balance);
-		token.transferFrom(address(issuer), msg.sender, _tokens);
+		token.transferFrom(owner, msg.sender, _tokens);
 		fiat = fiat.add(_fiat);
 		tokens = tokens.add(_tokens);
 	}
@@ -109,11 +109,11 @@ contract CrowdsaleModule is STModuleBase {
 		uint256 _fiat
 	)
 		external
-		onlyIssuer
+		onlyAuthority
 	{
 		require (tokens.add(_tokens) <= tokensMax);
 		require (fiat.add(_fiat) <= fiatMax);
-		token.transferFrom(address(issuer), _to, _tokens);
+		token.transferFrom(owner, _to, _tokens);
 		tokens = tokens.add(_tokens);
 		fiat = fiat.add(_fiat);
 		if (tokens == tokensMax || fiat == fiatMax) {
@@ -121,7 +121,7 @@ contract CrowdsaleModule is STModuleBase {
 		}
 	}
 
-	function setEthFiatRate(uint256 _rate) external onlyIssuer {
+	function setEthFiatRate(uint256 _rate) external onlyAuthority {
 		ethFiatRate = _rate;
 	}
 
@@ -137,7 +137,7 @@ contract CrowdsaleModule is STModuleBase {
 		if (!isOpen()) {
 			return false;
 		}
-		return token.checkTransfer(address(issuer), _addr, 1);
+		return token.checkTransfer(owner, _addr, 1);
 	}
 
 	function checkTransfer(

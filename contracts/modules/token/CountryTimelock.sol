@@ -18,7 +18,7 @@ contract CountryLockModule is STModuleBase {
 		hooks.push(0x70aaf928);
 	}
 
-	function modifyCountryLock(uint16 _country, uint256 _epochTime) public onlyIssuer {
+	function modifyCountryLock(uint16 _country, uint256 _epochTime) public onlyAuthority {
 		countryLock[_country] = _epochTime;
 	}
 

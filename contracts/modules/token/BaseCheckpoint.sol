@@ -42,7 +42,7 @@ contract CheckpointModule is STModuleBase {
 		uint256 _value
 	)
 		external
-		onlyParent
+		onlyOwner
 		returns (bool)
 	{
 		if (now < time) return true;
@@ -69,7 +69,7 @@ contract CheckpointModule is STModuleBase {
 		uint256 _new
 	)
 		external
-		onlyParent
+		onlyOwner
 		returns (bool)
 	{
 		if (now < time) {

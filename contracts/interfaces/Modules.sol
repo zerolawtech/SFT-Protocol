@@ -3,14 +3,14 @@ pragma solidity ^0.4.24;
 
 interface IBaseModule {
 	function getHooks() external view returns (bytes4[]);
-	function owner() external view returns (address);
+	function getOwner() external view returns (address);
 	function name() external view returns (string);
 }
 
 interface ISTModule {
 	function getHooks() external view returns (bytes4[]);
+	function getOwner() external view returns (address);
 	function token() external returns (address);
-	function owner() external view returns (address);
 	function name() external view returns (string);
 	
 	/* 0x70aaf928 */
@@ -53,8 +53,7 @@ interface ISTModule {
 
 interface IIssuerModule {
 	function getHooks() external view returns (bytes4[]);
-	function issuer() external returns (address);
-	function owner() external view returns (address);
+	function getOwner() external view returns (address);
 	function name() external view returns (string);
 
 	/* 0x47fca5df */
@@ -97,7 +96,7 @@ interface IIssuerModule {
 
 interface ICustodianModule {
 	function getHooks() external view returns (bytes4[]);
-	function owner() external view returns (address);
+	function getOwner() external view returns (address);
 	function name() external view returns (string);
 
 	/**
