@@ -6,6 +6,31 @@ Getting Started
 
 This is a quick explanation of the minimum steps required to deploy and use each contract of the protocol.
 
+To setup a simple test environment using brownie:
+
+
+::
+
+    brownie console
+    >>> run('simple')
+
+
+This runs `simple.py <https://github.com/SFT-Protocol/security-token/tree/master/deployments/simple.py>`__ which:
+
+* Deploys ``KYCRegistrar`` from ``accounts[0]``
+* Deploys ``IssuingEntity`` from ``accounts[1]``
+* Deploys ``SecurityToken`` from ``accounts[1]`` with an initial total supply of 1,000,000 tokens
+* Associates the contracts
+* Approves ``accounts[2:8]`` in ``KYCRegistrar``, with investor ratings 1-2 and country codes 1-3
+* Approves investors from country codes 1-3 in ``IssuingEntity``
+
+From this configuration, the contracts are ready to transfer tokens:
+
+..
+
+    >>> SecurityToken[0].transfer(accounts[2], 1000)
+    >>> SecurityToken[0].transfer(accounts[3], 1000, {'from': accounts[2]})
+
 KYC Registrar
 =============
 
