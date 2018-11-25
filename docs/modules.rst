@@ -21,6 +21,14 @@ Attaching and Detaching
 
 Modules are attached or detached via methods ``attachModule`` and ``detachModule`` in the inheriting contracts. See the :ref:`issuing-entity` and :ref:`custodian` documentation implementations.
 
+All contracts implementing modular functionality will also include the following method:
+
+.. method:: Modular.isActiveModule(address _module)
+
+    Returns true if a module is currently active on the contract.
+    
+    Modules that are attached to an IssuingEntity are also considered active on any tokens belonging to that issuer.
+
 Hooking into Methods
 ====================
 

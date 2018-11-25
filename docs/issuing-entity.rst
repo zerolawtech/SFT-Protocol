@@ -172,7 +172,7 @@ Modules
 
 The issuer may use these methods to attach or detach modules to this contract or any associated token contract.
 
-See the :ref:`modules` documentation for more information.
+See the :ref:`modules` documentation for information module funtionality and development.
 
 .. method:: IssuingEntity.attachModule(address _target, address _module)
 
@@ -189,5 +189,3 @@ See the :ref:`modules` documentation for more information.
 
     Returns true if a module is currently active on the contract. Modules that are active on a token will return false.
 
-Integration
-===========

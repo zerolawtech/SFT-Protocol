@@ -99,7 +99,6 @@ Authorites may add, modify, or restrict investors in any country that they have 
 
     Modifies the restricted status of an investor.  An investor who is restricted will be unable to send or receive tokens.
 
-
 .. method:: KYCRegistrar.setInvestorAuthority(bytes32[] _id, bytes32 _authID)
 
     Modifies the authority that is associated with one or more investors.
@@ -130,13 +129,17 @@ In situations of a lost or compromised private key the address may instead be fl
 Getting Investor Info
 =====================
 
+Issuers and custodians may use the following getter methods to query information about an investor:
+
 .. method:: KYCRegistrar.getID(address _addr)
 
     Given an address, returns the investor or authority ID associated to it. If there is no association it will return an empty bytes32.
 
 .. method:: KYCRegistrar.getInvestor(address _addr)
 
-    Returns the investor ID, permission status (based on the input address), rating, and country code for an investor. This function is designed to maximize gas efficiency when calling for information prior to performing a token transfer.
+    Returns the investor ID, permission status (based on the input address), rating, and country code for an investor.
+
+    .. note:: This function is designed to maximize gas efficiency when calling for information prior to performing a token transfer.
 
 .. method:: KYCRegistrar.getInvestors(address _from, address _to)
 
@@ -166,12 +169,3 @@ Getting Investor Info
     * Is the investor ID restricted?
     * Is the address restricted?
     * Has the investor's rating expired?
-
-Integration
-===========
-
-Issuers must associate their `IssuingEntity <https://github.com/SFT-Protocol/security-token/tree/master/contracts/IssuingEntity.sol>`__ contract with one or more registrars in order to alow investors to hold their tokens. This is accomplished by calling ``IssuingEntity.setRegistrar``.
-
-The investor ID associated with an address may be obtained by calling the ``KYCRegistrar.getID`` view function. The ID may then be used to call a variety of view functions to obtain the investor's rating, region, country or KYC expiration date.
-
-IssuingEntity contracts primarily rely on ``KYCRegistrar.getInvestor`` and ``KYCRegistrar.getInvestors`` to retrieve investor information in the most gas efficient manner possible.

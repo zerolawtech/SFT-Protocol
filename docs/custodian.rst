@@ -75,13 +75,15 @@ As one of the purposes of custodians is to facilitate off-chain transfers of own
 Modules
 =======
 
+See the :ref:`modules` documentation for information module funtionality and development.
+
 .. method:: Custodian.attachModule(address _module)
 
-    Attaches a module.
+    Attaches a module to the custodian.
 
 .. method:: Custodian.detachModule(address _module)
 
-    Detaches a module. A module may call to detach itself but not other modules.
+    Detaches a module. A module may call to detach itself, but not other modules.
 
 .. method:: Custodian.isActiveModule(address _module)
 

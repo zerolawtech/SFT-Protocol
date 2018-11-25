@@ -128,10 +128,3 @@ Modules are attached and detached via :ref:`issuing-entity`.
 .. method:: SecurityToken.isActiveModule(address _module)
 
     Returns true if a module is currently active on the token.  Modules that are active on the IssuingEntity are also considered active on tokens.
-
-Integration
-===========
-
-After the contract is deployed it must be associated with the issuer via
-``IssuingEntity.addToken``. Token transfers are not possible until this is done.
-
