@@ -2,39 +2,51 @@
 SFT Protocol
 ############
 
-The SFT protocol is a set of compliance-oriented smart contracts built on the Ethereum blockchain that allow for the tokenization of debt and equity based securities. It provides a robust, flexible framework allowing issuers and investors to retain regulatory compliance throughout primary issuance and multi-jurisdictional secondary trading.
+The SFT protocol is a set of compliance-oriented smart contracts, written in `Solidity <https://solidity.readthedocs.io/en/v0.5.0/>`__ for the Ethereum blockchain, that allow for the tokenization of debt and equity based securities. It provides a robust, flexible framework allowing issuers and investors to retain regulatory compliance throughout primary issuance and multi-jurisdictional secondary trading.
 
 How it Works
 ============
 
-SFT expands upon the ERC20 token standard. Tokens are transferred via the ``transfer`` and ``transferFrom`` functions, however the transfer will only succeed if approved by a series of permissioning modules. A call to ``checkTransfer`` returns true if the transfer is possible. The standard configuration includes checking a KYC/AML whitelist, tracking investor counts and limits, and restrictions on countries and accredited status. By implementing other modules a variety of additional functionality is possible so as to allow compliance to laws in the countries of the issuer and investors.
+SFT is designed to maximize interoperability between different network participants. Broadly speaking, these participants may be split into four categories:
+
+* **Investors** are entities that have passed KYC/AML checks and are are able to hold or transfer security tokens.
+* **Issuers** are entities that create and sell security tokens to fund their business operations.
+* **Registrars** are trusted entities that provide KYC/AML services for network participants.
+* **Custodians** are trusted entities that may hold tokens on behalf of multiple investors and facilitate secondary trading of tokens.
+
+The protocol is built with two central concepts in mind: **identification** and **permission**. Each investor has their identity verified by a registrar and a unique ID hash is associated to their wallet addresses, Based on this identity information, issuers and custodians apply a series of rules to determine how the investor may interact with them.
+
+Issuers, registrars and custodians each exist on the blockchain with their own smart contracts that define the way they interact with one another. These contracts allow different entities to provide services to each other within the ecosystem.
+
+Security tokens in the protocol are built upon the ERC20 token standard. Tokens are transferred via the ``transfer`` and ``transferFrom`` methods, however the transfer will only succeed if approved by a series of permissioning modules. A call to ``checkTransfer`` returns true if the transfer is possible. The base configuration includes checking a KYC/AML whitelist, tracking investor counts and limits, and restrictions on countries and accredited status. By implementing other modules a variety of additional functionality is possible so as to allow compliance to laws in the countries of the issuer and investors.
 
 Components
 ==========
 
+The SFT protocol is comprised of four core contracts:
+
 1. :ref:`security-token`
 
-    * ERC20 compliant tokens intended to represent a claim to ownership of securities
-    * Modules may be applied to each security token to add additional permissioning or functionality
+    * ERC20 compliant token contract
+    * Intended to represent a claim to ownership of securities
+    * Permissioning logic ensures compliance in all token transfers
 
 2. :ref:`issuing-entity`
 
-    * Central owner contract for tokens created by the same issuer
-    * Modules may be applied at this level that introduce permissioning / functionality to all associated security token contracts
+    * Owner contract for tokens created by the same issuer
+    * Handles common compliance logic for all the issuer's tokens
 
 3. :ref:`kyc-registrar`
 
-    a. Whitelists that provide identity, region, and accreditation information of investors based on off-chain KYC/AML verification
+    * Whitelists that provide identity, region, and accreditation information of investors based on off-chain KYC/AML verification
+    * May be maintained by a single entity or a federation across multiple jurisdictions
 
 4. :ref:`custodian`
 
-    * Contracts that represent an entity approved to hold tokens for multiple investors
-    * Base interface that allows for wide customization depending on the needs of the owner
-
-5. :ref:`modules`
-
-    * Optional additional contracts that can attach into IssuingEntity and SecurityToken
-    * Wide range of functionality is possible depending on where the modules hook into
+    * Contracts that represent an entity approved to hold tokens on behalf of multiple investors
+    * Interacts with IssuingEntity to provide accurate on-chain investor counts
+    * Intended to be used by broker/dealers and exchanges
+    * Modular design allows for optional added functionality
 
 Source Code
 ===========
@@ -43,11 +55,13 @@ The SFT Protocol is open source. You can view the code on `github <https://githu
 
 Testing and Deployment
 ======================
-   Unit testing and deployment of this project is performed with `brownie <https://github.com/iamdefinitelyahuman/brownie>`__.
+
+Unit testing and deployment of this project is performed with `brownie <https://github.com/iamdefinitelyahuman/brownie>`__.
 
 License
 =======
-   This project is licensed under the `Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0.html>`__ license.
+
+This project is licensed under the `Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0.html>`__ license.
 
 
 Contents
