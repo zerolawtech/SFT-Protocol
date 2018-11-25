@@ -51,12 +51,12 @@ The SFT protocol is comprised of four core contracts:
 Source Code
 ===========
 
-The SFT Protocol is open source. You can view the code on `github <https://github.com/SFT-Protocol/security-token>`__.
+The SFT Protocol is open source. You can view the code on `GitHub <https://github.com/SFT-Protocol/security-token>`__.
 
 Testing and Deployment
 ======================
 
-Unit testing and deployment of this project is performed with `brownie <https://github.com/iamdefinitelyahuman/brownie>`__.
+Unit testing and deployment of this project is performed with `Brownie <https://github.com/iamdefinitelyahuman/brownie>`__.
 
 License
 =======
