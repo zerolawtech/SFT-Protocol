@@ -115,6 +115,6 @@ Multisig functionality can be implemented within any contract method as well as 
 
     This function relies on ``tx.origin`` to verify that the original caller is an approved authority. Permissions are checked against the signature value in the same way as with an internal call. The recorded keccak hash of the call is formed by joining the address of the calling contract, the signature, and the supplied call hash. As such it is impossible to exploit the external call to advance the count on internal multisig events.
 
-    An important security consideration: If an external contract includes a function with the same signature as a one inside the multi-sig contract, it will be impossible to set unique permissions for each function. Developers and auditors of external contracts should always keep this in mind.
+    .. warning:: If an external contract includes a function with the same signature as one inside the multi-sig contract, it will be impossible to set unique permissions for each function. Developers and auditors of external contracts should always keep this in mind.
 
 

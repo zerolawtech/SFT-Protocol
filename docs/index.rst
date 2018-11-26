@@ -2,7 +2,7 @@
 SFT Protocol
 ############
 
-The SFT protocol is a set of compliance-oriented smart contracts, written in `Solidity <https://solidity.readthedocs.io/en/v0.5.0/>`__ for the Ethereum blockchain, that allow for the tokenization of debt and equity based securities. It provides a robust, flexible framework allowing issuers and investors to retain regulatory compliance throughout primary issuance and multi-jurisdictional secondary trading.
+The Secured Financial Transaction (SFT) Protocol is a set of compliance-oriented smart contracts, written in `Solidity <https://solidity.readthedocs.io/en/v0.5.0/>`__ for the Ethereum blockchain, that allow for the tokenization of debt and equity based securities. It provides a robust, flexible framework allowing issuers and investors to retain regulatory compliance throughout primary issuance and multi-jurisdictional secondary trading.
 
 How it Works
 ============
