@@ -66,7 +66,7 @@ SecurityToken.sol is based on the `ERC20 Token Standard <https://theethereum.wik
 
 You can check if a transfer will succeed without performing a transaction by calling the ``SecurityToken.checkTransfer`` method within the token contract.
 
-Restrictions imposed on investor limits, approved countries and minimum ratings are only checked when receiving tokens. Unless an address has been explicitly blocked, it will always be able to send an existing balance. For example, an investor may purchase tokens that are only require being accredited, and then later their accreditation status expires. The investor may still transfer the tokens they already have, but may not receive any more tokens.
+Restrictions imposed on investor limits, approved countries and minimum ratings are only checked when receiving tokens. Unless an address has been explicitly blocked, it will always be able to send an existing balance. For example, an investor may purchase tokens that are only available to accredited investors, and then later their accreditation status expires. The investor may still transfer the tokens they already have, but may not receive any more tokens.
 
 Transferring a balance between two addresses associated with the same investor ID does not have the same restrictions imposed, as there is no change of ownership. An investor with multiple addresses may call ``SecurityToken.transferFrom`` to move tokens from any of their addresses without first using the ``SecurityToken.approve`` method. The issuer can also use ``SecurityToken.transferFrom`` to move any investor's tokens, without prior approval.
 
