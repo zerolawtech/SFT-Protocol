@@ -14,7 +14,7 @@ SFT is designed to maximize interoperability between different network participa
 * **Registrars** are trusted entities that provide KYC/AML services for network participants.
 * **Custodians** are trusted entities that may hold tokens on behalf of multiple investors and facilitate secondary trading of tokens.
 
-The protocol is built with two central concepts in mind: **identification** and **permission**. Each investor has their identity verified by a registrar and a unique ID hash is associated to their wallet addresses, Based on this identity information, issuers and custodians apply a series of rules to determine how the investor may interact with them.
+The protocol is built with two central concepts in mind: **identification** and **permission**. Each investor has their identity verified by a registrar and a unique ID hash is associated to their wallet addresses. Based on this identity information, issuers and custodians apply a series of rules to determine how the investor may interact with them.
 
 Issuers, registrars and custodians each exist on the blockchain with their own smart contracts that define the way they interact with one another. These contracts allow different entities to provide services to each other within the ecosystem.
 
