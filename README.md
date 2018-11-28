@@ -13,11 +13,11 @@ SFT is designed to maximize interoperability between different network participa
 * **Registrars** are trusted entities that provide KYC/AML services for network participants.
 * **Custodians** are trusted entities that may hold tokens on behalf of multiple investors and facilitate secondary trading of tokens.
 
-The protocol is built with two central concepts in mind: **identification** and **permission**. Each investor has their identity verified by a registrar and a unique ID hash is associated to their wallet addresses, Based on this identity information, issuers and custodians apply a series of rules to determine how the investor may interact with them.
+The protocol is built with two central concepts in mind: **identification** and **permission**. Each investor has their identity verified by a registrar and a unique ID hash is associated to their wallet addresses. Based on this identity information, issuers and custodians apply a series of rules to determine how the investor may interact with them.
 
 Issuers, registrars and custodians each exist on the blockchain with their own smart contracts that define the way they interact with one another. These contracts allow different entities to provide services to each other within the ecosystem.
 
-Security tokens in the protocol are built upon the ERC20 token standard. Tokens are transferred via the ``transfer`` and ``transferFrom`` methods, however the transfer will only succeed if approved by a series of permissioning modules. A call to ``checkTransfer`` returns true if the transfer is possible. The base configuration includes checking a KYC/AML whitelist, tracking investor counts and limits, and restrictions on countries and accredited status. By implementing other modules a variety of additional functionality is possible so as to allow compliance to laws in the countries of the issuer and investors.
+Security tokens in the protocol are built upon the ERC20 token standard. Tokens are transferred via the ``transfer`` and ``transferFrom`` methods, however the transfer will only succeed if it passes a series of on-chain compliance requirements. A call to ``checkTransfer`` returns true if the transfer is possible. The base configuration includes investor identification, tracking investor counts and limits, and restrictions on countries and accredited status. By implementing other modules a variety of additional functionality is possible so as to allow compliance to laws in the countries of the issuer and investors.
 
 ## Components
 
@@ -56,6 +56,10 @@ The SFT protocol is comprised of four core contracts:
 The [Yellow Paper](docs/SFT-Protocol-Yellowpaper.pdf) provides a more detailed overview of how the SFT Protocol is structrued.
 
 In-depth documentation is hosted at [Read the docs](https://sft-protocol.readthedocs.io).
+
+## Develoment Progress
+
+The SFT Protocol is still under active development and has not yet undergone a third party audit. Please notify us if you find any issues in the code. We highly recommend against using these contracts prior to an audit by a trusted third party.
 
 ## Testing and Deployment
 
