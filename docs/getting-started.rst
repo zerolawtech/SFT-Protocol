@@ -15,7 +15,7 @@ To setup a simple test environment using brownie:
     >>> run('simple')
 
 
-This runs `simple.py <https://github.com/HyperLink-Capital/sft-protocol/tree/master/deployments/simple.py>`__ which:
+This runs `simple.py <https://github.com/SFT-Protocol/security-token/tree/master/deployments/simple.py>`__ which:
 
 * Deploys ``KYCRegistrar`` from ``accounts[0]``
 * Deploys ``IssuingEntity`` from ``accounts[1]``
@@ -34,7 +34,7 @@ From this configuration, the contracts are ready to transfer tokens:
 KYC Registrar
 =============
 
-To setup an investor registry, deploy `KYCRegistrar.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/KYCRegistrar.sol>`__. Owner addresses will then be able to add investors using ``KYCRegistrar.addInvestor`` or approve other whitelisting authorities with ``KYCRegistrar.addAuthority``.
+To setup an investor registry, deploy `KYCRegistrar.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/KYCRegistrar.sol>`__. Owner addresses will then be able to add investors using ``KYCRegistrar.addInvestor`` or approve other whitelisting authorities with ``KYCRegistrar.addAuthority``.
 
 See the :ref:`kyc-registrar` page for a detailed explanation of how to use this contract.
 
@@ -43,9 +43,9 @@ Issuing Tokens
 
 Issuing tokens and being able to transfer them requires the following steps:
 
-1. Deploy `IssuingEntity.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/IssuingEntity.sol>`__.
+1. Deploy `IssuingEntity.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/IssuingEntity.sol>`__.
 2. Call ``IssuingEntity.setRegistrar`` to add one or more investor registries. You may maintain your own registry and/or use those belonging to trusted third parties.
-3. Deploy `SecurityToken.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/SecurityToken.sol>`__. Enter the address of the issuer contract from step 1 in the constructor. The total supply of tokens will be initially creditted to the issuer.
+3. Deploy `SecurityToken.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/SecurityToken.sol>`__. Enter the address of the issuer contract from step 1 in the constructor. The total supply of tokens will be initially creditted to the issuer.
 4. Call ``IssuingEntity.addToken`` to attach the token to the issuer.
 5. Call ``IssuingEntity.setCountries`` to approve investors from specific countries to hold the tokens.
 
@@ -75,7 +75,7 @@ See the :ref:`security-token` page for a detailed explanation of how to use this
 Custodians
 ==========
 
-To set up a custodian contract to send and receive tokens, deploy `Custodian.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/Custodian.sol>`__ and then attach it to an IssuingEntity with ``IssuingEntity.addCustodian``. At this point, investors may send tokens into the custodian contract just like they would any other address.
+To set up a custodian contract to send and receive tokens, deploy `Custodian.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/Custodian.sol>`__ and then attach it to an IssuingEntity with ``IssuingEntity.addCustodian``. At this point, investors may send tokens into the custodian contract just like they would any other address.
 
 The ``Custodian.transfer`` function allows you to send tokens out of the contract. You may modify the list of beneficial owners using ``addInvestors`` and ``removeInvestors``.
 

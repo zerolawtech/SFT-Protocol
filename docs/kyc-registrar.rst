@@ -12,7 +12,7 @@ Contract authorities associate addresses to ID hashes that denote the identity o
 
 Registry contracts implement a variation of the standard :ref:`multisig` functionality used in other contracts within the protocol. This document assumes familiarity with the standard multi-sig implementation, and will only highlight the differences.
 
-It may be useful to also view the `KYCRegistrar.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/KYCRegistrar.sol>`__ source code while reading this document.
+It may be useful to also view the `KYCRegistrar.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/KYCRegistrar.sol>`__ source code while reading this document.
 
 Deployment
 ==========

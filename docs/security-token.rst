@@ -11,7 +11,7 @@ Token contracts are associated to an :ref:`issuing-entity` and also implement :r
 
 This documentation only explains contract methods that are meant to be accessed directly. External methods that will revert unless called through another contract, such as IssuingEntity or modules, are not included.
 
-It may be useful to also view the `SecurityToken.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/SecurityToken.sol>`__ source code while reading this document.
+It may be useful to also view the `SecurityToken.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/SecurityToken.sol>`__ source code while reading this document.
 
 Deployment
 ==========
