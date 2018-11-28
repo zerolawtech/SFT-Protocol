@@ -23,7 +23,7 @@ def setup(sphinx):
 # -- Project information -----------------------------------------------------
 
 project = u'SFT Protocol'
-copyright = u'2018 Benjamin Hauser, Alex Firmani (<a href="https://hyperlink.capital">HyperLink Capital</a>)'
+copyright = u'2018 Benjamin Hauser, Alex Firmani (HyperLink Capital)'
 author = u'Benjamin Hauser, Alex Firmani'
 
 # The short X.Y version
