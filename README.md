@@ -27,17 +27,21 @@ The SFT protocol is comprised of four core contracts:
 
     * ERC20 compliant token contract
     * Intended to represent a claim to ownership of securities
-    * Permissioning logic ensures compliance in all token transfers
+    * Permissioning logic to enforce compliance in all token transfers
+    * Modular design allows for optional added functionality
 
 2. [IssuingEntity](contracts/IssuingEntity.sol)
 
     * Owner contract for tokens created by the same issuer
     * Handles common compliance logic for all the issuer's tokens
+    * Modular design allows for optional added functionality
+    * Multi-sig, multi-authority design provides increased security and permissioned contract management
 
 3. [KYCRegistrar](contracts/KYCRegistrar.sol)
 
     * Whitelists that provide identity, region, and accreditation information of investors based on off-chain KYC/AML verification
     * May be maintained by a single entity or a federation across multiple jurisdictions
+    * Multi-sig, multi-authority design provides increased security and permissioned contract management
 
 4. [Custodian](contracts/Custodian.sol)
 
@@ -45,6 +49,7 @@ The SFT protocol is comprised of four core contracts:
     * Interacts with IssuingEntity to provide accurate on-chain investor counts
     * Intended to be used by broker/dealers and exchanges
     * Modular design allows for optional added functionality
+    * Multi-sig, multi-authority design provides increased security and permissioned contract management
 
 ## Documentation
 
