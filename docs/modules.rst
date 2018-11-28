@@ -8,9 +8,9 @@ Modules are contracts that hook into various methods in :ref:`issuing-entity`, :
 
 It may be useful to view source code for the following contracts while reading this document:
 
-* `Modular.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/components/Modular.sol>`__: Inherited by modular contracts. Provides functionality around attaching, detaching, and calling modules.
-* `ModuleBase.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/components/Modular.sol>`__: Inherited by modules. Provide required functionality for modules to be able to attach or detach.
-* `IModules.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/components/Modular.sol>`__: Interfaces outlining standard module functionality. Includes inputs for all possible hook methods.
+* `Modular.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/components/Modular.sol>`__: Inherited by modular contracts. Provides functionality around attaching, detaching, and calling modules.
+* `ModuleBase.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/components/Modular.sol>`__: Inherited by modules. Provide required functionality for modules to be able to attach or detach.
+* `IModules.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/components/Modular.sol>`__: Interfaces outlining standard module functionality. Includes inputs for all possible hook methods.
 
 .. note:: In order to minimize gas costs, modules should be attached only when their functionality is required and detached as soon as they are no longer needed.
 
@@ -26,7 +26,7 @@ All contracts implementing modular functionality will also include the following
 .. method:: Modular.isActiveModule(address _module)
 
     Returns true if a module is currently active on the contract.
-    
+
     Modules that are attached to an IssuingEntity are also considered active on any tokens belonging to that issuer.
 
 Hooking into Methods
@@ -181,7 +181,7 @@ Calling Parent Methods
 
 Once attached, modules are permitted to call certain methods in the parent contract.
 
-.. note:: When a module calls into the parent contract, it will still trigger any of it's own methods hooked into the called method. With poor contract design you can create infinite loops and effectively break the parent contract functionality as long as the module is attached.
+.. note:: When a module calls into the parent contract, it will still trigger any of it's own methods hooked into the called method. With poor contract design you can create infinite loops and effectively break the parent contract functionality as long as the module remains attached.
 
 SecurityToken
 -------------
@@ -228,4 +228,4 @@ Use Cases
 
 The wide range of functionality that modules can hook into, combined with their high level of authority, allows for many different applications. Some examples include: crowdsales, country/time based token locks, right of first refusal enforcement, voting rights, dividend payments, tender offers, and bond redemption.
 
-We have included some sample modules on `GitHub <https://github.com/SFT-Protocol/security-token/tree/master/contracts/modules>`__ as examples to help understand module development and demonstrate the range of available functionality.
+We have included some sample modules on `GitHub <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/modules>`__ as examples to help understand module development and demonstrate the range of available functionality.

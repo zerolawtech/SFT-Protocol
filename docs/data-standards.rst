@@ -15,8 +15,7 @@ Investor IDs are stored as a bytes32 keccak256 hash of the investor's
 personally identifiable information.
 
 For legal entities, the hash is generated from their `Global Legal
-Entity Identifier
-(LEI) <https://www.gleif.org/en/about-lei/iso-17442-the-lei-code-structure>`__:
+Entity Identifier (LEI) <https://www.gleif.org/en/about-lei/iso-17442-the-lei-code-structure>`__:
 
     *The International Organization for Standardization (ISO) 1744 standard defines a set of attributes or legal entity reference data that are the most essential elements of identification. The Legal Entity Identifier (LEI) code itself is neutral, with no embedded intelligence or country codes that could create unnecessary complexity for users.*
 
@@ -27,22 +26,14 @@ following:
 * Date of Birth as DDMMYYYY
 * Unique tax ID from current jurisdiction of residence
 
-If any of the malleable fields are changed (via a legal name change or a
-change of home jurisdictions), the investor will be required to pass
-KYC/AML again and a new investor ID will be generated. Once KYC is
-passed, the tokens held in previous addresses must be transferred to
-addresses associated to the new investor ID. It is impossible to remove
-or change the ID association of an address.
+If any of the malleable fields are changed (via a legal name change or a change of home jurisdictions), the investor will be required to pass KYC/AML again and a new investor ID will be generated. Once KYC is passed, the tokens held in previous addresses must be transferred to addresses associated to the new investor ID. It is impossible to remove or change the ID association of an address.
 
 Country Codes
 -------------
 
-Based on the `ISO-3166-1
-numeric <https://en.wikipedia.org/wiki/ISO_3166-1_numeric>`__ standard.
-Country codes are stored as a uint16 and follow the standard exactly.
+Based on the `ISO-3166-1 numeric <https://en.wikipedia.org/wiki/ISO_3166-1_numeric>`__ standard. Country codes are stored as a uint16 and follow the standard exactly.
 
-A CSV of country and region codes is available
-`here <https://github.com/SFT-Protocol/security-token/tree/master/docs/country-and-region-codes.csv>`__.
+A CSV of country and region codes is available `here <https://github.com/HyperLink-Capital/sft-protocol/tree/master/docs/country-and-region-codes.csv>`__.
 
 Region Codes
 ------------
@@ -64,5 +55,4 @@ A quick example to generate region codes using python:
 * Original code: US-AL
 * Resulting bytes32: 0x414c00
 
-A CSV of country and region codes is available
-`here <https://github.com/SFT-Protocol/security-token/tree/master/docs/country-and-region-codes.csv>`__.
+A CSV of country and region codes is available `here <https://github.com/HyperLink-Capital/sft-protocol/tree/master/docs/country-and-region-codes.csv>`__.

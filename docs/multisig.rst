@@ -9,7 +9,7 @@ MultiSig Implementation
 :ref:`kyc-registrar` contracts use a slightly modified implementation.
 
 It may be useful to also view the
-`MultiSig.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/components/MultiSig.sol>`__ source code
+`MultiSig.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/components/MultiSig.sol>`__ source code
 while reading this document.
 
 Deployment

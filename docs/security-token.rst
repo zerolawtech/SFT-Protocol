@@ -11,10 +11,12 @@ Token contracts are associated to an :ref:`issuing-entity` and also implement :r
 
 This documentation only explains contract methods that are meant to be accessed directly. External methods that will revert unless called through another contract, such as IssuingEntity or modules, are not included.
 
-It may be useful to also view the `SecurityToken.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/SecurityToken.sol>`__ source code while reading this document.
+It may be useful to also view the `SecurityToken.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/SecurityToken.sol>`__ source code while reading this document.
 
 Deployment
 ==========
+
+The constructor takes the following arguments:
 
 .. method:: SecurityToken.constructor(address _issuer, string _name, string _symbol, uint256 _totalSupply)
 
@@ -55,6 +57,8 @@ The following public variables cannot be changed after contract deployment.
 Total Supply and Balances
 =========================
 
+Along with the standard ERC20 methods, SecurityToken introduces two additional methods around the total supply.
+
 .. method:: SecurityToken.totalSupply
 
     Returns the total supply of tokens.
@@ -65,7 +69,7 @@ Total Supply and Balances
 
 .. method:: SecurityToken.treasurySupply
 
-    Returns the number of tokens held by the issuer.
+    Returns the number of tokens held by the issuer. Equivalent to calling ``SecurityToken.balanceOf(SecurityToken.ownerID())``.
 
 .. method:: SecurityToken.circulatingSupply
 
@@ -74,6 +78,8 @@ Total Supply and Balances
 
 Token Transfers
 ===============
+
+SecurityToken uses the standard ERC20 methods for token transfers, however their functionality differs slightly due to transfer permissioning requirements.
 
 .. method:: SecurityToken.checkTransfer(address _from, address _to, uint256 _value)
 

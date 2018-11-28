@@ -56,12 +56,12 @@ The SFT protocol is comprised of four core contracts:
 Yellow Paper
 ============
 
-The `Yellow Paper <https://github.com/SFT-Protocol/security-token/docs/SFT-Protocol-Yellowpaper.pdf>`__ provides a more detailed overview of how the protocol is structrued.
+The `Yellow Paper <https://github.com/HyperLink-Capital/sft-protocol/docs/SFT-Protocol-Yellowpaper.pdf>`__ provides a more detailed overview of how the protocol is structrued.
 
 Source Code
 ===========
 
-The SFT Protocol is open source. You can view the code on `GitHub <https://github.com/SFT-Protocol/security-token>`__.
+The SFT Protocol is open source. You can view the code on `GitHub <https://github.com/HyperLink-Capital/sft-protocol>`__.
 
 Testing and Deployment
 ======================

@@ -10,7 +10,7 @@ Each issuer contract includes standard SFT protocol :ref:`multisig` and :ref:`mo
 
 This documentation only explains contract methods that are meant to be accessed directly. External methods that will revert unless called through another contract, such as a token or module, are not included.
 
-It may be useful to also view the `IsssuingEntity.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/IssuingEntity.sol>`__ source code while reading this document.
+It may be useful to also view the `IsssuingEntity.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/IssuingEntity.sol>`__ source code while reading this document.
 
 Deployment
 ==========
@@ -53,11 +53,13 @@ Tokens must be associated with the IssuingEntity contract before they can be tra
 Identifying Investors
 =====================
 
+Investors must be identified by a registrar before they can send or receive tokens. This identity data is then used to apply further checks against investor limits and accreditation requirements.
+
 .. method:: IssuingEntity.setRegistrar(address _registrar, bool _allowed)
 
     Associates or removes a :ref:`kyc-registrar`.
 
-    Investors must be identified before they can send or receive tokens. Before a transfer is completed, each associated registrar is called to check which IDs are associated to the transfer addresses.
+    Before a transfer is completed, each associated registrar is called to check which IDs are associated to the transfer addresses.
 
     The address => ID association is stored within IssuingEntity. If a registrar is later removed it is impossible for another registrar to return a different ID for the address.
 

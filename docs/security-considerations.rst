@@ -68,6 +68,6 @@ A list of beneficial owners can be obtained by filtering for the ``BeneficialOwn
 Compromised Issuer
 ------------------
 
-As an issuer is the highest authority over their own tokens, a fully compromised issuer is a difficult situation to overcome.  Issuers should always follow strict security practices such as keeping the original owner private keys in cold storage, isolating function authority via permissioning, and using strict multi-sig requirements.
+As the issuer is the highest authority over their own tokens, a fully compromised issuer presents a challenging situation to overcome.  Issuers should always follow strict security practices including keeping the original owner private keys in cold storage, isolating function authority via permissioning, and using strict multi-sig requirements.
 
 If an IssuingEntity contract is compromised the best course of action will be to immediately notify all investors and custodians and halt secondary trading.  The issuer will have to deploy new contracts and reissue tokens based on a determined historic state of the blockchain.

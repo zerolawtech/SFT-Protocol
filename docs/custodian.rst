@@ -12,7 +12,7 @@ Custodian contracts include the standard SFT protocol :ref:`multisig` and :ref:`
 
 This documentation only explains contract methods that are meant to be accessed directly. External methods that will revert unless called through another contract, such as IssuingEntity or modules, are not included.
 
-It may be useful to also view the `Custodian.sol <https://github.com/SFT-Protocol/security-token/tree/master/contracts/Custodian.sol>`__ source code while reading this document.
+It may be useful to view the `Custodian.sol <https://github.com/HyperLink-Capital/sft-protocol/tree/master/contracts/Custodian.sol>`__ source code while reading this document.
 
 Deployment
 ==========
