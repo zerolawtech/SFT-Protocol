@@ -29,7 +29,7 @@ The **owner** is declared during deployment. The owner is the highest contract a
 Working With Authorities
 ========================
 
-**Authorities** are known, trusted entities that are permitted to add, modify, or restrict investors within the registrar. Authorities are assigned a unique ID and associated with one or more addresses.
+**Authorities** are entities that are permitted to call admin-level methods within a contract. They are assigned a unique ID that is associated with one or more addresses.
 
 Authorities differ from the owner in that they must be explicitly
 approved to call functions within the contract. These permissions may be

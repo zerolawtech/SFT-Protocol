@@ -1,11 +1,11 @@
 .. _security-token:
 
-##############
-Security Token
-##############
+#############
+SecurityToken
+#############
 
 Each SecurityToken contract represents a single, fungible class of securities from an issuer. The contracts conforms to the `ERC20 Token
-Standard <https://theethereum.wiki/w/index.php/ERC20_Token_Standard>`__., with an additional ``checkTransfer`` function available to verify if a transfer will succeed.
+Standard <https://theethereum.wiki/w/index.php/ERC20_Token_Standard>`__, with an additional ``checkTransfer`` function available to verify if a transfer will succeed.
 
 Token contracts are associated to an :ref:`issuing-entity` and also implement :ref:`modules` functionality. Permissioning around transfers is achieved through these components. See the respective documents for more detailed information.
 
@@ -77,7 +77,7 @@ Token Transfers
 
 .. method:: SecurityToken.checkTransfer(address _from, address _to, uint256 _value)
 
-    Returns true if ``_from`` is perimitted to transfer ``_value`` tokens to ``_to``.
+    Returns true if ``_from`` is permitted to transfer ``_value`` tokens to ``_to``.
 
     For a transfer to succeed it must first pass a series of checks:
 

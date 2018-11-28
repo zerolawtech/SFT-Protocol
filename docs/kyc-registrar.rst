@@ -1,8 +1,8 @@
 .. _kyc-registrar:
 
-#############
-KYC Registrar
-#############
+############
+KYCRegistrar
+############
 
 KYCRegistrar contracts are registries that hold information on the identity, region, and rating of investors.
 

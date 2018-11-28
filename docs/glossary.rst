@@ -7,6 +7,7 @@ Glossary
 * **Authority**: A collection of one or more addresses permitted to call specific admin-level functionality in a multisig contract.
 * **Custodian**: An entity that is approved to hold tokens on behalf of multiple investors. Common examples of custodians include broker/dealers and secondary markets.
 * **Entity**: A participant in the SFT protocol. Entity may refer to natural persons or corporations.
+* **Hook**: The point at which a module attaches to a method in a parent contract.
 * **Issuer**: An entity that creates and sells security tokens.
 * **Investor**: An entity that has passed KYC/AML checks and is able to hold and transfer security tokens.
 * **Module**: A non-essential smart contract associated with an IssuingEntity or SecurityToken contract by an issuer, used to add extra transfer permissioning or handle on-chain governance events.

@@ -53,7 +53,9 @@ The SFT protocol is comprised of four core contracts:
 
 ## Documentation
 
-The SFT Protocol documentation is hosted at [Read the docs](https://sft-protocol.readthedocs.io).
+The [Yellow Paper](docs/SFT-Protocol-Yellowpaper.pdf) provides a more detailed overview of how the SFT Protocol is structrued.
+
+In-depth documentation is hosted at [Read the docs](https://sft-protocol.readthedocs.io).
 
 ## Testing and Deployment
 

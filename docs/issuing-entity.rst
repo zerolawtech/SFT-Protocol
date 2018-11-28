@@ -1,8 +1,8 @@
 .. _issuing-entity:
 
-##############
-Issuing Entity
-##############
+#############
+IssuingEntity
+#############
 
 IssuingEntity contracts hold shared compliance logic for all security tokens created by a single issuer. They are the central contract that an issuer uses to connect and interact with registrars, tokens and custodians.
 

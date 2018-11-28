@@ -53,6 +53,11 @@ The SFT protocol is comprised of four core contracts:
     * Modular design allows for optional added functionality
     * Multi-sig, multi-authority design provides increased security and permissioned contract management
 
+Yellow Paper
+============
+
+The `Yellow Paper <https://github.com/SFT-Protocol/security-token/docs/SFT-Protocol-Yellowpaper.pdf>`__ provides a more detailed overview of how the protocol is structrued.
+
 Source Code
 ===========
 
