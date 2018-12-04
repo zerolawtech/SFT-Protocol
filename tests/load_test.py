@@ -2,6 +2,8 @@
 
 import random
 
+from lib.components.eth import VirtualMachineError
+
 NO_SETUP = True
 
 REGISTRIES = 3
@@ -91,7 +93,7 @@ def transfer_issuer_to_investors():
                 if _investor_balance(issuer, i) == 0:
                     issuer.countries[i['country']]['count'] += 1
                 token.balances[to] += value
-            except ValueError:
+            except VirtualMachineError:
                 check.not_equal(allowed, True, "Transfer should have succeeded")
                 continue
             check.equal(token.balanceOf(to), token.balances[to], "Incorrect issuer Balance")
