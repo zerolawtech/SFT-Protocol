@@ -1,7 +1,7 @@
 pragma solidity >=0.4.24 <0.5.0;
 
-import "./open-zeppelin/SafeMath.sol";
 import "./SecurityToken.sol";
+import "./components/Modular.sol";
 import "./components/MultiSig.sol";
 
 /** @title Custodian Contract */
