@@ -42,10 +42,25 @@ To maintain accurate beneficial owner records, custodians must initiate all toke
 
     The ``_stillOwner`` boolean is only used to remove investors from the list of beneficial owners. If it is set to true but the recipient was not previously listed, they will not be added.
 
+Ether Transfers
+===============
+
+There may be cases where a custodian will need receive ether into their contract, and distribute it to one or more investors. The contract includes a fallback function allowing anyone to send ether in. Approved custodian authorities may transfer tokens out via the following function:
+
+.. method:: Custodian.transferEther(address[] _to, uint256[] _value)
+
+    Transfers ether from of the custodian contract.
+
+    * ``_to``: Array of address to transfer to.
+    * ``_value``: Array of amounts to transfer.
+
+    The function will iterate over both arrays, sending ``amount[0]`` ether to ``to[0]`` and so on.
+
+
 Beneficial Owners
 =================
 
-Whenever a transfer happens on-chain, the custodian's beneficial owner list is updated:
+Whenever a token transfer happens on-chain, the custodian's beneficial owner list is updated:
 
     * When tokens are transfered to a custodian, the sender is added to the list of beneficial owners for that token.
     * When tokens are transfered from a custodian, the receipient may be removed from the list of beneficial owners by setting ``_stillOwner`` to false.
