@@ -15,7 +15,7 @@ contract Custodian is Modular, MultiSig {
 	// mapping (address => mapping(bytes32 => address[])) beneficialOwners;
 	
 	/* token contract => issuer contract */
-	mapping (address => address) issuerMap;
+	mapping (address => IssuingEntity) issuerMap;
 	
 	mapping (bytes32 => Investor) investors;
 
@@ -100,45 +100,50 @@ contract Custodian is Modular, MultiSig {
 	// 	return true;
 	// }
 
-	// /**
-	// 	@notice Custodian transfer function
-	// 	@dev
-	// 		Addresses associated to the custodian cannot directly hold tokens,
-	// 		so they must use this transfer function to move them.
-	// 	@param _token Address of the token to transfer
-	// 	@param _to Address of the recipient
-	// 	@param _value Amount to transfer
-	// 	@param _stillOwner is recipient still a beneficial owner for this token?
-	// 	@return bool success
-	//  */
-	// function transfer(
-	// 	address _token,
-	// 	address _to,
-	// 	uint256 _value,
-	// 	bool _stillOwner
-	// )
-	// 	external
-	// 	returns (bool)
-	// {
-	// 	if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
-	// 	SecurityToken t = SecurityToken(_token);
-	// 	require(t.transfer(_to, _value));
-	// 	IssuingEntity i = IssuingEntity(issuerMap[_token]);
-	// 	bytes32[] memory _id = new bytes32[](1);
-	// 	_id[0] = i.getID(_to);
-	// 	if (!_stillOwner) {
-	// 		_removeInvestors(_token, _id);
-	// 	}
-	// 	/* bytes4 signature for custodian module sentTokens() */
-	// 	_callModules(0x31b45d35, abi.encode(
-	// 		_token,
-	// 		_id[0],
-	// 		_value,
-	// 		_stillOwner
-	// 	));
-	// 	emit SentTokens(issuerMap[_token], _token, _to, _value);
-	// 	return true;
-	// }
+	/**
+		@notice Custodian transfer function
+		@dev
+			Addresses associated to the custodian cannot directly hold tokens,
+			so they must use this transfer function to move them.
+		@param _token Address of the token to transfer
+		@param _to Address of the recipient
+		@param _value Amount to transfer
+		@param _stillOwner is recipient still a beneficial owner for this token?
+		@return bool success
+	 */
+	function transfer(
+		address _token,
+		address _to,
+		uint256 _value,
+		bool _stillOwner
+	)
+		external
+		returns (bool)
+	{
+		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
+		bytes32 _id = issuerMap[_token].getID(_to);
+		Investor storage i = investors[_id];
+		i.balances[_token] = i.balances[_token].sub(_value);
+		SecurityToken t = SecurityToken(_token);
+		require(t.transfer(_to, _value));
+		if (i.balances[_token] == 0) {
+			Issuer storage issuer = i.issuers[issuerMap[_token]];
+			issuer.tokenCount = issuer.tokenCount.sub(1);
+			if (issuer.tokenCount == 0 && !_stillOwner) {
+				issuer.isOwner = false;
+				// call to modify beneficial owners
+			}
+		}
+		/* bytes4 signature for custodian module sentTokens() */
+		_callModules(0x31b45d35, abi.encode(
+			_token,
+			_id,
+			_value,
+			issuer.isOwner
+		));
+		emit SentTokens(issuerMap[_token], _token, _to, _value);
+		return true;
+	}
 
 	/**
 		@notice Add a new token owner
@@ -156,9 +161,9 @@ contract Custodian is Modular, MultiSig {
 		external
 		returns (bool)
 	{
-		if (issuerMap[_token] == 0) {
+		if (issuerMap[_token] == address(0)) {
 			require(SecurityToken(_token).issuer() == msg.sender);
-			issuerMap[_token] = msg.sender;
+			issuerMap[_token] = IssuingEntity(msg.sender);
 		} else {
 			require(issuerMap[_token] == msg.sender);
 		}
@@ -166,9 +171,10 @@ contract Custodian is Modular, MultiSig {
 		Investor storage i = investors[_id];
 		bool _known;
 		if (i.balances[_token] == 0) {
-			i.issuers[msg.sender].tokenCount = i.issuers[msg.sender].tokenCount.add(1);
-			if (!i.issuers.isOwner) {
-				i.issuers.isOwner = true;
+			Issuer storage issuer = i.issuers[msg.sender];
+			issuer.tokenCount = issuer.tokenCount.add(1);
+			if (!issuer.isOwner) {
+				issuer.isOwner = true;
 				_known = true;
 			}
 		}
@@ -178,124 +184,56 @@ contract Custodian is Modular, MultiSig {
 		return _known;
 	}
 
-	/**
-		@notice Add beneficial token owners
-		@dev Increases the investor count in the IssuingEntity contract
-		@param _token Token address
-		@param _id Array of investor IDs
-		@return bool success
-	 */
-	// function addInvestors(
-	// 	address _token,
-	// 	bytes32[] _id
-	// )
-	// 	external
-	// 	returns (bool)
-	// {
-	// 	if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
-	// 	address _issuer = issuerMap[_token];
-	// 	bool _newBool;
-	// 	bytes32[] memory _newID = new bytes32[](_id.length);
-	// 	for (uint256 i = 0; i < _id.length; i++) {
-	// 		address[] storage _owner = beneficialOwners[_issuer][_id[i]];
-	// 		bool _found = false;
-	// 		for (uint256 x = 0; x < _owner.length; x++) {
-	// 			if (_owner[x] == _token) {
-	// 				_found = true;
-	// 				break;
-	// 			}
-	// 		}
-	// 		if (!_found) {
-	// 			_newID[i] = _id[i];
-	// 			_newBool = true;
-	// 			_owner.push(_token);
-	// 			emit NewBeneficialOwner(_issuer, _token, _id[i]);
-	// 		}
-	// 	}
-	// 	if (_newBool) {
-	// 		require(IssuingEntity(_issuer).setBeneficialOwners(ownerID,
-	// 			_newID,
-	// 			true
-	// 		));
-	// 		/* bytes4 signature for custodian module addedInvestors() */
-	// 		_callModules(0xf8324d5a, abi.encode(_token, _newID));
-	// 	}
-	// 	return true;
-	// }
+	function transferInternal(
+		address _token,
+		bytes32 _fromID,
+		bytes32 _toID,
+		uint256 _value,
+		bool _stillOwner
+	)
+		external
+		returns (bool)
+	{
+		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
+		Investor storage from = investors[_fromID];
+		Investor storage to = investors[_toID];
+		require(issuerMap[_token].checkTransferCustodian(_token, _fromID, _toID));
+		from.balances[_token] = from.balances[_token].sub(_value);
+		to.balances[_token] = to.balances[_token].add(_value);
+		if (from.balances[_token] == 0) {
+			Issuer storage issuer = from.issuers[issuerMap[_token]];
+			issuer.tokenCount = issuer.tokenCount.sub(1);
+			if (issuer.tokenCount == 0 && !_stillOwner) {
+				issuer.isOwner = false;
+				// call to modify beneficial owners
+			}
+		}
+		if (to.balances[_token] == _value) {
+			issuer = to.issuers[issuerMap[_token]];
+			issuer.tokenCount = issuer.tokenCount.add(1);
+			if (!issuer.isOwner) {
+				issuer.isOwner = true;
+				// call to modify beneficial owners
+			}
+		}
+		return true;
+	}
 
-	// /**
-	// 	@notice Remove beneficial token owners
-	// 	@dev Decreases the investor count in the IssuingEntity contract
-	// 	@param _token Token address
-	// 	@param _id Array of investor IDs
-	// 	@return bool success
-	//  */
-	// function removeInvestors(
-	// 	address _token,
-	// 	bytes32[] _id
-	// )
-	// 	external
-	// 	returns (bool)
-	// {
-	// 	if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
-	// 	(bool _rBool, bytes32[] memory _rID) = _removeInvestors(_token, _id);
-	// 	if (_rBool) {
-	// 		/* bytes4 signature for custodian module removedInvestors() */
-	// 		_callModules(0x9898b82e, abi.encode(_token, _rID));
-	// 		return;
-	// 	}
-		
-		
-		
-	// 	return true;
-	// }
-
-	// /**
-	// 	@notice internal to remove beneficial token owners
-	// 	@param _token Token address
-	// 	@param _id Array of investor IDs
-	//  */
-	// function _removeInvestors(
-	// 	address _token,
-	// 	bytes32[] _id
-	// )
-	// 	internal
-	// 	returns (bool, bytes32[])
-	// {
-	// 	address _issuer = issuerMap[_token];
-	// 	bool _zeroBool;
-	// 	bytes32[] memory _zeroID = new bytes32[](_id.length);
-	// 	bool _removeBool;
-	// 	bytes32[] memory _removeID = new bytes32[](_id.length);
-	// 		for (uint256 i = 0; i < _id.length; i++) {
-	// 		address[] storage _owner = beneficialOwners[_issuer][_id[i]];
-	// 		for (uint256 x = 0; x < _owner.length; x++) {
-	// 			if (_owner[x] == _token) {
-	// 				_owner[x] = _owner[_owner.length-1];
-	// 				/*
-	// 					underflow is impossible because for loop would not
-	// 					start with an empty array.
-	// 				*/
-	// 				_owner.length -= 1;
-	// 				emit RemovedBeneficialOwner(_issuer, _token, _id[i]);
-	// 				_removeBool = true;
-	// 				_removeID[i] = _id[i];
-	// 				if (_owner.length > 0) break;
-	// 				_zeroBool = true;
-	// 				_zeroID[i] = _id[i];
-	// 				break;
-	// 			}
-	// 		}
-	// 	}
-	// 	if (_zeroBool) {
-	// 		require(IssuingEntity(_issuer).setBeneficialOwners(
-	// 			ownerID,
-	// 			_zeroID,
-	// 			false
-	// 		));
-	// 	}
-	// 	return (_removeBool, _removeID);
-	// }
+	function setOwnership(
+		bytes32 _id,
+		address _issuer,
+		bool _isOwner
+	)
+		external
+		returns (bool)
+	{
+		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
+		Issuer storage i = investors[_id].issuers[_issuer];
+		if (i.tokenCount == 0 && i.isOwner != _isOwner) {
+			i.isOwner = _isOwner;
+			// call to modify beneficial owners
+		}
+	}
 
 	/**
 		@notice Attach a module
