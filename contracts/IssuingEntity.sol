@@ -359,16 +359,20 @@ contract IssuingEntity is Modular, MultiSig {
 			if (_rating[1] != 0) {
 				Country storage c = countries[_country[1]];
 				require(c.allowed, "Reciever blocked: Country");
-				/*  
-					If the receiving investor currently has a 0 balance,
-					we must make sure a slot is available for allocation.
-				*/
 				require(_rating[1] >= c.minRating, "Receiver blocked: Rating");
-				if (accounts[_id[1]].balance == 0) {
+				/*  
+					If the receiving investor currently has 0 balance and no
+					custodians, make sure a slot is available for allocation.
+				*/ 
+				if (
+					accounts[_id[1]].balance == 0 &&
+					accounts[_id[1]].custodianCount == 0
+				) {
 					/* create a bool to prevent repeated comparisons */
 					bool _check = (
-						_rating[0] != 0 ||
-						accounts[_id[1]].balance > _value
+						_rating[0] == 0 ||
+						accounts[_id[0]].balance > _value ||
+						accounts[_id[0]].custodianCount > 0
 					);
 					/*
 						If the sender is an investor and still retains a balance,
