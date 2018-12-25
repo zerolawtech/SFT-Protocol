@@ -39,19 +39,24 @@ contract IssuingEntity is Modular, MultiSig {
 		bool restricted;
 	}
 
-	struct Contract {
+	struct RegistrarContract {
+		KYCRegistrar addr;
+		bool restricted;
+	}
+
+	struct CustodianContract {
 		address addr;
 		bool restricted;
 	}
 
 	bool locked;
 	bool mutex;
-	Contract[] registrars;
+	RegistrarContract[] registrars;
 	uint32[8] counts;
 	uint32[8] limits;
 	mapping (uint16 => Country) countries;
 	mapping (bytes32 => Account) accounts;
-	mapping (bytes32 => Contract) custodians;
+	mapping (bytes32 => CustodianContract) custodians;
 	mapping (address => Token) tokens;
 	mapping (string => bytes32) documentHashes;
 
@@ -100,7 +105,7 @@ contract IssuingEntity is Modular, MultiSig {
 		public 
 	{
 		/* First registrar is empty so Account.regKey == 0 means it is unset. */
-		registrars.push(Contract(0, false));
+		registrars.push(RegistrarContract(KYCRegistrar(0), false));
 	}
 
 	/**
@@ -268,7 +273,8 @@ contract IssuingEntity is Modular, MultiSig {
 
 		(_allowed, _rating, _country) = _getInvestors(
 			[_addr, _to],
-			[accounts[idMap[_addr].id].regKey, accounts[idMap[_to].id].regKey]
+			_id,
+			[accounts[idMap[_addr].id].regKey, accounts[_id[1]].regKey]
 		);
 		_checkTransfer(_token, _authID, _id, _allowed, _rating, _country, _value);
 		return (_authID, _id, _rating, _country);
@@ -299,8 +305,8 @@ contract IssuingEntity is Modular, MultiSig {
 		)
 	{	
 		uint8[2] memory _key;
-		(_id[0], _key[0]) = _getIDView(_from);
-		(_id[1], _key[1]) = _getIDView(_to);
+		(_id[0], _key[0]) = _getIDView(_from, idMap[_from].id);
+		(_id[1], _key[1]) = _getIDView(_to, idMap[_to].id);
 
 		if (_id[0] == ownerID && idMap[_from].id != ownerID) {
 			require(
@@ -313,9 +319,31 @@ contract IssuingEntity is Modular, MultiSig {
 		address[2] memory _addr = [_from, _to];
 		bool[2] memory _allowed;
 
-		(_allowed, _rating, _country) = _getInvestors(_addr, _key);
+		(_allowed, _rating, _country) = _getInvestors(_addr, _id, _key);
 		_checkTransfer(_token, _id[0], _id, _allowed, _rating, _country, _value);
 		return (_id, _rating, _country);
+	}
+
+	function checkTransferCustodian(
+		address _token,
+		bytes32 _fromID,
+		bytes32 _toID
+	)
+		external
+		view
+		returns (bool)
+	{
+		uint8[2] memory _key;
+		bytes32[2] memory _id;
+		(_id[0], _key[0]) = _getIDView(0, _fromID);
+		(_id[1], _key[1]) = _getIDView(0, _toID);
+		(
+			bool[2] memory _allowed,
+			uint8[2] memory _rating,
+			uint16[2] memory _country
+		) = _getInvestors([address(0), address(0)], _id, _key);
+		_checkTransfer(_token, _id[0], _id, _allowed, _rating, _country, 0);
+		return true;
 	}
 
 	/**
@@ -443,7 +471,13 @@ contract IssuingEntity is Modular, MultiSig {
 		@return bytes32 investor ID
 	 */
 	function getID(address _addr) external view returns (bytes32) {
-		(bytes32 _id, uint8 _key) = _getIDView(_addr);
+		if (
+			authorityData[idMap[_addr].id].addressCount > 0 ||
+			_addr == address(this)
+		) {
+			return ownerID;
+		}
+		(bytes32 _id, uint8 _key) = _getIDView(_addr, idMap[_addr].id);
 		return _id;
 	}
 
@@ -453,7 +487,13 @@ contract IssuingEntity is Modular, MultiSig {
 		@return bytes32 investor ID
 	 */
 	function _getID(address _addr) internal returns (bytes32) {
-		(bytes32 _id, uint8 _key) = _getIDView(_addr);
+		if (
+			authorityData[idMap[_addr].id].addressCount > 0 ||
+			_addr == address(this)
+		) {
+			return ownerID;
+		}
+		(bytes32 _id, uint8 _key) = _getIDView(_addr, idMap[_addr].id);
 		if (idMap[_addr].id == 0) {
 			idMap[_addr].id = _id;
 		}
@@ -469,18 +509,11 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _addr address of token being transferred
 		@return bytes32 investor ID, uint8 registrar index
 	 */
-	function _getIDView(address _addr) internal view returns (bytes32, uint8) {
-		if (
-			authorityData[idMap[_addr].id].addressCount > 0 ||
-			_addr == address(this)
-		) {
-			return (ownerID, 0);
-		}
-		bytes32 _id = idMap[_addr].id;
+	function _getIDView(address _addr, bytes32 _id) internal view returns (bytes32, uint8) {
 		if (_id == 0) {
 			for (uint256 i = 1; i < registrars.length; i++) {
 				if (!registrars[i].restricted) {
-					_id = KYCRegistrar(registrars[i].addr).getID(_addr);
+					_id = registrars[i].addr.getID(_addr);
 					if (_id != 0) {
 						return (_id, uint8(i));
 					}
@@ -496,9 +529,10 @@ contract IssuingEntity is Modular, MultiSig {
 			registrars[accounts[_id].regKey].restricted
 		) {
 			for (i = 1; i < registrars.length; i++) {
+				if (registrars[i].restricted) continue;
 				if (
-					!registrars[i].restricted && 
-					_id == KYCRegistrar(registrars[i].addr).getID(_addr)
+					(_addr != 0 && _id == registrars[i].addr.getID(_addr)) ||
+					(_addr == 0 && registrars[i].addr.isRegistered(_id))
 				) {
 					return (_id, uint8(i));
 				}
@@ -519,6 +553,7 @@ contract IssuingEntity is Modular, MultiSig {
 	 */
 	function _getInvestors(
 		address[2] _addr,
+		bytes32[2] _id,
 		uint8[2] _key
 	)
 		internal
@@ -529,7 +564,6 @@ contract IssuingEntity is Modular, MultiSig {
 			uint16[2] _country
 		)
 	{
-		bytes32[2] memory _id;
 		/* If key == 0 the address belongs to the issuer or a custodian. */
 		if (_key[0] == 0) {
 			_allowed[0] = true;
@@ -543,21 +577,30 @@ contract IssuingEntity is Modular, MultiSig {
 		}
 		/* If both investors are in the same registry, call getInvestors */
 		if (_key[0] == _key[1] && _key[0] != 0) {
-			(
-				_id,
-				_allowed,
-				_rating,
-				_country
-			) = KYCRegistrar(registrars[_key[0]].addr).getInvestors(_addr[0], _addr[1]);
+			if (_addr[0] != 0) {
+
+				(
+					_id,
+					_allowed,
+					_rating,
+					_country
+				) = registrars[_key[0]].addr.getInvestors(_addr[0], _addr[1]);
+			} else {
+				(
+					_allowed,
+					_rating,
+					_country
+				) = registrars[_key[0]].addr.getInvestorsByID(_id[0], _id[1]);
+			}
 		/* Otherwise, call getInvestor at each registry */
-		} else {
+		} else if (_addr[0] != 0) {
 			if (_key[0] != 0) {
 				(
 					_id[0],
 					_allowed[0],
 					_rating[0],
 					_country[0]
-				) = KYCRegistrar(registrars[_key[0]].addr).getInvestor(_addr[0]);
+				) = registrars[_key[0]].addr.getInvestor(_addr[0]);
 			}
 			if (_key[1] != 0) {
 				(
@@ -565,8 +608,23 @@ contract IssuingEntity is Modular, MultiSig {
 					_allowed[1],
 					_rating[1],
 					_country[1]
-				) = KYCRegistrar(registrars[_key[1]].addr).getInvestor(_addr[1]);
+				) = registrars[_key[1]].addr.getInvestor(_addr[1]);
 			}	
+		} else {
+			if (_key[0] != 0) {
+				(
+					_allowed[0],
+					_rating[0],
+					_country[0]
+				) = registrars[_key[0]].addr.getInvestorByID(_id[0]);
+			}
+			if (_key[1] != 0) {
+				(
+					_allowed[1],
+					_rating[1],
+					_country[1]
+				) = registrars[_key[1]].addr.getInvestorByID(_id[1]);
+			}
 		}
 		return (_allowed, _rating, _country);
 	}
@@ -657,7 +715,7 @@ contract IssuingEntity is Modular, MultiSig {
 				_allowed,
 				_rating,
 				_country
-			) = KYCRegistrar(registrars[_key].addr).getInvestor(_owner);
+			) = registrars[_key].addr.getInvestor(_owner);
 		}
 		uint256 _oldTotal = accounts[_id].balance;
 		if (_new > _old) {
@@ -778,7 +836,7 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _allowed registrar permission
 		@return bool success
 	 */
-	function setRegistrar(address _registrar, bool _allowed) external returns (bool) {
+	function setRegistrar(KYCRegistrar _registrar, bool _allowed) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		for (uint256 i = 1; i < registrars.length; i++) {
 			if (registrars[i].addr == _registrar) {
@@ -788,7 +846,7 @@ contract IssuingEntity is Modular, MultiSig {
 			}
 		}
 		if (_allowed) {
-			registrars.push(Contract(_registrar, false));
+			registrars.push(RegistrarContract(_registrar, false));
 			emit RegistrarSet(_registrar, _allowed);
 			return true;
 		}
@@ -986,7 +1044,7 @@ contract IssuingEntity is Modular, MultiSig {
 				if (a.custodianCount == 1 && a.balance == 0) {
 					_incrementCount(
 						a.rating,
-						KYCRegistrar(registrars[a.regKey].addr).getCountry(_id[i])
+						registrars[a.regKey].addr.getCountry(_id[i])
 					);	
 				}
 			} else {
@@ -994,7 +1052,7 @@ contract IssuingEntity is Modular, MultiSig {
 				if (a.custodianCount == 0 && a.balance == 0) {
 					_decrementCount(
 						a.rating,
-						KYCRegistrar(registrars[a.regKey].addr).getCountry(_id[i])
+						registrars[a.regKey].addr.getCountry(_id[i])
 					);	
 				}
 			}

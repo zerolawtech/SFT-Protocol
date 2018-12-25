@@ -501,6 +501,22 @@ contract KYCRegistrar {
 		return (_id, isPermitted(_addr), i.rating, i.country);
 	}
 
+	function getInvestorByID(
+		bytes32 _id
+	)
+		external
+		view
+		returns (
+			bool _allowed,
+			uint8 _rating,
+			uint16 _country
+		)
+	{
+		Investor storage i = investorData[_id];
+		require(i.country != 0, "Address not registered");
+		return (isPermittedID(_id), i.rating, i.country);
+	}
+
 	/**
 		@notice Use addresses to fetch information on 2 investors
 		@dev
@@ -533,6 +549,29 @@ contract KYCRegistrar {
 		return (
 			bytes32[2]([idMap[_from].id, idMap[_to].id]),
 			bool[2]([isPermitted(_from), isPermitted(_to)]),
+			uint8[2]([f.rating,t.rating]),
+			uint16[2]([f.country, t.country])
+		);
+	}
+
+	function getInvestorsByID(
+		bytes32 _fromID,
+		bytes32 _toID
+	)
+		external
+		view
+		returns (
+			bool[2] _allowed,
+			uint8[2] _rating,
+			uint16[2] _country
+		)
+	{
+		Investor storage f = investorData[_fromID];
+		require(f.country != 0, "Sender not Registered");
+		Investor storage t = investorData[_toID];
+		require(t.country != 0, "Receiver not Registered");
+		return (
+			bool[2]([isPermittedID(_fromID), isPermittedID(_toID)]),
 			uint8[2]([f.rating,t.rating]),
 			uint16[2]([f.country, t.country])
 		);
@@ -587,6 +626,10 @@ contract KYCRegistrar {
 		return investorData[_id].expires;
 	}
 
+	function isRegistered(bytes32 _id) external view returns (bool) {
+		return investorData[_id].country != 0;
+	}
+
 	/**
 		@notice Check if an an investor and address are permitted
 		@param _addr Address to query
@@ -594,7 +637,11 @@ contract KYCRegistrar {
 	 */
 	function isPermitted(address _addr) public view returns (bool) {
 		if (idMap[_addr].restricted) return false;
-		Investor storage i = investorData[idMap[_addr].id];
+		return isPermittedID(idMap[_addr].id);
+	}
+
+	function isPermittedID(bytes32 _id) public view returns (bool) {
+		Investor storage i = investorData[_id];
 		if (i.restricted) return false;
 		if (i.expires < now) return false;
 		if (authorityData[i.authority].restricted) return false;
