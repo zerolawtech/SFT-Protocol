@@ -131,7 +131,7 @@ contract Custodian is Modular, MultiSig {
 			issuer.tokenCount = issuer.tokenCount.sub(1);
 			if (issuer.tokenCount == 0 && !_stillOwner) {
 				issuer.isOwner = false;
-				// call to modify beneficial owners
+				issuerMap[_token].setBeneficialOwners(ownerID, _id, false);
 			}
 		}
 		/* bytes4 signature for custodian module sentTokens() */
@@ -205,7 +205,7 @@ contract Custodian is Modular, MultiSig {
 			issuer.tokenCount = issuer.tokenCount.sub(1);
 			if (issuer.tokenCount == 0 && !_stillOwner) {
 				issuer.isOwner = false;
-				// call to modify beneficial owners
+				issuerMap[_token].setBeneficialOwners(ownerID, _fromID, false);
 			}
 		}
 		if (to.balances[_token] == _value) {
@@ -213,7 +213,7 @@ contract Custodian is Modular, MultiSig {
 			issuer.tokenCount = issuer.tokenCount.add(1);
 			if (!issuer.isOwner) {
 				issuer.isOwner = true;
-				// call to modify beneficial owners
+				issuerMap[_token].setBeneficialOwners(ownerID, _toID, true);
 			}
 		}
 		return true;
@@ -231,7 +231,7 @@ contract Custodian is Modular, MultiSig {
 		Issuer storage i = investors[_id].issuers[_issuer];
 		if (i.tokenCount == 0 && i.isOwner != _isOwner) {
 			i.isOwner = _isOwner;
-			// call to modify beneficial owners
+			IssuingEntity(_issuer).setBeneficialOwners(ownerID, _id, _isOwner);
 		}
 	}
 

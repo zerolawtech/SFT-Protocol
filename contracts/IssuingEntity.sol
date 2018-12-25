@@ -509,7 +509,14 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _addr address of token being transferred
 		@return bytes32 investor ID, uint8 registrar index
 	 */
-	function _getIDView(address _addr, bytes32 _id) internal view returns (bytes32, uint8) {
+	function _getIDView(
+		address _addr,
+		bytes32 _id
+	)
+		internal
+		view
+		returns (bytes32, uint8)
+	{
 		if (_id == 0) {
 			for (uint256 i = 1; i < registrars.length; i++) {
 				if (!registrars[i].restricted) {
@@ -836,7 +843,13 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _allowed registrar permission
 		@return bool success
 	 */
-	function setRegistrar(KYCRegistrar _registrar, bool _allowed) external returns (bool) {
+	function setRegistrar(
+		KYCRegistrar _registrar,
+		bool _allowed
+	)
+		external
+		returns (bool)
+	{
 		if (!_checkMultiSig()) return false;
 		for (uint256 i = 1; i < registrars.length; i++) {
 			if (registrars[i].addr == _registrar) {
@@ -1015,13 +1028,13 @@ contract IssuingEntity is Modular, MultiSig {
 		@notice Add or remove an investor from a custodian's beneficial owners
 		@dev Only callable by a custodian or the issuer
 		@param _custID Custodian ID
-		@param _id Array of investor IDs
+		@param _id investor ID
 		@param _add bool add or remove
 		@return bool success
 	 */
 	function setBeneficialOwners(
 		bytes32 _custID,
-		bytes32[] _id,
+		bytes32 _id,
 		bool _add
 	)
 		external
@@ -1032,29 +1045,26 @@ contract IssuingEntity is Modular, MultiSig {
 		if (custodians[_custID].addr != msg.sender) {
 			if (!_checkMultiSig()) return false;
 		}
-		for (uint256 i = 0; i < _id.length; i++) {
-			if (_id[i] == 0) continue;
-			if (_id[i] == ownerID || custodians[_id[i]].addr != 0) continue;
-			Account storage a = accounts[_id[i]];
-			if (a.custodians[_custID] == _add) continue;
-			a.custodians[_custID] = _add;
-			emit BeneficialOwnerSet(msg.sender, _id[i], _add);
-			if (_add) {
-				a.custodianCount = a.custodianCount.add(1);
-				if (a.custodianCount == 1 && a.balance == 0) {
-					_incrementCount(
-						a.rating,
-						registrars[a.regKey].addr.getCountry(_id[i])
-					);	
-				}
-			} else {
-				a.custodianCount = a.custodianCount.sub(1);
-				if (a.custodianCount == 0 && a.balance == 0) {
-					_decrementCount(
-						a.rating,
-						registrars[a.regKey].addr.getCountry(_id[i])
-					);	
-				}
+		if (_id == ownerID || custodians[_id].addr != 0) return true;
+		Account storage a = accounts[_id];
+		if (a.custodians[_custID] == _add) return true;
+		a.custodians[_custID] = _add;
+		emit BeneficialOwnerSet(msg.sender, _id, _add);
+		if (_add) {
+			a.custodianCount = a.custodianCount.add(1);
+			if (a.custodianCount == 1 && a.balance == 0) {
+				_incrementCount(
+					a.rating,
+					registrars[a.regKey].addr.getCountry(_id)
+				);	
+			}
+		} else {
+			a.custodianCount = a.custodianCount.sub(1);
+			if (a.custodianCount == 0 && a.balance == 0) {
+				_decrementCount(
+					a.rating,
+					registrars[a.regKey].addr.getCountry(_id)
+				);	
 			}
 		}
 		return true;
