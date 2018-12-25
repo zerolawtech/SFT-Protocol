@@ -1,5 +1,6 @@
 pragma solidity >=0.4.24 <0.5.0;
 
+import "./open-zeppelin/SafeMath.sol";
 import "./SecurityToken.sol";
 import "./components/Modular.sol";
 import "./components/MultiSig.sol";
@@ -7,10 +8,31 @@ import "./components/MultiSig.sol";
 /** @title Custodian Contract */
 contract Custodian is Modular, MultiSig {
 
+	using SafeMath32 for uint32;
+	using SafeMath for uint256;
+
 	/* issuer contract => investor ID => token addresses */
-	mapping (address => mapping(bytes32 => address[])) beneficialOwners;
+	// mapping (address => mapping(bytes32 => address[])) beneficialOwners;
+	
 	/* token contract => issuer contract */
 	mapping (address => address) issuerMap;
+	
+	mapping (bytes32 => Investor) investors;
+
+	struct Balance {
+		uint256 balance;
+		bool isOwner;
+	}
+	
+	struct Issuer {
+		uint32 tokenCount;
+		bool isOwner;
+	}
+	
+	struct Investor {
+		mapping (address => Issuer) issuers;
+		mapping (address => uint256) balances;
+	}
 
 	event ReceivedTokens(
 		address indexed issuer,
@@ -63,60 +85,60 @@ contract Custodian is Modular, MultiSig {
 		@param _value Array of amounts to transfer
 		@return bool success
 	 */
-	function transferEther(
-		address[] _to,
-		uint256[] _value
-	)
-		external
-		returns (bool)
-	{
-		if (!_checkMultiSig()) return false;
-		require (_to.length == _value.length);
-		for (uint256 i = 0; i < _to.length; i++) {
-			_to[i].transfer(_value[i]);
-		}
-		return true;
-	}
+	// function transferEther(
+	// 	address[] _to,
+	// 	uint256[] _value
+	// )
+	// 	external
+	// 	returns (bool)
+	// {
+	// 	if (!_checkMultiSig()) return false;
+	// 	require (_to.length == _value.length);
+	// 	for (uint256 i = 0; i < _to.length; i++) {
+	// 		_to[i].transfer(_value[i]);
+	// 	}
+	// 	return true;
+	// }
 
-	/**
-		@notice Custodian transfer function
-		@dev
-			Addresses associated to the custodian cannot directly hold tokens,
-			so they must use this transfer function to move them.
-		@param _token Address of the token to transfer
-		@param _to Address of the recipient
-		@param _value Amount to transfer
-		@param _stillOwner is recipient still a beneficial owner for this token?
-		@return bool success
-	 */
-	function transfer(
-		address _token,
-		address _to,
-		uint256 _value,
-		bool _stillOwner
-	)
-		external
-		returns (bool)
-	{
-		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
-		SecurityToken t = SecurityToken(_token);
-		require(t.transfer(_to, _value));
-		IssuingEntity i = IssuingEntity(issuerMap[_token]);
-		bytes32[] memory _id = new bytes32[](1);
-		_id[0] = i.getID(_to);
-		if (!_stillOwner) {
-			_removeInvestors(_token, _id);
-		}
-		/* bytes4 signature for custodian module sentTokens() */
-		_callModules(0x31b45d35, abi.encode(
-			_token,
-			_id[0],
-			_value,
-			_stillOwner
-		));
-		emit SentTokens(issuerMap[_token], _token, _to, _value);
-		return true;
-	}
+	// /**
+	// 	@notice Custodian transfer function
+	// 	@dev
+	// 		Addresses associated to the custodian cannot directly hold tokens,
+	// 		so they must use this transfer function to move them.
+	// 	@param _token Address of the token to transfer
+	// 	@param _to Address of the recipient
+	// 	@param _value Amount to transfer
+	// 	@param _stillOwner is recipient still a beneficial owner for this token?
+	// 	@return bool success
+	//  */
+	// function transfer(
+	// 	address _token,
+	// 	address _to,
+	// 	uint256 _value,
+	// 	bool _stillOwner
+	// )
+	// 	external
+	// 	returns (bool)
+	// {
+	// 	if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
+	// 	SecurityToken t = SecurityToken(_token);
+	// 	require(t.transfer(_to, _value));
+	// 	IssuingEntity i = IssuingEntity(issuerMap[_token]);
+	// 	bytes32[] memory _id = new bytes32[](1);
+	// 	_id[0] = i.getID(_to);
+	// 	if (!_stillOwner) {
+	// 		_removeInvestors(_token, _id);
+	// 	}
+	// 	/* bytes4 signature for custodian module sentTokens() */
+	// 	_callModules(0x31b45d35, abi.encode(
+	// 		_token,
+	// 		_id[0],
+	// 		_value,
+	// 		_stillOwner
+	// 	));
+	// 	emit SentTokens(issuerMap[_token], _token, _to, _value);
+	// 	return true;
+	// }
 
 	/**
 		@notice Add a new token owner
@@ -141,25 +163,19 @@ contract Custodian is Modular, MultiSig {
 			require(issuerMap[_token] == msg.sender);
 		}
 		emit ReceivedTokens(msg.sender, _token, _id, _value);
-		address[] storage _owner = beneficialOwners[msg.sender][_id];
+		Investor storage i = investors[_id];
 		bool _known;
-		for (uint256 i = 0; i < _owner.length; i++) {
-			if (_owner[i] == _token) {
+		if (i.balances[_token] == 0) {
+			i.issuers[msg.sender].tokenCount = i.issuers[msg.sender].tokenCount.add(1);
+			if (!i.issuers.isOwner) {
+				i.issuers.isOwner = true;
 				_known = true;
-				break;
 			}
 		}
-		if (!_known) {
-			_owner.push(_token);
-			emit NewBeneficialOwner(msg.sender, _token, _id);
-		}
+		i.balances[_token] = i.balances[_token].add(_value);
 		/* bytes4 signature for custodian module receivedTokens() */
 		_callModules(0x081e5f03, abi.encode(_token, _id, _value, !_known));
-		/*
-			return true if custodian did not previously hold any tokens
-			from this issuer for this investor 
-		*/
-		return (!_known && _owner.length == 1) ? true : false;
+		return _known;
 	}
 
 	/**
@@ -169,117 +185,117 @@ contract Custodian is Modular, MultiSig {
 		@param _id Array of investor IDs
 		@return bool success
 	 */
-	function addInvestors(
-		address _token,
-		bytes32[] _id
-	)
-		external
-		returns (bool)
-	{
-		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
-		address _issuer = issuerMap[_token];
-		bool _newBool;
-		bytes32[] memory _newID = new bytes32[](_id.length);
-		for (uint256 i = 0; i < _id.length; i++) {
-			address[] storage _owner = beneficialOwners[_issuer][_id[i]];
-			bool _found = false;
-			for (uint256 x = 0; x < _owner.length; x++) {
-				if (_owner[x] == _token) {
-					_found = true;
-					break;
-				}
-			}
-			if (!_found) {
-				_newID[i] = _id[i];
-				_newBool = true;
-				_owner.push(_token);
-				emit NewBeneficialOwner(_issuer, _token, _id[i]);
-			}
-		}
-		if (_newBool) {
-			require(IssuingEntity(_issuer).setBeneficialOwners(ownerID,
-				_newID,
-				true
-			));
-			/* bytes4 signature for custodian module addedInvestors() */
-			_callModules(0xf8324d5a, abi.encode(_token, _newID));
-		}
-		return true;
-	}
+	// function addInvestors(
+	// 	address _token,
+	// 	bytes32[] _id
+	// )
+	// 	external
+	// 	returns (bool)
+	// {
+	// 	if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
+	// 	address _issuer = issuerMap[_token];
+	// 	bool _newBool;
+	// 	bytes32[] memory _newID = new bytes32[](_id.length);
+	// 	for (uint256 i = 0; i < _id.length; i++) {
+	// 		address[] storage _owner = beneficialOwners[_issuer][_id[i]];
+	// 		bool _found = false;
+	// 		for (uint256 x = 0; x < _owner.length; x++) {
+	// 			if (_owner[x] == _token) {
+	// 				_found = true;
+	// 				break;
+	// 			}
+	// 		}
+	// 		if (!_found) {
+	// 			_newID[i] = _id[i];
+	// 			_newBool = true;
+	// 			_owner.push(_token);
+	// 			emit NewBeneficialOwner(_issuer, _token, _id[i]);
+	// 		}
+	// 	}
+	// 	if (_newBool) {
+	// 		require(IssuingEntity(_issuer).setBeneficialOwners(ownerID,
+	// 			_newID,
+	// 			true
+	// 		));
+	// 		/* bytes4 signature for custodian module addedInvestors() */
+	// 		_callModules(0xf8324d5a, abi.encode(_token, _newID));
+	// 	}
+	// 	return true;
+	// }
 
-	/**
-		@notice Remove beneficial token owners
-		@dev Decreases the investor count in the IssuingEntity contract
-		@param _token Token address
-		@param _id Array of investor IDs
-		@return bool success
-	 */
-	function removeInvestors(
-		address _token,
-		bytes32[] _id
-	)
-		external
-		returns (bool)
-	{
-		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
-		(bool _rBool, bytes32[] memory _rID) = _removeInvestors(_token, _id);
-		if (_rBool) {
-			/* bytes4 signature for custodian module removedInvestors() */
-			_callModules(0x9898b82e, abi.encode(_token, _rID));
-			return;
-		}
+	// /**
+	// 	@notice Remove beneficial token owners
+	// 	@dev Decreases the investor count in the IssuingEntity contract
+	// 	@param _token Token address
+	// 	@param _id Array of investor IDs
+	// 	@return bool success
+	//  */
+	// function removeInvestors(
+	// 	address _token,
+	// 	bytes32[] _id
+	// )
+	// 	external
+	// 	returns (bool)
+	// {
+	// 	if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
+	// 	(bool _rBool, bytes32[] memory _rID) = _removeInvestors(_token, _id);
+	// 	if (_rBool) {
+	// 		/* bytes4 signature for custodian module removedInvestors() */
+	// 		_callModules(0x9898b82e, abi.encode(_token, _rID));
+	// 		return;
+	// 	}
 		
 		
 		
-		return true;
-	}
+	// 	return true;
+	// }
 
-	/**
-		@notice internal to remove beneficial token owners
-		@param _token Token address
-		@param _id Array of investor IDs
-	 */
-	function _removeInvestors(
-		address _token,
-		bytes32[] _id
-	)
-		internal
-		returns (bool, bytes32[])
-	{
-		address _issuer = issuerMap[_token];
-		bool _zeroBool;
-		bytes32[] memory _zeroID = new bytes32[](_id.length);
-		bool _removeBool;
-		bytes32[] memory _removeID = new bytes32[](_id.length);
-			for (uint256 i = 0; i < _id.length; i++) {
-			address[] storage _owner = beneficialOwners[_issuer][_id[i]];
-			for (uint256 x = 0; x < _owner.length; x++) {
-				if (_owner[x] == _token) {
-					_owner[x] = _owner[_owner.length-1];
-					/*
-						underflow is impossible because for loop would not
-						start with an empty array.
-					*/
-					_owner.length -= 1;
-					emit RemovedBeneficialOwner(_issuer, _token, _id[i]);
-					_removeBool = true;
-					_removeID[i] = _id[i];
-					if (_owner.length > 0) break;
-					_zeroBool = true;
-					_zeroID[i] = _id[i];
-					break;
-				}
-			}
-		}
-		if (_zeroBool) {
-			require(IssuingEntity(_issuer).setBeneficialOwners(
-				ownerID,
-				_zeroID,
-				false
-			));
-		}
-		return (_removeBool, _removeID);
-	}
+	// /**
+	// 	@notice internal to remove beneficial token owners
+	// 	@param _token Token address
+	// 	@param _id Array of investor IDs
+	//  */
+	// function _removeInvestors(
+	// 	address _token,
+	// 	bytes32[] _id
+	// )
+	// 	internal
+	// 	returns (bool, bytes32[])
+	// {
+	// 	address _issuer = issuerMap[_token];
+	// 	bool _zeroBool;
+	// 	bytes32[] memory _zeroID = new bytes32[](_id.length);
+	// 	bool _removeBool;
+	// 	bytes32[] memory _removeID = new bytes32[](_id.length);
+	// 		for (uint256 i = 0; i < _id.length; i++) {
+	// 		address[] storage _owner = beneficialOwners[_issuer][_id[i]];
+	// 		for (uint256 x = 0; x < _owner.length; x++) {
+	// 			if (_owner[x] == _token) {
+	// 				_owner[x] = _owner[_owner.length-1];
+	// 				/*
+	// 					underflow is impossible because for loop would not
+	// 					start with an empty array.
+	// 				*/
+	// 				_owner.length -= 1;
+	// 				emit RemovedBeneficialOwner(_issuer, _token, _id[i]);
+	// 				_removeBool = true;
+	// 				_removeID[i] = _id[i];
+	// 				if (_owner.length > 0) break;
+	// 				_zeroBool = true;
+	// 				_zeroID[i] = _id[i];
+	// 				break;
+	// 			}
+	// 		}
+	// 	}
+	// 	if (_zeroBool) {
+	// 		require(IssuingEntity(_issuer).setBeneficialOwners(
+	// 			ownerID,
+	// 			_zeroID,
+	// 			false
+	// 		));
+	// 	}
+	// 	return (_removeBool, _removeID);
+	// }
 
 	/**
 		@notice Attach a module
