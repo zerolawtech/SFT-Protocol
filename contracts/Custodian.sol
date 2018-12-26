@@ -221,6 +221,7 @@ contract Custodian is Modular, MultiSig {
 		Investor storage from = investors[_fromID];
 		Investor storage to = investors[_toID];
 		require(issuerMap[_token].checkTransferCustodian(_token, _fromID, _toID));
+		require(from.balances[_token] >= _value, "Insufficient balance");
 		from.balances[_token] = from.balances[_token].sub(_value);
 		to.balances[_token] = to.balances[_token].add(_value);
 		if (from.balances[_token] == 0) {

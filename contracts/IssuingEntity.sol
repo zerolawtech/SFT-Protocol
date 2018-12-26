@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.4.24 <0.5.0;
 
 import "./open-zeppelin/SafeMath.sol";
 import "./KYCRegistrar.sol";
@@ -251,9 +251,9 @@ contract IssuingEntity is Modular, MultiSig {
 			uint16[2] _country
 		)
 	{
-		_authID = _getID(_auth, idMap[_auth].id);
-		_id[0] = _getID(_from, idMap[_from].id);
-		_id[1] = _getID(_to, idMap[_to].id);
+		_authID = _getID(_auth, 0);
+		_id[0] = _getID(_from, 0);
+		_id[1] = _getID(_to, 0);
 		
 		if (_authID == ownerID && idMap[_auth].id != ownerID) {
 			/*
@@ -305,8 +305,8 @@ contract IssuingEntity is Modular, MultiSig {
 		)
 	{	
 		uint8[2] memory _key;
-		(_id[0], _key[0]) = _getIDView(_from, idMap[_from].id);
-		(_id[1], _key[1]) = _getIDView(_to, idMap[_to].id);
+		(_id[0], _key[0]) = _getIDView(_from, 0);
+		(_id[1], _key[1]) = _getIDView(_to, 0);
 
 		if (_id[0] == ownerID && idMap[_from].id != ownerID) {
 			require(
@@ -332,6 +332,7 @@ contract IssuingEntity is Modular, MultiSig {
 		external
 		returns (bool)
 	{
+		require(custodians[_toID].addr == 0);
 		bytes32[2] memory _id;
 		_id[0] = _getID(0, _fromID);
 		_id[1] = _getID(0, _toID);
@@ -475,7 +476,7 @@ contract IssuingEntity is Modular, MultiSig {
 		@return bytes32 investor ID
 	 */
 	function getID(address _addr) external view returns (bytes32) {
-		(bytes32 _id, uint8 _key) = _getIDView(_addr, idMap[_addr].id);
+		(bytes32 _id, uint8 _key) = _getIDView(_addr, 0);
 		return _id;
 	}
 
@@ -510,8 +511,11 @@ contract IssuingEntity is Modular, MultiSig {
 		view
 		returns (bytes32, uint8)
 	{
+		if (_id == 0) {
+			_id = idMap[_addr].id;
+		}
 		if (
-			authorityData[idMap[_addr].id].addressCount > 0 ||
+			authorityData[_id].addressCount > 0 ||
 			_addr == address(this)
 		) {
 			return (ownerID, 0);
