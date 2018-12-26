@@ -85,20 +85,43 @@ contract Custodian is Modular, MultiSig {
 		@param _value Array of amounts to transfer
 		@return bool success
 	 */
-	// function transferEther(
-	// 	address[] _to,
-	// 	uint256[] _value
-	// )
-	// 	external
-	// 	returns (bool)
-	// {
-	// 	if (!_checkMultiSig()) return false;
-	// 	require (_to.length == _value.length);
-	// 	for (uint256 i = 0; i < _to.length; i++) {
-	// 		_to[i].transfer(_value[i]);
-	// 	}
-	// 	return true;
-	// }
+	function transferEther(
+		address[] _to,
+		uint256[] _value
+	)
+		external
+		returns (bool)
+	{
+		if (!_checkMultiSig()) return false;
+		require (_to.length == _value.length);
+		for (uint256 i = 0; i < _to.length; i++) {
+			_to[i].transfer(_value[i]);
+		}
+		return true;
+	}
+
+
+	function balanceOf(
+		bytes32 _id,
+		address _token
+	)
+		external
+		view
+		returns (uint256)
+	{
+		return investors[_id].balances[_token];
+	}
+
+	function isBeneficialOwner(
+		bytes32 _id,
+		address _issuer
+	)
+		external
+		view
+		returns (bool)
+	{
+		return investors[_id].issuers[_issuer].isOwner;
+	}
 
 	/**
 		@notice Custodian transfer function

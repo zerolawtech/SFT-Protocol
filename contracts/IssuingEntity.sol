@@ -251,9 +251,9 @@ contract IssuingEntity is Modular, MultiSig {
 			uint16[2] _country
 		)
 	{
-		_authID = _getID(_auth);
-		_id[0] = _getID(_from);
-		_id[1] = _getID(_to);
+		_authID = _getID(_auth, idMap[_auth].id);
+		_id[0] = _getID(_from, idMap[_from].id);
+		_id[1] = _getID(_to, idMap[_to].id);
 		
 		if (_authID == ownerID && idMap[_auth].id != ownerID) {
 			/*
@@ -330,18 +330,20 @@ contract IssuingEntity is Modular, MultiSig {
 		bytes32 _toID
 	)
 		external
-		view
 		returns (bool)
 	{
-		uint8[2] memory _key;
 		bytes32[2] memory _id;
-		(_id[0], _key[0]) = _getIDView(0, _fromID);
-		(_id[1], _key[1]) = _getIDView(0, _toID);
+		_id[0] = _getID(0, _fromID);
+		_id[1] = _getID(0, _toID);
 		(
 			bool[2] memory _allowed,
 			uint8[2] memory _rating,
 			uint16[2] memory _country
-		) = _getInvestors([address(0), address(0)], _id, _key);
+		) = _getInvestors(
+			[address(0), address(0)],
+			_id,
+			[accounts[_id[0]].regKey, accounts[_id[1]].regKey]
+		);
 		_checkTransfer(_token, _id[0], _id, _allowed, _rating, _country, 0);
 		return true;
 	}
@@ -486,14 +488,15 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _addr address of token being transferred
 		@return bytes32 investor ID
 	 */
-	function _getID(address _addr) internal returns (bytes32) {
+	function _getID(address _addr, bytes32 _id) internal returns (bytes32) {
 		if (
 			authorityData[idMap[_addr].id].addressCount > 0 ||
 			_addr == address(this)
 		) {
 			return ownerID;
 		}
-		(bytes32 _id, uint8 _key) = _getIDView(_addr, idMap[_addr].id);
+		uint8 _key;
+		(_id, _key) = _getIDView(_addr, _id);
 		if (idMap[_addr].id == 0) {
 			idMap[_addr].id = _id;
 		}
