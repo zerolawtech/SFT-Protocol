@@ -344,6 +344,8 @@ contract IssuingEntity is Modular, MultiSig {
 			_id,
 			[accounts[_id[0]].regKey, accounts[_id[1]].regKey]
 		);
+		_setRating(_id[0], _rating[0], _country[0]);
+		_setRating(_id[1], _rating[1], _country[1]);
 		_checkTransfer(_token, _id[0], _id, _allowed, _rating, _country, 0);
 		return true;
 	}
@@ -497,7 +499,7 @@ contract IssuingEntity is Modular, MultiSig {
 		}
 		uint8 _key;
 		(_id, _key) = _getIDView(_addr, _id);
-		if (idMap[_addr].id == 0) {
+		if (_addr != 0 && idMap[_addr].id == 0) {
 			idMap[_addr].id = _id;
 		}
 		if (accounts[_id].regKey != _key) {
@@ -674,6 +676,8 @@ contract IssuingEntity is Modular, MultiSig {
 				emit BeneficialOwnerSet(address(c), _id[0], true);
 			}
 			mutex = false;
+		} else if (custodians[_id[0]].addr == 0) {
+			emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
 		}
 		
 		uint256 _balance = uint256(accounts[_id[0]].balance).sub(_value);
@@ -687,7 +691,6 @@ contract IssuingEntity is Modular, MultiSig {
 			_country,
 			_value
 		));
-		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
 		
 		return true;
 	}
@@ -762,27 +765,30 @@ contract IssuingEntity is Modular, MultiSig {
 		internal
 	{
 		Account storage a = accounts[_id];
-		Country storage c = countries[_country];
 		if (_rating != 0) {
-			/* rating from registrar does not match local rating */
-			if (_rating != a.rating) {
-				/* if local rating is not 0, rating has changed */
-				if (a.rating > 0) {
-					c.counts[_rating] = c.counts[_rating].sub(1);
-					c.counts[a.rating] = c.counts[a.rating].add(1);
-				}
-				a.rating = _rating;
-			}
+			_setRating(_id, _rating, _country);
 			/* If investor account balance was 0, increase investor counts */
-			if (a.balance == 0 && accounts[_id].custodianCount == 0) {
+			if (a.balance == 0 && a.custodianCount == 0) {
 				_incrementCount(_rating, _country);
 			/* If investor account balance is now 0, reduce investor counts */
-			} else if (_value == 0 && accounts[_id].custodianCount == 0) {
+			} else if (_value == 0 && a.custodianCount == 0) {
 				_decrementCount(_rating, _country);
 			}
 		}
 		a.balance = uint192(_value);
 		require(a.balance == _value);
+	}
+
+	function _setRating(bytes32 _id, uint8 _rating, uint16 _country) internal {
+		Account storage a = accounts[_id];
+		if (_rating == a.rating) return;
+		/* if local rating is not 0, rating has changed */
+		if (a.rating > 0) {
+			Country storage c = countries[_country];
+			c.counts[_rating] = c.counts[_rating].sub(1);
+			c.counts[a.rating] = c.counts[a.rating].add(1);
+		}
+		a.rating = _rating;
 	}
 
 	/**
@@ -1073,5 +1079,4 @@ contract IssuingEntity is Modular, MultiSig {
 		return true;
 	}
 
-	
 }
