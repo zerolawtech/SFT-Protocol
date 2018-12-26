@@ -475,12 +475,6 @@ contract IssuingEntity is Modular, MultiSig {
 		@return bytes32 investor ID
 	 */
 	function getID(address _addr) external view returns (bytes32) {
-		if (
-			authorityData[idMap[_addr].id].addressCount > 0 ||
-			_addr == address(this)
-		) {
-			return ownerID;
-		}
 		(bytes32 _id, uint8 _key) = _getIDView(_addr, idMap[_addr].id);
 		return _id;
 	}
@@ -491,12 +485,6 @@ contract IssuingEntity is Modular, MultiSig {
 		@return bytes32 investor ID
 	 */
 	function _getID(address _addr, bytes32 _id) internal returns (bytes32) {
-		if (
-			authorityData[idMap[_addr].id].addressCount > 0 ||
-			_addr == address(this)
-		) {
-			return ownerID;
-		}
 		uint8 _key;
 		(_id, _key) = _getIDView(_addr, _id);
 		if (_addr != 0 && idMap[_addr].id == 0) {
@@ -522,6 +510,12 @@ contract IssuingEntity is Modular, MultiSig {
 		view
 		returns (bytes32, uint8)
 	{
+		if (
+			authorityData[idMap[_addr].id].addressCount > 0 ||
+			_addr == address(this)
+		) {
+			return (ownerID, 0);
+		}
 		if (_id == 0) {
 			for (uint256 i = 1; i < registrars.length; i++) {
 				if (!registrars[i].restricted) {
