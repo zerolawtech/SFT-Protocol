@@ -208,7 +208,7 @@ contract Custodian is Modular, MultiSig {
 	}
 
 	function transferInternal(
-		address _token,
+		SecurityToken _token,
 		bytes32 _fromID,
 		bytes32 _toID,
 		uint256 _value,
@@ -220,7 +220,7 @@ contract Custodian is Modular, MultiSig {
 		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
 		Investor storage from = investors[_fromID];
 		Investor storage to = investors[_toID];
-		require(issuerMap[_token].checkTransferCustodian(_token, _fromID, _toID));
+		require(_token.transferCustodian([_fromID, _toID], _value));
 		require(from.balances[_token] >= _value, "Insufficient balance");
 		from.balances[_token] = from.balances[_token].sub(_value);
 		to.balances[_token] = to.balances[_token].add(_value);

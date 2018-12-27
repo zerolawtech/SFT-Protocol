@@ -107,7 +107,7 @@ contract SecurityToken is Modular {
 
 	/**
 		@notice View function to check if a transfer is permitted
-		@dev If a transfer is not allowed, the functionn will throw
+		@dev If a transfer is not allowed, the function will throw
 		@param _from Address of sender
 		@param _to Address of recipient
 		@param _value Amount being transferred
@@ -339,6 +339,42 @@ contract SecurityToken is Modular {
 			_value
 		));
 		emit Transfer(_addr[0], _addr[1], _value);
+	}
+
+
+	function checkTransferCustodian(
+		bytes32[2] _id,
+		uint256 _value
+	)
+		external
+		returns (bool)
+	{
+		issuer.checkTransferCustodian(msg.sender, address(this), _id);
+	}
+
+	function transferCustodian(
+		bytes32[2] _id,
+		uint256 _value
+	)
+		external
+		returns (bool)
+	{
+		(
+			bytes32 _custID,
+			uint8[2] memory _rating,
+			uint16[2] memory _country
+		) = issuer.checkTransferCustodian(msg.sender, address(this), _id);
+		_checkTransfer([address(0), address(0)], _custID, _id, _rating, _country, 0);
+		require(issuer.transferCustodian(_custID, _id, _rating, _country, _value));
+		/* bytes4 signature for token module transferTokensCustodian() */
+		_callModules(0x4f072579, abi.encode(
+			_custID,
+			_id,
+			_rating,
+			_country,
+			_value
+		));
+		return true;
 	}
 
 	/**

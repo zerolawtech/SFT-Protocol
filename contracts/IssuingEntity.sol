@@ -325,21 +325,26 @@ contract IssuingEntity is Modular, MultiSig {
 	}
 
 	function checkTransferCustodian(
+		address _cust,
 		address _token,
-		bytes32 _fromID,
-		bytes32 _toID
+		bytes32[2] _id
 	)
 		external
-		returns (bool)
+		returns (
+			bytes32 _custID,
+			uint8[2] _rating,
+			uint16[2] _country
+		)
 	{
-		require(custodians[_toID].addr == 0);
-		bytes32[2] memory _id;
-		_id[0] = _getID(0, _fromID);
-		_id[1] = _getID(0, _toID);
+		require(custodians[idMap[_cust].id].addr == _cust);
+		require(custodians[_id[1]].addr == 0);
+		_getID(0, _id[0]);
+		_getID(0, _id[1]);
+		bool[2] memory _allowed;
 		(
-			bool[2] memory _allowed,
-			uint8[2] memory _rating,
-			uint16[2] memory _country
+			_allowed,
+			_rating,
+			_country
 		) = _getInvestors(
 			[address(0), address(0)],
 			_id,
@@ -347,8 +352,16 @@ contract IssuingEntity is Modular, MultiSig {
 		);
 		_setRating(_id[0], _rating[0], _country[0]);
 		_setRating(_id[1], _rating[1], _country[1]);
-		_checkTransfer(_token, _id[0], _id, _allowed, _rating, _country, 0);
-		return true;
+		_checkTransfer(
+			_token,
+			idMap[_cust].id,
+			_id,
+			_allowed,
+			_rating,
+			_country,
+			0)
+		;
+		return (idMap[_cust].id, _rating, _country);
 	}
 
 	/**
@@ -682,14 +695,38 @@ contract IssuingEntity is Modular, MultiSig {
 		_setBalance(_id[0], _rating[0], _country[0], _balance);
 		_balance = uint256(accounts[_id[1]].balance).add(_value);
 		_setBalance(_id[1], _rating[1], _country[1], _balance);
-		/* bytes4 signature for token module transferTokens() */
+		/* bytes4 signature for issuer module transferTokens() */
 		_callModules(0x0cfb54c9, abi.encode(
 			msg.sender,
-			_id, _rating,
+			_id,
+			_rating,
 			_country,
 			_value
 		));
 		
+		return true;
+	}
+
+	function transferCustodian(
+		bytes32 _custID,
+		bytes32[2] _id,
+		uint8[2] _rating,
+		uint16[2] _country,
+		uint256 _value
+	)
+		external
+		onlyToken
+		returns (bool)
+	{
+		/* bytes4 signature for token module transferTokensCustodian() */
+		_callModules(0x38a1b79a, abi.encode(
+			msg.sender,
+			_custID,
+			_id,
+			_rating,
+			_country,
+			_value
+		));
 		return true;
 	}
 
