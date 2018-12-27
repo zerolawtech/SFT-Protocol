@@ -46,16 +46,6 @@ contract Custodian is Modular, MultiSig {
 		address indexed recipient,
 		uint256 amount
 	);
-	event NewBeneficialOwner(
-		address indexed issuer,
-		address indexed token,
-		bytes32 indexed investorID
-	);
-	event RemovedBeneficialOwner(
-		address indexed issuer,
-		address indexed token,
-		bytes32 indexed investorID
-	);
 
 
 	/**
@@ -135,7 +125,7 @@ contract Custodian is Modular, MultiSig {
 		@return bool success
 	 */
 	function transfer(
-		address _token,
+		SecurityToken _token,
 		address _to,
 		uint256 _value,
 		bool _stillOwner
@@ -147,8 +137,7 @@ contract Custodian is Modular, MultiSig {
 		bytes32 _id = issuerMap[_token].getID(_to);
 		Investor storage i = investors[_id];
 		i.balances[_token] = i.balances[_token].sub(_value);
-		SecurityToken t = SecurityToken(_token);
-		require(t.transfer(_to, _value));
+		require(_token.transfer(_to, _value));
 		if (i.balances[_token] == 0) {
 			Issuer storage issuer = i.issuers[issuerMap[_token]];
 			issuer.tokenCount = issuer.tokenCount.sub(1);
@@ -219,27 +208,25 @@ contract Custodian is Modular, MultiSig {
 	{
 		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
 		Investor storage from = investors[_fromID];
-		Investor storage to = investors[_toID];
-		require(_token.transferCustodian([_fromID, _toID], _value));
 		require(from.balances[_token] >= _value, "Insufficient balance");
+		Investor storage to = investors[_toID];
 		from.balances[_token] = from.balances[_token].sub(_value);
 		to.balances[_token] = to.balances[_token].add(_value);
-		if (from.balances[_token] == 0) {
-			Issuer storage issuer = from.issuers[issuerMap[_token]];
-			issuer.tokenCount = issuer.tokenCount.sub(1);
-			if (issuer.tokenCount == 0 && !_stillOwner) {
-				issuer.isOwner = false;
-				issuerMap[_token].setBeneficialOwners(ownerID, _fromID, false);
-			}
-		}
 		if (to.balances[_token] == _value) {
-			issuer = to.issuers[issuerMap[_token]];
+			Issuer storage issuer = to.issuers[issuerMap[_token]];
 			issuer.tokenCount = issuer.tokenCount.add(1);
 			if (!issuer.isOwner) {
 				issuer.isOwner = true;
-				issuerMap[_token].setBeneficialOwners(ownerID, _toID, true);
 			}
 		}
+		issuer = from.issuers[issuerMap[_token]];
+		if (from.balances[_token] == 0) {
+			issuer.tokenCount = issuer.tokenCount.sub(1);
+			if (issuer.tokenCount == 0 && !_stillOwner) {
+				issuer.isOwner = false;
+			}
+		}
+		require(_token.transferCustodian([_fromID, _toID], _value, issuer.isOwner));
 		return true;
 	}
 
@@ -254,7 +241,18 @@ contract Custodian is Modular, MultiSig {
 		view
 		returns (bool)
 	{
-		require (_token.checkTransferCustodian([_fromID, _toID]));
+		Investor storage from = investors[_fromID];
+		require(from.balances[_token] >= _value, "Insufficient balance");
+		if (
+			!_stillOwner &&
+			from.balances[_token] == _value &&
+			from.issuers[issuerMap[_token]].tokenCount == 1
+		) {
+			bool _owner;
+		} else {
+			_owner = true;
+		}
+		require (_token.checkTransferCustodian([_fromID, _toID], _owner));
 		return true;
 	}
 

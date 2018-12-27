@@ -344,7 +344,8 @@ contract SecurityToken is Modular {
 
 
 	function checkTransferCustodian(
-		bytes32[2] _id
+		bytes32[2] _id,
+		bool _stillOwner
 	)
 		external
 		view
@@ -354,14 +355,15 @@ contract SecurityToken is Modular {
 			bytes32 _custID,
 			uint8[2] memory _rating,
 			uint16[2] memory _country
-		) = issuer.checkTransferCustodian(msg.sender, address(this), _id);
+		) = issuer.checkTransferCustodian(msg.sender, address(this), _id, _stillOwner);
 		_checkTransfer([address(0), address(0)], _custID, _id, _rating, _country, 0);
 		return true;
 	}
 
 	function transferCustodian(
 		bytes32[2] _id,
-		uint256 _value
+		uint256 _value,
+		bool _stillOwner
 	)
 		external
 		returns (bool)
@@ -370,9 +372,9 @@ contract SecurityToken is Modular {
 			bytes32 _custID,
 			uint8[2] memory _rating,
 			uint16[2] memory _country
-		) = issuer.checkTransferCustodian(msg.sender, address(this), _id);
+		) = issuer.checkTransferCustodian(msg.sender, address(this), _id, _stillOwner);
 		_checkTransfer([address(0), address(0)], _custID, _id, _rating, _country, 0);
-		require(issuer.transferCustodian(_custID, _id, _rating, _country, _value));
+		require(issuer.transferCustodian(_custID, _id, _rating, _country, _value, _stillOwner));
 		/* bytes4 signature for token module transferTokensCustodian() */
 		_callModules(0x4f072579, abi.encode(
 			_custID,

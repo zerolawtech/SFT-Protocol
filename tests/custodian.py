@@ -143,3 +143,20 @@ def transfers6():
     cust1.transfer(token2,a[2],1000,False)
     token2.transfer(issuer,1000,{'from':a[2]})
     check.equal(issuer.getInvestorCounts()[0][0],0,"Investor count is wrong")
+
+def transfers7():
+    '''Investor limits'''
+    issuer.setInvestorLimits([1,0,0,0,0,0,0,0])
+    token.transfer(a[2],1000)
+    check.reverts(token.transfer,[a[3],500,{'from':a[2]}], "Exceeded investor limit")
+    token.transfer(a[3],1000,{'from':a[2]})
+    check.reverts(token.transfer,[a[2],1000], "Exceeded investor limit")
+    token.transfer(cust1,1000,{'from':a[3]})
+    check.reverts(cust1.checkTransferInternal,[token,id3,id2,500,False],"Exceeded investor limit")
+    check.reverts(cust1.checkTransferInternal,[token,id3,id2,1000,True],"Exceeded investor limit")
+    check.reverts(cust1.transferInternal,[token,id3,id2,500,False],"Exceeded investor limit")
+    check.reverts(cust1.transferInternal,[token,id3,id2,1000,True],"Exceeded investor limit")
+    cust1.checkTransferInternal(token,id3,id2,1000,False)
+    cust1.transferInternal(token,id3,id2,1000,False)
+    cust1.transfer(token,a[2],500,False)
+    token.transfer(cust2,250,{'from':a[2]})

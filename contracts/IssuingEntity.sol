@@ -275,14 +275,15 @@ contract IssuingEntity is Modular, MultiSig {
 			_id,
 			[accounts[idMap[_addr].id].regKey, accounts[_id[1]].regKey]
 		);
-		_checkTransfer(_token, _authID, _id, _allowed, _rating, _country, _value);
+		_checkTransfer(_token, _authID, _id, _allowed, _rating, _country, _value, accounts[_id[0]].custodianCount);
 		return (_authID, _id, _rating, _country);
 	}	
 
 	function checkTransferCustodian(
 		address _cust,
 		address _token,
-		bytes32[2] _id
+		bytes32[2] _id,
+		bool _stillOwner
 	)
 		external
 		returns (
@@ -291,8 +292,8 @@ contract IssuingEntity is Modular, MultiSig {
 			uint16[2] _country
 		)
 	{
-		require(custodians[idMap[_cust].id].addr == _cust);
-		require(custodians[_id[1]].addr == 0);
+		require(custodians[idMap[_cust].id].addr == _cust, "Custodian not registered");
+		require(custodians[_id[1]].addr == 0, "Receiver is custodian");
 		_getID(0, _id[0]);
 		_getID(0, _id[1]);
 		bool[2] memory _allowed;
@@ -307,6 +308,11 @@ contract IssuingEntity is Modular, MultiSig {
 		);
 		_setRating(_id[0], _rating[0], _country[0]);
 		_setRating(_id[1], _rating[1], _country[1]);
+		if (accounts[_id[0]].custodianCount > 0 && !_stillOwner) {
+			uint256 _count = accounts[_id[0]].custodianCount.sub(1);
+		} else {
+			_count = accounts[_id[0]].custodianCount;
+		}
 		_checkTransfer(
 			_token,
 			idMap[_cust].id,
@@ -314,7 +320,8 @@ contract IssuingEntity is Modular, MultiSig {
 			_allowed,
 			_rating,
 			_country,
-			0)
+			0,
+			_count)
 		;
 		return (idMap[_cust].id, _rating, _country);
 	}
@@ -336,10 +343,10 @@ contract IssuingEntity is Modular, MultiSig {
 		bool[2] _allowed,
 		uint8[2] _rating,
 		uint16[2] _country,
-		uint256 _value
+		uint256 _value,
+		uint256 _custodianCount
 	)
 		internal
-		view
 	{	
 		require(tokens[_token].set);
 		/* If issuer is not the authority, check the sender is not restricted */
@@ -373,7 +380,7 @@ contract IssuingEntity is Modular, MultiSig {
 					bool _check = (
 						_rating[0] == 0 ||
 						accounts[_id[0]].balance > _value ||
-						accounts[_id[0]].custodianCount > 0
+						_custodianCount > 0
 					);
 					/*
 						If the sender is an investor and still retains a balance,
@@ -667,12 +674,17 @@ contract IssuingEntity is Modular, MultiSig {
 		bytes32[2] _id,
 		uint8[2] _rating,
 		uint16[2] _country,
-		uint256 _value
+		uint256 _value,
+		bool _stillOwner
 	)
 		external
 		onlyToken
 		returns (bool)
 	{
+
+		_setBeneficialOwners(_custID, _id[0], _stillOwner);
+		_setBeneficialOwners(_custID, _id[1], true);
+
 		/* bytes4 signature for token module transferTokensCustodian() */
 		_callModules(0x38a1b79a, abi.encode(
 			msg.sender,
@@ -1044,9 +1056,20 @@ contract IssuingEntity is Modular, MultiSig {
 		if (custodians[_custID].addr != msg.sender) {
 			if (!_checkMultiSig()) return false;
 		}
-		if (_id == ownerID || custodians[_id].addr != 0) return true;
+		_setBeneficialOwners(_custID, _id, _add);
+		return true;
+	}
+
+	function _setBeneficialOwners(
+		bytes32 _custID,
+		bytes32 _id,
+		bool _add
+	)
+		internal
+	{
+		if (_id == ownerID || custodians[_id].addr != 0) return;
 		Account storage a = accounts[_id];
-		if (a.custodians[_custID] == _add) return true;
+		if (a.custodians[_custID] == _add) return;
 		a.custodians[_custID] = _add;
 		emit BeneficialOwnerSet(msg.sender, _id, _add);
 		if (_add) {
@@ -1066,7 +1089,6 @@ contract IssuingEntity is Modular, MultiSig {
 				);	
 			}
 		}
-		return true;
 	}
 
 }
