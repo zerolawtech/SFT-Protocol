@@ -10,20 +10,11 @@ contract Custodian is Modular, MultiSig {
 
 	using SafeMath32 for uint32;
 	using SafeMath for uint256;
-
-	/* issuer contract => investor ID => token addresses */
-	// mapping (address => mapping(bytes32 => address[])) beneficialOwners;
 	
 	/* token contract => issuer contract */
 	mapping (address => IssuingEntity) issuerMap;
-	
 	mapping (bytes32 => Investor) investors;
 
-	struct Balance {
-		uint256 balance;
-		bool isOwner;
-	}
-	
 	struct Issuer {
 		uint32 tokenCount;
 		bool isOwner;
