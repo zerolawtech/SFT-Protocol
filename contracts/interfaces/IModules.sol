@@ -25,18 +25,6 @@ interface ISTModule {
 		external
 		view
 		returns (bool);
-	
-	/* 0x2ced1ddc */
-	function checkTransferCustodian(
-		bytes32 _custID,
-		bytes32[2] _id,
-		uint8[2] _rating,
-		uint16[2] _country,
-		uint256 _value
-	)
-		external
-		view
-		returns (bool);
 
 	/* 0x35a341da */
 	function transferTokens(
@@ -82,19 +70,6 @@ interface IIssuerModule {
 	function checkTransfer(
 		address _token,
 		bytes32 _authID,
-		bytes32[2] _id,
-		uint8[2] _rating,
-		uint16[2] _country,
-		uint256 _value
-	)
-		external
-		view
-		returns (bool);
-	
-	/* 0x97545e3c */
-	function checkTransferCustodian(
-		address _token,
-		bytes32 _custID,
 		bytes32[2] _id,
 		uint8[2] _rating,
 		uint16[2] _country,

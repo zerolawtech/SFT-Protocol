@@ -125,10 +125,11 @@ contract SecurityToken is Modular {
 		/* Sending 0 balance is blocked to reduce logic around investor limits */
 		require(_value > 0, "Cannot send 0 tokens");
 		(
+			bytes32 _authID,
 			bytes32[2] memory _id,
 			uint8[2] memory _rating,
 			uint16[2] memory _country
-		) = issuer.checkTransferView(address(this), _from, _to, _value);
+		) = issuer.checkTransfer(address(this), _from, _from, _to, _value);
 		_checkTransfer([_from, _to], _id[0], _id, _rating, _country, _value);
 		return true;
 	}
@@ -343,13 +344,19 @@ contract SecurityToken is Modular {
 
 
 	function checkTransferCustodian(
-		bytes32[2] _id,
-		uint256 _value
+		bytes32[2] _id
 	)
 		external
+		view
 		returns (bool)
 	{
-		issuer.checkTransferCustodian(msg.sender, address(this), _id);
+		(
+			bytes32 _custID,
+			uint8[2] memory _rating,
+			uint16[2] memory _country
+		) = issuer.checkTransferCustodian(msg.sender, address(this), _id);
+		_checkTransfer([address(0), address(0)], _custID, _id, _rating, _country, 0);
+		return true;
 	}
 
 	function transferCustodian(

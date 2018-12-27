@@ -243,6 +243,21 @@ contract Custodian is Modular, MultiSig {
 		return true;
 	}
 
+	function checkTransferInternal(
+		SecurityToken _token,
+		bytes32 _fromID,
+		bytes32 _toID,
+		uint256 _value,
+		bool _stillOwner
+	)
+		external
+		view
+		returns (bool)
+	{
+		require (_token.checkTransferCustodian([_fromID, _toID]));
+		return true;
+	}
+
 	function setOwnership(
 		bytes32 _id,
 		address _issuer,

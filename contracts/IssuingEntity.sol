@@ -254,7 +254,6 @@ contract IssuingEntity is Modular, MultiSig {
 		_authID = _getID(_auth, 0);
 		_id[0] = _getID(_from, 0);
 		_id[1] = _getID(_to, 0);
-		
 		if (_authID == ownerID && idMap[_auth].id != ownerID) {
 			/*
 				bytes4 signatures of transfer, transferFrom
@@ -279,50 +278,6 @@ contract IssuingEntity is Modular, MultiSig {
 		_checkTransfer(_token, _authID, _id, _allowed, _rating, _country, _value);
 		return (_authID, _id, _rating, _country);
 	}	
-		
-	/**
-		@notice View function to check if transfer is permitted
-		@param _token address of token being transferred
-		@param _from address of the sender
-		@param _to address of the receiver
-		@param _value number of tokens being transferred
-		@return bytes32[] IDs of sender and receiver
-		@return uint8[] ratings of sender and receiver
-		@return uint16[] countries of sender and receiver
-	 */
-	function checkTransferView(
-		address _token,
-		address _from,
-		address _to,
-		uint256 _value
-	)
-		external
-		view
-		returns (
-			bytes32[2] _id,
-			uint8[2] _rating,
-			uint16[2] _country
-		)
-	{	
-		uint8[2] memory _key;
-		(_id[0], _key[0]) = _getIDView(_from, 0);
-		(_id[1], _key[1]) = _getIDView(_to, 0);
-
-		if (_id[0] == ownerID && idMap[_from].id != ownerID) {
-			require(
-				authorityData[idMap[_from].id].approvedUntil >= now &&
-				authorityData[idMap[_from].id].signatures[0xa9059cbb],
-				"Authority is not permitted"
-			);
-		}
-
-		address[2] memory _addr = [_from, _to];
-		bool[2] memory _allowed;
-
-		(_allowed, _rating, _country) = _getInvestors(_addr, _id, _key);
-		_checkTransfer(_token, _id[0], _id, _allowed, _rating, _country, _value);
-		return (_id, _rating, _country);
-	}
 
 	function checkTransferCustodian(
 		address _cust,
