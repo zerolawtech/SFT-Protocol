@@ -1036,17 +1036,15 @@ contract IssuingEntity is Modular, MultiSig {
 	}
 
 	/**
-		@notice Add or remove an investor from a custodian's beneficial owners
+		@notice Remove an investor from a custodian's beneficial owners
 		@dev Only callable by a custodian or the issuer
 		@param _custID Custodian ID
 		@param _id investor ID
-		@param _add bool add or remove
 		@return bool success
 	 */
-	function setBeneficialOwners(
+	function releaseOwnership(
 		bytes32 _custID,
-		bytes32 _id,
-		bool _add
+		bytes32 _id
 	)
 		external
 		returns (bool)
@@ -1056,7 +1054,7 @@ contract IssuingEntity is Modular, MultiSig {
 		if (custodians[_custID].addr != msg.sender) {
 			if (!_checkMultiSig()) return false;
 		}
-		_setBeneficialOwners(_custID, _id, _add);
+		_setBeneficialOwners(_custID, _id, false);
 		return true;
 	}
 
