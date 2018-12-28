@@ -14,8 +14,8 @@ contract SecurityToken is Modular {
 
 	using SafeMath for uint256;
 
-	IssuingEntity public issuer;
 	bytes32 public ownerID;
+	IssuingEntity public issuer;
 
 	/* Assets cannot be fractionalized */
 	uint8 public constant decimals = 0;
@@ -82,6 +82,7 @@ contract SecurityToken is Modular {
 
 	/**
 		@notice Fetch the current balance at an address
+		@param _owner Address of balance to query
 		@return integer
 	 */
 	function balanceOf(address _owner) external view returns (uint256) {
@@ -138,6 +139,43 @@ contract SecurityToken is Modular {
 			_value
 		);
 		_checkTransfer([_from, _to], _id[0], _id, _rating, _country, _value);
+		return true;
+	}
+
+	/**
+		@notice Check if custodian internal transfer is permitted
+		@dev If a transfer is not allowed, the function will throw
+		@dev Do not call directly, use Custodian.checkTransferInternal
+		@param _id Array of sender/receiver investor IDs
+		@param _stillOwner bool is sender still a beneficial owner?
+		@return bool success
+	 */
+	function checkTransferCustodian(
+		bytes32[2] _id,
+		bool _stillOwner
+	)
+		external
+		view
+		returns (bool)
+	{
+		(
+			bytes32 _custID,
+			uint8[2] memory _rating,
+			uint16[2] memory _country
+		) = issuer.checkTransferCustodian(
+			msg.sender,
+			address(this),
+			_id,
+			_stillOwner
+		);
+		_checkTransfer(
+			[address(0), address(0)],
+			_custID,
+			_id,
+			_rating,
+			_country,
+			0
+		);
 		return true;
 	}
 
@@ -346,34 +384,21 @@ contract SecurityToken is Modular {
 			[balances[_addr[0]] == 0, balances[_addr[1]] == _value]
 		));
 		/* bytes4 signature for token module transferTokens() */
-		_callModules(0x35a341da, abi.encode(
-			_addr,
-			_id,
-			_rating,
-			_country,
-			_value
-		));
+		_callModules(
+			0x35a341da,
+			abi.encode(_addr, _id, _rating, _country, _value)
+		);
 		emit Transfer(_addr[0], _addr[1], _value);
 	}
 
-
-	function checkTransferCustodian(
-		bytes32[2] _id,
-		bool _stillOwner
-	)
-		external
-		view
-		returns (bool)
-	{
-		(
-			bytes32 _custID,
-			uint8[2] memory _rating,
-			uint16[2] memory _country
-		) = issuer.checkTransferCustodian(msg.sender, address(this), _id, _stillOwner);
-		_checkTransfer([address(0), address(0)], _custID, _id, _rating, _country, 0);
-		return true;
-	}
-
+	/**
+		@notice Check custodian internal transfer permission and set ownership
+		@dev Called by Custodian.transferInternal
+		@param _id Array of sender/receiver investor IDs
+		@param _value Amount being transferred
+		@param _stillOwner bool is sender still a beneficial owner?
+		@return bool success
+	 */
 	function transferCustodian(
 		bytes32[2] _id,
 		uint256 _value,
@@ -386,17 +411,33 @@ contract SecurityToken is Modular {
 			bytes32 _custID,
 			uint8[2] memory _rating,
 			uint16[2] memory _country
-		) = issuer.checkTransferCustodian(msg.sender, address(this), _id, _stillOwner);
-		_checkTransfer([address(0), address(0)], _custID, _id, _rating, _country, 0);
-		require(issuer.transferCustodian(_custID, _id, _rating, _country, _value, _stillOwner));
-		/* bytes4 signature for token module transferTokensCustodian() */
-		_callModules(0x4f072579, abi.encode(
+		) = issuer.checkTransferCustodian(
 			msg.sender,
+			address(this),
+			_id,
+			_stillOwner
+		);
+		_checkTransfer(
+			[address(0), address(0)],
+			_custID,
 			_id,
 			_rating,
 			_country,
-			_value
+			0
+		);
+		require(issuer.transferCustodian(
+			_custID,
+			_id,
+			_rating,
+			_country,
+			_value,
+			_stillOwner
 		));
+		/* bytes4 signature for token module transferTokensCustodian() */
+		_callModules(
+			0x4f072579,
+			abi.encode(msg.sender, _id, _rating, _country, _value)
+		);
 		return true;
 	}
 
@@ -430,14 +471,10 @@ contract SecurityToken is Modular {
 			uint16 _country
 		) = issuer.modifyBalance(_owner, _old, _value);
 		/* bytes4 signature for token module balanceChanged() */
-		_callModules(0x4268353d, abi.encode(
-			_owner,
-			_id,
-			_rating,
-			_country,
-			_old,
-			_value
-		));
+		_callModules(
+			0x4268353d,
+			abi.encode(_owner, _id, _rating, _country, _old, _value)
+		);
 		emit BalanceChanged(_owner, _old, _value);
 		return true;
 	}
