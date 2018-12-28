@@ -37,6 +37,12 @@ contract Custodian is Modular, MultiSig {
 		address indexed recipient,
 		uint256 amount
 	);
+	event TransferOwnership(
+		address indexed token,
+		bytes32 indexed from,
+		bytes32 indexed to,
+		uint256 value
+	);
 
 
 	/**
@@ -83,8 +89,8 @@ contract Custodian is Modular, MultiSig {
 
 
 	function balanceOf(
-		bytes32 _id,
-		address _token
+		address _token,
+		bytes32 _id
 	)
 		external
 		view
@@ -217,7 +223,12 @@ contract Custodian is Modular, MultiSig {
 				issuer.isOwner = false;
 			}
 		}
-		require(_token.transferCustodian([_fromID, _toID], _value, issuer.isOwner));
+		require(_token.transferCustodian(
+			[_fromID, _toID],
+			_value,
+			issuer.isOwner
+		));
+		emit TransferOwnership(_token, _fromID, _toID, _value);
 		return true;
 	}
 

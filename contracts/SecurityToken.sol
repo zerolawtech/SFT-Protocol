@@ -377,7 +377,7 @@ contract SecurityToken is Modular {
 		require(issuer.transferCustodian(_custID, _id, _rating, _country, _value, _stillOwner));
 		/* bytes4 signature for token module transferTokensCustodian() */
 		_callModules(0x4f072579, abi.encode(
-			_custID,
+			msg.sender,
 			_id,
 			_rating,
 			_country,

@@ -688,7 +688,7 @@ contract IssuingEntity is Modular, MultiSig {
 		/* bytes4 signature for token module transferTokensCustodian() */
 		_callModules(0x38a1b79a, abi.encode(
 			msg.sender,
-			_custID,
+			custodians[_custID].addr,
 			_id,
 			_rating,
 			_country,
