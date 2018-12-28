@@ -132,7 +132,7 @@ contract Custodian is Modular, MultiSig {
 		@param _token Token address
 		@param _id Investor ID
 		@param _value Amount transferred
-		@return bool was investor already a beneficial owner of this issuer?
+		@return bool success
 	 */
 	function receiveTransfer(
 		address _token,
@@ -150,19 +150,17 @@ contract Custodian is Modular, MultiSig {
 		}
 		emit ReceivedTokens(msg.sender, _token, _id, _value);
 		Investor storage i = investors[_id];
-		bool _known;
 		if (i.balances[_token] == 0) {
 			Issuer storage issuer = i.issuers[msg.sender];
 			issuer.tokenCount = issuer.tokenCount.add(1);
 			if (!issuer.isOwner) {
 				issuer.isOwner = true;
-				_known = true;
 			}
 		}
 		i.balances[_token] = i.balances[_token].add(_value);
 		/* bytes4 signature for custodian module receivedTokens() */
-		_callModules(0x081e5f03, abi.encode(_token, _id, _value, !_known));
-		return _known;
+		_callModules(0x081e5f03, abi.encode(_token, _id, _value));
+		return true;
 	}
 
 	function transferInternal(

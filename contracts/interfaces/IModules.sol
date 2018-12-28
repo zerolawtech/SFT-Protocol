@@ -147,14 +147,12 @@ interface ICustodianModule {
 		@param _token Token address
 		@param _id Recipient ID
 		@param _value Amount of tokens transfered
-		@param _newOwner Is recipient a new beneficial owner for this token?
 		@return bool success
 	 */
 	function receivedTokens(
 		address _token,
 		bytes32 _id,
-		uint256 _value,
-		bool _newOwner
+		uint256 _value
 	)
 		external
 		returns (bool);

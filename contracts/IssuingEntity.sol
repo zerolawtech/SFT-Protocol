@@ -649,7 +649,8 @@ contract IssuingEntity is Modular, MultiSig {
 		if (custodians[_id[1]].addr != 0) {
 			Custodian c = Custodian(custodians[_id[1]].addr);
 			mutex = true;
-			if (c.receiveTransfer(msg.sender, _id[0], _value) && _rating[0] > 0) {
+			require(c.receiveTransfer(msg.sender, _id[0], _value));
+			if (_rating[0] > 0 && !_from.custodians[_id[1]]) {
 				_from.count = _from.count.add(1);
 				_from.custodians[_id[1]] = true;
 				emit BeneficialOwnerSet(address(c), _id[0], true);
