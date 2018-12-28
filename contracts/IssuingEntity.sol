@@ -26,10 +26,9 @@ contract IssuingEntity is Modular, MultiSig {
 	}
 
 	struct Account {
-		uint192 balance;
+		uint32 count;
 		uint8 rating;
 		uint8 regKey;
-		uint32 custodianCount;
 		bool restricted;
 		mapping (bytes32 => bool) custodians;
 	}
@@ -106,15 +105,6 @@ contract IssuingEntity is Modular, MultiSig {
 	{
 		/* First registrar is empty so Account.regKey == 0 means it is unset. */
 		registrars.push(RegistrarContract(KYCRegistrar(0), false));
-	}
-
-	/**
-		@notice Fetch balance of an investor from their ID
-		@param _id ID to query
-		@return uint256 balance
-	 */
-	function balanceOf(bytes32 _id) external view returns (uint256) {
-		return uint256(accounts[_id].balance);
 	}
 
 	/**
@@ -230,7 +220,6 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _auth address of the caller attempting the transfer
 		@param _from address of the sender
 		@param _to address of the receiver
-		@param _value number of tokens being transferred
 		@return bytes32 ID of caller
 		@return bytes32[] IDs of sender and receiver
 		@return uint8[] ratings of sender and receiver
@@ -241,7 +230,7 @@ contract IssuingEntity is Modular, MultiSig {
 		address _auth,
 		address _from,
 		address _to,
-		uint256 _value
+		bool _zero
 	)
 		external
 		returns (
@@ -254,18 +243,18 @@ contract IssuingEntity is Modular, MultiSig {
 		_authID = _getID(_auth, 0);
 		_id[0] = _getID(_from, 0);
 		_id[1] = _getID(_to, 0);
-		if (_authID == ownerID && idMap[_auth].id != ownerID) {
-			/*
-				bytes4 signatures of transfer, transferFrom
-				This enforces sub-authority permissioning around transfers
-			*/
-			require(
-				authorityData[idMap[_auth].id].approvedUntil >= now &&
-				authorityData[idMap[_auth].id].signatures[
-					(_authID == _id[0] ? bytes4(0xa9059cbb) : bytes4(0x23b872dd))
-				], "Authority is not permitted"
-			);
-		}
+		// if (_authID == ownerID && idMap[_auth].id != ownerID) {
+		// 	/*
+		// 		bytes4 signatures of transfer, transferFrom
+		// 		This enforces sub-authority permissioning around transfers
+		// 	*/
+		// 	require(
+		// 		authorityData[idMap[_auth].id].approvedUntil >= now &&
+		// 		authorityData[idMap[_auth].id].signatures[
+		// 			(_authID == _id[0] ? bytes4(0xa9059cbb) : bytes4(0x23b872dd))
+		// 		], "Authority is not permitted"
+		// 	);
+		// }
 
 		address _addr = (_authID == _id[0] ? _auth : _from);
 		bool[2] memory _allowed;
@@ -275,7 +264,17 @@ contract IssuingEntity is Modular, MultiSig {
 			_id,
 			[accounts[idMap[_addr].id].regKey, accounts[_id[1]].regKey]
 		);
-		_checkTransfer(_token, _authID, _id, _allowed, _rating, _country, _value, accounts[_id[0]].custodianCount);
+		Account storage a = accounts[_id[0]];
+		_checkTransfer(
+			_token,
+			_authID,
+			_id,
+			_allowed,
+			_rating,
+			_country,
+			//accounts[_id[0]].count.sub(_zero ? 1 : 0)
+			(_zero ? a.count.sub(1) : a.count)
+			);
 		return (_authID, _id, _rating, _country);
 	}	
 
@@ -308,10 +307,10 @@ contract IssuingEntity is Modular, MultiSig {
 		);
 		_setRating(_id[0], _rating[0], _country[0]);
 		_setRating(_id[1], _rating[1], _country[1]);
-		if (accounts[_id[0]].custodianCount > 0 && !_stillOwner) {
-			uint256 _count = accounts[_id[0]].custodianCount.sub(1);
+		if (accounts[_id[0]].count > 0 && !_stillOwner) {
+			uint32 _count = accounts[_id[0]].count.sub(1);
 		} else {
-			_count = accounts[_id[0]].custodianCount;
+			_count = accounts[_id[0]].count;
 		}
 		_checkTransfer(
 			_token,
@@ -320,7 +319,6 @@ contract IssuingEntity is Modular, MultiSig {
 			_allowed,
 			_rating,
 			_country,
-			0,
 			_count)
 		;
 		return (idMap[_cust].id, _rating, _country);
@@ -334,7 +332,6 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _allowed array of permission bools from registrar
 		@param _rating array of investor ratings
 		@param _country array of investor countries
-		@param _value amount to be transferred
 	 */
 	function _checkTransfer(
 		address _token,
@@ -343,8 +340,7 @@ contract IssuingEntity is Modular, MultiSig {
 		bool[2] _allowed,
 		uint8[2] _rating,
 		uint16[2] _country,
-		uint256 _value,
-		uint256 _custodianCount
+		uint32 _tokenCount
 	)
 		internal
 	{	
@@ -373,15 +369,10 @@ contract IssuingEntity is Modular, MultiSig {
 					custodians, make sure a slot is available for allocation.
 				*/ 
 				if (
-					accounts[_id[1]].balance == 0 &&
-					accounts[_id[1]].custodianCount == 0
+					accounts[_id[1]].count == 0
 				) {
 					/* create a bool to prevent repeated comparisons */
-					bool _check = (
-						_rating[0] == 0 ||
-						accounts[_id[0]].balance > _value ||
-						_custodianCount > 0
-					);
+					bool _check = (_rating[0] == 0 || _tokenCount > 0);
 					/*
 						If the sender is an investor and still retains a balance,
 						a new slot must be available.
@@ -440,8 +431,7 @@ contract IssuingEntity is Modular, MultiSig {
 			_authID,
 			_id,
 			_rating,
-			_country,
-			_value
+			_country
 		));
 	}
 
@@ -626,7 +616,8 @@ contract IssuingEntity is Modular, MultiSig {
 		bytes32[2] _id,
 		uint8[2] _rating,
 		uint16[2] _country,
-		uint256 _value
+		uint256 _value,
+		bool[2] _zero
 	)
 		external
 		onlyToken
@@ -634,6 +625,13 @@ contract IssuingEntity is Modular, MultiSig {
 	{
 		/* custodian re-entrancy guard */
 		require (!mutex);
+		if (_zero[0]) {
+			accounts[_id[0]].count = accounts[_id[0]].count.sub(1);
+		}
+		if (_zero[1]) {
+			accounts[_id[1]].count = accounts[_id[1]].count.add(1);
+		}
+		
 		/* If no transfer of ownership, return true immediately */
 		if (_id[0] == _id[1]) return true;
 		/*
@@ -644,7 +642,7 @@ contract IssuingEntity is Modular, MultiSig {
 			Custodian c = Custodian(custodians[_id[1]].addr);
 			mutex = true;
 			if (c.receiveTransfer(msg.sender, _id[0], _value) && _rating[0] > 0) {
-				accounts[_id[0]].custodianCount = accounts[_id[0]].custodianCount.add(1);
+				accounts[_id[0]].count = accounts[_id[0]].count.add(1);
 				accounts[_id[0]].custodians[_id[1]] = true;
 				emit BeneficialOwnerSet(address(c), _id[0], true);
 			}
@@ -653,10 +651,22 @@ contract IssuingEntity is Modular, MultiSig {
 			emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
 		}
 		
-		uint256 _balance = uint256(accounts[_id[0]].balance).sub(_value);
-		_setBalance(_id[0], _rating[0], _country[0], _balance);
-		_balance = uint256(accounts[_id[1]].balance).add(_value);
-		_setBalance(_id[1], _rating[1], _country[1], _balance);
+		Account storage a = accounts[_id[0]];
+		if (_rating[0] != 0) {
+			_setRating(_id[0], _rating[0], _country[0]);
+			/* If investor account balance was 0, increase investor counts */
+			if (a.count == 0) {
+				_decrementCount(_rating[0], _country[0]);
+			}
+		}
+		a = accounts[_id[1]];
+		if (_rating[1] != 0) {
+			_setRating(_id[1], _rating[1], _country[1]);
+			/* If investor account balance was 0, increase investor counts */
+			if (a.count == 1) {
+				_incrementCount(_rating[1], _country[1]);
+			}
+		}
 		/* bytes4 signature for issuer module transferTokens() */
 		_callModules(0x0cfb54c9, abi.encode(
 			msg.sender,
@@ -732,53 +742,30 @@ contract IssuingEntity is Modular, MultiSig {
 				_country
 			) = registrars[_key].addr.getInvestor(_owner);
 		}
-		uint256 _oldTotal = accounts[_id].balance;
-		if (_new > _old) {
-			uint256 _newTotal = uint256(accounts[_id].balance).add(_new.sub(_old));
-		} else {
-			_newTotal = uint256(accounts[_id].balance).sub(_old.sub(_new));
+		Account storage a = accounts[_id];
+		if (_old == 0) {
+			a.count = a.count.add(1);
+			if (a.count == 1) {
+				_incrementCount(_rating, _country);
+			}
 		}
-		_setBalance(_id, _rating, _country, _newTotal);
+		if (_new == 0) {
+			a.count = a.count.sub(1);
+			if (a.count == 0) {
+				_decrementCount(_rating, _country);
+			}
+		}
+		
 		/* bytes4 signature for token module balanceChanged() */
 		_callModules(0x4268353d, abi.encode(
 			msg.sender,
 			_id,
 			_rating,
 			_country,
-			_oldTotal,
-			_newTotal
+			_old,
+			_new
 		));
 		return (_id, _rating, _country);
-	}
-
-	/**
-		@notice Directly set a balance at the issuing entity level
-		@param _id investor ID
-		@param _rating investor rating
-		@param _country investor country
-		@param _value new balance value
-	 */
-	function _setBalance(
-		bytes32 _id,
-		uint8 _rating,
-		uint16 _country,
-		uint256 _value
-	)
-		internal
-	{
-		Account storage a = accounts[_id];
-		if (_rating != 0) {
-			_setRating(_id, _rating, _country);
-			/* If investor account balance was 0, increase investor counts */
-			if (a.balance == 0 && a.custodianCount == 0) {
-				_incrementCount(_rating, _country);
-			/* If investor account balance is now 0, reduce investor counts */
-			} else if (_value == 0 && a.custodianCount == 0) {
-				_decrementCount(_rating, _country);
-			}
-		}
-		a.balance = uint192(_value);
-		require(a.balance == _value);
 	}
 
 	function _setRating(bytes32 _id, uint8 _rating, uint16 _country) internal {
@@ -916,9 +903,7 @@ contract IssuingEntity is Modular, MultiSig {
 		require(token.ownerID() == ownerID);
 		require(token.circulatingSupply() == 0);
 		tokens[_token].set = true;
-		uint256 _balance = uint256(accounts[ownerID].balance).add(token.treasurySupply());
-		accounts[ownerID].balance = uint192(_balance);
-		require(accounts[ownerID].balance == _balance);
+		
 		emit TokenAdded(_token);
 		return true;
 	}
@@ -1071,16 +1056,16 @@ contract IssuingEntity is Modular, MultiSig {
 		a.custodians[_custID] = _add;
 		emit BeneficialOwnerSet(msg.sender, _id, _add);
 		if (_add) {
-			a.custodianCount = a.custodianCount.add(1);
-			if (a.custodianCount == 1 && a.balance == 0) {
+			a.count = a.count.add(1);
+			if (a.count == 1) {
 				_incrementCount(
 					a.rating,
 					registrars[a.regKey].addr.getCountry(_id)
 				);	
 			}
 		} else {
-			a.custodianCount = a.custodianCount.sub(1);
-			if (a.custodianCount == 0 && a.balance == 0) {
+			a.count = a.count.sub(1);
+			if (a.count == 0) {
 				_decrementCount(
 					a.rating,
 					registrars[a.regKey].addr.getCountry(_id)

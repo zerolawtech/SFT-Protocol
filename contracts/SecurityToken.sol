@@ -129,7 +129,7 @@ contract SecurityToken is Modular {
 			bytes32[2] memory _id,
 			uint8[2] memory _rating,
 			uint16[2] memory _country
-		) = issuer.checkTransfer(address(this), _from, _from, _to, _value);
+		) = issuer.checkTransfer(address(this), _from, _from, _to, _value == balances[_from]);
 		_checkTransfer([_from, _to], _id[0], _id, _rating, _country, _value);
 		return true;
 	}
@@ -167,7 +167,7 @@ contract SecurityToken is Modular {
 			_auth,
 			_from,
 			_to,
-			_value
+			_value == balances[_from]
 		);
 		_addr = _checkTransfer(
 			[_from, _to],
@@ -330,7 +330,13 @@ contract SecurityToken is Modular {
 	{
 		balances[_addr[0]] = balances[_addr[0]].sub(_value);
 		balances[_addr[1]] = balances[_addr[1]].add(_value);
-		require(issuer.transferTokens(_id, _rating, _country, _value));
+		require(issuer.transferTokens(
+			_id,
+			_rating,
+			_country,
+			_value,
+			[balances[_addr[0]] == 0, balances[_addr[1]] == _value]
+		));
 		/* bytes4 signature for token module transferTokens() */
 		_callModules(0x35a341da, abi.encode(
 			_addr,

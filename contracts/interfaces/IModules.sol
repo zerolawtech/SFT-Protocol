@@ -71,8 +71,7 @@ interface IIssuerModule {
 		bytes32 _authID,
 		bytes32[2] _id,
 		uint8[2] _rating,
-		uint16[2] _country,
-		uint256 _value
+		uint16[2] _country
 	)
 		external
 		view
