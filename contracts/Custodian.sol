@@ -60,34 +60,6 @@ contract Custodian is Modular, MultiSig {
 
 	}
 
-	/** @notice fallback function, allows contract to receive ether */
-	function () external payable {
-		return;
-	}
-
-	/**
-		@notice Allows custodian to transfer ether out the contract
-		@dev Useful for dividend distributions
-		@param _to Array of address to transfer to
-		@param _value Array of amounts to transfer
-		@return bool success
-	 */
-	function transferEther(
-		address[] _to,
-		uint256[] _value
-	)
-		external
-		returns (bool)
-	{
-		if (!_checkMultiSig()) return false;
-		require (_to.length == _value.length);
-		for (uint256 i = 0; i < _to.length; i++) {
-			_to[i].transfer(_value[i]);
-		}
-		return true;
-	}
-
-
 	function balanceOf(
 		address _token,
 		bytes32 _id
