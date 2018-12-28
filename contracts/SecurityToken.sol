@@ -129,7 +129,7 @@ contract SecurityToken is Modular {
 			bytes32[2] memory _id,
 			uint8[2] memory _rating,
 			uint16[2] memory _country
-		) = issuer.checkTransfer(address(this), _from, _from, _to, _value == balances[_from]);
+		) = issuer.checkTransfer(address(this), _from, _from, _to, _value == balances[_from], _value);
 		_checkTransfer([_from, _to], _id[0], _id, _rating, _country, _value);
 		return true;
 	}
@@ -167,7 +167,8 @@ contract SecurityToken is Modular {
 			_auth,
 			_from,
 			_to,
-			_value == balances[_from]
+			_value == balances[_from],
+			_value
 		);
 		_addr = _checkTransfer(
 			[_from, _to],
