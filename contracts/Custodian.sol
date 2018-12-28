@@ -44,7 +44,6 @@ contract Custodian is Modular, MultiSig {
 		uint256 value
 	);
 
-
 	/**
 		@notice Custodian constructor
 		@param _owners Array of addresses to associate with owner
@@ -60,6 +59,12 @@ contract Custodian is Modular, MultiSig {
 
 	}
 
+	/**
+		@notice Fetch an investor's current token balance held by the custodian
+		@param _token address of the SecurityToken contract
+		@param _id investor ID
+		@return integer
+	 */
 	function balanceOf(
 		address _token,
 		bytes32 _id
@@ -71,9 +76,15 @@ contract Custodian is Modular, MultiSig {
 		return investors[_id].balances[_token];
 	}
 
+	/**
+		@notice Check if an investor is a beneficial owner for an issuer
+		@param _issuer address of the IssuingEntity contract
+		@param _id investor ID
+		@return bool
+	 */
 	function isBeneficialOwner(
-		bytes32 _id,
-		address _issuer
+		address _issuer,
+		bytes32 _id
 	)
 		external
 		view
@@ -83,10 +94,43 @@ contract Custodian is Modular, MultiSig {
 	}
 
 	/**
-		@notice Custodian transfer function
-		@dev
-			Addresses associated to the custodian cannot directly hold tokens,
-			so they must use this transfer function to move them.
+		@notice View function to check if an internal transfer is possible
+		@param _token Address of the token to transfer
+		@param _fromID Sender investor ID
+		@param _toID Recipient investor ID
+		@param _value Amount of tokens to transfer
+		@param _stillOwner is sender still a beneficial owner for this issuer?
+		@return bool success
+	 */
+	function checkTransferInternal(
+		SecurityToken _token,
+		bytes32 _fromID,
+		bytes32 _toID,
+		uint256 _value,
+		bool _stillOwner
+	)
+		external
+		view
+		returns (bool)
+	{
+		Investor storage from = investors[_fromID];
+		require(from.balances[_token] >= _value, "Insufficient balance");
+		if (
+			!_stillOwner &&
+			from.balances[_token] == _value &&
+			from.issuers[issuerMap[_token]].tokenCount == 1
+		) {
+			bool _owner;
+		} else {
+			_owner = true;
+		}
+		require (_token.checkTransferCustodian([_fromID, _toID], _owner));
+		return true;
+	}
+
+	/**
+		@notice Transfers tokens out of the custodian contract
+		@dev callable by custodian authorities and modules
 		@param _token Address of the token to transfer
 		@param _to Address of the recipient
 		@param _value Amount to transfer
@@ -163,6 +207,16 @@ contract Custodian is Modular, MultiSig {
 		return true;
 	}
 
+	/**
+		@notice Transfer token ownership within the custodian
+		@dev Callable by custodian authorities and modules
+		@param _token Address of the token to transfer
+		@param _fromID Sender investor ID
+		@param _toID Recipient investor ID
+		@param _value Amount of tokens to transfer
+		@param _stillOwner is sender still a beneficial owner for this issuer?
+		@return bool success
+	 */
 	function transferInternal(
 		SecurityToken _token,
 		bytes32 _fromID,
@@ -202,32 +256,17 @@ contract Custodian is Modular, MultiSig {
 		return true;
 	}
 
-	function checkTransferInternal(
-		SecurityToken _token,
-		bytes32 _fromID,
-		bytes32 _toID,
-		uint256 _value,
-		bool _stillOwner
-	)
-		external
-		view
-		returns (bool)
-	{
-		Investor storage from = investors[_fromID];
-		require(from.balances[_token] >= _value, "Insufficient balance");
-		if (
-			!_stillOwner &&
-			from.balances[_token] == _value &&
-			from.issuers[issuerMap[_token]].tokenCount == 1
-		) {
-			bool _owner;
-		} else {
-			_owner = true;
-		}
-		require (_token.checkTransferCustodian([_fromID, _toID], _owner));
-		return true;
-	}
-
+	/**
+		@notice Release beneficial ownership of an investor
+		@dev
+			Even when an investor's balance reaches 0, their beneficial owner
+			status may be preserved with _stillOwner. This function can be 
+			called later to revoke that status.
+		@dev Callable by custodian authorities and modules
+		@param _issuer Address of IssuingEntity
+		@param _id investor ID
+		@return bool success
+	 */
 	function releaseOwnership(
 		address _issuer,
 		bytes32 _id
