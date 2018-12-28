@@ -16,20 +16,20 @@ contract KYCRegistrar {
 	}
 
 	struct Investor {
-		bytes32 authority;
-		bytes3 region;
 		uint8 rating;
 		uint16 country;
 		uint40 expires;
 		bool restricted;
+		bytes3 region;
+		bytes32 authority;
 	}
 
 	struct Authority {
-		mapping (uint16 => bool) countries;
-		mapping (bytes32 => address[]) multiSigAuth;
 		uint32 multiSigThreshold;
 		uint32 addressCount;
 		bool restricted;
+		mapping (uint16 => bool) countries;
+		mapping (bytes32 => address[]) multiSigAuth;
 	}
 
 	mapping (address => Address) idMap;
@@ -155,10 +155,11 @@ contract KYCRegistrar {
 			authorityData[_id].addressCount > 0
 		);
 		for (uint256 i = 0; i < _addr.length; i++) {
-			if (idMap[_addr[i]].id == _id && idMap[_addr[i]].restricted) {
-				idMap[_addr[i]].restricted = false;
-			} else if (idMap[_addr[i]].id == 0) {
-				idMap[_addr[i]].id = _id;
+			Address storage _inv = idMap[_addr[i]];
+			if (_inv.id == _id && _inv.restricted) {
+				_inv.restricted = false;
+			} else if (_inv.id == 0) {
+				_inv.id = _id;
 				_count = _count.add(1);
 			} else {
 				revert();
@@ -301,12 +302,12 @@ contract KYCRegistrar {
 		require(investorData[_id].authority == 0);
 		if (!_checkMultiSig()) return false;
 		investorData[_id] = Investor(
-			idMap[msg.sender].id,
-			_region,
 			_rating,
 			_country,
 			_expires,
-			false
+			false,
+			_region,
+			idMap[msg.sender].id
 		);
 		emit NewInvestor(
 			_id,
@@ -341,10 +342,11 @@ contract KYCRegistrar {
 	{
 		require(investorData[_id].country != 0);
 		if (!_checkMultiSig()) return false;
-		investorData[_id].authority = idMap[msg.sender].id;
-		investorData[_id].region = _region;
-		investorData[_id].rating = _rating;
-		investorData[_id].expires = _expires;
+		Investor storage i = investorData[_id];
+		i.authority = idMap[msg.sender].id;
+		i.region = _region;
+		i.rating = _rating;
+		i.expires = _expires;
 		emit UpdatedInvestor(
 			_id,
 			_region,
