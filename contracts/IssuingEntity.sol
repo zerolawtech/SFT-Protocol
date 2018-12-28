@@ -19,10 +19,10 @@ contract IssuingEntity is Modular, MultiSig {
 		counts[0] and levels[0] == the sum total of counts[1:] and limits[1:]
 	*/
 	struct Country {
-		bool allowed;
-		uint8 minRating;
 		uint32[8] counts;
 		uint32[8] limits;
+		bool allowed;
+		uint8 minRating;
 	}
 
 	struct Account {
@@ -296,7 +296,10 @@ contract IssuingEntity is Modular, MultiSig {
 			uint16[2] _country
 		)
 	{
-		require(custodians[idMap[_cust].id].addr == _cust, "Custodian not registered");
+		require(
+			custodians[idMap[_cust].id].addr == _cust,
+			"Custodian not registered"
+		);
 		require(custodians[_id[1]].addr == 0, "Receiver is custodian");
 		_getID(0, _id[0]);
 		_getID(0, _id[1]);
@@ -431,14 +434,10 @@ contract IssuingEntity is Modular, MultiSig {
 			}
 		}
 		/* bytes4 signature for issuer module checkTransfer() */
-		_callModules(0x47fca5df, abi.encode(
-			_token,
-			_authID,
-			_id,
-			_rating,
-			_country,
-			_value
-		));
+		_callModules(
+			0x47fca5df,
+			abi.encode(_token, _authID, _id, _rating, _country, _value)
+		);
 	}
 
 	/**
@@ -675,13 +674,10 @@ contract IssuingEntity is Modular, MultiSig {
 			}
 		}
 		/* bytes4 signature for issuer module transferTokens() */
-		_callModules(0x0cfb54c9, abi.encode(
-			msg.sender,
-			_id,
-			_rating,
-			_country,
-			_value
-		));
+		_callModules(
+			0x0cfb54c9,
+			abi.encode(msg.sender, _id, _rating, _country, _value)
+		);
 		
 		return true;
 	}
@@ -755,8 +751,7 @@ contract IssuingEntity is Modular, MultiSig {
 			if (a.count == 1) {
 				_incrementCount(_rating, _country);
 			}
-		}
-		if (_new == 0) {
+		} else if (_new == 0) {
 			a.count = a.count.sub(1);
 			if (a.count == 0) {
 				_decrementCount(_rating, _country);
@@ -764,14 +759,10 @@ contract IssuingEntity is Modular, MultiSig {
 		}
 		
 		/* bytes4 signature for token module balanceChanged() */
-		_callModules(0x4268353d, abi.encode(
-			msg.sender,
-			_id,
-			_rating,
-			_country,
-			_old,
-			_new
-		));
+		_callModules(
+			0x4268353d,
+			abi.encode(msg.sender, _id, _rating, _country, _old, _new)
+		);
 		return (_id, _rating, _country);
 	}
 
@@ -780,9 +771,9 @@ contract IssuingEntity is Modular, MultiSig {
 		if (_rating == a.rating) return;
 		/* if local rating is not 0, rating has changed */
 		if (a.rating > 0) {
-			Country storage c = countries[_country];
-			c.counts[_rating] = c.counts[_rating].sub(1);
-			c.counts[a.rating] = c.counts[a.rating].add(1);
+			uint32[8] storage c = countries[_country].counts;
+			c[_rating] = c[_rating].sub(1);
+			c[a.rating] = c[a.rating].add(1);
 		}
 		a.rating = _rating;
 	}
@@ -910,7 +901,6 @@ contract IssuingEntity is Modular, MultiSig {
 		require(token.ownerID() == ownerID);
 		require(token.circulatingSupply() == 0);
 		tokens[_token].set = true;
-		
 		emit TokenAdded(_token);
 		return true;
 	}
