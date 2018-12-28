@@ -1,8 +1,7 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.4.24 <0.5.0;
 
 import "../../open-zeppelin/SafeMath.sol";
 import "./BaseCheckpoint.sol";
-
 
 contract DividendModule is CheckpointModule {
 
@@ -14,10 +13,17 @@ contract DividendModule is CheckpointModule {
 	uint256 public claimExpiration;
 
 	mapping (address => bool) claimed;
+	mapping (address => mapping (bytes32 => bool)) claimedCustodian;
 
 	event DividendIssued(uint256 time, uint256 amount);
 	event DividendClaimed(address beneficiary, uint256 amount);
 	event DividendExpired(uint256 unclaimedAmount);
+	event CustodianDividendClaimed(
+		address indexed custodian,
+		bytes32 beneficiaryID,
+		address beneficiary,
+		uint256 amount
+	);
 
 	constructor(
 		address _token,
@@ -30,7 +36,7 @@ contract DividendModule is CheckpointModule {
 		
 	}
 
-	function issueDividend(uint256 _claimPeriod) public onlyAuthority payable {
+	function issueDividend(uint256 _claimPeriod) external onlyAuthority payable {
 		require (dividendTime < now);
 		require (claimExpiration == 0);
 		require (msg.value > 0);
@@ -47,7 +53,9 @@ contract DividendModule is CheckpointModule {
 		}
 		require (issuer.getID(_beneficiary) != ownerID);
 		require (!claimed[_beneficiary]);
-		uint256 _value = _getBalance(_beneficiary).mul(dividendAmount).div(totalSupply);
+		uint256 _value = (
+			_getBalance(_beneficiary).mul(dividendAmount).div(totalSupply)
+		);
 		claimed[_beneficiary] = true;
 		_beneficiary.transfer(_value);
 		emit DividendClaimed(_beneficiary, _value);
@@ -59,7 +67,38 @@ contract DividendModule is CheckpointModule {
 		}
 	}
 
-	function closeDividend() public onlyAuthority {
+	function claimCustodianDividend(
+		address _custodian,
+		bytes32 _beneficiaryID,
+		address _beneficiary
+	)
+		public
+	{
+		require (address(this).balance > 0);
+		if (_beneficiaryID == 0) {
+			_beneficiaryID = issuer.getID(msg.sender);
+		}
+		if (_beneficiary == 0) {
+			_beneficiary = msg.sender;
+		}
+		require (_beneficiaryID != ownerID);
+		require (!claimedCustodian[_custodian][_beneficiaryID]);
+		require (issuer.getID(_beneficiary) == _beneficiaryID);
+		uint256 _value = _getCustodianBalance(
+			_custodian,
+			_beneficiaryID
+		).mul(dividendAmount).div(totalSupply);
+		claimedCustodian[_custodian][_beneficiaryID] = true;
+		msg.sender.transfer(_value);
+		emit CustodianDividendClaimed(
+			_custodian,
+			_beneficiaryID,
+			_beneficiary,
+			_value
+		);
+	}
+
+	function closeDividend() external onlyAuthority {
 		require (claimExpiration > 0);
 		require (now > claimExpiration || address(this).balance == 0);
 		emit DividendExpired(address(this).balance);

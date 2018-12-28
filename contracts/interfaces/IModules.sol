@@ -1,5 +1,4 @@
-pragma solidity ^0.4.24;
-
+pragma solidity >=0.4.24 <0.5.0;
 
 interface IBaseModule {
 	function getHooks() external view returns (bytes4[]);
@@ -39,7 +38,7 @@ interface ISTModule {
 
 	/* 0x4f072579 */
 	function transferTokensCustodian(
-		bytes32 _custID,
+		address _custodian,
 		bytes32[2] _id,
 		uint8[2] _rating,
 		uint16[2] _country,
@@ -93,7 +92,7 @@ interface IIssuerModule {
 	/* 0x38a1b79a */
 	function transferTokensCustodian(
 		address _token,
-		bytes32 _custID,
+		address _custodian,
 		bytes32[2] _id,
 		uint8[2] _rating,
 		uint16[2] _country,
