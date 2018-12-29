@@ -202,12 +202,7 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _limits Array of limits
 		@return bool success
 	 */
-	function setInvestorLimits(
-		uint32[8] _limits
-	)
-		external
-		returns (bool)
-	{
+	function setInvestorLimits(uint32[8] _limits) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		limits = _limits;
 		emit InvestorLimitSet(0, _limits);
@@ -216,10 +211,13 @@ contract IssuingEntity is Modular, MultiSig {
 
 	/**
 		@notice Check if transfer is possible based on issuer level restrictions
+		@dev function is not called directly - see SecurityToken.checkTransfer
 		@param _token address of token being transferred
 		@param _auth address of the caller attempting the transfer
 		@param _from address of the sender
 		@param _to address of the receiver
+		@param _zero is the sender's balance zero after the transfer?
+		@param _value amount being transferred
 		@return bytes32 ID of caller
 		@return bytes32[] IDs of sender and receiver
 		@return uint8[] ratings of sender and receiver
@@ -275,6 +273,12 @@ contract IssuingEntity is Modular, MultiSig {
 		return (_authID, _id, _rating, _country);
 	}	
 
+	/**
+		@notice Internal to check sub-authority permissioning around transfers
+		@dev This is a seperate function to avoid stack-depth errors
+		@param _auth Address of the authority
+		@param _sig bytes4 signature of the call (transfer or transferFrom)
+	 */
 	function _checkAuth(address _auth, bytes4 _sig) internal view {
 		Authority storage a = authorityData[idMap[_auth].id];
 		require(
@@ -283,6 +287,18 @@ contract IssuingEntity is Modular, MultiSig {
 		);
 	}
 
+	
+	/**
+		@notice Check if custodian internal transfer is possible
+		@dev Function not called directly - see Custodian.checkTransferInternal
+		@param _cust Address of custodian
+		@param _token Address of token being transferred
+		@param _id IDs of sender and receiver
+		@param _stillOwner Is sender still a beneficial owner after transfer?
+		@return bytes32 ID of custodian
+		@return uint8[] ratings of sender and receiver
+		@return uint16[] countries of sender and receiver
+	 */
 	function checkTransferCustodian(
 		address _cust,
 		address _token,
@@ -341,6 +357,8 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _allowed array of permission bools from registrar
 		@param _rating array of investor ratings
 		@param _country array of investor countries
+		@param _tokenCount sender accounts.count value after transfer
+		@param _value amount being transferred
 	 */
 	function _checkTransfer(
 		address _token,
@@ -452,7 +470,9 @@ contract IssuingEntity is Modular, MultiSig {
 
 	/**
 		@notice internal investor ID fetch, updates local record
-		@param _addr address of token being transferred
+		@dev Either of the params may be given as 0
+		@param _addr Investor address
+		@param _id Investor ID
 		@return bytes32 investor ID
 	 */
 	function _getID(address _addr, bytes32 _id) internal returns (bytes32) {
@@ -470,7 +490,9 @@ contract IssuingEntity is Modular, MultiSig {
 	/**
 		@notice internal investor ID fetch
 		@dev common logic for getID() and _getID()
-		@param _addr address of token being transferred
+		@dev Either of the params may be given as 0
+		@param _addr Investor address
+		@param _id Investor ID
 		@return bytes32 investor ID, uint8 registrar index
 	 */
 	function _getIDView(
@@ -526,8 +548,10 @@ contract IssuingEntity is Modular, MultiSig {
 	}
 
 	/**
-		@dev fetch investor data from registrar(s)
+		@notice Internal function for fetching investor data from registrars
+		@dev Either _addr or _id may be given as an empty array
 		@param _addr array of investor addresses
+		@param _id Array of investor IDs
 		@param _key array of registrar indexes
 		@return permissions, ratings, and countries of investors
 	 */
@@ -612,10 +636,12 @@ contract IssuingEntity is Modular, MultiSig {
 
 	/**
 		@notice Transfer tokens through the issuing entity level
+		@dev only callable through SecurityToken
 		@param _id Array of sender/receiver IDs
 		@param _rating Array of sender/receiver ratings
 		@param _country Array of sender/receiver countries
 		@param _value Number of tokens being transferred
+		@param _zero Array - Is balance now zero? Was receiver balance zero?
 		@return bool success
 	 */
 	function transferTokens(
@@ -683,6 +709,17 @@ contract IssuingEntity is Modular, MultiSig {
 		return true;
 	}
 
+	/**
+		@notice Registrer change of beneficial ownership in custodian
+		@dev only callable through Custodian.transferInternal
+		@param _custID Custodian ID
+		@param _id Array of sender/receiver IDs
+		@param _rating Array of sender/receiver ratings
+		@param _country Array of sender/receiver countries
+		@param _value Number of tokens being transferred
+		@param _stillOwner Is sender still a beneficial owner?
+		@return bool success
+	 */
 	function transferCustodian(
 		bytes32 _custID,
 		bytes32[2] _id,
@@ -758,7 +795,6 @@ contract IssuingEntity is Modular, MultiSig {
 				_decrementCount(_rating, _country);
 			}
 		}
-		
 		/* bytes4 signature for token module balanceChanged() */
 		_callModules(
 			0x4268353d,
@@ -767,6 +803,12 @@ contract IssuingEntity is Modular, MultiSig {
 		return (_id, _rating, _country);
 	}
 
+	/**
+		@notice Check and modify an investor's rating in contract storage
+		@param _id Investor ID
+		@param _rating Investor rating
+		@param _country Investor country
+	 */
 	function _setRating(bytes32 _id, uint8 _rating, uint16 _country) internal {
 		Account storage a = accounts[_id];
 		if (_rating == a.rating) return;
@@ -1041,6 +1083,12 @@ contract IssuingEntity is Modular, MultiSig {
 		return true;
 	}
 
+	/**
+		@notice Add or remove an investor from a custodian's beneficial owners
+		@param _custID Custodian ID
+		@param _id investor ID
+		@param _add is investor a beneficial owner?
+	 */
 	function _setBeneficialOwners(
 		bytes32 _custID,
 		bytes32 _id,
