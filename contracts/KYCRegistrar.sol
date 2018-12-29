@@ -452,8 +452,13 @@ contract KYCRegistrar {
 		@param _addr Array of addresses
 		@return bool success
 	 */
-	function restrictAddresses(bytes32 _id, address[] _addr) external returns (bool) {
-
+	function restrictAddresses(
+		bytes32 _id,
+		address[] _addr
+	)
+		external
+		returns (bool) 
+	{
 		if (!_checkMultiSig()) return false;
 		if (authorityData[_id].addressCount > 0) {
 			/* Only the owner can unregister addresses for an authority. */
@@ -503,6 +508,16 @@ contract KYCRegistrar {
 		return (_id, isPermitted(_addr), i.rating, i.country);
 	}
 
+	/**
+		@notice Fetch investor information using an ID
+		@dev
+			This call increases gas efficiency around token transfers
+			by minimizing the amount of calls to the registrar
+		@param _id investor ID
+		@return bool investor permission from isPermitted()
+		@return uint8 investor rating
+		@return uint16 investor country code
+	 */
 	function getInvestorByID(
 		bytes32 _id
 	)
@@ -549,13 +564,24 @@ contract KYCRegistrar {
 		Investor storage t = investorData[idMap[_to].id];
 		require(t.country != 0, "Receiver not Registered");
 		return (
-			bytes32[2]([idMap[_from].id, idMap[_to].id]),
-			bool[2]([isPermitted(_from), isPermitted(_to)]),
-			uint8[2]([f.rating,t.rating]),
-			uint16[2]([f.country, t.country])
+			[idMap[_from].id, idMap[_to].id],
+			[isPermitted(_from), isPermitted(_to)],
+			[f.rating,t.rating],
+			[f.country, t.country]
 		);
 	}
 
+	/**
+		@notice Use IDs to fetch information on 2 investors
+		@dev
+			This call is increases gas efficiency around token transfers
+			by minimizing the amount of calls to the registrar.
+		@param _fromID first ID to query
+		@param _toID second ID to query
+		@return bool array - Investor permission from isPermitted()
+		@return uint8 array of investor ratings
+		@return uint16 array of investor country codes
+	 */
 	function getInvestorsByID(
 		bytes32 _fromID,
 		bytes32 _toID
@@ -573,10 +599,19 @@ contract KYCRegistrar {
 		Investor storage t = investorData[_toID];
 		require(t.country != 0, "Receiver not Registered");
 		return (
-			bool[2]([isPermittedID(_fromID), isPermittedID(_toID)]),
-			uint8[2]([f.rating,t.rating]),
-			uint16[2]([f.country, t.country])
+			[isPermittedID(_fromID), isPermittedID(_toID)],
+			[f.rating,t.rating],
+			[f.country, t.country]
 		);
+	}
+
+	/**
+		@notice Returns true if an ID is registered in this contract
+		@param _id investor ID
+		@return bool
+	 */
+	function isRegistered(bytes32 _id) external view returns (bool) {
+		return investorData[_id].country != 0;
 	}
 
 	/**
@@ -590,6 +625,7 @@ contract KYCRegistrar {
 
 	/**
 		@notice Fetch investor rating from an ID
+		@dev If the investor is unknown the call will throw
 		@param _id Investor ID
 		@return uint8 rating code
 	 */
@@ -600,6 +636,7 @@ contract KYCRegistrar {
 
 	/**
 		@notice Fetch investor region from an ID
+		@dev If the investor is unknown the call will throw
 		@param _id Investor ID
 		@return bytes3 region code
 	 */
@@ -610,6 +647,7 @@ contract KYCRegistrar {
 
 	/**
 		@notice Fetch investor country from an ID
+		@dev If the investor is unknown the call will throw
 		@param _id Investor ID
 		@return string
 	 */
@@ -620,16 +658,13 @@ contract KYCRegistrar {
 
 	/**
 		@notice Fetch investor KYC expiration from an ID
+		@dev If the investor is unknown the call will throw
 		@param _id Investor ID
 		@return uint40 expiration epoch time
 	 */
 	function getExpires(bytes32 _id) external view returns (uint40) {
 		require (investorData[_id].country != 0);
 		return investorData[_id].expires;
-	}
-
-	function isRegistered(bytes32 _id) external view returns (bool) {
-		return investorData[_id].country != 0;
 	}
 
 	/**
@@ -642,6 +677,11 @@ contract KYCRegistrar {
 		return isPermittedID(idMap[_addr].id);
 	}
 
+	/**
+		@notice Check if an an investor is permitted based on ID
+		@param _id Investor ID to query
+		@return bool permission
+	 */
 	function isPermittedID(bytes32 _id) public view returns (bool) {
 		Investor storage i = investorData[_id];
 		if (i.restricted) return false;
