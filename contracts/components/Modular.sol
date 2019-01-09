@@ -7,12 +7,14 @@ import "../interfaces/IModules.sol";
 contract Modular {
 
 	struct Module {
-		address module;
-		mapping(bytes4 => bool) hooks;
+		bool active;
+		// call out, call in
+        mapping(bytes4 => bool[2]) permissions;
 	}
 
-	Module[] modules;
-	mapping (address => bool) activeModules;
+	address[] modules;
+    //Module[] modules;
+	mapping (address => Module) modulePermissions;
 
 	event ModuleAttached(address module, bytes4[] hooks);
 	event ModuleDetached(address module);
@@ -23,21 +25,13 @@ contract Modular {
 		@param _module Address of the module to attach
 	 */
 	function _attachModule(address _module) internal {
-		require (!activeModules[_module]);
+		require (!modulePermissions[_module].active);
 		IBaseModule b = IBaseModule(_module);
 		require (b.getOwner() == address(this));
 		bytes4[] memory _hooks = b.getHooks();
-		activeModules[_module] = true;
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (modules[i].module == 0) {
-				modules[i].module = _module;
-				_setHooks(i, _hooks, true);
-				emit ModuleAttached(_module, _hooks);
-				return;
-			}
-		}
-		modules.push(Module(_module));
-		_setHooks(modules.length-1, _hooks, true);
+		modulePermissions[_module].active = true;
+		modules.push(_module);
+		//_setHooks(_module, _hooks, true);
 		emit ModuleAttached(_module, _hooks);
 	}
 
@@ -47,11 +41,17 @@ contract Modular {
 		@param _module Address of the module to detach
 	 */
 	function _detachModule(address _module) internal {
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (modules[i].module == _module) {
-				_setHooks(i, IBaseModule(modules[i].module).getHooks(), false);
-				modules[i].module = 0;
-				activeModules[_module] = false;
+		require (modules.length > 0);
+        if (modules[modules.length-1] == _module) {
+            modules.length--;
+            return;
+        }
+        for (uint256 i = 0; i < modules.length-1; i++) {
+			if (modules[i] == _module) {
+				//_setHooks(i, IBaseModule(modules[i].module).getHooks(), false);
+				modules[i] = modules[modules.length-1];
+                modules.length--;
+				modulePermissions[_module].active = false;
 				emit ModuleDetached(_module);
 				return;
 			}
@@ -65,9 +65,9 @@ contract Modular {
 		@param _hooks bytes4 array
 		@param _set value to apply to mapping
 	 */
-	function _setHooks(uint256 _idx, bytes4[] _hooks, bool _set) private {
+	function _setHooks(address _module, bytes4[] _hooks, bool _set) private {
 		for (uint256 i = 0; i < _hooks.length; i++) {
-			modules[_idx].hooks[_hooks[i]] = _set;
+			modulePermissions[_module].permissions[_hooks[i]][0] = _set;
 		}
 	}
 
@@ -78,8 +78,8 @@ contract Modular {
 	 */
 	function _callModules(bytes4 _sig, bytes _data) internal {
 		for (uint256 i = 0; i < modules.length; i++) {
-			if (address(modules[i].module) != 0 && modules[i].hooks[_sig]) {
-				require(modules[i].module.call(_sig, _data));
+			if (modulePermissions[modules[i]].permissions[_sig][0]) {
+				require(modules[i].call(_sig, _data));
 			}
 		}
 	}
@@ -90,7 +90,7 @@ contract Modular {
 		@return bool
 	 */
 	function isActiveModule(address _module) public view returns (bool) {
-		return activeModules[_module];
+		return modulePermissions[_module].active;
 	}
 
 }
