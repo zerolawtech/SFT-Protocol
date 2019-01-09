@@ -16,6 +16,16 @@ contract MintBurnModule is ModuleBase {
 
 	constructor(address _issuer) ModuleBase(_issuer) public { }
 
+	function getPermissions() external pure returns (
+		bytes4[] outbound,
+		bytes4[] inbound
+	) {
+		bytes4[] memory _out = new bytes4[](0);
+		bytes4[] memory _in = new bytes4[](1);
+		_in[0] = 0x930e5004;
+		return (_out, _in);
+	}
+
 	function mint(address _token, uint256 _value) external onlyAuthority returns (bool) {
 		SecurityToken t = SecurityToken(_token);
 		uint256 _new = t.balanceOf(owner).add(_value);

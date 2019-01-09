@@ -27,9 +27,18 @@ contract CheckpointModule is STModuleBase {
 		require (_time >= now);
 		totalSupply = token.totalSupply();
 		time = _time;
-		hooks.push(0x35a341da);
-		hooks.push(0x4268353d);
-		hooks.push(0x4f072579);
+	}
+
+    function getPermissions() external pure returns (
+		bytes4[] outbound,
+		bytes4[] inbound
+	) {
+		bytes4[] memory _out = new bytes4[](3);
+		bytes4[] memory _in = new bytes4[](0);
+		outbound[0] = 0x35a341da;
+		outbound[1] = 0x4268353d;
+		outbound[2] = 0x4f072579;
+		return (_out, _in);
 	}
 
 	function _getBalance(address _owner) internal view returns (uint256) {
