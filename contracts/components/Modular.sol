@@ -97,4 +97,11 @@ contract Modular {
 		return modulePermissions[_module].active;
 	}
 
+	function isPermittedModule(address _module, bytes4 _sig) public view returns (bool) {
+		return (
+			modulePermissions[_module].active && 
+			modulePermissions[_module].permissions[_sig][1]
+		);
+	}
+
 }
