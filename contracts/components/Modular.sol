@@ -28,13 +28,14 @@ contract Modular {
 		require (!modulePermissions[_module].active);
 		IBaseModule b = IBaseModule(_module);
 		require (b.getOwner() == address(this));
-		(
-			bytes4[] memory _outbound,
-			bytes4[] memory _inbound
-		) = b.getPermissions();
 		modulePermissions[_module].active = true;
 		modules.push(_module);
+		/* permissions can only be set the first time a module is attached */
 		if (!modulePermissions[_module].set) {
+			(
+				bytes4[] memory _outbound,
+				bytes4[] memory _inbound
+			) = b.getPermissions();
 			_setPermissions(_module, _outbound, 0);
 			_setPermissions(_module, _inbound, 1);
 			modulePermissions[_module].set = true;
@@ -67,9 +68,9 @@ contract Modular {
 
 	/**
 		@notice Internal to modify module hooks mapping
-		@param _idx modules array index
-		@param _hooks bytes4 array
-		@param _set value to apply to mapping
+		@param _module module address
+		@param _sig array of function signatures
+		@param _idx permission arary index
 	 */
 	function _setPermissions(
 		address _module,
@@ -97,14 +98,23 @@ contract Modular {
 	}
 
 	/**
-		@notice Determines if a module is active on this contract
+		@notice Check if a module is active on this contract
 		@param _module Deployed module address
-		@return bool
+		@return bool active
 	 */
 	function isActiveModule(address _module) public view returns (bool) {
 		return modulePermissions[_module].active;
 	}
 
+	/**
+		@notice Check if a module is permitted to access a specific function
+		@dev
+			This returns false instead of throwing because an issuer level 
+			module must be checked twice
+		@param _module Module address
+		@param _sig Function signature
+		@return bool permission
+	 */
 	function isPermittedModule(
 		address _module,
 		bytes4 _sig
