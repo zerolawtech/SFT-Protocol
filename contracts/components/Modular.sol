@@ -8,15 +8,16 @@ contract Modular {
 
 	struct Module {
 		bool active;
+		bool set;
 		// call out, call in
-        mapping(bytes4 => bool[2]) permissions;
+		mapping(bytes4 => bool[2]) permissions;
 	}
 
 	address[] modules;
-    //Module[] modules;
+	//Module[] modules;
 	mapping (address => Module) modulePermissions;
 
-	event ModuleAttached(address module, bytes4[] hooks);
+	event ModuleAttached(address module, bytes4[] outbound, bytes4[] inbound);
 	event ModuleDetached(address module);
 
 	/**
@@ -28,11 +29,15 @@ contract Modular {
 		require (!modulePermissions[_module].active);
 		IBaseModule b = IBaseModule(_module);
 		require (b.getOwner() == address(this));
-		bytes4[] memory _hooks = b.getHooks();
+		(bytes4[] memory _outbound, bytes4[] memory _inbound) = b.getPermissions();
 		modulePermissions[_module].active = true;
 		modules.push(_module);
-		//_setHooks(_module, _hooks, true);
-		emit ModuleAttached(_module, _hooks);
+		if (!modulePermissions[_module].set) {
+			_setPermissions(_module, _outbound, 0);
+			_setPermissions(_module, _inbound, 1);
+			modulePermissions[_module].set = true;
+		}
+		emit ModuleAttached(_module, _outbound, _inbound);
 	}
 
 	/**
@@ -42,15 +47,14 @@ contract Modular {
 	 */
 	function _detachModule(address _module) internal {
 		require (modules.length > 0);
-        if (modules[modules.length-1] == _module) {
-            modules.length--;
-            return;
-        }
-        for (uint256 i = 0; i < modules.length-1; i++) {
+		if (modules[modules.length-1] == _module) {
+			modules.length--;
+			return;
+		}
+		for (uint256 i = 0; i < modules.length-1; i++) {
 			if (modules[i] == _module) {
-				//_setHooks(i, IBaseModule(modules[i].module).getHooks(), false);
 				modules[i] = modules[modules.length-1];
-                modules.length--;
+				modules.length--;
 				modulePermissions[_module].active = false;
 				emit ModuleDetached(_module);
 				return;
@@ -65,9 +69,9 @@ contract Modular {
 		@param _hooks bytes4 array
 		@param _set value to apply to mapping
 	 */
-	function _setHooks(address _module, bytes4[] _hooks, bool _set) private {
-		for (uint256 i = 0; i < _hooks.length; i++) {
-			modulePermissions[_module].permissions[_hooks[i]][0] = _set;
+	function _setPermissions(address _module, bytes4[] _sig, uint256 _idx) private {
+		for (uint256 i = 0; i < _sig.length; i++) {
+			modulePermissions[_module].permissions[_sig[i]][_idx] = true;
 		}
 	}
 
