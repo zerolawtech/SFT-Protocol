@@ -9,12 +9,11 @@ contract Modular {
 	struct Module {
 		bool active;
 		bool set;
-		// call out, call in
+		/* Outbound calls, inbound calls */
 		mapping(bytes4 => bool[2]) permissions;
 	}
 
 	address[] modules;
-	//Module[] modules;
 	mapping (address => Module) modulePermissions;
 
 	event ModuleAttached(address module, bytes4[] outbound, bytes4[] inbound);
@@ -29,7 +28,10 @@ contract Modular {
 		require (!modulePermissions[_module].active);
 		IBaseModule b = IBaseModule(_module);
 		require (b.getOwner() == address(this));
-		(bytes4[] memory _outbound, bytes4[] memory _inbound) = b.getPermissions();
+		(
+			bytes4[] memory _outbound,
+			bytes4[] memory _inbound
+		) = b.getPermissions();
 		modulePermissions[_module].active = true;
 		modules.push(_module);
 		if (!modulePermissions[_module].set) {
@@ -69,7 +71,13 @@ contract Modular {
 		@param _hooks bytes4 array
 		@param _set value to apply to mapping
 	 */
-	function _setPermissions(address _module, bytes4[] _sig, uint256 _idx) private {
+	function _setPermissions(
+		address _module,
+		bytes4[] _sig,
+		uint256 _idx
+	)
+		private
+	{
 		for (uint256 i = 0; i < _sig.length; i++) {
 			modulePermissions[_module].permissions[_sig[i]][_idx] = true;
 		}
@@ -97,7 +105,14 @@ contract Modular {
 		return modulePermissions[_module].active;
 	}
 
-	function isPermittedModule(address _module, bytes4 _sig) public view returns (bool) {
+	function isPermittedModule(
+		address _module,
+		bytes4 _sig
+	)
+		public
+		view
+		returns (bool)
+	{
 		return (
 			modulePermissions[_module].active && 
 			modulePermissions[_module].permissions[_sig][1]
