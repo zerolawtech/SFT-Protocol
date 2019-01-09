@@ -1050,6 +1050,8 @@ contract IssuingEntity is Modular, MultiSig {
 	{
 		if (_module != msg.sender) {
 			if (!_checkMultiSig()) return false;
+		} else {
+			require(isPermittedModule(msg.sender, msg.sig));
 		}
 		if (_target == address(this)) {
 			_detachModule(_module);
@@ -1107,7 +1109,7 @@ contract IssuingEntity is Modular, MultiSig {
 				_incrementCount(
 					a.rating,
 					registrars[a.regKey].addr.getCountry(_id)
-				);	
+				);
 			}
 		} else {
 			a.count = a.count.sub(1);
@@ -1115,7 +1117,7 @@ contract IssuingEntity is Modular, MultiSig {
 				_decrementCount(
 					a.rating,
 					registrars[a.regKey].addr.getCountry(_id)
-				);	
+				);
 			}
 		}
 	}
