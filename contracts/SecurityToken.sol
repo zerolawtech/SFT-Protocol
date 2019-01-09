@@ -331,7 +331,8 @@ contract SecurityToken is Modular {
 		returns (bool)
 	{
 		/* If called by a module, the authority becomes the issuing contract. */
-		if (isActiveModule(msg.sender)) {
+		// TODO msg.sig
+        if (isPermittedModule(msg.sender, msg.sig)) {
 			address _auth = address(issuer);
 		} else {
 			_auth = msg.sender;
@@ -456,7 +457,8 @@ contract SecurityToken is Modular {
 		external
 		returns (bool)
 	{
-		require(isActiveModule(msg.sender));
+		// TODO msg.sig
+        require(isPermittedModule(msg.sender, msg.sig));
 		if (balances[_owner] == _value) return true;
 		if (balances[_owner] > _value) {
 			totalSupply = totalSupply.sub(balances[_owner].sub(_value));
@@ -515,8 +517,18 @@ contract SecurityToken is Modular {
 		@param _module Deployed module address
 	 */
 	function isActiveModule(address _module) public view returns (bool) {
-		if (activeModules[_module]) return true;
+		if (modulePermissions[_module].active) return true;
 		return issuer.isActiveModule(_module);
+	}
+
+    function isPermittedModule(address _module, bytes4 _sig) public view returns (bool) {
+		if (
+			modulePermissions[_module].active && 
+			modulePermissions[_module].permissions[_sig][1]
+		) {
+            return true;
+        }
+        return issuer.isPermittedModule(_module, _sig);
 	}
 
 }
