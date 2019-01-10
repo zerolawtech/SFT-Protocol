@@ -61,7 +61,22 @@ contract CrowdsaleModule is STModuleBase {
 		tokensMax = _tokensMax;	
 		bonusTimes = _bonusTimes;
 		bonusPct = _bonusPct;
-		hooks.push(0x70aaf928);
+	}
+
+	function getPermissions()
+		external
+		pure
+		returns
+	(
+		bytes4[] hooks,
+		bytes4[] permissions
+	)
+	{
+		bytes4[] memory _hooks = new bytes4[](1);
+		bytes4[] memory _permissions = new bytes4[](1);
+		_hooks[0] = 0x70aaf928;
+		_permissions[0] = 0x23b872dd;
+		return (_hooks, _permissions);
 	}
 
 	function () public payable {

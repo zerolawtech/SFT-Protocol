@@ -520,7 +520,7 @@ contract SecurityToken is Modular {
 		@param _module Deployed module address
 	 */
 	function isActiveModule(address _module) public view returns (bool) {
-		if (modulePermissions[_module].active) return true;
+		if (moduleData[_module].active) return true;
 		return issuer.isActiveModule(_module);
 	}
 
@@ -542,8 +542,8 @@ contract SecurityToken is Modular {
 		returns (bool)
 	{
 		if (
-			modulePermissions[_module].active && 
-			modulePermissions[_module].permissions[_sig][1]
+			moduleData[_module].active && 
+			moduleData[_module].signatures[_sig][1]
 		) {
 			return true;
 		}

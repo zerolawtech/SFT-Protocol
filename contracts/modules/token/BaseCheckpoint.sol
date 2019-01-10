@@ -38,7 +38,7 @@ contract CheckpointModule is STModuleBase {
 		bytes4[] permissions
 	)
 	{
-		bytes4[] memory _hooks = new bytes4[](4);
+		bytes4[] memory _hooks = new bytes4[](3);
 		bytes4[] memory _permissions = new bytes4[](1);
 		_hooks[0] = 0x35a341da;
 		_hooks[1] = 0x4268353d;
