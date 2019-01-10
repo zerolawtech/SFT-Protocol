@@ -160,14 +160,31 @@ contract EscrowCustodian {
 			_token,
 			_issuer,
 			msg.value,
-			_released[_released.length-1],
+			0,
 			_dates,
 			_paid,
 			_released
 		));
+		// fire an event! returning it like this isn't useful
 		return loans.length - 1;
 	}
 
-	
+	function claimOffer(uint256 _id) external returns (bool) {
+		LoanAgreement storage _offer = loans[_id];
+		require(_offer.issuer.getID(msg.sender) == _offer.receiver);
+		require(_offer.dates[0] > now);
+		require(_offer.tokenBalance == 0);
+		_offer.tokenBalance = _offer.released[_offer.released.length-1];
+		require(_offer.token.transferFrom(
+			msg.sender,
+			address(this),
+			_offer.tokenBalance
+		));
+		msg.sender.transfer(_offer.etherRepaid);
+		_offer.etherRepaid = 0;
+		// event
+		return true;
+	}
 
+	
 }
