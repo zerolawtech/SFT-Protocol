@@ -128,17 +128,17 @@ def dividend_issue():
     '''Dividend: issue the dividend'''
     check.reverts(
         dividend.issueDividend,
-        (100, {'from':accounts[2], 'value':1e19}),
+        (100, {'from':accounts[2], 'value':"10 ether"}),
         "Dividend was successfully issued by account 2")
     check.reverts(dividend.issueDividend, (100,),
         "Was able to issue a dividend without sending any eth")
     check.confirms(
         dividend.issueDividend,
-        (100, {'value':2e19}),
+        (100, {'value':"20 ether"}),
         "Unable to issue Dividend")
     check.reverts(
         dividend.issueDividend,
-        (100, {'value':1e19}),
+        (100, {'value':"10 ether"}),
         "Was able to call issueDividend twice")
 
 def dividend_claim():
@@ -155,10 +155,10 @@ def dividend_claim():
         (cust,issuer.getID(a[6]),a[6],{'from':a[6]}),
         "Was able to claim custodian dividend twice"
     )
-    for i,final in enumerate([int(4e18), int(2e18), int(4e18), int(1e18), int(3e18), int(6e18)], start=2):
+    for i,final in enumerate([wei(4e18), wei(2e18), wei(4e18), wei(1e18), wei(1e18), wei(6e18)], start=2):
         balance = accounts[i].balance()
-        dividend.claimDividend(accounts[i])
-        check.equal(accounts[i].balance(), balance+final, "Dividend payout wrong: {}".format(i))
+        tx = dividend.claimDividend(accounts[i], {'from':accounts[i]})
+        check.equal(accounts[i].balance(), balance+final-(tx.gasUsed*tx.gasPrice), "Dividend payout wrong: {}".format(i))
         check.reverts(dividend.claimDividend,(accounts[i],), "Able to claim twice")
 
 def dividend_close():

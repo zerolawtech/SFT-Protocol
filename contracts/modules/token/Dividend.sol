@@ -33,7 +33,7 @@ contract DividendModule is CheckpointModule {
 		CheckpointModule(_token, _issuer, _time)
 		public
 	{
-		
+
 	}
 
 	function issueDividend(uint256 _claimPeriod) external onlyAuthority payable {

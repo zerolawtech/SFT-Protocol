@@ -29,15 +29,16 @@ contract CheckpointModule is STModuleBase {
 		time = _time;
 	}
 
-    function getPermissions() external pure returns (
+	function getPermissions() external pure returns (
 		bytes4[] outbound,
 		bytes4[] inbound
 	) {
-		bytes4[] memory _out = new bytes4[](3);
-		bytes4[] memory _in = new bytes4[](0);
-		outbound[0] = 0x35a341da;
-		outbound[1] = 0x4268353d;
-		outbound[2] = 0x4f072579;
+		bytes4[] memory _out = new bytes4[](4);
+		bytes4[] memory _in = new bytes4[](1);
+		_out[0] = 0x35a341da;
+		_out[1] = 0x4268353d;
+		_out[2] = 0x4f072579;
+		_in[0] = 0xbb2a8522;
 		return (_out, _in);
 	}
 
