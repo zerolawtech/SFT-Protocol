@@ -28,7 +28,7 @@ def mintburn_setup():
 
 def mintburn_mint():
     '''MintBurn: mint tokens'''
-    check.confirms(mint.mint, (token.address, 1000000), "Unable to mint")
+    mint.mint(token.address, 1000000)
     check.equal(token.balanceOf(issuer.address), 2000000, "Issuer balance is wrong")
     check.reverts(
         mint.mint,

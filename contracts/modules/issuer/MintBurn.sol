@@ -27,7 +27,7 @@ contract MintBurnModule is ModuleBase {
 	{
 		bytes4[] memory _hooks = new bytes4[](0);
 		bytes4[] memory _permissions = new bytes4[](1);
-		_permissions[0] = 0x930e5004;
+		_permissions[0] = 0x250dea06;
 		return (_hooks, _permissions);
 	}
 

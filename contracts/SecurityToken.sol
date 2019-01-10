@@ -457,7 +457,7 @@ contract SecurityToken is Modular {
 		external
 		returns (bool)
 	{
-		/* msg.sig = 0x930e5004 */
+		/* msg.sig = 0x250dea06 */
 		require(isPermittedModule(msg.sender, msg.sig));
 		if (balances[_owner] == _value) return true;
 		if (balances[_owner] > _value) {
