@@ -9,14 +9,14 @@ contract Modular {
 	struct Module {
 		bool active;
 		bool set;
-		/* Outbound calls, inbound calls */
-		mapping(bytes4 => bool[2]) permissions;
+		/* hooks, permissions */
+		mapping(bytes4 => bool[2]) signatures;
 	}
 
-	address[] modules;
-	mapping (address => Module) modulePermissions;
+	address[] activeModules;
+	mapping (address => Module) moduleData;
 
-	event ModuleAttached(address module, bytes4[] outbound, bytes4[] inbound);
+	event ModuleAttached(address module, bytes4[] hooks, bytes4[] permissions);
 	event ModuleDetached(address module);
 
 	/**
@@ -25,22 +25,22 @@ contract Modular {
 		@param _module Address of the module to attach
 	 */
 	function _attachModule(address _module) internal {
-		require (!modulePermissions[_module].active);
+		require (!moduleData[_module].active);
 		IBaseModule b = IBaseModule(_module);
 		require (b.getOwner() == address(this));
-		modulePermissions[_module].active = true;
-		modules.push(_module);
-		/* permissions can only be set the first time a module is attached */
-		if (!modulePermissions[_module].set) {
+		moduleData[_module].active = true;
+		activeModules.push(_module);
+		/* signatures can only be set the first time a module is attached */
+		if (!moduleData[_module].set) {
 			(
-				bytes4[] memory _outbound,
-				bytes4[] memory _inbound
+				bytes4[] memory _hooks,
+				bytes4[] memory _permissions
 			) = b.getPermissions();
-			_setPermissions(_module, _outbound, 0);
-			_setPermissions(_module, _inbound, 1);
-			modulePermissions[_module].set = true;
+			_setPermissions(_module, _hooks, 0);
+			_setPermissions(_module, _permissions, 1);
+			moduleData[_module].set = true;
 		}
-		emit ModuleAttached(_module, _outbound, _inbound);
+		emit ModuleAttached(_module, _hooks, _permissions);
 	}
 
 	/**
@@ -50,19 +50,19 @@ contract Modular {
 	 */
 	function _detachModule(address _module) internal {
 		require (
-			modulePermissions[_module].active &&
-			modules.length > 0
+			moduleData[_module].active &&
+			activeModules.length > 0
 		);
-		modulePermissions[_module].active = false;
+		moduleData[_module].active = false;
 		emit ModuleDetached(_module);
-		if (modules[modules.length-1] == _module) {
-			modules.length--;
+		if (activeModules[activeModules.length - 1] == _module) {
+			activeModules.length--;
 			return;
 		}
-		for (uint256 i = 0; i < modules.length-1; i++) {
-			if (modules[i] == _module) {
-				modules[i] = modules[modules.length-1];
-				modules.length--;
+		for (uint256 i = 0; i < activeModules.length - 1; i++) {
+			if (activeModules[i] == _module) {
+				activeModules[i] = activeModules[activeModules.length - 1];
+				activeModules.length--;
 				return;
 			}
 		}
@@ -83,7 +83,7 @@ contract Modular {
 		private
 	{
 		for (uint256 i = 0; i < _sig.length; i++) {
-			modulePermissions[_module].permissions[_sig[i]][_idx] = true;
+			moduleData[_module].signatures[_sig[i]][_idx] = true;
 		}
 	}
 
@@ -93,9 +93,9 @@ contract Modular {
 		@param _data calldata to send to module
 	 */
 	function _callModules(bytes4 _sig, bytes _data) internal {
-		for (uint256 i = 0; i < modules.length; i++) {
-			if (modulePermissions[modules[i]].permissions[_sig][0]) {
-				require(modules[i].call(_sig, _data));
+		for (uint256 i = 0; i < activeModules.length; i++) {
+			if (moduleData[activeModules[i]].signatures[_sig][0]) {
+				require(activeModules[i].call(_sig, _data));
 			}
 		}
 	}
@@ -106,7 +106,7 @@ contract Modular {
 		@return bool active
 	 */
 	function isActiveModule(address _module) public view returns (bool) {
-		return modulePermissions[_module].active;
+		return moduleData[_module].active;
 	}
 
 	/**
@@ -127,8 +127,8 @@ contract Modular {
 		returns (bool)
 	{
 		return (
-			modulePermissions[_module].active && 
-			modulePermissions[_module].permissions[_sig][1]
+			moduleData[_module].active && 
+			moduleData[_module].signatures[_sig][1]
 		);
 	}
 

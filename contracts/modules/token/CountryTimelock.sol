@@ -28,14 +28,19 @@ contract CountryLockModule is STModuleBase {
 		countryLock[_country] = _epochTime;
 	}
 
-	function getPermissions() external pure returns (
-		bytes4[] outbound,
-		bytes4[] inbound
-	) {
-		bytes4[] memory _out = new bytes4[](1);
-		bytes4[] memory _in = new bytes4[](0);
-		_out[0] = 0x70aaf928;
-		return (_out, _in);
+	function getPermissions()
+		external
+		pure
+		returns
+	(
+		bytes4[] hooks,
+		bytes4[] permissions
+	)
+	{
+		bytes4[] memory _hooks = new bytes4[](1);
+		bytes4[] memory _permissions = new bytes4[](0);
+		_hooks[0] = 0x70aaf928;
+		return (_hooks, _permissions);
 	}
 
 	function checkTransfer(

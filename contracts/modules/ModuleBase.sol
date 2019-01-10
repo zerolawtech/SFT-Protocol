@@ -10,7 +10,6 @@ import "../components/MultiSig.sol";
 contract ModuleBase {
 
 	bytes32 public ownerID;
-	bytes4[] hooks;
 	address owner;
 	
 	/** @dev Check that call originates from issuer or token contract */
@@ -32,10 +31,6 @@ contract ModuleBase {
 	constructor(address _owner) public {
 		owner = _owner;
 		ownerID = MultiSig(owner).ownerID();
-	}
-
-	function getHooks() external view returns (bytes4[]) {
-		return hooks;
 	}
 
 	/**
