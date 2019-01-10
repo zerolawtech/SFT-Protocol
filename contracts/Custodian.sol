@@ -147,6 +147,7 @@ contract Custodian is Modular, MultiSig {
 		returns (bool)
 	{
 		if (
+			/* msg.sig = 0x75219e4e */
 			!isPermittedModule(msg.sender, msg.sig) &&
 			!_checkMultiSig()
 		) {
@@ -233,6 +234,7 @@ contract Custodian is Modular, MultiSig {
 		returns (bool)
 	{
 		if (
+			/* msg.sig = 0x2965c868 */
 			!isPermittedModule(msg.sender, msg.sig) &&
 			!_checkMultiSig()
 		) {
@@ -285,6 +287,7 @@ contract Custodian is Modular, MultiSig {
 		returns (bool)
 	{
 		if (
+			/* msg.sig = 0xc07f6f8e */
 			!isPermittedModule(msg.sender, msg.sig) &&
 			!_checkMultiSig()
 		) {
@@ -333,6 +336,7 @@ contract Custodian is Modular, MultiSig {
 		if (_module != msg.sender) {
 			if (!_checkMultiSig()) return false;
 		} else {
+			/* msg.sig = 0xbb2a8522 */
 			require(isPermittedModule(msg.sender, msg.sig));
 		}
 		_detachModule(_module);

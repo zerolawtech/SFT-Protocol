@@ -1051,6 +1051,7 @@ contract IssuingEntity is Modular, MultiSig {
 		if (_module != msg.sender) {
 			if (!_checkMultiSig()) return false;
 		} else {
+			/* msg.sig = 0x3556099d */
 			require(isPermittedModule(msg.sender, msg.sig));
 		}
 		if (_target == address(this)) {

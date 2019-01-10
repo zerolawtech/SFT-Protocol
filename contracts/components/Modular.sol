@@ -49,7 +49,12 @@ contract Modular {
 		@param _module Address of the module to detach
 	 */
 	function _detachModule(address _module) internal {
-		require (modules.length > 0);
+		require (
+			modulePermissions[_module].active &&
+			modules.length > 0
+		);
+		modulePermissions[_module].active = false;
+		emit ModuleDetached(_module);
 		if (modules[modules.length-1] == _module) {
 			modules.length--;
 			return;
@@ -58,8 +63,6 @@ contract Modular {
 			if (modules[i] == _module) {
 				modules[i] = modules[modules.length-1];
 				modules.length--;
-				modulePermissions[_module].active = false;
-				emit ModuleDetached(_module);
 				return;
 			}
 		}
