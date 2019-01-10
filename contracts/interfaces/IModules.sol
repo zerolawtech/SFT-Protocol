@@ -1,7 +1,7 @@
 pragma solidity >=0.4.24 <0.5.0;
 
 interface IBaseModule {
-	function getPermissions() external view returns (
+	function getPermissions() external pure returns (
 		bytes4[] outbound,
 		bytes4[] inbound
 	);

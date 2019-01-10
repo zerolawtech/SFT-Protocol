@@ -15,11 +15,27 @@ contract CountryLockModule is STModuleBase {
 		STModuleBase(_token, _issuer)
 		public
 	{
-		hooks.push(0x70aaf928);
+
 	}
 
-	function modifyCountryLock(uint16 _country, uint256 _epochTime) public onlyAuthority {
+	function modifyCountryLock(
+		uint16 _country,
+		uint256 _epochTime
+	)
+		public
+		onlyAuthority
+	{
 		countryLock[_country] = _epochTime;
+	}
+
+	function getPermissions() external pure returns (
+		bytes4[] outbound,
+		bytes4[] inbound
+	) {
+		bytes4[] memory _out = new bytes4[](1);
+		bytes4[] memory _in = new bytes4[](0);
+		_out[0] = 0x70aaf928;
+		return (_out, _in);
 	}
 
 	function checkTransfer(
