@@ -69,7 +69,6 @@ def multidate():
     escrow.makePayment(3,{'from':a[2],'value':1})
     check.equal(token.balanceOf(a[2]), 200)
     check.equal(escrow.balanceOf(token, id2), 0)
-    
 
 def reclaim():
     '''Reposess assets in an overdue loan'''
@@ -112,3 +111,17 @@ def reclaim_complex():
     check.equal(token.balanceOf(a[3]), 150)
     check.reverts(escrow.claimCollateral, (4, {'from':a[3]}))
     check.reverts(escrow.makePayment,(4, {'from':a[2],'value':500}))
+
+def transfer_offer():
+    '''Transfer loan ownership'''
+    token.transfer(a[2],150,{'from':a[3]})
+    escrow.offerLoan(id2, token, [int(time.time()+30)],[1100],[100], {'from':a[3], 'value':1000})
+    escrow.claimOffer(7, {'from':a[2]})
+    escrow.makeTransferOffer(7, a[5], 1100, 1000, {'from':a[3]})
+    b = a[3].balance()
+    escrow.claimTransferOffer(7, {'from':a[5], 'value':1000})
+    check.equal(b+1000,a[3].balance())
+    b = a[5].balance()
+    escrow.makePayment(7, {'from':a[2],'value':1100})
+    check.equal(b+1100, a[5].balance())
+    
