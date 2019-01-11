@@ -11,7 +11,7 @@ def deploy_and_attach():
     token = SecurityToken[0]
     a = accounts
     id2 = issuer.getID(a[2])
-    escrow = a[0].deploy(Escrow)
+    escrow = a[0].deploy(EscrowCustodian)
     issuer.addCustodian(escrow)
     token.transfer(a[2],200),
     token.transfer(a[4],200)
@@ -117,7 +117,7 @@ def transfer_offer():
     token.transfer(a[2],150,{'from':a[3]})
     escrow.offerLoan(id2, token, [int(time.time()+30)],[1100],[100], {'from':a[3], 'value':1000})
     escrow.claimOffer(7, {'from':a[2]})
-    escrow.makeTransferOffer(7, a[5], 1100, 1000, {'from':a[3]})
+    escrow.makeTransferOffer(7, a[5], 1000, {'from':a[3]})
     b = a[3].balance()
     escrow.claimTransferOffer(7, {'from':a[5], 'value':1000})
     check.equal(b+1000,a[3].balance())

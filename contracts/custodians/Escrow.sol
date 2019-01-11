@@ -1,10 +1,10 @@
 pragma solidity >=0.4.24 <0.5.0;
 
-import "./open-zeppelin/SafeMath.sol";
-import "./SecurityToken.sol";
+import "../open-zeppelin/SafeMath.sol";
+import "../SecurityToken.sol";
 
-/** @title Escrow Contract */
-contract Escrow {
+/** @title Custodial Escrow Contract */
+contract EscrowCustodian {
 
 	using SafeMath32 for uint32;
 	using SafeMath for uint256;
