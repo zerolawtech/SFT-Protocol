@@ -316,17 +316,17 @@ contract Escrow {
 		LoanAgreement storage _offer = loans[_loanId];
 		require(msg.sender == _offer.lender);
 		for (uint256 i = 0; i < _offer.dates.length; i++) {
-			if (_offer.dates[i] > now) return false;
-			if (_offer.paid[i] < _offer.etherRepaid) {
+			require(_offer.dates[i] < now,);
+			if (_offer.paid[i] > _offer.etherRepaid) {
 				bytes32 _id = issuerMap[_offer.token].getID(msg.sender);
 				uint256 _amount = _offer.tokenBalance.sub(_offer.tokensRepaid);
 				_transferInternal(_offer.token, _offer.receiver, _id, _amount);
-				delete loans[_loanId];
 				_transfer(_offer.token, msg.sender, _id, _amount);
+				delete loans[_loanId];
 				return true;
 			}
 		}
-		return false;
+		revert();
 	}
 
 }
