@@ -3,8 +3,8 @@ pragma solidity >=0.4.24 <0.5.0;
 import "./open-zeppelin/SafeMath.sol";
 import "./SecurityToken.sol";
 
-/** @title Custodian Contract */
-contract EscrowCustodian {
+/** @title Escrow Contract */
+contract Escrow {
 
 	using SafeMath32 for uint32;
 	using SafeMath for uint256;
@@ -60,8 +60,6 @@ contract EscrowCustodian {
 
 	/**
 		@notice Custodian constructor
-		@param _owners Array of addresses to associate with owner
-		@param _threshold multisig threshold for owning authority
 	 */
 	constructor () public {
 		ownerID = keccak256(abi.encodePacked(address(this)));
@@ -106,6 +104,7 @@ contract EscrowCustodian {
 		@dev callable by custodian authorities and modules
 		@param _token Address of the token to transfer
 		@param _to Address of the recipient
+		@param _id ID of the recipient
 		@param _value Amount to transfer
 		@return bool success
 	 */
@@ -168,14 +167,11 @@ contract EscrowCustodian {
 	}
 
 	/**
-		@notice Transfer token ownership within the custodian
-		@dev Callable by custodian authorities and modules
+		@notice Internal transfer token ownership within the custodian
 		@param _token Address of the token to transfer
 		@param _fromID Sender investor ID
 		@param _toID Recipient investor ID
 		@param _value Amount of tokens to transfer
-		@param _stillOwner is sender still a beneficial owner for this issuer?
-		@return bool success
 	 */
 	function _transferInternal(
 		SecurityToken _token,
@@ -212,6 +208,20 @@ contract EscrowCustodian {
 		emit TransferOwnership(_token, _fromID, _toID, _value);
 	}
 
+	/**
+		@notice Make an offer of a loan
+		@dev
+			* Total required collateral amount for the loan is _released[-1]
+			
+			* Amount of interest required is the difference between _paid[-1]
+			  and the amount of ether sent during the contract call
+
+		@param _receiver ID of loan recipient
+		@param _token Address of token to require as collateral
+		@param _dates Array of payment dates in epoch time
+		@param _paid Array of required payment amounts in wei
+		@param _released Array of token amounts released at each payment
+	 */
 	function offerLoan(
 		bytes32 _receiver,
 		SecurityToken _token,
@@ -232,7 +242,9 @@ contract EscrowCustodian {
 			require(_paid[i] > _paid[i-1]);
 			require(_released[i] >= _released[i-1]);
 		}
-		IssuingEntity _issuer = IssuingEntity(_token.issuer());
+		if (issuerMap[_token] == address(0)) {
+			issuerMap[_token] = _token.issuer();
+		}
 		loans.push(LoanAgreement(
 			_receiver,
 			msg.sender,
@@ -246,6 +258,15 @@ contract EscrowCustodian {
 		));
 		// fire an event! returning it like this isn't useful
 		return loans.length - 1;
+	}
+
+	function revokeOffer(uint256 _loanId) external returns (bool) {
+		LoanAgreement storage _offer = loans[_loanId];
+		require(msg.sender == _offer.lender);
+		require(_offer.tokenBalance == 0);
+		msg.sender.transfer(_offer.etherRepaid);
+		delete loans[_loanId];
+		return true;
 	}
 
 	function claimOffer(uint256 _loanId) external returns (bool) {
@@ -274,7 +295,7 @@ contract EscrowCustodian {
 		require(_offer.tokenBalance > _offer.tokensRepaid);
 		_offer.etherRepaid = _offer.etherRepaid.add(msg.value);
 		_offer.lender.transfer(msg.value);
-		for (uint256 i = _offer.dates.length-1; i != 0; i--) {
+		for (uint256 i = _offer.dates.length-1; i+1 != 0; i--) {
 			if (
 				_offer.paid[i] <= _offer.etherRepaid &&
 				_offer.released[i] > _offer.tokensRepaid
@@ -293,6 +314,7 @@ contract EscrowCustodian {
 
 	function claimCollateral(uint256 _loanId) external returns (bool) {
 		LoanAgreement storage _offer = loans[_loanId];
+		require(msg.sender == _offer.lender);
 		for (uint256 i = 0; i < _offer.dates.length; i++) {
 			if (_offer.dates[i] > now) return false;
 			if (_offer.paid[i] < _offer.etherRepaid) {
