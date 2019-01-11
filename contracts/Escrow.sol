@@ -33,15 +33,14 @@ contract Escrow {
 		SecurityToken token;
 		uint256 etherRepaid; // before claimed, is the amount of the loan
 		uint256 tokensRepaid;
-		uint256 tokenBalance;
-		uint256[] dates; // payment due dates
-		uint256[] paid; // amount that must be paid by dates
-		uint256[] released; // amount in escrow that may be released after the payment
+		uint256 tokenTotal;
+		uint256[] paymentDates; // payment due dates
+		uint256[] amountDue; // amount that must be paid by dates
+		uint256[] tokensReleased; // amount in escrow that may be released after the payment
 		TransferOffer transferOffer;
 	}
 
 	struct TransferOffer {
-		uint256 loanEtherRepaid;
 		uint256 offerAmount;
 		address counterparty;
 	}
@@ -63,6 +62,35 @@ contract Escrow {
 		bytes32 indexed from,
 		bytes32 indexed to,
 		uint256 value
+	);
+	event NewLoanOffer(
+		uint256 indexed loanId,
+		bytes32 indexed receiver,
+		address indexed lender,
+		address token,
+		uint256[] paymentDates,
+		uint256[] amountDue,
+		uint256[] tokensReleased
+	);
+	event LoanOfferRevoked(uint256 indexed loanId);
+	event LoanOfferClaimed(uint256 indexed loanId);
+	event LoanPayment(uint256 indexed loanId, uint256 amount);
+	event LoanRepaid(uint256 indexed loanId);
+	event LoanDefaulted(uint256 indexed loanId, uint256 amount);
+	event LoanTransferOffered(
+		uint256 indexed loanId,
+		address counterparty,
+		uint256 amount
+	);
+	event LoanTransferRevoked(
+		uint256 indexed _loanId,
+		address counterparty,
+		uint256 amount
+	);
+	event LoanTransferClaimed(
+		uint256 indexed _loanId,
+		address counterparty,
+		uint256 amount
 	);
 
 	/**
@@ -107,8 +135,7 @@ contract Escrow {
 	}
 
 	/**
-		@notice Transfers tokens out of the custodian contract
-		@dev callable by custodian authorities and modules
+		@notice Internal transfer function
 		@param _token Address of the token to transfer
 		@param _to Address of the recipient
 		@param _id ID of the recipient
@@ -153,6 +180,7 @@ contract Escrow {
 		external
 		returns (bool)
 	{
+		/* can only receive tokens as part of claimOffer */
 		require(accept);
 		if (issuerMap[_token] == address(0)) {
 			require(SecurityToken(_token).issuer() == msg.sender);
@@ -218,36 +246,38 @@ contract Escrow {
 	/**
 		@notice Make an offer of a loan
 		@dev
-			* Total required collateral amount for the loan is _released[-1]
-			
-			* Amount of interest required is the difference between _paid[-1]
-			  and the amount of ether sent during the contract call
-
+			* Amount of the loan is msg.value
+			* Required collateral amount for the loan is _tokensReleased[-1]
+			* Required repayment for the loan is _amountDue[-1]
+		@dev
+				_amountDue and _tokensReleased represent milestones, not the
+				amounts due or released at each step, so that the final array
+				entry is the total amount paid or released
 		@param _receiver ID of loan recipient
 		@param _token Address of token to require as collateral
-		@param _dates Array of payment dates in epoch time
-		@param _paid Array of required payment amounts in wei
-		@param _released Array of token amounts released at each payment
+		@param _paymentDates Array of payment dates in epoch time
+		@param _amountDue Array of total required payment amounts in wei
+		@param _tokensReleased Array of total tokens released at each payment
 	 */
 	function offerLoan(
 		bytes32 _receiver,
 		SecurityToken _token,
-		uint256[] _dates,
-		uint256[] _paid,
-		uint256[] _released
+		uint256[] _paymentDates,
+		uint256[] _amountDue,
+		uint256[] _tokensReleased
 	)
 		external
 		payable
-		returns (uint256)
+		returns (bool)
 	{
-		require(_dates.length == _paid.length);
-		require(_dates.length == _released.length);
-		require(_dates[0] > now);
+		require(_paymentDates.length == _amountDue.length);
+		require(_paymentDates.length == _tokensReleased.length);
+		require(_paymentDates[0] > now);
 		require(msg.value > 0);
-		for (uint256 i = 1; i < _dates.length; i++) {
-			require(_dates[i] > _dates[i-1]);
-			require(_paid[i] > _paid[i-1]);
-			require(_released[i] >= _released[i-1]);
+		for (uint256 i = 1; i < _paymentDates.length; i++) {
+			require(_paymentDates[i] > _paymentDates[i-1]);
+			require(_amountDue[i] > _amountDue[i-1]);
+			require(_tokensReleased[i] >= _tokensReleased[i-1]);
 		}
 		if (issuerMap[_token] == address(0)) {
 			issuerMap[_token] = _token.issuer();
@@ -259,40 +289,49 @@ contract Escrow {
 			msg.value,
 			0,
 			0,
-			_dates,
-			_paid,
-			_released,
-			TransferOffer(0, 0, 0)
+			_paymentDates,
+			_amountDue,
+			_tokensReleased,
+			TransferOffer(0, 0)
 		));
-		// fire an event! returning it like this isn't useful
-		return loans.length - 1;
+		emit NewLoanOffer(
+			loans.length - 1,
+			_receiver,
+			msg.sender,
+			_token,
+			_paymentDates,
+			_amountDue,
+			_tokensReleased
+		);
+		return true;
 	}
 
 	function revokeOffer(uint256 _loanId) external returns (bool) {
 		LoanAgreement storage _offer = loans[_loanId];
 		require(msg.sender == _offer.lender);
-		require(_offer.tokenBalance == 0);
+		require(_offer.tokenTotal == 0);
 		msg.sender.transfer(_offer.etherRepaid);
 		delete loans[_loanId];
+		emit LoanOfferRevoked(_loanId);
 		return true;
 	}
 
 	function claimOffer(uint256 _loanId) external returns (bool) {
 		LoanAgreement storage _offer = loans[_loanId];
 		require(issuerMap[_offer.token].getID(msg.sender) == _offer.receiver);
-		require(_offer.dates[0] > now);
-		require(_offer.tokenBalance == 0);
-		_offer.tokenBalance = _offer.released[_offer.released.length-1];
+		require(_offer.paymentDates[0] > now);
+		require(_offer.tokenTotal == 0);
+		_offer.tokenTotal = _offer.tokensReleased[_offer.tokensReleased.length-1];
 		accept = true;
 		require(_offer.token.transferFrom(
 			msg.sender,
 			address(this),
-			_offer.tokenBalance
+			_offer.tokenTotal
 		));
 		accept = false;
 		msg.sender.transfer(_offer.etherRepaid);
 		_offer.etherRepaid = 0;
-		// event
+		emit LoanOfferClaimed(_loanId);
 		return true;
 	}
 
@@ -300,18 +339,20 @@ contract Escrow {
 		LoanAgreement storage _offer = loans[_loanId];
 		bytes32 _id = issuerMap[_offer.token].getID(msg.sender);
 		require(_id == _offer.receiver);
-		require(_offer.tokenBalance > _offer.tokensRepaid);
+		require(_offer.tokenTotal > _offer.tokensRepaid);
 		_offer.etherRepaid = _offer.etherRepaid.add(msg.value);
 		_offer.lender.transfer(msg.value);
-		for (uint256 i = _offer.dates.length-1; i+1 != 0; i--) {
+		emit LoanPayment(_loanId, msg.value);
+		for (uint256 i = _offer.paymentDates.length-1; i+1 != 0; i--) {
 			if (
-				_offer.paid[i] <= _offer.etherRepaid &&
-				_offer.released[i] > _offer.tokensRepaid
+				_offer.amountDue[i] <= _offer.etherRepaid &&
+				_offer.tokensReleased[i] > _offer.tokensRepaid
 			) {
-				uint256 _amount = _offer.released[i].sub(_offer.tokensRepaid);
-				_offer.tokensRepaid = _offer.released[i];
+				uint256 _amount = _offer.tokensReleased[i].sub(_offer.tokensRepaid);
+				_offer.tokensRepaid = _offer.tokensReleased[i];
 				_transfer(_offer.token, msg.sender, _id, _amount);
-				if (_offer.tokensRepaid == _offer.tokenBalance) {
+				if (_offer.tokensRepaid == _offer.tokenTotal) {
+					emit LoanRepaid(_loanId);
 					delete loans[_loanId];
 				}
 				return true;
@@ -323,14 +364,15 @@ contract Escrow {
 	function claimCollateral(uint256 _loanId) external returns (bool) {
 		LoanAgreement storage _offer = loans[_loanId];
 		require(msg.sender == _offer.lender);
-		for (uint256 i = 0; i < _offer.dates.length; i++) {
-			require(_offer.dates[i] < now);
-			if (_offer.paid[i] > _offer.etherRepaid) {
+		for (uint256 i = 0; i < _offer.paymentDates.length; i++) {
+			require(_offer.paymentDates[i] < now);
+			if (_offer.amountDue[i] > _offer.etherRepaid) {
 				bytes32 _id = issuerMap[_offer.token].getID(msg.sender);
-				uint256 _amount = _offer.tokenBalance.sub(_offer.tokensRepaid);
+				uint256 _amount = _offer.tokenTotal.sub(_offer.tokensRepaid);
 				_transferInternal(_offer.token, _offer.receiver, _id, _amount);
 				_transfer(_offer.token, msg.sender, _id, _amount);
 				delete loans[_loanId];
+				emit LoanDefaulted(_loanId, _amount);
 				return true;
 			}
 		}
@@ -340,7 +382,6 @@ contract Escrow {
 	function makeTransferOffer(
 		uint256 _loanId,
 		address _counterparty,
-		uint256 _repaid,
 		uint256 _amount
 	)
 		external
@@ -348,19 +389,21 @@ contract Escrow {
 	{
 		LoanAgreement storage _offer = loans[_loanId];
 		require(msg.sender == _offer.lender);
-		require(_offer.tokenBalance > _offer.tokensRepaid);
-		require(_offer.paid[_offer.paid.length-1] >= _repaid);
-		_offer.transferOffer = TransferOffer(_repaid, _amount, _counterparty);
+		require(_offer.tokenTotal > _offer.tokensRepaid);
+		_offer.transferOffer = TransferOffer(_amount, _counterparty);
+		emit LoanTransferOffered(_loanId, _counterparty, _amount);
 		return true;
 	}
 
 	function revokeTransferOffer(uint256 _loanId) external returns (bool) {
 		require(msg.sender == loans[_loanId].lender);
+		TransferOffer storage t = loans[_loanId].transferOffer;
+		emit LoanTransferRevoked(_loanId, t.counterparty, t.offerAmount);
 		delete loans[_loanId].transferOffer;
 		return true;
 	}
 
-	function claimTransferOffer (
+	function claimTransferOffer(
 		uint256 _loanId
 	)
 		external
@@ -370,8 +413,12 @@ contract Escrow {
 		LoanAgreement storage _offer = loans[_loanId];
 		require(msg.sender == _offer.transferOffer.counterparty);
 		require(msg.value == _offer.transferOffer.offerAmount);
-		require(_offer.tokenBalance > _offer.tokensRepaid);
-		require(_offer.etherRepaid <= _offer.transferOffer.loanEtherRepaid);
+		require(_offer.tokenTotal > _offer.tokensRepaid);
+		emit LoanTransferClaimed(
+			_loanId,
+			_offer.transferOffer.counterparty,
+			_offer.transferOffer.offerAmount
+		);
 		delete _offer.transferOffer;
 		_offer.lender.transfer(msg.value);
 		_offer.lender = msg.sender;
