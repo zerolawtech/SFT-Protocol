@@ -8,7 +8,11 @@ contract EscrowCustodian {
 
 	using SafeMath32 for uint32;
 	using SafeMath for uint256;
-	
+
+	bytes32 public ownerID;
+	bool accept;
+	LoanAgreement[] loans;
+
 	/* token contract => issuer contract */
 	mapping (address => IssuingEntity) issuerMap;
 	mapping (bytes32 => Investor) investors;
@@ -21,6 +25,18 @@ contract EscrowCustodian {
 	struct Investor {
 		mapping (address => Issuer) issuers;
 		mapping (address => uint256) balances;
+	}
+
+	struct LoanAgreement {
+		bytes32 receiver;
+		address lender;
+		SecurityToken token;
+		uint256 etherRepaid; // before claimed, is the amount of the loan
+		uint256 tokensRepaid;
+		uint256 tokenBalance;
+		uint256[] dates; // payment due dates
+		uint256[] paid; // amount that must be paid by dates
+		uint256[] released; // amount in escrow that may be released after the payment
 	}
 
 	event ReceivedTokens(
@@ -86,6 +102,36 @@ contract EscrowCustodian {
 	}
 
 	/**
+		@notice Transfers tokens out of the custodian contract
+		@dev callable by custodian authorities and modules
+		@param _token Address of the token to transfer
+		@param _to Address of the recipient
+		@param _value Amount to transfer
+		@return bool success
+	 */
+	function _transfer(
+		SecurityToken _token,
+		address _to,
+		bytes32 _id,
+		uint256 _value
+	)
+		internal
+	{
+		Investor storage i = investors[_id];
+		i.balances[_token] = i.balances[_token].sub(_value);
+		require(_token.transfer(_to, _value));
+		if (i.balances[_token] == 0) {
+			Issuer storage issuer = i.issuers[issuerMap[_token]];
+			issuer.tokenCount = issuer.tokenCount.sub(1);
+			if (issuer.tokenCount == 0) {
+				issuer.isOwner = false;
+				issuerMap[_token].releaseOwnership(ownerID, _id);
+			}
+		}
+		emit SentTokens(issuerMap[_token], _token, _to, _value);
+	}
+
+	/**
 		@notice Add a new token owner
 		@dev called by IssuingEntity when tokens are transferred to a custodian
 		@param _token Token address
@@ -101,6 +147,7 @@ contract EscrowCustodian {
 		external
 		returns (bool)
 	{
+		require(accept);
 		if (issuerMap[_token] == address(0)) {
 			require(SecurityToken(_token).issuer() == msg.sender);
 			issuerMap[_token] = IssuingEntity(msg.sender);
@@ -119,19 +166,6 @@ contract EscrowCustodian {
 		i.balances[_token] = i.balances[_token].add(_value);
 		return true;
 	}
-
-	struct LoanAgreement {
-		bytes32 receiver;
-		address lender;
-		SecurityToken token;
-		IssuingEntity issuer;
-		uint256 etherRepaid; // before claimed, is the amount of the loan
-		uint256 tokenBalance;
-		uint256[] dates; // payment due dates
-		uint256[] paid; // amount that must be paid by dates
-		uint256[] released; // amount in escrow that may be released after the payment
-	}
-	LoanAgreement[] loans;
 
 	function offerLoan(
 		bytes32 _receiver,
@@ -158,8 +192,8 @@ contract EscrowCustodian {
 			_receiver,
 			msg.sender,
 			_token,
-			_issuer,
 			msg.value,
+			0,
 			0,
 			_dates,
 			_paid,
@@ -169,22 +203,44 @@ contract EscrowCustodian {
 		return loans.length - 1;
 	}
 
-	function claimOffer(uint256 _id) external returns (bool) {
-		LoanAgreement storage _offer = loans[_id];
-		require(_offer.issuer.getID(msg.sender) == _offer.receiver);
+	function claimOffer(uint256 _loanId) external returns (bool) {
+		LoanAgreement storage _offer = loans[_loanId];
+		require(issuerMap[_offer.token].getID(msg.sender) == _offer.receiver);
 		require(_offer.dates[0] > now);
 		require(_offer.tokenBalance == 0);
 		_offer.tokenBalance = _offer.released[_offer.released.length-1];
+		accept = true;
 		require(_offer.token.transferFrom(
 			msg.sender,
 			address(this),
 			_offer.tokenBalance
 		));
+		accept = false;
 		msg.sender.transfer(_offer.etherRepaid);
 		_offer.etherRepaid = 0;
 		// event
 		return true;
 	}
 
-	
+	function makePayment(uint256 _loanId) external payable returns (bool) {
+		LoanAgreement storage _offer = loans[_loanId];
+		bytes32 _id = issuerMap[_offer.token].getID(msg.sender);
+		require(_id == _offer.receiver);
+		require(_offer.tokenBalance > _offer.tokensRepaid);
+		_offer.etherRepaid = _offer.etherRepaid.add(msg.value);
+		_offer.lender.transfer(msg.value);
+		for (uint256 i = _offer.dates.length-1; i != 0; i--) {
+			if (
+				_offer.paid[i] <= _offer.etherRepaid &&
+				_offer.released[i] > _offer.tokensRepaid
+			) {
+				uint256 _amount = _offer.released[i].sub(_offer.tokensRepaid);
+				_offer.tokensRepaid = _offer.released[i];
+				_transfer(_offer.token, msg.sender, _id, _amount);
+				return true;
+			}
+		}
+		return true;
+	}
+
 }
