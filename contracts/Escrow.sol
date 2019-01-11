@@ -37,6 +37,13 @@ contract Escrow {
 		uint256[] dates; // payment due dates
 		uint256[] paid; // amount that must be paid by dates
 		uint256[] released; // amount in escrow that may be released after the payment
+		TransferOffer transferOffer;
+	}
+
+	struct TransferOffer {
+		uint256 loanEtherRepaid;
+		uint256 offerAmount;
+		address counterparty;
 	}
 
 	event ReceivedTokens(
@@ -254,7 +261,8 @@ contract Escrow {
 			0,
 			_dates,
 			_paid,
-			_released
+			_released,
+			TransferOffer(0, 0, 0)
 		));
 		// fire an event! returning it like this isn't useful
 		return loans.length - 1;
@@ -316,7 +324,7 @@ contract Escrow {
 		LoanAgreement storage _offer = loans[_loanId];
 		require(msg.sender == _offer.lender);
 		for (uint256 i = 0; i < _offer.dates.length; i++) {
-			require(_offer.dates[i] < now,);
+			require(_offer.dates[i] < now);
 			if (_offer.paid[i] > _offer.etherRepaid) {
 				bytes32 _id = issuerMap[_offer.token].getID(msg.sender);
 				uint256 _amount = _offer.tokenBalance.sub(_offer.tokensRepaid);
@@ -329,4 +337,44 @@ contract Escrow {
 		revert();
 	}
 
+	function makeTransferOffer(
+		uint256 _loanId,
+		address _counterparty,
+		uint256 _repaid,
+		uint256 _amount
+	)
+		external
+		returns (bool)
+	{
+		LoanAgreement storage _offer = loans[_loanId];
+		require(msg.sender == _offer.lender);
+		require(_offer.tokenBalance > _offer.tokensRepaid);
+		require(_offer.paid[_offer.paid.length-1] >= _repaid);
+		_offer.transferOffer = TransferOffer(_repaid, _amount, _counterparty);
+		return true;
+	}
+
+	function revokeTransferOffer(uint256 _loanId) external returns (bool) {
+		require(msg.sender == loans[_loanId].lender);
+		delete loans[_loanId].transferOffer;
+		return true;
+	}
+
+	function claimTransferOffer (
+		uint256 _loanId
+	)
+		external
+		payable
+		returns (bool)
+	{
+		LoanAgreement storage _offer = loans[_loanId];
+		require(msg.sender == _offer.transferOffer.counterparty);
+		require(msg.value == _offer.transferOffer.offerAmount);
+		require(_offer.tokenBalance > _offer.tokensRepaid);
+		require(_offer.etherRepaid <= _offer.transferOffer.loanEtherRepaid);
+		delete _offer.transferOffer;
+		_offer.lender.transfer(msg.value);
+		_offer.lender = msg.sender;
+		return true;
+	}
 }
