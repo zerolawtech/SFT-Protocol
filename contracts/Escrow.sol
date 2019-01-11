@@ -31,12 +31,12 @@ contract Escrow {
 		bytes32 receiver;
 		address lender;
 		SecurityToken token;
-		uint256 etherRepaid; // before claimed, is the amount of the loan
+		uint256 etherRepaid;
 		uint256 tokensRepaid;
 		uint256 tokenTotal;
-		uint256[] paymentDates; // payment due dates
-		uint256[] amountDue; // amount that must be paid by dates
-		uint256[] tokensReleased; // amount in escrow that may be released after the payment
+		uint256[] paymentDates;
+		uint256[] amountDue;
+		uint256[] tokensReleased;
 		TransferOffer transferOffer;
 	}
 
@@ -258,6 +258,7 @@ contract Escrow {
 		@param _paymentDates Array of payment dates in epoch time
 		@param _amountDue Array of total required payment amounts in wei
 		@param _tokensReleased Array of total tokens released at each payment
+		@return bool success
 	 */
 	function offerLoan(
 		bytes32 _receiver,
@@ -306,6 +307,11 @@ contract Escrow {
 		return true;
 	}
 
+	/**
+		@notice Revoke a loan offer
+		@param _loanId ID of loan agreement
+		@return bool success
+	 */
 	function revokeOffer(uint256 _loanId) external returns (bool) {
 		LoanAgreement storage _offer = loans[_loanId];
 		require(msg.sender == _offer.lender);
@@ -316,6 +322,11 @@ contract Escrow {
 		return true;
 	}
 
+	/**
+		@notice Claim a loan offer
+		@param _loanId ID of loan agreement
+		@return bool success
+	 */
 	function claimOffer(uint256 _loanId) external returns (bool) {
 		LoanAgreement storage _offer = loans[_loanId];
 		require(issuerMap[_offer.token].getID(msg.sender) == _offer.receiver);
@@ -335,6 +346,11 @@ contract Escrow {
 		return true;
 	}
 
+	/**
+		@notice Make a payment on an active loan
+		@param _loanId ID of loan agreement
+		@return bool success
+	 */
 	function makePayment(uint256 _loanId) external payable returns (bool) {
 		LoanAgreement storage _offer = loans[_loanId];
 		bytes32 _id = issuerMap[_offer.token].getID(msg.sender);
@@ -361,6 +377,14 @@ contract Escrow {
 		return true;
 	}
 
+	/**
+		@notice Claim escrowed tokens on a defaulted loan
+		@dev
+			In order to successfully take ownership of the tokens, the lender
+			will need to be KYC'd by an associated registry
+		@param _loanId ID of loan agreement
+		@return bool success
+	 */
 	function claimCollateral(uint256 _loanId) external returns (bool) {
 		LoanAgreement storage _offer = loans[_loanId];
 		require(msg.sender == _offer.lender);
@@ -379,6 +403,14 @@ contract Escrow {
 		revert();
 	}
 
+	/**
+		@notice Create an offer to transfer ownership of a loan
+		@dev This allows a lender to resell the loan to another lender
+		@param _loanId ID of loan agreement
+		@param _counterparty Address of the buyer
+		@param _amount Sale amount in wei
+		@return bool success
+	 */
 	function makeTransferOffer(
 		uint256 _loanId,
 		address _counterparty,
@@ -395,6 +427,11 @@ contract Escrow {
 		return true;
 	}
 
+	/**
+		@notice Revoke an offer to transfer ownership
+		@param _loanId ID of loan agreement
+		@return bool success
+	 */
 	function revokeTransferOffer(uint256 _loanId) external returns (bool) {
 		require(msg.sender == loans[_loanId].lender);
 		TransferOffer storage t = loans[_loanId].transferOffer;
@@ -403,6 +440,11 @@ contract Escrow {
 		return true;
 	}
 
+	/**
+		@notice Claim an offer to transfer ownership
+		@param _loanId ID of loan agreement
+		@return bool success
+	 */
 	function claimTransferOffer(
 		uint256 _loanId
 	)
