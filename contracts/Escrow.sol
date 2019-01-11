@@ -167,6 +167,51 @@ contract EscrowCustodian {
 		return true;
 	}
 
+	/**
+		@notice Transfer token ownership within the custodian
+		@dev Callable by custodian authorities and modules
+		@param _token Address of the token to transfer
+		@param _fromID Sender investor ID
+		@param _toID Recipient investor ID
+		@param _value Amount of tokens to transfer
+		@param _stillOwner is sender still a beneficial owner for this issuer?
+		@return bool success
+	 */
+	function _transferInternal(
+		SecurityToken _token,
+		bytes32 _fromID,
+		bytes32 _toID,
+		uint256 _value
+	)
+		internal
+	{
+		Investor storage from = investors[_fromID];
+		require(from.balances[_token] >= _value, "Insufficient balance");
+		Investor storage to = investors[_toID];
+		from.balances[_token] = from.balances[_token].sub(_value);
+		to.balances[_token] = to.balances[_token].add(_value);
+		if (to.balances[_token] == _value) {
+			Issuer storage issuer = to.issuers[issuerMap[_token]];
+			issuer.tokenCount = issuer.tokenCount.add(1);
+			if (!issuer.isOwner) {
+				issuer.isOwner = true;
+			}
+		}
+		issuer = from.issuers[issuerMap[_token]];
+		if (from.balances[_token] == 0) {
+			issuer.tokenCount = issuer.tokenCount.sub(1);
+			if (issuer.tokenCount == 0) {
+				issuer.isOwner = false;
+			}
+		}
+		require(_token.transferCustodian(
+			[_fromID, _toID],
+			_value,
+			issuer.isOwner
+		));
+		emit TransferOwnership(_token, _fromID, _toID, _value);
+	}
+
 	function offerLoan(
 		bytes32 _receiver,
 		SecurityToken _token,
@@ -237,10 +282,29 @@ contract EscrowCustodian {
 				uint256 _amount = _offer.released[i].sub(_offer.tokensRepaid);
 				_offer.tokensRepaid = _offer.released[i];
 				_transfer(_offer.token, msg.sender, _id, _amount);
+				if (_offer.tokensRepaid == _offer.tokenBalance) {
+					delete loans[_loanId];
+				}
 				return true;
 			}
 		}
 		return true;
+	}
+
+	function claimCollateral(uint256 _loanId) external returns (bool) {
+		LoanAgreement storage _offer = loans[_loanId];
+		for (uint256 i = 0; i < _offer.dates.length; i++) {
+			if (_offer.dates[i] > now) return false;
+			if (_offer.paid[i] < _offer.etherRepaid) {
+				bytes32 _id = issuerMap[_offer.token].getID(msg.sender);
+				uint256 _amount = _offer.tokenBalance.sub(_offer.tokensRepaid);
+				_transferInternal(_offer.token, _offer.receiver, _id, _amount);
+				delete loans[_loanId];
+				_transfer(_offer.token, msg.sender, _id, _amount);
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
