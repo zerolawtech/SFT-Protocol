@@ -4,6 +4,7 @@ pragma solidity >=0.4.24 <0.5.0;
 interface MiniCustodian {
 
 	function ownerID() external view returns (bytes32);
+	
 	function receiveTransfer(
 		address _token,
 		bytes32 _id,
@@ -11,5 +12,12 @@ interface MiniCustodian {
 	)
 		external
 		returns (bool);
-
+	
+	function balanceOf(
+		address _token,
+		bytes32 _id
+	)
+		external
+		view
+		returns (uint256);
 }
