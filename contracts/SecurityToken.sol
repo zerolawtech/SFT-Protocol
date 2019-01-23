@@ -331,7 +331,8 @@ contract SecurityToken is Modular {
 		returns (bool)
 	{
 		/* If called by a module, the authority becomes the issuing contract. */
-		if (isActiveModule(msg.sender)) {
+		/* msg.sig = 0x23b872dd */
+		if (isPermittedModule(msg.sender, msg.sig)) {
 			address _auth = address(issuer);
 		} else {
 			_auth = msg.sender;
@@ -456,7 +457,8 @@ contract SecurityToken is Modular {
 		external
 		returns (bool)
 	{
-		require(isActiveModule(msg.sender));
+		/* msg.sig = 0x250dea06 */
+		require(isPermittedModule(msg.sender, msg.sig));
 		if (balances[_owner] == _value) return true;
 		if (balances[_owner] > _value) {
 			totalSupply = totalSupply.sub(balances[_owner].sub(_value));
@@ -502,6 +504,9 @@ contract SecurityToken is Modular {
 	function detachModule(address _module) external returns (bool) {
 		if (_module != msg.sender) {
 			require(msg.sender == address(issuer));
+		} else {
+			/* msg.sig = 0xbb2a8522 */
+			require(isPermittedModule(msg.sender, msg.sig));
 		}
 		_detachModule(_module);
 		return true;
@@ -510,13 +515,39 @@ contract SecurityToken is Modular {
 	/**
 		@notice Check if a module is active on this token
 		@dev
-			IssuingEntity modules are considered active on all tokens associated
-			with that issuer.
+			IssuingEntity modules are considered active on all tokens
+			associated with that issuer.
 		@param _module Deployed module address
 	 */
 	function isActiveModule(address _module) public view returns (bool) {
-		if (activeModules[_module]) return true;
+		if (moduleData[_module].active) return true;
 		return issuer.isActiveModule(_module);
+	}
+
+	/**
+		@notice Check if a module is permitted to access a specific function
+		@dev
+			This returns false instead of throwing because an issuer level 
+			module must be checked twice
+		@param _module Module address
+		@param _sig Function signature
+		@return bool permission
+	 */
+	function isPermittedModule(
+		address _module,
+		bytes4 _sig
+	)
+		public
+		view
+		returns (bool)
+	{
+		if (
+			moduleData[_module].active && 
+			moduleData[_module].signatures[_sig][1]
+		) {
+			return true;
+		}
+		return issuer.isPermittedModule(_module, _sig);
 	}
 
 }

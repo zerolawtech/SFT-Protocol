@@ -146,7 +146,13 @@ contract Custodian is Modular, MultiSig {
 		external
 		returns (bool)
 	{
-		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
+		if (
+			/* msg.sig = 0x75219e4e */
+			!isPermittedModule(msg.sender, msg.sig) &&
+			!_checkMultiSig()
+		) {
+			return false;
+		}
 		bytes32 _id = issuerMap[_token].getID(_to);
 		Investor storage i = investors[_id];
 		i.balances[_token] = i.balances[_token].sub(_value);
@@ -227,7 +233,13 @@ contract Custodian is Modular, MultiSig {
 		external
 		returns (bool)
 	{
-		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
+		if (
+			/* msg.sig = 0x2965c868 */
+			!isPermittedModule(msg.sender, msg.sig) &&
+			!_checkMultiSig()
+		) {
+			return false;
+		}
 		Investor storage from = investors[_fromID];
 		require(from.balances[_token] >= _value, "Insufficient balance");
 		Investor storage to = investors[_toID];
@@ -274,7 +286,13 @@ contract Custodian is Modular, MultiSig {
 		external
 		returns (bool)
 	{
-		if (!isActiveModule(msg.sender) && !_checkMultiSig()) return false;
+		if (
+			/* msg.sig = 0xc07f6f8e */
+			!isPermittedModule(msg.sender, msg.sig) &&
+			!_checkMultiSig()
+		) {
+			return false;
+		}
 		Issuer storage i = investors[_id].issuers[_issuer];
 		if (i.tokenCount == 0 && i.isOwner) {
 			i.isOwner = false;
@@ -317,6 +335,9 @@ contract Custodian is Modular, MultiSig {
 	{
 		if (_module != msg.sender) {
 			if (!_checkMultiSig()) return false;
+		} else {
+			/* msg.sig = 0xbb2a8522 */
+			require(isPermittedModule(msg.sender, msg.sig));
 		}
 		_detachModule(_module);
 		return true;
