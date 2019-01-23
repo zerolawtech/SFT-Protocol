@@ -1,5 +1,4 @@
-pragma solidity ^0.4.24;
-
+pragma solidity >=0.4.24 <0.5.0;
 
 interface IBaseModule {
 	function getHooks() external view returns (bytes4[]);
@@ -25,10 +24,21 @@ interface ISTModule {
 		external
 		view
 		returns (bool);
-	
+
 	/* 0x35a341da */
 	function transferTokens(
 		address[2] _addr,
+		bytes32[2] _id,
+		uint8[2] _rating,
+		uint16[2] _country,
+		uint256 _value
+	)
+		external
+		returns (bool);
+
+	/* 0x4f072579 */
+	function transferTokensCustodian(
+		address _custodian,
 		bytes32[2] _id,
 		uint8[2] _rating,
 		uint16[2] _country,
@@ -67,7 +77,7 @@ interface IIssuerModule {
 		external
 		view
 		returns (bool);
-	
+
 	/* 0x0cfb54c9 */
 	function transferTokens(
 		address _token,
@@ -79,6 +89,18 @@ interface IIssuerModule {
 		external
 		returns (bool);
 	
+	/* 0x38a1b79a */
+	function transferTokensCustodian(
+		address _token,
+		address _custodian,
+		bytes32[2] _id,
+		uint8[2] _rating,
+		uint16[2] _country,
+		uint256 _value
+	)
+		external
+		returns (bool);
+
 	/* 0x4268353d */
 	function balanceChanged(
 		address _token,
@@ -125,49 +147,14 @@ interface ICustodianModule {
 		@param _token Token address
 		@param _id Recipient ID
 		@param _value Amount of tokens transfered
-		@param _newOwner Is recipient a new beneficial owner for this token?
 		@return bool success
 	 */
 	function receivedTokens(
 		address _token,
 		bytes32 _id,
-		uint256 _value,
-		bool _newOwner
+		uint256 _value
 	)
 		external
 		returns (bool);
 	
-	/**
-		@notice Custodian added new beneficial owners
-		@dev
-			Called after new beneficial owners are added to a custodian.
-			Note that these may not actually be new beneficial owners.
-			Use 0xf8324d5a as the hook value for this method.
-		@param _token Token address
-		@param _id Array of investor IDs to add
-		@return bool success
-	 */
-	function addedInvestors(
-		address _token,
-		bytes32[] _id
-	)
-		external
-		returns (bool);
-	
-	/**
-		@notice Custodian removed beneficial owners
-		@dev
-			Called after beneficial owners are removed from a custodian.
-			Note that these may not actually be existing beneficial owners.
-			Use 0x9898b82e as the hook value for this method.
-		@param _token Token address
-		@param _id Array of investor IDs to add
-		@return bool success
-	 */
-	function removedInvestors(
-		address _token,
-		bytes32[] _id
-	)
-		external
-		returns (bool);
 }

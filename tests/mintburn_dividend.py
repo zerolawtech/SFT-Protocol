@@ -79,7 +79,9 @@ def mintburn_final():
 
 def dividend_setup():
     '''Dividend: deploy and attach'''
-    global dividend_time, dividend
+    global dividend_time, dividend, cust
+    cust = accounts[0].deploy(Custodian, [a[0]], 1)
+    issuer.addCustodian(cust)
     dividend_time = int(time.time()+3)
     dividend = check.confirms(
         accounts[1].deploy,
@@ -97,11 +99,14 @@ def dividend_setup():
 def dividend_transfer():
     '''Dividend: transfer tokens before claim time'''
     token.transfer(accounts[2], 100)
+    token.transfer(cust,100,{'from':accounts[2]})
+    cust.transfer(token,accounts[2],100,False)
     token.transfer(accounts[2], 300)
     token.transfer(accounts[3], 200)
     token.transfer(accounts[4], 500)
     token.transfer(accounts[5], 100, {'from':accounts[4]})
     token.transfer(accounts[6], 900)
+    token.transfer(cust,200,{'from':accounts[6]})
     token.transferFrom(accounts[6], accounts[7], 600, {'from':accounts[1]})
     check.equal(token.circulatingSupply(), 2000, "Circulating supply is wrong")
 
@@ -144,7 +149,12 @@ def dividend_claim():
         dividend.claimDividend,
         (accounts[1],),
         "Issuer was able to claim")
-    #dividend.claimDividend(accounts[8])
+    dividend.claimCustodianDividend(cust,issuer.getID(a[6]),a[6],{'from':a[6]})
+    check.reverts(
+        dividend.claimCustodianDividend,
+        (cust,issuer.getID(a[6]),a[6],{'from':a[6]}),
+        "Was able to claim custodian dividend twice"
+    )
     for i,final in enumerate([int(4e18), int(2e18), int(4e18), int(1e18), int(3e18), int(6e18)], start=2):
         balance = accounts[i].balance()
         dividend.claimDividend(accounts[i])

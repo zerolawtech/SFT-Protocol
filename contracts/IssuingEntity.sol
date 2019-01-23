@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.4.24 <0.5.0;
 
 import "./open-zeppelin/SafeMath.sol";
 import "./KYCRegistrar.sol";
@@ -19,17 +19,16 @@ contract IssuingEntity is Modular, MultiSig {
 		counts[0] and levels[0] == the sum total of counts[1:] and limits[1:]
 	*/
 	struct Country {
-		bool allowed;
-		uint8 minRating;
 		uint32[8] counts;
 		uint32[8] limits;
+		bool allowed;
+		uint8 minRating;
 	}
 
 	struct Account {
-		uint192 balance;
+		uint32 count;
 		uint8 rating;
 		uint8 regKey;
-		uint32 custodianCount;
 		bool restricted;
 		mapping (bytes32 => bool) custodians;
 	}
@@ -39,19 +38,24 @@ contract IssuingEntity is Modular, MultiSig {
 		bool restricted;
 	}
 
-	struct Contract {
+	struct RegistrarContract {
+		KYCRegistrar addr;
+		bool restricted;
+	}
+
+	struct CustodianContract {
 		address addr;
 		bool restricted;
 	}
 
 	bool locked;
 	bool mutex;
-	Contract[] registrars;
+	RegistrarContract[] registrars;
 	uint32[8] counts;
 	uint32[8] limits;
 	mapping (uint16 => Country) countries;
 	mapping (bytes32 => Account) accounts;
-	mapping (bytes32 => Contract) custodians;
+	mapping (bytes32 => CustodianContract) custodians;
 	mapping (address => Token) tokens;
 	mapping (string => bytes32) documentHashes;
 
@@ -100,16 +104,7 @@ contract IssuingEntity is Modular, MultiSig {
 		public 
 	{
 		/* First registrar is empty so Account.regKey == 0 means it is unset. */
-		registrars.push(Contract(0, false));
-	}
-
-	/**
-		@notice Fetch balance of an investor from their ID
-		@param _id ID to query
-		@return uint256 balance
-	 */
-	function balanceOf(bytes32 _id) external view returns (uint256) {
-		return uint256(accounts[_id].balance);
+		registrars.push(RegistrarContract(KYCRegistrar(0), false));
 	}
 
 	/**
@@ -207,12 +202,7 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _limits Array of limits
 		@return bool success
 	 */
-	function setInvestorLimits(
-		uint32[8] _limits
-	)
-		external
-		returns (bool)
-	{
+	function setInvestorLimits(uint32[8] _limits) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		limits = _limits;
 		emit InvestorLimitSet(0, _limits);
@@ -221,11 +211,13 @@ contract IssuingEntity is Modular, MultiSig {
 
 	/**
 		@notice Check if transfer is possible based on issuer level restrictions
+		@dev function is not called directly - see SecurityToken.checkTransfer
 		@param _token address of token being transferred
 		@param _auth address of the caller attempting the transfer
 		@param _from address of the sender
 		@param _to address of the receiver
-		@param _value number of tokens being transferred
+		@param _zero is the sender's balance zero after the transfer?
+		@param _value amount being transferred
 		@return bytes32 ID of caller
 		@return bytes32[] IDs of sender and receiver
 		@return uint8[] ratings of sender and receiver
@@ -236,6 +228,7 @@ contract IssuingEntity is Modular, MultiSig {
 		address _auth,
 		address _from,
 		address _to,
+		bool _zero,
 		uint256 _value
 	)
 		external
@@ -246,20 +239,15 @@ contract IssuingEntity is Modular, MultiSig {
 			uint16[2] _country
 		)
 	{
-		_authID = _getID(_auth);
-		_id[0] = _getID(_from);
-		_id[1] = _getID(_to);
+		_authID = _getID(_auth, 0);
+		_id[0] = _getID(_from, 0);
+		_id[1] = _getID(_to, 0);
 		
 		if (_authID == ownerID && idMap[_auth].id != ownerID) {
-			/*
-				bytes4 signatures of transfer, transferFrom
-				This enforces sub-authority permissioning around transfers
-			*/
-			require(
-				authorityData[idMap[_auth].id].approvedUntil >= now &&
-				authorityData[idMap[_auth].id].signatures[
-					(_authID == _id[0] ? bytes4(0xa9059cbb) : bytes4(0x23b872dd))
-				], "Authority is not permitted"
+			/* This enforces sub-authority permissioning around transfers */
+			_checkAuth(
+				_auth,
+				_authID == _id[0] ? bytes4(0xa9059cbb) : bytes4(0x23b872dd)
 			);
 		}
 
@@ -268,54 +256,97 @@ contract IssuingEntity is Modular, MultiSig {
 
 		(_allowed, _rating, _country) = _getInvestors(
 			[_addr, _to],
-			[accounts[idMap[_addr].id].regKey, accounts[idMap[_to].id].regKey]
+			_id,
+			[accounts[idMap[_addr].id].regKey, accounts[_id[1]].regKey]
 		);
-		_checkTransfer(_token, _authID, _id, _allowed, _rating, _country, _value);
+		Account storage a = accounts[_id[0]];
+		_checkTransfer(
+			_token,
+			_authID,
+			_id,
+			_allowed,
+			_rating,
+			_country,
+			_zero ? a.count.sub(1) : a.count,
+			_value
+			);
 		return (_authID, _id, _rating, _country);
 	}	
-		
+
 	/**
-		@notice View function to check if transfer is permitted
-		@param _token address of token being transferred
-		@param _from address of the sender
-		@param _to address of the receiver
-		@param _value number of tokens being transferred
-		@return bytes32[] IDs of sender and receiver
+		@notice Internal to check sub-authority permissioning around transfers
+		@dev This is a seperate function to avoid stack-depth errors
+		@param _auth Address of the authority
+		@param _sig bytes4 signature of the call (transfer or transferFrom)
+	 */
+	function _checkAuth(address _auth, bytes4 _sig) internal view {
+		Authority storage a = authorityData[idMap[_auth].id];
+		require(
+			a.approvedUntil >= now &&	
+			a.signatures[_sig], "Authority is not permitted"
+		);
+	}
+
+	
+	/**
+		@notice Check if custodian internal transfer is possible
+		@dev Function not called directly - see Custodian.checkTransferInternal
+		@param _cust Address of custodian
+		@param _token Address of token being transferred
+		@param _id IDs of sender and receiver
+		@param _stillOwner Is sender still a beneficial owner after transfer?
+		@return bytes32 ID of custodian
 		@return uint8[] ratings of sender and receiver
 		@return uint16[] countries of sender and receiver
 	 */
-	function checkTransferView(
+	function checkTransferCustodian(
+		address _cust,
 		address _token,
-		address _from,
-		address _to,
-		uint256 _value
+		bytes32[2] _id,
+		bool _stillOwner
 	)
 		external
-		view
 		returns (
-			bytes32[2] _id,
+			bytes32 _custID,
 			uint8[2] _rating,
 			uint16[2] _country
 		)
-	{	
-		uint8[2] memory _key;
-		(_id[0], _key[0]) = _getIDView(_from);
-		(_id[1], _key[1]) = _getIDView(_to);
-
-		if (_id[0] == ownerID && idMap[_from].id != ownerID) {
-			require(
-				authorityData[idMap[_from].id].approvedUntil >= now &&
-				authorityData[idMap[_from].id].signatures[0xa9059cbb],
-				"Authority is not permitted"
-			);
-		}
-
-		address[2] memory _addr = [_from, _to];
+	{
+		require(
+			custodians[idMap[_cust].id].addr == _cust,
+			"Custodian not registered"
+		);
+		require(custodians[_id[1]].addr == 0, "Receiver is custodian");
+		_getID(0, _id[0]);
+		_getID(0, _id[1]);
 		bool[2] memory _allowed;
-
-		(_allowed, _rating, _country) = _getInvestors(_addr, _key);
-		_checkTransfer(_token, _id[0], _id, _allowed, _rating, _country, _value);
-		return (_id, _rating, _country);
+		(
+			_allowed,
+			_rating,
+			_country
+		) = _getInvestors(
+			[address(0), address(0)],
+			_id,
+			[accounts[_id[0]].regKey, accounts[_id[1]].regKey]
+		);
+		_setRating(_id[0], _rating[0], _country[0]);
+		_setRating(_id[1], _rating[1], _country[1]);
+		if (accounts[_id[0]].count > 0 && !_stillOwner) {
+			uint32 _count = accounts[_id[0]].count.sub(1);
+		} else {
+			_count = accounts[_id[0]].count;
+		}
+		_checkTransfer(
+			_token,
+			idMap[_cust].id,
+			_id,
+			_allowed,
+			_rating,
+			_country,
+			_count,
+			0)
+		;
+		return (idMap[_cust].id, _rating, _country);
 	}
 
 	/**
@@ -326,7 +357,8 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _allowed array of permission bools from registrar
 		@param _rating array of investor ratings
 		@param _country array of investor countries
-		@param _value amount to be transferred
+		@param _tokenCount sender accounts.count value after transfer
+		@param _value amount being transferred
 	 */
 	function _checkTransfer(
 		address _token,
@@ -335,10 +367,10 @@ contract IssuingEntity is Modular, MultiSig {
 		bool[2] _allowed,
 		uint8[2] _rating,
 		uint16[2] _country,
+		uint32 _tokenCount,
 		uint256 _value
 	)
 		internal
-		view
 	{	
 		require(tokens[_token].set);
 		/* If issuer is not the authority, check the sender is not restricted */
@@ -359,17 +391,14 @@ contract IssuingEntity is Modular, MultiSig {
 			if (_rating[1] != 0) {
 				Country storage c = countries[_country[1]];
 				require(c.allowed, "Reciever blocked: Country");
-				/*  
-					If the receiving investor currently has a 0 balance,
-					we must make sure a slot is available for allocation.
-				*/
 				require(_rating[1] >= c.minRating, "Receiver blocked: Rating");
-				if (accounts[_id[1]].balance == 0) {
+				/*  
+					If the receiving investor currently has 0 balance and no
+					custodians, make sure a slot is available for allocation.
+				*/ 
+				if (accounts[_id[1]].count == 0) {
 					/* create a bool to prevent repeated comparisons */
-					bool _check = (
-						_rating[0] != 0 ||
-						accounts[_id[1]].balance > _value
-					);
+					bool _check = (_rating[0] == 0 || _tokenCount > 0);
 					/*
 						If the sender is an investor and still retains a balance,
 						a new slot must be available.
@@ -423,14 +452,10 @@ contract IssuingEntity is Modular, MultiSig {
 			}
 		}
 		/* bytes4 signature for issuer module checkTransfer() */
-		_callModules(0x47fca5df, abi.encode(
-			_token,
-			_authID,
-			_id,
-			_rating,
-			_country,
-			_value
-		));
+		_callModules(
+			0x47fca5df,
+			abi.encode(_token, _authID, _id, _rating, _country, _value)
+		);
 	}
 
 	/**
@@ -439,18 +464,21 @@ contract IssuingEntity is Modular, MultiSig {
 		@return bytes32 investor ID
 	 */
 	function getID(address _addr) external view returns (bytes32) {
-		(bytes32 _id, uint8 _key) = _getIDView(_addr);
+		(bytes32 _id, uint8 _key) = _getIDView(_addr, 0);
 		return _id;
 	}
 
 	/**
 		@notice internal investor ID fetch, updates local record
-		@param _addr address of token being transferred
+		@dev Either of the params may be given as 0
+		@param _addr Investor address
+		@param _id Investor ID
 		@return bytes32 investor ID
 	 */
-	function _getID(address _addr) internal returns (bytes32) {
-		(bytes32 _id, uint8 _key) = _getIDView(_addr);
-		if (idMap[_addr].id == 0) {
+	function _getID(address _addr, bytes32 _id) internal returns (bytes32) {
+		uint8 _key;
+		(_id, _key) = _getIDView(_addr, _id);
+		if (_addr != 0 && idMap[_addr].id == 0) {
 			idMap[_addr].id = _id;
 		}
 		if (accounts[_id].regKey != _key) {
@@ -462,21 +490,32 @@ contract IssuingEntity is Modular, MultiSig {
 	/**
 		@notice internal investor ID fetch
 		@dev common logic for getID() and _getID()
-		@param _addr address of token being transferred
+		@dev Either of the params may be given as 0
+		@param _addr Investor address
+		@param _id Investor ID
 		@return bytes32 investor ID, uint8 registrar index
 	 */
-	function _getIDView(address _addr) internal view returns (bytes32, uint8) {
+	function _getIDView(
+		address _addr,
+		bytes32 _id
+	)
+		internal
+		view
+		returns (bytes32, uint8)
+	{
+		if (_id == 0) {
+			_id = idMap[_addr].id;
+		}
 		if (
-			authorityData[idMap[_addr].id].addressCount > 0 ||
+			authorityData[_id].addressCount > 0 ||
 			_addr == address(this)
 		) {
 			return (ownerID, 0);
 		}
-		bytes32 _id = idMap[_addr].id;
 		if (_id == 0) {
 			for (uint256 i = 1; i < registrars.length; i++) {
 				if (!registrars[i].restricted) {
-					_id = KYCRegistrar(registrars[i].addr).getID(_addr);
+					_id = registrars[i].addr.getID(_addr);
 					if (_id != 0) {
 						return (_id, uint8(i));
 					}
@@ -492,9 +531,10 @@ contract IssuingEntity is Modular, MultiSig {
 			registrars[accounts[_id].regKey].restricted
 		) {
 			for (i = 1; i < registrars.length; i++) {
+				if (registrars[i].restricted) continue;
 				if (
-					!registrars[i].restricted && 
-					_id == KYCRegistrar(registrars[i].addr).getID(_addr)
+					(_addr != 0 && _id == registrars[i].addr.getID(_addr)) ||
+					(_addr == 0 && registrars[i].addr.isRegistered(_id))
 				) {
 					return (_id, uint8(i));
 				}
@@ -508,13 +548,16 @@ contract IssuingEntity is Modular, MultiSig {
 	}
 
 	/**
-		@dev fetch investor data from registrar(s)
+		@notice Internal function for fetching investor data from registrars
+		@dev Either _addr or _id may be given as an empty array
 		@param _addr array of investor addresses
+		@param _id Array of investor IDs
 		@param _key array of registrar indexes
 		@return permissions, ratings, and countries of investors
 	 */
 	function _getInvestors(
 		address[2] _addr,
+		bytes32[2] _id,
 		uint8[2] _key
 	)
 		internal
@@ -525,7 +568,6 @@ contract IssuingEntity is Modular, MultiSig {
 			uint16[2] _country
 		)
 	{
-		bytes32[2] memory _id;
 		/* If key == 0 the address belongs to the issuer or a custodian. */
 		if (_key[0] == 0) {
 			_allowed[0] = true;
@@ -538,22 +580,32 @@ contract IssuingEntity is Modular, MultiSig {
 			_country[1] = 0;
 		}
 		/* If both investors are in the same registry, call getInvestors */
+		KYCRegistrar r = registrars[_key[0]].addr;
 		if (_key[0] == _key[1] && _key[0] != 0) {
-			(
-				_id,
-				_allowed,
-				_rating,
-				_country
-			) = KYCRegistrar(registrars[_key[0]].addr).getInvestors(_addr[0], _addr[1]);
+			if (_addr[0] != 0) {
+
+				(
+					_id,
+					_allowed,
+					_rating,
+					_country
+				) = r.getInvestors(_addr[0], _addr[1]);
+			} else {
+				(
+					_allowed,
+					_rating,
+					_country
+				) = r.getInvestorsByID(_id[0], _id[1]);
+			}
 		/* Otherwise, call getInvestor at each registry */
-		} else {
+		} else if (_addr[0] != 0) {
 			if (_key[0] != 0) {
 				(
 					_id[0],
 					_allowed[0],
 					_rating[0],
 					_country[0]
-				) = KYCRegistrar(registrars[_key[0]].addr).getInvestor(_addr[0]);
+				) = r.getInvestor(_addr[0]);
 			}
 			if (_key[1] != 0) {
 				(
@@ -561,25 +613,43 @@ contract IssuingEntity is Modular, MultiSig {
 					_allowed[1],
 					_rating[1],
 					_country[1]
-				) = KYCRegistrar(registrars[_key[1]].addr).getInvestor(_addr[1]);
+				) = registrars[_key[1]].addr.getInvestor(_addr[1]);
 			}	
+		} else {
+			if (_key[0] != 0) {
+				(
+					_allowed[0],
+					_rating[0],
+					_country[0]
+				) = r.getInvestorByID(_id[0]);
+			}
+			if (_key[1] != 0) {
+				(
+					_allowed[1],
+					_rating[1],
+					_country[1]
+				) = registrars[_key[1]].addr.getInvestorByID(_id[1]);
+			}
 		}
 		return (_allowed, _rating, _country);
 	}
 
 	/**
 		@notice Transfer tokens through the issuing entity level
+		@dev only callable through SecurityToken
 		@param _id Array of sender/receiver IDs
 		@param _rating Array of sender/receiver ratings
 		@param _country Array of sender/receiver countries
 		@param _value Number of tokens being transferred
+		@param _zero Array - Is balance now zero? Was receiver balance zero?
 		@return bool success
 	 */
 	function transferTokens(
 		bytes32[2] _id,
 		uint8[2] _rating,
 		uint16[2] _country,
-		uint256 _value
+		uint256 _value,
+		bool[2] _zero
 	)
 		external
 		onlyToken
@@ -587,6 +657,15 @@ contract IssuingEntity is Modular, MultiSig {
 	{
 		/* custodian re-entrancy guard */
 		require (!mutex);
+		Account storage _from = accounts[_id[0]];
+		Account storage _to = accounts[_id[1]];
+		if (_zero[0]) {
+			_from.count = _from.count.sub(1);
+		}
+		if (_zero[1]) {
+			_to.count = _to.count.add(1);
+		}
+		
 		/* If no transfer of ownership, return true immediately */
 		if (_id[0] == _id[1]) return true;
 		/*
@@ -596,27 +675,76 @@ contract IssuingEntity is Modular, MultiSig {
 		if (custodians[_id[1]].addr != 0) {
 			Custodian c = Custodian(custodians[_id[1]].addr);
 			mutex = true;
-			if (c.receiveTransfer(msg.sender, _id[0], _value) && _rating[0] > 0) {
-				accounts[_id[0]].custodianCount = accounts[_id[0]].custodianCount.add(1);
-				accounts[_id[0]].custodians[_id[1]] = true;
+			require(c.receiveTransfer(msg.sender, _id[0], _value));
+			if (_rating[0] > 0 && !_from.custodians[_id[1]]) {
+				_from.count = _from.count.add(1);
+				_from.custodians[_id[1]] = true;
 				emit BeneficialOwnerSet(address(c), _id[0], true);
 			}
 			mutex = false;
+		} else if (custodians[_id[0]].addr == 0) {
+			emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
 		}
 		
-		uint256 _balance = uint256(accounts[_id[0]].balance).sub(_value);
-		_setBalance(_id[0], _rating[0], _country[0], _balance);
-		_balance = uint256(accounts[_id[1]].balance).add(_value);
-		_setBalance(_id[1], _rating[1], _country[1], _balance);
-		/* bytes4 signature for token module transferTokens() */
-		_callModules(0x0cfb54c9, abi.encode(
+		if (_rating[0] != 0) {
+			_setRating(_id[0], _rating[0], _country[0]);
+			/* If investor account balance was 0, increase investor counts */
+			if (_from.count == 0) {
+				_decrementCount(_rating[0], _country[0]);
+			}
+		}
+		if (_rating[1] != 0) {
+			_setRating(_id[1], _rating[1], _country[1]);
+			/* If investor account balance was 0, increase investor counts */
+			if (_to.count == 1) {
+				_incrementCount(_rating[1], _country[1]);
+			}
+		}
+		/* bytes4 signature for issuer module transferTokens() */
+		_callModules(
+			0x0cfb54c9,
+			abi.encode(msg.sender, _id, _rating, _country, _value)
+		);
+		
+		return true;
+	}
+
+	/**
+		@notice Registrer change of beneficial ownership in custodian
+		@dev only callable through Custodian.transferInternal
+		@param _custID Custodian ID
+		@param _id Array of sender/receiver IDs
+		@param _rating Array of sender/receiver ratings
+		@param _country Array of sender/receiver countries
+		@param _value Number of tokens being transferred
+		@param _stillOwner Is sender still a beneficial owner?
+		@return bool success
+	 */
+	function transferCustodian(
+		bytes32 _custID,
+		bytes32[2] _id,
+		uint8[2] _rating,
+		uint16[2] _country,
+		uint256 _value,
+		bool _stillOwner
+	)
+		external
+		onlyToken
+		returns (bool)
+	{
+
+		_setBeneficialOwners(_custID, _id[0], _stillOwner);
+		_setBeneficialOwners(_custID, _id[1], true);
+
+		/* bytes4 signature for token module transferTokensCustodian() */
+		_callModules(0x38a1b79a, abi.encode(
 			msg.sender,
-			_id, _rating,
+			custodians[_custID].addr,
+			_id,
+			_rating,
 			_country,
 			_value
 		));
-		emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
-		
 		return true;
 	}
 
@@ -653,64 +781,44 @@ contract IssuingEntity is Modular, MultiSig {
 				_allowed,
 				_rating,
 				_country
-			) = KYCRegistrar(registrars[_key].addr).getInvestor(_owner);
+			) = registrars[_key].addr.getInvestor(_owner);
 		}
-		uint256 _oldTotal = accounts[_id].balance;
-		if (_new > _old) {
-			uint256 _newTotal = uint256(accounts[_id].balance).add(_new.sub(_old));
-		} else {
-			_newTotal = uint256(accounts[_id].balance).sub(_old.sub(_new));
+		Account storage a = accounts[_id];
+		if (_old == 0) {
+			a.count = a.count.add(1);
+			if (a.count == 1) {
+				_incrementCount(_rating, _country);
+			}
+		} else if (_new == 0) {
+			a.count = a.count.sub(1);
+			if (a.count == 0) {
+				_decrementCount(_rating, _country);
+			}
 		}
-		_setBalance(_id, _rating, _country, _newTotal);
 		/* bytes4 signature for token module balanceChanged() */
-		_callModules(0x4268353d, abi.encode(
-			msg.sender,
-			_id,
-			_rating,
-			_country,
-			_oldTotal,
-			_newTotal
-		));
+		_callModules(
+			0x4268353d,
+			abi.encode(msg.sender, _id, _rating, _country, _old, _new)
+		);
 		return (_id, _rating, _country);
 	}
 
 	/**
-		@notice Directly set a balance at the issuing entity level
-		@param _id investor ID
-		@param _rating investor rating
-		@param _country investor country
-		@param _value new balance value
+		@notice Check and modify an investor's rating in contract storage
+		@param _id Investor ID
+		@param _rating Investor rating
+		@param _country Investor country
 	 */
-	function _setBalance(
-		bytes32 _id,
-		uint8 _rating,
-		uint16 _country,
-		uint256 _value
-	)
-		internal
-	{
+	function _setRating(bytes32 _id, uint8 _rating, uint16 _country) internal {
 		Account storage a = accounts[_id];
-		Country storage c = countries[_country];
-		if (_rating != 0) {
-			/* rating from registrar does not match local rating */
-			if (_rating != a.rating) {
-				/* if local rating is not 0, rating has changed */
-				if (a.rating > 0) {
-					c.counts[_rating] = c.counts[_rating].sub(1);
-					c.counts[a.rating] = c.counts[a.rating].add(1);
-				}
-				a.rating = _rating;
-			}
-			/* If investor account balance was 0, increase investor counts */
-			if (a.balance == 0 && accounts[_id].custodianCount == 0) {
-				_incrementCount(_rating, _country);
-			/* If investor account balance is now 0, reduce investor counts */
-			} else if (_value == 0 && accounts[_id].custodianCount == 0) {
-				_decrementCount(_rating, _country);
-			}
+		if (_rating == a.rating) return;
+		/* if local rating is not 0, rating has changed */
+		if (a.rating > 0) {
+			uint32[8] storage c = countries[_country].counts;
+			c[_rating] = c[_rating].sub(1);
+			c[a.rating] = c[a.rating].add(1);
 		}
-		a.balance = uint192(_value);
-		require(a.balance == _value);
+		a.rating = _rating;
 	}
 
 	/**
@@ -774,7 +882,13 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _allowed registrar permission
 		@return bool success
 	 */
-	function setRegistrar(address _registrar, bool _allowed) external returns (bool) {
+	function setRegistrar(
+		KYCRegistrar _registrar,
+		bool _allowed
+	)
+		external
+		returns (bool)
+	{
 		if (!_checkMultiSig()) return false;
 		for (uint256 i = 1; i < registrars.length; i++) {
 			if (registrars[i].addr == _registrar) {
@@ -784,7 +898,7 @@ contract IssuingEntity is Modular, MultiSig {
 			}
 		}
 		if (_allowed) {
-			registrars.push(Contract(_registrar, false));
+			registrars.push(RegistrarContract(_registrar, false));
 			emit RegistrarSet(_registrar, _allowed);
 			return true;
 		}
@@ -830,9 +944,6 @@ contract IssuingEntity is Modular, MultiSig {
 		require(token.ownerID() == ownerID);
 		require(token.circulatingSupply() == 0);
 		tokens[_token].set = true;
-		uint256 _balance = uint256(accounts[ownerID].balance).add(token.treasurySupply());
-		accounts[ownerID].balance = uint192(_balance);
-		require(accounts[ownerID].balance == _balance);
 		emit TokenAdded(_token);
 		return true;
 	}
@@ -950,17 +1061,15 @@ contract IssuingEntity is Modular, MultiSig {
 	}
 
 	/**
-		@notice Add or remove an investor from a custodian's beneficial owners
+		@notice Remove an investor from a custodian's beneficial owners
 		@dev Only callable by a custodian or the issuer
 		@param _custID Custodian ID
-		@param _id Array of investor IDs
-		@param _add bool add or remove
+		@param _id investor ID
 		@return bool success
 	 */
-	function setBeneficialOwners(
+	function releaseOwnership(
 		bytes32 _custID,
-		bytes32[] _id,
-		bool _add
+		bytes32 _id
 	)
 		external
 		returns (bool)
@@ -970,33 +1079,45 @@ contract IssuingEntity is Modular, MultiSig {
 		if (custodians[_custID].addr != msg.sender) {
 			if (!_checkMultiSig()) return false;
 		}
-		for (uint256 i = 0; i < _id.length; i++) {
-			if (_id[i] == 0) continue;
-			if (_id[i] == ownerID || custodians[_id[i]].addr != 0) continue;
-			Account storage a = accounts[_id[i]];
-			if (a.custodians[_custID] == _add) continue;
-			a.custodians[_custID] = _add;
-			emit BeneficialOwnerSet(msg.sender, _id[i], _add);
-			if (_add) {
-				a.custodianCount = a.custodianCount.add(1);
-				if (a.custodianCount == 1 && a.balance == 0) {
-					_incrementCount(
-						a.rating,
-						KYCRegistrar(registrars[a.regKey].addr).getCountry(_id[i])
-					);	
-				}
-			} else {
-				a.custodianCount = a.custodianCount.sub(1);
-				if (a.custodianCount == 0 && a.balance == 0) {
-					_decrementCount(
-						a.rating,
-						KYCRegistrar(registrars[a.regKey].addr).getCountry(_id[i])
-					);	
-				}
-			}
-		}
+		_setBeneficialOwners(_custID, _id, false);
 		return true;
 	}
 
-	
+	/**
+		@notice Add or remove an investor from a custodian's beneficial owners
+		@param _custID Custodian ID
+		@param _id investor ID
+		@param _add is investor a beneficial owner?
+	 */
+	function _setBeneficialOwners(
+		bytes32 _custID,
+		bytes32 _id,
+		bool _add
+	)
+		internal
+	{
+		if (_id == ownerID || custodians[_id].addr != 0) return;
+		Account storage a = accounts[_id];
+		if (a.custodians[_custID] == _add) return;
+		a.custodians[_custID] = _add;
+		emit BeneficialOwnerSet(msg.sender, _id, _add);
+		if (_add) {
+			a.count = a.count.add(1);
+			if (a.count == 1) {
+				_incrementCount(
+					a.rating,
+					registrars[a.regKey].addr.getCountry(_id)
+				);	
+			}
+		} else {
+			a.count = a.count.sub(1);
+			if (a.count == 0) {
+				_decrementCount(
+					a.rating,
+					registrars[a.regKey].addr.getCountry(_id)
+				);	
+			}
+		}
+	}
+
 }
