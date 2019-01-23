@@ -1,12 +1,12 @@
 pragma solidity >=0.4.24 <0.5.0;
 
-import "./open-zeppelin/SafeMath.sol";
-import "./SecurityToken.sol";
-import "./components/Modular.sol";
-import "./components/MultiSig.sol";
+import "../open-zeppelin/SafeMath.sol";
+import "../SecurityToken.sol";
+import "../components/Modular.sol";
+import "../components/MultiSig.sol";
 
-/** @title Custodian Contract */
-contract Custodian is Modular, MultiSig {
+/** @title Owned Custodian Contract */
+contract OwnedCustodian is Modular, MultiSig {
 
 	using SafeMath32 for uint32;
 	using SafeMath for uint256;

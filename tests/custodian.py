@@ -10,8 +10,8 @@ def create_custodians():
     issuer = IssuingEntity[0]
     token = SecurityToken[0]
     a = accounts
-    cust1 = a[10].deploy(Custodian, [a[10]], 1)
-    cust2 = a[11].deploy(Custodian, [a[11]], 1)
+    cust1 = a[10].deploy(OwnedCustodian, [a[10]], 1)
+    cust2 = a[11].deploy(OwnedCustodian, [a[11]], 1)
     id2 = issuer.getID(a[2])
     id3 = issuer.getID(a[3])
     id4 = issuer.getID(a[4])
