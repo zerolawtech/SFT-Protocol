@@ -53,8 +53,6 @@ The SFT protocol is comprised of four core contracts:
 
 ## Documentation
 
-The [Yellow Paper](docs/SFT-Protocol-Yellowpaper.pdf) provides a more detailed overview of how the SFT Protocol is structrued.
-
 In-depth documentation is hosted at [Read the Docs](https://sft-protocol.readthedocs.io).
 
 ## Develoment Progress
@@ -65,6 +63,15 @@ The SFT Protocol is still under active development and has not yet undergone a t
 
 Unit testing and deployment of this project is performed with [Brownie](https://github.com/iamdefinitelyahuman/brownie).
 
+To use docker to run the brownie tests:
+
+```bash
+docker build -f Dockerfile -t brownie .
+docker run -v $PWD:/usr/src brownie brownie test
+```
+
+Tests are still under development, the public suite should not be considered complete.
+
 ## Getting Started
 
 See the [Getting Started](https://sft-protocol.readthedocs.io/en/latest/getting-started.html) page for in-depth details on how to deploy the contracts so you can interact with them.
@@ -72,17 +79,9 @@ See the [Getting Started](https://sft-protocol.readthedocs.io/en/latest/getting-
 To setup a brownie test environment:
 
 ```bash
-brownie console
->>> run('simple')
+$ brownie console
+>>> run('deploy_simple')
 ```
-
-To use docker to run the tests in brownie:
-
-```bash
-docker build -f Dockerfile -t brownie .
-docker run -v $PWD:/usr/src brownie brownie test
-```
-
 
 This runs [deployments/simple.py](deployments/simple.py) which:
 
@@ -97,7 +96,10 @@ From this configuration, the contracts are ready to transfer tokens:
 
 ```python
 >>> SecurityToken[0].transfer(accounts[2], 1000)
->>> SecurityToken[0].transfer(accounts[3], 1000, {'from': accounts[2]})
+
+Transaction sent: 0x4fbdffd32ef4d8e7a0f7a645150752c8f6c34fd6b0b97a64f5571e12db19547a
+SecurityToken.transfer confirmed - block: 13   gas used: 199180 (66.58%)
+<Transaction object '0x4fbdffd32ef4d8e7a0f7a645150752c8f6c34fd6b0b97a64f5571e12db19547a'>
 ```
 
 ## License

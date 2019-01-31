@@ -1,6 +1,4 @@
-deployments/__pycache__/
-tests/__pycache__/
-environments/
+__pycache__
 .vscode
 docs/_build/
 docs/_templates/

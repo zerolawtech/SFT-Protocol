@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
+from brownie import *
+
 import itertools
 
-def deploy():
+def main():
     kyc = accounts[0].deploy(KYCRegistrar, [accounts[0]], 0)
     issuer = accounts[1].deploy(IssuingEntity, [accounts[1]], 1)
     token = accounts[1].deploy(SecurityToken, issuer, "Test Token", "TST", 1000000)
