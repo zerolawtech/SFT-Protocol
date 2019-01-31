@@ -2,7 +2,7 @@
 
 import random
 
-from lib.components.eth import VirtualMachineError
+from lib.components.transaction import VirtualMachineError
 
 NO_SETUP = True
 

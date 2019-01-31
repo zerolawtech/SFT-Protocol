@@ -76,6 +76,14 @@ brownie console
 >>> run('simple')
 ```
 
+To use docker to run the tests in brownie:
+
+```bash
+docker build -f Dockerfile -t brownie .
+docker run -v $PWD:/usr/src brownie brownie test
+```
+
+
 This runs [deployments/simple.py](deployments/simple.py) which:
 
 * Deploys ``KYCRegistrar`` from ``accounts[0]``
