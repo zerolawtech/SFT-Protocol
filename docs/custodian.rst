@@ -51,9 +51,9 @@ During an inbound transfer the following method is be called in the custodian co
 
 .. method:: IMiniCustodian.receiveTransfer(address _token, bytes32 _id, uint256 _value)
 
-    ``_token``: Token addresss being transferred to the the Custodian.
-    ``_id``: Sender ID.
-    ``_value``: Amount being transferred.
+    * ``_token``: Token addresss being transferred to the the Custodian.
+    * ``_id``: Sender ID.
+    * ``_value``: Amount being transferred.
 
     Called from ``IssuingEntity.transferTokens``. Used to update the custodian's balance and investor counts. Revert or return ``false`` to block the transfer.
 
@@ -102,8 +102,8 @@ The ``IMiniCustodian`` interface defines a minimal implementation required for c
 
     View function to query the balance of an investor for a specific token.
 
-    ``_token``: SecurityToken address
-    ``_id``: Investor ID
+    * ``_token``: SecurityToken address
+    * ``_id``: Investor ID
 
     While there is no strict requirement for a Custodian to maintain an on-chain record of investor balances, this information is necessary if the custodian is to e.g. allow investors to claim dividends or exercise voting rights based on held balances. As such, balances should always be accurately recorded on-chain unless there is a use case that requires otherwise.
 
@@ -111,14 +111,14 @@ The ``IMiniCustodian`` interface defines a minimal implementation required for c
 
     Checks if an investor is on the custodian's list of beneficial owners for this issuer.
 
-    ``_issuer``: IssuingEntity contract address
-    ``_id``: Investor ID
+    * ``_issuer``: IssuingEntity contract address
+    * ``_id``: Investor ID
 
 .. method:: IMiniCustodian.receiveTransfer(address _token, bytes32 _id, uint256 _value)
 
-    ``_token``: Token addresss being transferred to the the Custodian.
-    ``_id``: Sender ID.
-    ``_value``: Amount being transferred.
+    * ``_token``: Token addresss being transferred to the the Custodian.
+    * ``_id``: Sender ID.
+    * ``_value``: Amount being transferred.
 
     Called from ``IssuingEntity.transferTokens`` when tokens are being sent into the Custodian contract. It should be used to update the custodian's balance and investor counts. Revert or return ``false`` to block the transfer.
 
