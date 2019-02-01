@@ -20,4 +20,12 @@ interface MiniCustodian {
 		external
 		view
 		returns (uint256);
+
+	function isBeneficialOwner(
+		address _issuer,
+		bytes32 _id
+	)
+		external
+		view
+		returns (bool)
 }

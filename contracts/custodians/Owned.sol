@@ -134,7 +134,7 @@ contract OwnedCustodian is Modular, MultiSig {
 		@param _token Address of the token to transfer
 		@param _to Address of the recipient
 		@param _value Amount to transfer
-		@param _stillOwner is recipient still a beneficial owner for this token?
+		@param _stillOwner is recipient still a beneficial owner for this issuer?
 		@return bool success
 	 */
 	function transfer(
