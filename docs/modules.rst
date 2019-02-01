@@ -46,8 +46,8 @@ Permissioning and Functionality
 
 Modules introduce functionality in two ways:
 
-* ``Hooks`` are points within the parent contract's methods where the module will be called. They can be used to introduce extra permissioning requirements or record additional data.
-* ``Permissions`` are methods within the parent contract that the module is able to call into. This can allow actions such as adjusting investor limits, transferring tokens, or changing the total supply.
+* **Hooks** are points within the parent contract's methods where the module will be called. They can be used to introduce extra permissioning requirements or record additional data.
+* **Permissions** are methods within the parent contract that the module is able to call into. This can allow actions such as adjusting investor limits, transferring tokens, or changing the total supply.
 
 In short: hooks involve calls from a parent contract into a module, permissions involve calls from a module into the parent contract.
 

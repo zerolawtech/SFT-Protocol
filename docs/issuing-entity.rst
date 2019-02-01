@@ -90,8 +90,6 @@ Each time a beneficial owner is added or removed from a custodian, the ``Benefic
 
 See the :ref:`custodian` documentation for more information on how custodians interact with the IssuingEntity contract.
 
-.. warning:: Custodians may facilitate off-chain transfers of ownership that bypass on-chain compliance checks. It is imperative this approval only be given to known, trusted entities who have deployed a verified, audited custodian contract.
-
 .. method:: IssuingEntity.addCustodian(address _custodian)
 
     Approves a custodian contract to send and receive tokens associated with the issuer.
@@ -105,13 +103,14 @@ See the :ref:`custodian` documentation for more information on how custodians in
     * ``_custID``: Custodian ID
     * ``_id``: Investor ID
 
-    This can only be called via the custodian's contract, or by the issuer. An issuer should only use this method in a case where a custodian has been found to be acting in bad faith.
+    This can be called via the Custodian contract, or directly by the issuer.
 
+    .. note:: In the case of a direct call by the issuer, the Custodian contract will not be called to update it's record. This results in a discrepancy between the on-chain ownership records of the custodian contract and the issuer contract. An issuer should only call this method as a last resort in a situation where a custodian has been found to be acting in bad faith.
 
 Setting Investor Limits
 =======================
 
-Issuers can define investor limits globally, by country, by investor rating, or by a combination thereof. These limits are common across all tokens associated to the issuer.
+Issuers can define investor limits globally, by country, by investor rating, or by a combination thereof. These limits are shared across all tokens associated to the issuer.
 
 Investor counts and limits are stored in uint32[8] arrays. The first entry in each array is the sum of all the remaining entries. The remaining entries correspond to the count or limit for each investor rating. In most (if not all) countries there will be less than 7 types of investor accreditation ratings, and so the upper range of these arrays will be empty. Setting an investor limit to 0 means no limit is imposed.
 
