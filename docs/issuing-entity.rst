@@ -82,7 +82,7 @@ Investors must be identified by a registrar before they can send or receive toke
 Custodians
 ==========
 
-**Custodian** are entities that are approved to hold tokens on behalf of multiple investors. Common examples of custodians include broker/dealers and secondary markets. Each custodian must be individually approved by an issuer before they can receive tokens.
+**Custodian** are entities that are approved to hold tokens on behalf of multiple investors. Common examples of custodians include broker/dealers, escrow agents and secondary markets. Each custodian must be individually approved by an issuer before they can receive tokens.
 
 Custodians interact with an issuer's investor counts differently from regular investors. When an investor transfers a balance into a custodian it does not increase the overall investor count, instead the investor is now included in the list of beneficial owners represented by the custodian. Even if the investor now has a balance of 0, they will be still be included in the issuer's investor count.
 
@@ -98,13 +98,12 @@ See the :ref:`custodian` documentation for more information on how custodians in
 
     Once a custodian is approved, they can be restricted with ``IssuingEntity.setInvestorRestriction``.
 
-.. method:: IssuingEntity.setBeneficialOwners(bytes32 _custID, bytes32[] _id, bool _add)
+.. method:: IssuingEntity.releaseOwnership(bytes32 _custID, bytes32 _id)
 
-    Modifies the list of beneficial owners associated with the custodian.
+    Removes an investor from a custodian's list of beneficial owners.
 
     * ``_custID``: Custodian ID
-    * ``_id``: Array of investor IDs
-    * ``_add``: Permission bool
+    * ``_id``: Investor ID
 
     This can only be called via the custodian's contract, or by the issuer. An issuer should only use this method in a case where a custodian has been found to be acting in bad faith.
 

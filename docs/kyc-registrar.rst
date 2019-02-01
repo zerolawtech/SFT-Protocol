@@ -129,37 +129,17 @@ In situations of a lost or compromised private key the address may instead be fl
 Getting Investor Info
 =====================
 
-Issuers and custodians may use the following getter methods to query information about an investor:
+There are a variey of getter methods available for issuers and custodians to query information about investors. In some cases these calls will revert if no investor data is found.
+
+The following calls will not revert, instead returning ``false`` or an empty result:
+
+.. method:: KYCRegistrar.isRegistered(bytes32 _id)
+
+    Returns a boolean to indicate if an ID is known to the registrar contract. No permissioning checks are applied.
 
 .. method:: KYCRegistrar.getID(address _addr)
 
     Given an address, returns the investor or authority ID associated to it. If there is no association it will return an empty bytes32.
-
-.. method:: KYCRegistrar.getInvestor(address _addr)
-
-    Returns the investor ID, permission status (based on the input address), rating, and country code for an investor.
-
-    .. note:: This function is designed to maximize gas efficiency when calling for information prior to performing a token transfer.
-
-.. method:: KYCRegistrar.getInvestors(address _from, address _to)
-
-    The two investor version of ``KYCRegistrar.getInvestor``. Also used to maximize gas efficiency.
-
-.. method:: KYCRegistrar.getRating(bytes32 _id)
-
-    Returns the investor rating number for a given ID.
-
-.. method:: KYCRegistrar.getRegion(bytes32 _id)
-
-    Returns the investor region code for a given ID.
-
-.. method:: KYCRegistrar.getCountry(bytes32 _id)
-
-    Returns the investor country code for a given ID.
-
-.. method:: KYCRegistrar.getExpires(bytes32 _id)
-
-    Returns the investor rating expiration date (in epoch time) for a given ID.
 
 .. method:: KYCRegistrar.isPermitted(address _addr)
 
@@ -169,3 +149,55 @@ Issuers and custodians may use the following getter methods to query information
     * Is the investor ID restricted?
     * Is the address restricted?
     * Has the investor's rating expired?
+
+.. method:: KYCRegistrar.isPermittedID(address _addr)
+
+    Returns a transfer permission boolean similar to ``KYCRegistrar.isPermitted``, without a check on a specific address.
+
+The remaining calls **will revert under some conditions**:
+
+.. method:: KYCRegistrar.getInvestor(address _addr)
+
+    Returns the investor ID, permission status (based on the input address), rating, and country code for an investor.
+
+    Reverts if the address is not registered.
+
+    .. note:: This function is designed to maximize gas efficiency when calling for information prior to performing a token transfer.
+
+.. method:: KYCRegistrar.getInvestorByID(bytes32 _id)
+
+    Returns the permission status, rating, and country code for an investor ID. Used by Custodians to check permission for an investor where there is no specific address associated to the action.
+
+    Reverts if the ID is not registered.
+
+.. method:: KYCRegistrar.getInvestors(address _from, address _to)
+
+    The two investor version of ``KYCRegistrar.getInvestor``. Also used to maximize gas efficiency.
+
+.. method:: KYCRegistrar.getInvestorsByID(bytes32 _fromID, bytes32 _toID)
+
+    The two investor version of ``KYCRegistrar.getInvestorByID``.
+
+.. method:: KYCRegistrar.getRating(bytes32 _id)
+
+    Returns the investor rating number for a given ID.
+
+    Reverts if the ID is not registered.
+
+.. method:: KYCRegistrar.getRegion(bytes32 _id)
+
+    Returns the investor region code for a given ID.
+
+    Reverts if the ID is not registered.
+
+.. method:: KYCRegistrar.getCountry(bytes32 _id)
+
+    Returns the investor country code for a given ID.
+
+    Reverts if the ID is not registered.
+
+.. method:: KYCRegistrar.getExpires(bytes32 _id)
+
+    Returns the investor rating expiration date (in epoch time) for a given ID.
+
+    Reverts if the ID is not registered or the rating has expired.
