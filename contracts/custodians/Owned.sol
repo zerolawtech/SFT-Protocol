@@ -264,6 +264,11 @@ contract OwnedCustodian is Modular, MultiSig {
 			_value,
 			issuer.isOwner
 		));
+		/* bytes4 signature for custodian module internalTransfer() */
+		_callModules(
+			0x7054b724,
+			abi.encode(_token, _fromID, _toID, _value, _stillOwner)
+		);
 		emit TransferOwnership(_token, _fromID, _toID, _value);
 		return true;
 	}
@@ -297,6 +302,8 @@ contract OwnedCustodian is Modular, MultiSig {
 		if (i.tokenCount == 0 && i.isOwner) {
 			i.isOwner = false;
 			IssuingEntity(_issuer).releaseOwnership(ownerID, _id);
+			/* bytes4 signature of custodian module ownershipReleased() */
+			_callModules(0x054d1c76, abi.encode(_issuer, _id));
 		}
 	}
 

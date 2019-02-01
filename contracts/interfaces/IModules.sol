@@ -184,5 +184,23 @@ interface ICustodianModule {
 	)
 		external
 		returns (bool);
-	
+
+	/* 0x7054b724 */
+	function internalTransfer(
+		address _token,
+		bytes32 _fromID,
+		bytes32 _toID,
+		uint256 _value,
+		bool _stillOwner
+	)
+		external
+		returns (bool);
+
+	/* 0x054d1c76 */
+	function ownershipReleased(
+		address _issuer,
+		bytes32 _id
+	)
+		external
+		returns (bool);
 }
