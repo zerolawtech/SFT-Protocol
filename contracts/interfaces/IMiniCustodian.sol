@@ -27,5 +27,5 @@ interface MiniCustodian {
 	)
 		external
 		view
-		returns (bool)
+		returns (bool);
 }
