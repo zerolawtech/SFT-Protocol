@@ -209,7 +209,7 @@ contract OwnedCustodian is Modular, MultiSig {
 		}
 		i.balances[_token] = i.balances[_token].add(_value);
 		/* bytes4 signature for custodian module receivedTokens() */
-		_callModules(0x081e5f03, abi.encode(_token, _id, _value));
+		_callModules(0xa0e7f751, abi.encode(_token, _id, _value));
 		return true;
 	}
 

@@ -436,7 +436,7 @@ contract SecurityToken is Modular {
 		));
 		/* bytes4 signature for token module transferTokensCustodian() */
 		_callModules(
-			0x4f072579,
+			0x6eaf832c,
 			abi.encode(msg.sender, _id, _rating, _country, _value)
 		);
 		return true;

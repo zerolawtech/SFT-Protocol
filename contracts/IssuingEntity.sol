@@ -737,7 +737,7 @@ contract IssuingEntity is Modular, MultiSig {
 		_setBeneficialOwners(_custID, _id[1], true);
 
 		/* bytes4 signature for token module transferTokensCustodian() */
-		_callModules(0x38a1b79a, abi.encode(
+		_callModules(0x3b59c439, abi.encode(
 			msg.sender,
 			custodians[_custID].addr,
 			_id,

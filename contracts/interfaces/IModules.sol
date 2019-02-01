@@ -50,7 +50,7 @@ interface ISTModule {
 		external
 		returns (bool);
 
-	/* 0x4f072579 */
+	/* 0x6eaf832c */
 	function transferTokensCustodian(
 		address _custodian,
 		bytes32[2] _id,
@@ -110,7 +110,7 @@ interface IIssuerModule {
 		external
 		returns (bool);
 	
-	/* 0x38a1b79a */
+	/* 0x3b59c439 */
 	function transferTokensCustodian(
 		address _token,
 		address _custodian,
@@ -151,7 +151,7 @@ interface ICustodianModule {
 		@notice Custodian sent tokens
 		@dev
 			Called after a successful token transfer from the custodian.
-			Use 0x7ffebabc as the hook value for this method.
+			Use 0x31b45d35 as the hook value for this method.
 		@param _token Token address
 		@param _id Recipient ID
 		@param _value Amount of tokens transfered
@@ -171,7 +171,7 @@ interface ICustodianModule {
 		@notice Custodian received tokens
 		@dev
 			Called after a successful token transfer to the custodian.
-			Use 0x081e5f03 as the hook value for this method.
+			Use 0xa0e7f751 as the hook value for this method.
 		@param _token Token address
 		@param _id Recipient ID
 		@param _value Amount of tokens transfered
