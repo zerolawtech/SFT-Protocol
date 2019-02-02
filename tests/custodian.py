@@ -1,23 +1,21 @@
 #!/usr/bin/python3
 
-import time
+from brownie import *
+from scripts.deploy_simple import main
 
-DEPLOYMENT = "simple"
-
-def create_custodians():
-    '''Create custodians''' 
+def setup():
+    main()
     global issuer, token, a, cust1, cust2, id2, id3, id4
     issuer = IssuingEntity[0]
     token = SecurityToken[0]
     a = accounts
     cust1 = a[10].deploy(OwnedCustodian, [a[10]], 1)
     cust2 = a[11].deploy(OwnedCustodian, [a[11]], 1)
+    issuer.addCustodian(cust1)
+    issuer.addCustodian(cust2)
     id2 = issuer.getID(a[2])
     id3 = issuer.getID(a[3])
     id4 = issuer.getID(a[4])
-    issuer.addCustodian(cust1)
-    issuer.addCustodian(cust2)
-    check.equal(issuer.getInvestorCounts()[0][0],0,"Investor count is wrong")
 
 def transfers():
     '''Transfers to and from custodian and internal transfers'''

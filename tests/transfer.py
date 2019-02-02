@@ -1,15 +1,18 @@
 #!/usr/bin/python3
 
-import time
+from brownie import *
+from scripts.deploy_simple import main
 
-DEPLOYMENT = "simple"
-
-def transfer_from_issuer():
-    '''Transfers from issuer to investors''' 
+def setup():
+    main()
     global issuer, token, a
     issuer = IssuingEntity[0]
     token = SecurityToken[0]
     a = accounts
+
+
+def transfer_from_issuer():
+    '''Transfers from issuer to investors''' 
     check.confirms(token.transfer, (a[2], 100), "Unable to send to account 2")
     check.equal(token.balanceOf(a[2]), 100, "Wrong balance on account 2")
     check.confirms(token.transfer,(a[3], 1000), "Unable to send to account 3")
@@ -22,18 +25,21 @@ def transfer_from_issuer():
     
 def transfer_between_investors():
     '''Transfers between investors'''
-    check.confirms(token.transfer, (a[4], 100, {'from':a[2]}), "Unable to send to account 4")
+    check.confirms(token.transfer, (a[2], 400), "Unable to send to account 2")
+    check.equal(token.balanceOf(a[2]), 400, "Wrong balance on account 2")
+    check.confirms(token.transfer, (a[4], 300, {'from':a[2]}), "Unable to send to account 4")
     check.equal(token.balanceOf(a[4]), 300, "Wrong balance on account 4")
-    check.equal(token.balanceOf(a[2]), 0, "Wrong balance on account 2")
-    check.confirms(token.transfer, (a[5], 500, {'from':a[3]}), "Unable to send to account 3")
-    check.equal(token.balanceOf(a[3]), 500, "Wrong balance on account 3")
-    check.equal(token.balanceOf(a[5]), 500, "Wrong balance on account 5")
+    check.equal(token.balanceOf(a[2]), 100, "Wrong balance on account 2")
+    check.confirms(token.transfer, (a[5], 100, {'from':a[4]}), "Unable to send to account 3")
+    check.equal(token.balanceOf(a[5]), 100, "Wrong balance on account 3")
+    check.equal(token.balanceOf(a[4]), 200, "Wrong balance on account 5")
 
 def transfer_from():
     '''Approve and TransferFrom'''
+    check.confirms(token.transfer, (a[5], 1000), "Unable to send to account 2")
     check.confirms(token.transferFrom,(a[5],a[3],100), "Issuer cannot transferFrom")
-    check.equal(token.balanceOf(a[3]), 600, "Wrong balance on account 3")
-    check.equal(token.balanceOf(a[5]), 400, "Wrong balance on account 5")
+    check.equal(token.balanceOf(a[3]), 100, "Wrong balance on account 3")
+    check.equal(token.balanceOf(a[5]), 900, "Wrong balance on account 5")
     check.reverts(token.transferFrom,(a[5],a[3],100, {'from':a[4]}), "Account 4 can transferFrom without approval")
     check.confirms(token.approve,(a[4],100,{'from':a[5]}), "approve reverted")
     check.reverts(token.transferFrom,(a[5],a[3],200, {'from':a[4]}), "Account 4 can transferFrom exceeding approved amount")
@@ -50,7 +56,7 @@ def transfer_same_investor():
     check.equal(token.balanceOf(a[8]),500, "Account 8 balance wrong")
     check.equal(token.balanceOf(a[9]),500, "Account 9 balance wrong")
     check.confirms(token.transferFrom,(a[8],a[3],400,{'from':a[9]}), "Could not transferFrom")
-    check.equal(token.balanceOf(a[3]), 1050, "Wrong balance on account 3")
+    check.equal(token.balanceOf(a[3]), 400, "Wrong balance on account 3")
     check.equal(token.balanceOf(a[8]),100, "Account 8 balance wrong")
     check.equal(token.balanceOf(a[9]),500, "Account 9 balance wrong")
     
