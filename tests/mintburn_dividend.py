@@ -1,26 +1,23 @@
 #!/usr/bin/python3
 
-import time
 
-DEPLOYMENT = "simple"
+from brownie import *
+from scripts.deploy_simple import main
 
-def mintburn_setup():
-    '''MintBurn: deploy and attach''' 
+def setup():
+    main()
     global issuer, token, mint
     issuer = IssuingEntity[0]
     token = SecurityToken[0]
-    mint = check.confirms(
-        accounts[1].deploy,
-        (MintBurnModule, issuer.address),
-        "Could not deploy MintBurn")
+    mint = accounts[1].deploy(MintBurnModule, issuer)
+    issuer.attachModule(issuer, mint)
+
+def attach():
+    '''Mintburn: Attach'''
     check.reverts(
         issuer.attachModule,
         (issuer.address,mint.address, {'from':accounts[2]}),
         "Account 2 was able to attach MintBurn module")
-    check.confirms(
-        issuer.attachModule,
-        (issuer.address, mint.address),
-        "Issuer could not attach MintBurn module")
     check.reverts(
         issuer.attachModule,
         (issuer.address, mint.address),
