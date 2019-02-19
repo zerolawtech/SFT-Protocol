@@ -70,7 +70,7 @@ contract CheckpointModule is STModuleBase {
 		onlyOwner
 		returns (bool)
 	{
-		require(balance[_addr[1]] >= _value);
+		require(token.balanceOf(_addr[1]) >= _value);
 		_;
 		if (now < time) return true;
 		if (_rating[0] == 0 && _id[0] != ownerID) {
