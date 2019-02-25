@@ -249,13 +249,13 @@ Any module applied to an IssuingEntity contract may also be permitted to call me
 
     Calling this method will also call any hooked in ``checkTransfer`` and ``transferTokens`` methods.
 
-.. method:: SecurityToken.modifyBalance(address _owner, uint256 _value)
+.. method:: SecurityToken.modifyTotalSupply(address _owner, uint256 _value)
 
     * Permission signature: ``0x250dea06``
 
     Sets the balance of ``_owner`` to ``_value`` and modifies ``totalSupply`` accordingly. This method is only callable by a module.
 
-    Calling this method will also call any hooked in ``balanceChanged`` methods.
+    Calling this method will also call any hooked in ``totalSupplyChanged`` methods.
 
 .. method:: SecurityToken.detachModule(address _module)
 
@@ -268,7 +268,7 @@ IssuingEntity
 
 .. method:: IssuingEntity.detachModule(address _target, address _module)
 
-    * Permission signature: ``0xbb2a8522``
+    * Permission signature: ``0x3556099d``
 
     Detaches module contract ``_module`` from parent contract ``_target``.
 
