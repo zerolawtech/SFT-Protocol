@@ -150,7 +150,7 @@ The following calls will not revert, instead returning ``false`` or an empty res
     * Is the address restricted?
     * Has the investor's rating expired?
 
-.. method:: KYCRegistrar.isPermittedID(address _addr)
+.. method:: KYCRegistrar.isPermittedID(bytes32 _id)
 
     Returns a transfer permission boolean similar to ``KYCRegistrar.isPermitted``, without a check on a specific address.
 

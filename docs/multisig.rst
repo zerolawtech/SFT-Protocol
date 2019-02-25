@@ -58,6 +58,8 @@ Only the owner may add, modify or restrict other authorities.
 
     Modifies call permissions for an authority.
 
+    .. warning:: If an external contract includes a function with the same signature as one inside the multi-sig contract, it will be impossible to set unique permissions for each function. Developers and auditors of external contracts should always keep this in mind.
+
 .. method:: MultiSig.setAuthorityThreshold(bytes32 _id, uint32 _threshold)
 
     Modifies the multisig threshold requirement for an authority. Can be called by any authority to modify their own threshold, or by the owner to modify the threshold for anyone.
@@ -99,7 +101,7 @@ Multisig functionality can be implemented within any contract method as well as 
 
 .. method:: MultiSig.checkMultiSigExternal(bytes4 _sig, bytes32 _callHash)
 
-    External function, used to implement multisig in an different contract.
+    External function, used to implement multisig in an external contract.
 
     * ``_sig``: The original function signature being called
     * ``_callHash``: a keccak hash of the original calldata
@@ -113,8 +115,6 @@ Multisig functionality can be implemented within any contract method as well as 
             return false;
         }
 
-    This function relies on ``tx.origin`` to verify that the original caller is an approved authority. Permissions are checked against the signature value in the same way as with an internal call. The recorded keccak hash of the call is formed by joining the address of the calling contract, the signature, and the supplied call hash. As such it is impossible to exploit the external call to advance the count on internal multisig events.
+    This function relies on ``tx.origin`` to verify that the original caller is an approved authority. Permissions are checked against the signature value in the same way as with an internal call. The recorded hash of the call is formed from a concatenation of the address of the supplied call hash, the signature and the calling contract.
 
-    .. warning:: If an external contract includes a function with the same signature as one inside the multi-sig contract, it will be impossible to set unique permissions for each function. Developers and auditors of external contracts should always keep this in mind.
-
-
+    .. warning:: Because of the use of ``tx.origin``, you must also include a call to ``MultiSig.isApprovedAuthority`` within the external method to verify that ``msg.sender`` is a permitted authority. Without this check the contract will be vulnerable to an `authentication exploit <https://vessenes.com/tx-origin-and-ethereum-oh-my/>`__.
