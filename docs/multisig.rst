@@ -58,11 +58,11 @@ Only the owner may add, modify or restrict other authorities.
 
     Modifies call permissions for an authority.
 
-    .. warning:: If an external contract includes a function with the same signature as one inside the multi-sig contract, it will be impossible to set unique permissions for each function. Developers and auditors of external contracts should always keep this in mind.
-
 .. method:: MultiSig.setAuthorityThreshold(bytes32 _id, uint32 _threshold)
 
     Modifies the multisig threshold requirement for an authority. Can be called by any authority to modify their own threshold, or by the owner to modify the threshold for anyone.
+
+    .. warning:: If an external contract method using ``checkMultiSigExternal`` has the same signature as one inside the multi-sig contract, it will be impossible to set unique permissions for each function. Developers and auditors of external contracts should always keep this in mind.
 
 .. method:: MultiSig.addAuthorityAddresses(bytes32 _id, address[] _addr)
 
@@ -117,4 +117,4 @@ Multisig functionality can be implemented within any contract method as well as 
 
     This function relies on ``tx.origin`` to verify that the original caller is an approved authority. Permissions are checked against the signature value in the same way as with an internal call. The recorded hash of the call is formed from a concatenation of the address of the supplied call hash, the signature and the calling contract.
 
-    .. warning:: Because of the use of ``tx.origin``, you must also include a call to ``MultiSig.isApprovedAuthority`` within the external method to verify that ``msg.sender`` is a permitted authority. Without this check the contract will be vulnerable to an `authentication exploit <https://vessenes.com/tx-origin-and-ethereum-oh-my/>`__.
+    .. warning:: Because of the use of ``tx.origin``, you must also include a call to ``isApprovedAuthority`` within the external method to verify that ``msg.sender`` is a permitted authority. Without this check the contract will be vulnerable to an `authentication exploit <https://vessenes.com/tx-origin-and-ethereum-oh-my/>`__.

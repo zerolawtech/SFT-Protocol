@@ -18,16 +18,16 @@ Deployment
 
 The constructor takes the following arguments:
 
-.. method:: SecurityToken.constructor(address _issuer, string _name, string _symbol, uint256 _totalSupply)
+.. method:: SecurityToken.constructor(address _issuer, string _name, string _symbol, uint256 _authorizedSupply)
 
     * ``_issuer``: The address of the ``IssuingEntity`` associated with this token.
     * ``_name``: The full name of the token.
     * ``_symbol``: The ticker symbol for the token.
-    * ``_totalSupply``: The initial total supply of tokens to create.
-
-    The total supply of tokens is assigned to the issuer at the time of creation, with a ``Transfer`` event logged to show them as moving from 0x00.
+    * ``_authorizedSupply``: The initial authorized token supply.
 
     After the contract is deployed it must be associated with the issuer via ``IssuingEntity.addToken``. Token transfers are not possible until this is done.
+
+    At the time of deployment the initial authorized supply is set, and the total supply is left as 0. The issuer may then mint tokens by calling ``modifyTotalSupply`` directly or via a module. See :ref:`security-token-mint-burn`.
 
 Constants
 =========
@@ -54,14 +54,12 @@ The following public variables cannot be changed after contract deployment.
 
     The address of the associated IssuingEntity contract.
 
-Total Supply and Balances
+Token Supply and Balances
 =========================
 
-Along with the standard ERC20 methods, SecurityToken introduces two additional methods around the total supply.
+Along with the standard ERC20 methods, SecurityToken introduces three additional methods around the total supply.
 
-.. method:: SecurityToken.totalSupply
 
-    Returns the total supply of tokens.
 
 .. method:: SecurityToken.balanceOf(address)
 
@@ -75,6 +73,45 @@ Along with the standard ERC20 methods, SecurityToken introduces two additional m
 
     Returns the total supply, less the amount held by the issuer.
 
+.. _security-token-mint-burn:
+
+Token Supply, Minting and Burning
+=================================
+
+Along with the ERC20 standard ``totalSupply``, SecurityToken contracts include an ``authorizedSupply`` that represents the maximum allowable total supply. The issuer may mint new tokens using ``modifyTotalSupply`` until the total supply is equal to the authorized supply. The initial authorized supply is set during deployment and may be increased later using ``modifyAuthorizedSupply``.
+
+A governance module can be used to dictate when the issuer is allowed to modify the authorized supply.
+
+.. method:: SecurityToken.totalSupply
+
+    Returns the current total supply of tokens.
+
+.. method:: SecurityToken.authorizedSupply
+
+    Returns the maximum authorized total supply of tokens. Whenever the authorized supply exceeds the total supply, the issuer may mint new tokens using ``modifyTotalSupply``.
+
+.. method:: SecurityToken.modifyTotalSupply(address _owner, uint256 _value)
+
+    Modifies the balance of a token holder, affecting the total supply.
+
+    * ``_owner``: The account balance to modify.
+    * ``_value``: The new balance of the account.
+
+    If the current account balance is less than the new balance, tokens will be minted by transferring from ``0x00`` and the total supply will increase. The new total supply cannot exceed ``authorizedSupply``.
+
+    If the current account balance is greater than the new balance, tokens will be burned by transferring to ``0x00`` and the total supply will decrease.
+
+    This method is callable directly by the issuer, implementing multi-sig via ``MultiSig.checkMultiSigExternal``. It may also be called by a permitted module.
+
+    Modules can hook into this method via ``STModule.totalSupplyChanged``. The modules are called after the total supply has has been changed.
+
+.. method:: SecurityToken.modifyAuthorizedSupply(uint256 _value)
+
+    Sets the authorized supply. The value may never be less than the current total supply.
+
+    This method is callable directly by the issuer, implementing multi-sig via ``MultiSig.checkMultiSigExternal``. It may also be called by a permitted module.
+
+    Modules can hook into this method via ``STModule.modifyAuthorizedSupply``. The modules are called before the authorized supply is changed.
 
 Token Transfers
 ===============
@@ -96,6 +133,8 @@ SecurityToken uses the standard ERC20 methods for token transfers, however their
 
     Transfers between two addresses that are associated to the same ID do not undergo the same level of restrictions, as there is no change of ownership occuring.
 
+    Modules can hook into this method via ``STModule.checkTransfer``.
+
 .. method:: SecurityToken.transfer(address _to, uint256 _value)
 
     Transfers ``_value`` tokens from ``msg.sender`` to ``_to``.
@@ -114,6 +153,8 @@ SecurityToken uses the standard ERC20 methods for token transfers, however their
 
     If the caller and sender addresses are both associated to the same ID, ``transferFrom`` may be called without giving prior approval. In this way an investor can easily recover tokens when a private key is lost or compromised.
 
+    Modules can hook into this method via ``STModule.transferTokens``.
+
 Issuer Balances and Transfers
 =============================
 
@@ -129,7 +170,7 @@ The issuer may call ``SecurityToken.transferFrom`` to move tokens between any ad
 Modules
 =======
 
-Modules are attached and detached via :ref:`issuing-entity`.
+Modules are attached and detached to token contracts via :ref:`issuing-entity`.
 
 .. method:: SecurityToken.isActiveModule(address _module)
 

@@ -107,11 +107,11 @@ SecurityToken
     * ``_country``: Sender and receiver country codes.
     * ``_value``: Amount that was transferred.
 
-.. method:: STModule.balanceChanged(address _addr, bytes32 _id, uint8 _rating, uint16 _country, uint256 _old, uint256 _new)
+.. method:: STModule.totalSupplyChanged(address _addr, bytes32 _id, uint8 _rating, uint16 _country, uint256 _old, uint256 _new)
 
-    * Hook signature: ``0x4268353d``
+    * Hook signature: ``0x741b5078``
 
-    Called after a balance has been directly modified by ``SecurityToken.modifyBalance``. Calls to this method also modify the total supply.
+    Called after the total supply has been modified by ``SecurityToken.modifyTotalSupply``.
 
     * ``_addr``: Address where balance has changed.
     * ``_id``: ID that the address is associated to.
@@ -119,6 +119,16 @@ SecurityToken
     * ``_country``: Investor country code.
     * ``_old``: Previous token balance at the address.
     * ``_new``: New token balance at the address.
+
+.. method:: STModule.modifyAuthorizedSupply(address _token, uint256 _oldSupply, uint256 _newSupply)
+
+    * Hook signature: ``0xb1a1a455``
+
+    Called before changing the authorized supply of a token.
+
+    * ``_token``: Token address
+    * ``_oldSupply``: Current authorized supply
+    * ``_newSupply``: New authorized supply
 
 IssuingEntity
 -------------
@@ -161,11 +171,11 @@ IssuingEntity
     * ``_country``: Sender and receiver country codes.
     * ``_value``: Amount that was transferred.
 
-.. method:: IssuerModule.balanceChanged(address _token, bytes32 _id, uint8 _rating, uint16 _country, uint256 _old, uint256 _new)
+.. method:: IssuerModule.tokenTotalSupplyChanged(address _token, bytes32 _id, uint8 _rating, uint16 _country, uint256 _old, uint256 _new)
 
-    * Hook signature: ``0x4268353d``
+    * Hook signature: ``0xb446f3ca``
 
-    Called after a balance has been directly modified by ``SecurityToken.modifyBalance``. Calls to this method also modify the total supply.
+    Called after a token's total supply has been modified by ``SecurityToken.modifyTotalSupply``.
 
     * ``_token``: Token address where balance has changed.
     * ``_id``: ID of the investor who's balance changed.

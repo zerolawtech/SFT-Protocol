@@ -22,6 +22,7 @@ contract SecurityToken is Modular {
 	string public name;
 	string public symbol;
 	uint256 public totalSupply;
+	uint256 public authorizedSupply;
 
 	mapping (address => uint256) balances;
 	mapping (address => mapping (address => uint256)) allowed;
@@ -32,7 +33,8 @@ contract SecurityToken is Modular {
 		address indexed spender,
 		uint tokens
 	);
-	event BalanceChanged(
+	event AuthorizedSupplyChanged(uint256 oldAuthorized, uint256 newAuthorized);
+	event TotalSupplyChanged(
 		address indexed owner,
 		uint256 oldBalance,
 		uint256 newBalance
@@ -44,13 +46,13 @@ contract SecurityToken is Modular {
 		@param _issuer Address of the issuer's IssuingEntity contract
 		@param _name Name of the token
 		@param _symbol Unique ticker symbol
-		@param _totalSupply Total supply of the token
+		@param _authorizedSupply Initial authorized token supply
 	 */
 	constructor(
 		address _issuer,
 		string _name,
 		string _symbol,
-		uint256 _totalSupply
+		uint256 _authorizedSupply
 	)
 		public
 	{
@@ -58,9 +60,7 @@ contract SecurityToken is Modular {
 		ownerID = issuer.ownerID();
 		name = _name;
 		symbol = _symbol;
-		balances[_issuer] = _totalSupply;
-		totalSupply = _totalSupply;
-		emit Transfer(0, _issuer, _totalSupply);
+		authorizedSupply = _authorizedSupply;
 	}
 
 	/**
@@ -443,27 +443,61 @@ contract SecurityToken is Modular {
 	}
 
 	/**
-		@notice Directly modify the balance of an account
-		@notice May be used for minting, redemption, split, dilution, etc
-		@dev This function is only callable via module
+		@notice Modify authorized Supply
+		@dev Callable by issuer or via module
+		@param _value New authorized supply value
+		@return bool
+	 */
+	function modifyAuthorizedSupply(uint256 _value) external returns (bool) {
+		/* msg.sig = 0xc39f42ed */
+		if (!isPermittedModule(msg.sender, msg.sig)) {
+			require(issuer.isApprovedAuthority(msg.sender, msg.sig));
+			if (!issuer.checkMultiSigExternal(msg.sig, keccak256(msg.data))) {
+				return false;
+			}
+		}
+		require(_value >= totalSupply);
+		/* bytes4 signature for token module modifyAuthorizedSupply() */
+		_callModules(
+			0xb1a1a455,
+			abi.encode(address(this), totalSupply, _value)
+		);
+		emit AuthorizedSupplyChanged(totalSupply, _value);
+		authorizedSupply = _value;
+		return true;
+	}
+
+	/**
+		@notice Modify the balance of an account, affecting the total supply
+		@dev Callable by issuer or via module
 		@param _owner Owner of the tokens
 		@param _value Balance to set
 		@return bool
 	 */
-	function modifyBalance(
+	function modifyTotalSupply(
 		address _owner,
 		uint256 _value
 	)
 		external
 		returns (bool)
 	{
-		/* msg.sig = 0x250dea06 */
-		require(isPermittedModule(msg.sender, msg.sig));
+		/* msg.sig = 0x413ed002 */
+		if (!isPermittedModule(msg.sender, msg.sig)) {
+			require(issuer.isApprovedAuthority(msg.sender, msg.sig));
+			if (!issuer.checkMultiSigExternal(msg.sig, keccak256(msg.data))) {
+				return false;
+			}
+		}
 		if (balances[_owner] == _value) return true;
 		if (balances[_owner] > _value) {
-			totalSupply = totalSupply.sub(balances[_owner].sub(_value));
+			uint256 _amount = balances[_owner].sub(_value);
+			totalSupply = totalSupply.sub(_amount);
+			emit Transfer(_owner, 0x00, _amount);
 		} else {
-			totalSupply = totalSupply.add(_value.sub(balances[_owner]));
+			_amount = _value.sub(balances[_owner]);
+			totalSupply = totalSupply.add(_amount);
+			require(totalSupply <= authorizedSupply);
+			emit Transfer(0x00, _owner, _amount);
 		}
 		uint256 _old = balances[_owner];
 		balances[_owner] = _value;
@@ -471,13 +505,13 @@ contract SecurityToken is Modular {
 			bytes32 _id,
 			uint8 _rating,
 			uint16 _country
-		) = issuer.modifyBalance(_owner, _old, _value);
-		/* bytes4 signature for token module balanceChanged() */
+		) = issuer.modifyTokenTotalSupply(_owner, _old, _value);
+		/* bytes4 signature for token module totalSupplyChanged() */
 		_callModules(
-			0x4268353d,
+			0x741b5078,
 			abi.encode(_owner, _id, _rating, _country, _old, _value)
 		);
-		emit BalanceChanged(_owner, _old, _value);
+		emit TotalSupplyChanged(_owner, _old, _value);
 		return true;
 	}
 
