@@ -60,9 +60,18 @@ interface ISTModule {
 	)
 		external
 		returns (bool);
-	
-	/* 0x4268353d */
-	function balanceChanged(
+
+	/* 0xb1a1a455 */
+	function modifyAuthorizedSupply(
+		address _token,
+		uint256 _oldSupply,
+		uint256 _newSupply
+	)
+		external
+		returns (bool);
+
+	/* 0x741b5078 */
+	function totalSupplyChanged(
 		address _addr,
 		bytes32 _id,
 		uint8 _rating,
@@ -122,8 +131,8 @@ interface IIssuerModule {
 		external
 		returns (bool);
 
-	/* 0x4268353d */
-	function balanceChanged(
+	/* 0xb446f3ca */
+	function tokenTotalSupplyChanged(
 		address _token,
 		bytes32 _id,
 		uint8 _rating,

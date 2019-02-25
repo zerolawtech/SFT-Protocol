@@ -756,7 +756,7 @@ contract IssuingEntity is Modular, MultiSig {
 		@param _new New balance
 		@return id, rating, and country of the affected investor
 	 */
-	function modifyBalance(
+	function modifyTokenTotalSupply(
 		address _owner,
 		uint256 _old,
 		uint256 _new
@@ -795,9 +795,9 @@ contract IssuingEntity is Modular, MultiSig {
 				_decrementCount(_rating, _country);
 			}
 		}
-		/* bytes4 signature for token module balanceChanged() */
+		/* bytes4 signature for token module tokenTotalSupplyChanged() */
 		_callModules(
-			0x4268353d,
+			0xb446f3ca,
 			abi.encode(msg.sender, _id, _rating, _country, _old, _new)
 		);
 		return (_id, _rating, _country);
