@@ -10,7 +10,8 @@ contract Modular {
 		bool active;
 		bool set;
 		/* hooks, permissions */
-		mapping(bytes4 => bool[2]) signatures;
+		mapping(bytes4 => bool) hooks;
+		mapping(bytes4 => bool) permissions;
 	}
 
 	address[] activeModules;
@@ -36,8 +37,12 @@ contract Modular {
 				bytes4[] memory _hooks,
 				bytes4[] memory _permissions
 			) = b.getPermissions();
-			_setPermissions(_module, _hooks, 0);
-			_setPermissions(_module, _permissions, 1);
+			for (uint256 i; i < _hooks.length; i++) {
+				moduleData[_module].hooks[_hooks[i]] = true;
+			}
+			for (i = 0; i < _hooks.length; i++) {
+				moduleData[_module].permissions[_permissions[i]] = true;
+			}
 			moduleData[_module].set = true;
 		}
 		emit ModuleAttached(_module, _hooks, _permissions);
@@ -70,31 +75,13 @@ contract Modular {
 	}
 
 	/**
-		@notice Internal to modify module hooks mapping
-		@param _module module address
-		@param _sig array of function signatures
-		@param _idx permission arary index
-	 */
-	function _setPermissions(
-		address _module,
-		bytes4[] _sig,
-		uint256 _idx
-	)
-		private
-	{
-		for (uint256 i = 0; i < _sig.length; i++) {
-			moduleData[_module].signatures[_sig[i]][_idx] = true;
-		}
-	}
-
-	/**
 		@notice Internal function to iterate and call modules
 		@param _sig bytes4 signature to call module with
 		@param _data calldata to send to module
 	 */
 	function _callModules(bytes4 _sig, bytes _data) internal {
 		for (uint256 i = 0; i < activeModules.length; i++) {
-			if (moduleData[activeModules[i]].signatures[_sig][0]) {
+			if (moduleData[activeModules[i]].hooks[_sig]) {
 				require(activeModules[i].call(_sig, _data));
 			}
 		}
@@ -128,7 +115,7 @@ contract Modular {
 	{
 		return (
 			moduleData[_module].active && 
-			moduleData[_module].signatures[_sig][1]
+			moduleData[_module].permissions[_sig]
 		);
 	}
 
