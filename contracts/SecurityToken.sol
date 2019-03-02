@@ -577,7 +577,7 @@ contract SecurityToken is Modular {
 	{
 		if (
 			moduleData[_module].active && 
-			moduleData[_module].signatures[_sig][1]
+			moduleData[_module].permissions[_sig]
 		) {
 			return true;
 		}
