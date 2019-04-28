@@ -3,12 +3,11 @@ pragma solidity >=0.4.24 <0.5.0;
 import "./open-zeppelin/SafeMath.sol";
 import "./KYCRegistrar.sol";
 import "./SecurityToken.sol";
-import "./interfaces/IMiniCustodian.sol";
-import "./components/Modular.sol";
-import "./components/MultiSig.sol";
+import "./interfaces/IBaseCustodian.sol";
+import "./bases/MultiSig.sol";
 
 /** @title Issuing Entity */
-contract IssuingEntity is Modular, MultiSig {
+contract IssuingEntity is MultiSig {
 
 	using SafeMath32 for uint32;
 	using SafeMath for uint256;
@@ -21,7 +20,7 @@ contract IssuingEntity is Modular, MultiSig {
 	struct Country {
 		uint32[8] counts;
 		uint32[8] limits;
-		bool allowed;
+		bool permitted;
 		uint8 minRating;
 	}
 
@@ -29,8 +28,9 @@ contract IssuingEntity is Modular, MultiSig {
 		uint32 count;
 		uint8 rating;
 		uint8 regKey;
+		bool set;
 		bool restricted;
-		mapping (bytes32 => bool) custodians;
+		address custodian;
 	}
 
 	struct Token {
@@ -43,53 +43,29 @@ contract IssuingEntity is Modular, MultiSig {
 		bool restricted;
 	}
 
-	struct CustodianContract {
-		address addr;
-		bool restricted;
-	}
-
 	bool locked;
-	bool mutex;
 	RegistrarContract[] registrars;
 	uint32[8] counts;
 	uint32[8] limits;
 	mapping (uint16 => Country) countries;
 	mapping (bytes32 => Account) accounts;
-	mapping (bytes32 => CustodianContract) custodians;
 	mapping (address => Token) tokens;
 	mapping (string => bytes32) documentHashes;
 
-	event TransferOwnership(
-		address indexed token,
-		bytes32 indexed from,
-		bytes32 indexed to,
-		uint256 value
-	);
-	event BeneficialOwnerSet(
-		address indexed custodian,
-		bytes32 indexed id,
-		bool owned
-	);
 	event CountryModified(
 		uint16 indexed country,
-		bool allowed,
+		bool permitted,
 		uint8 minrating,
 		uint32[8] limits
 	);
-	event InvestorLimitSet(uint16 indexed country, uint32[8] limits);
+	event InvestorLimitsSet(uint32[8] limits);
 	event NewDocumentHash(string indexed document, bytes32 documentHash);
-	event RegistrarSet(address indexed registrar, bool allowed);
+	event RegistrarSet(address indexed registrar, bool permitted);
 	event CustodianAdded(address indexed custodian);
 	event TokenAdded(address indexed token);
-	event InvestorRestriction(bytes32 indexed id, bool allowed);
-	event TokenRestriction(address indexed token, bool allowed);
-	event GlobalRestriction(bool allowed);
-	
-	/** @dev check that call originates from a registered, unrestricted token */
-	modifier onlyToken() {
-		require(tokens[msg.sender].set && !tokens[msg.sender].restricted);
-		_;
-	}
+	event EntityRestriction(bytes32 indexed id, bool permitted);
+	event TokenRestriction(address indexed token, bool permitted);
+	event GlobalRestriction(bool permitted);
 
 	/**
 		@notice Issuing entity constructor
@@ -105,13 +81,54 @@ contract IssuingEntity is Modular, MultiSig {
 	{
 		/* First registrar is empty so Account.regKey == 0 means it is unset. */
 		registrars.push(RegistrarContract(KYCRegistrar(0), false));
+		idMap[address(this)].id = ownerID;
+	}
+
+	/**
+		@notice Check if an address belongs to a registered investor
+		@dev Retrurns false for custodian or issuer addresses
+		@param _addr address to check
+		@return bytes32 investor ID
+	 */
+	function isRegisteredInvestor(address _addr) external view returns (bool) {
+		bytes32 _id = _getID(_addr);
+		return accounts[_id].rating > 0;
+	}
+
+	/**
+		@notice External view to fetch an investor ID from an address
+		@param _addr address to check
+		@return bytes32 investor ID
+	 */
+	function getID(address _addr) external view returns (bytes32 _id) {
+		_id = _getID(_addr);
+		if (_id == ownerID) {
+			return idMap[_addr].id;
+		}
+		return _id;
+	}
+
+	/**
+		@notice Get address of the registrar an investor is associated with
+		@param _id Investor ID
+		@return registrar address
+	 */
+	function getInvestorRegistrar(bytes32 _id) external view returns (address) {
+		return registrars[accounts[_id].regKey].addr;
 	}
 
 	/**
 		@notice Fetch total investor counts and limits
 		@return counts, limits
 	 */
-	function getInvestorCounts() external view returns (uint32[8], uint32[8]) {
+	function getInvestorCounts()
+	external
+	view
+	returns (
+		uint32[8] _counts,
+		uint32[8] _limits
+	)
+	{
 		return (counts, limits);
 	}
 
@@ -136,16 +153,135 @@ contract IssuingEntity is Modular, MultiSig {
 	}
 
 	/**
+		@notice Fetch document hash
+		@param _documentID Document ID to fetch
+		@return document hash
+	 */
+	function getDocumentHash(string _documentID) external view returns (bytes32) {
+		return documentHashes[_documentID];
+	}
+
+	/**
+		@notice Set document hash
+		@param _documentID Document ID being hashed
+		@param _hash Hash of the document
+		@return bool success
+	 */
+	function setDocumentHash(
+		string _documentID,
+		bytes32 _hash
+	)
+		external
+		returns (bool)
+	{
+		if (!_checkMultiSig()) return false;
+		require(documentHashes[_documentID] == 0);
+		documentHashes[_documentID] = _hash;
+		emit NewDocumentHash(_documentID, _hash);
+		return true;
+	}
+
+	/**
+		@notice Add a new security token contract
+		@param _token Token contract address
+		@return bool success
+	 */
+	function addToken(address _token) external returns (bool) {
+		if (!_checkMultiSig()) return false;
+		SecurityToken token = SecurityToken(_token);
+		require(!tokens[_token].set);
+		require(token.ownerID() == ownerID);
+		require(token.circulatingSupply() == 0);
+		tokens[_token].set = true;
+		emit TokenAdded(_token);
+		return true;
+	}
+
+	/**
+		@notice Add a new authority
+		@param _addr Array of addressses to register as authority
+		@param _signatures Array of bytes4 sigs this authority may call
+		@param _approvedUntil Epoch time that authority is approved until
+		@param _threshold Minimum number of calls to a method for multisig
+		@return bool success
+	 */
+	function addAuthority(
+		address[] _addr,
+		bytes4[] _signatures,
+		uint32 _approvedUntil,
+		uint32 _threshold
+	)
+		public
+		returns (bool)
+	{
+		require(!accounts[keccak256(abi.encodePacked(_addr))].set, "dev: known ID");
+		super.addAuthority(_addr, _signatures, _approvedUntil, _threshold);
+		return true;
+	}
+
+	/**
+		@notice Add a custodian
+		@dev
+			Custodians are entities such as broker or exchanges that are approved
+			to hold tokens for 1 or more beneficial owners.
+			https://sft-protocol.readthedocs.io/en/latest/custodian.html
+		@param _custodian address of custodian contract
+		@return bool success
+	 */
+	function addCustodian(address _custodian) external returns (bool) {
+		if (!_checkMultiSig()) return false;
+		bytes32 _id = IBaseCustodian(_custodian).ownerID();
+		require(_id != 0, "dev: zero ID");
+		require(idMap[_custodian].id == 0, "dev: known address");
+		require(!accounts[_id].set, "dev: known ID");
+		require(authorityData[_id].addressCount == 0, "dev: authority ID");
+		idMap[_custodian].id = _id;
+		accounts[_id].custodian = _custodian;
+		accounts[_id].set = true;
+		emit CustodianAdded(_custodian);
+		return true;
+	}
+
+	/**
+		@notice Attach or remove a KYCRegistrar contract
+		@param _registrar address of registrar
+		@param _permitted registrar permission
+		@return bool success
+	 */
+	function setRegistrar(
+		KYCRegistrar _registrar,
+		bool _permitted
+	)
+		external
+		returns (bool)
+	{
+		if (!_checkMultiSig()) return false;
+		for (uint256 i = 1; i < registrars.length; i++) {
+			if (registrars[i].addr == _registrar) {
+				registrars[i].restricted = !_permitted;
+				emit RegistrarSet(_registrar, _permitted);
+				return true;
+			}
+		}
+		if (_permitted) {
+			registrars.push(RegistrarContract(_registrar, false));
+			emit RegistrarSet(_registrar, _permitted);
+			return true;
+		}
+		revert();
+	}
+
+	/**
 		@notice Set all information about a country
 		@param _country Country to modify
-		@param _allowed Is country approved
+		@param _permitted Is country approved
 		@param _minRating minimum investor rating
 		@param _limits array of investor limits
 		@return bool success
 	 */
 	function setCountry(
 		uint16 _country,
-		bool _allowed,
+		bool _permitted,
 		uint8 _minRating,
 		uint32[8] _limits
 	)
@@ -156,8 +292,8 @@ contract IssuingEntity is Modular, MultiSig {
 		Country storage c = countries[_country];
 		c.limits = _limits;
 		c.minRating = _minRating;
-		c.allowed = _allowed;
-		emit CountryModified(_country, _allowed, _minRating, _limits);
+		c.permitted = _permitted;
+		emit CountryModified(_country, _permitted, _minRating, _limits);
 		return true;
 	}
 
@@ -182,15 +318,15 @@ contract IssuingEntity is Modular, MultiSig {
 		require(_country.length == _minRating.length);
 		require(_country.length == _limit.length);
 		if (!_checkMultiSig()) return false;
-		for (uint256 i = 0; i < _country.length; i++) {
+		for (uint256 i; i < _country.length; i++) {
 			require(_minRating[i] != 0);
 			Country storage c = countries[_country[i]];
-			c.allowed = true;
+			c.permitted = true;
 			c.minRating = _minRating[i];
 			c.limits[0] = _limit[i];
 			emit CountryModified(_country[i], true, _minRating[i], c.limits);
-
 		}
+		return true;
 	}
 
 	/**
@@ -205,33 +341,86 @@ contract IssuingEntity is Modular, MultiSig {
 	function setInvestorLimits(uint32[8] _limits) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		limits = _limits;
-		emit InvestorLimitSet(0, _limits);
+		emit InvestorLimitsSet(_limits);
+		return true;
+	}
+
+	/**
+		@notice Set restriction on an investor or custodian ID
+		@dev restrictions on sub-authorities are handled via MultiSig methods
+		@param _id investor ID
+		@param _permitted permission bool
+		@return bool success
+	 */
+	function setEntityRestriction(
+		bytes32 _id,
+		bool _permitted
+	)
+		external
+		returns (bool)
+	{
+		if (!_checkMultiSig()) return false;
+		require(authorityData[_id].addressCount == 0, "dev: authority");
+		accounts[_id].restricted = !_permitted;
+		emit EntityRestriction(_id, _permitted);
+		return true;
+	}
+
+	/**
+		@notice Set restriction on a token
+		@dev
+			Only the issuer can transfer restricted tokens. Useful in dealing
+			with a security breach or a token migration.
+		@param _token Address of the token
+		@param _permitted permission bool
+		@return bool success
+	 */
+	function setTokenRestriction(
+		address _token,
+		bool _permitted
+	)
+		external
+		returns (bool)
+	{
+		if (!_checkMultiSig()) return false;
+		require(tokens[_token].set);
+		tokens[_token].restricted = !_permitted;
+		emit TokenRestriction(_token, _permitted);
+		return true;
+	}
+
+	/**
+		@notice Set restriction on all tokens for this issuer
+		@dev Only the issuer can transfer restricted tokens.
+		@param _permitted permission bool
+		@return bool success
+	 */
+	function setGlobalRestriction(bool _permitted) external returns (bool) {
+		if (!_checkMultiSig()) return false;
+		locked = !_permitted;
+		emit GlobalRestriction(_permitted);
 		return true;
 	}
 
 	/**
 		@notice Check if transfer is possible based on issuer level restrictions
 		@dev function is not called directly - see SecurityToken.checkTransfer
-		@param _token address of token being transferred
 		@param _auth address of the caller attempting the transfer
 		@param _from address of the sender
 		@param _to address of the receiver
 		@param _zero is the sender's balance zero after the transfer?
-		@param _value amount being transferred
 		@return bytes32 ID of caller
 		@return bytes32[] IDs of sender and receiver
 		@return uint8[] ratings of sender and receiver
 		@return uint16[] countries of sender and receiver
 	 */
 	function checkTransfer(
-		address _token,
 		address _auth,
 		address _from,
 		address _to,
-		bool _zero,
-		uint256 _value
+		bool _zero
 	)
-		external
+		public
 		returns (
 			bytes32 _authID,
 			bytes32[2] _id,
@@ -239,150 +428,160 @@ contract IssuingEntity is Modular, MultiSig {
 			uint16[2] _country
 		)
 	{
-		_authID = _getID(_auth, 0);
-		_id[0] = _getID(_from, 0);
-		_id[1] = _getID(_to, 0);
+		_authID = _getID(_auth);
+		_id[0] = _getID(_from);
+		_id[1] = _getID(_to);
 		
 		if (_authID == ownerID && idMap[_auth].id != ownerID) {
 			/* This enforces sub-authority permissioning around transfers */
-			_checkAuth(
-				_auth,
-				_authID == _id[0] ? bytes4(0xa9059cbb) : bytes4(0x23b872dd)
+			Authority storage a = authorityData[idMap[_auth].id];
+			require(
+				a.approvedUntil >= now &&
+				a.signatures[bytes4(_authID == _id[0] ? 0xa9059cbb : 0x23b872dd)],
+				"Authority not permitted"
 			);
 		}
 
 		address _addr = (_authID == _id[0] ? _auth : _from);
-		bool[2] memory _allowed;
+		bool[2] memory _permitted;
 
-		(_allowed, _rating, _country) = _getInvestors(
+		(_permitted, _rating, _country) = _getInvestors(
 			[_addr, _to],
-			_id,
 			[accounts[idMap[_addr].id].regKey, accounts[_id[1]].regKey]
 		);
-		Account storage a = accounts[_id[0]];
-		_checkTransfer(
-			_token,
-			_authID,
-			_id,
-			_allowed,
-			_rating,
-			_country,
-			_zero ? a.count.sub(1) : a.count,
-			_value
-			);
-		return (_authID, _id, _rating, _country);
-	}	
+		if (accounts[_authID].custodian != 0) {
+			require(accounts[_id[1]].custodian == 0, "Custodian to Custodian");
+		}
 
-	/**
-		@notice Internal to check sub-authority permissioning around transfers
-		@dev This is a seperate function to avoid stack-depth errors
-		@param _auth Address of the authority
-		@param _sig bytes4 signature of the call (transfer or transferFrom)
-	 */
-	function _checkAuth(address _auth, bytes4 _sig) internal view {
-		Authority storage a = authorityData[idMap[_auth].id];
-		require(
-			a.approvedUntil >= now &&	
-			a.signatures[_sig], "Authority is not permitted"
-		);
+		/* must be allowed to underflow in case of issuer zero balance */
+		uint32 _count = accounts[_id[0]].count;
+		if (_zero) _count -= 1;
+
+		_checkTransfer(_authID, _id, _permitted, _rating, _country, _count);
+		return (_authID, _id, _rating, _country);
 	}
 
-	
 	/**
-		@notice Check if custodian internal transfer is possible
-		@dev Function not called directly - see Custodian.checkTransferInternal
-		@param _cust Address of custodian
-		@param _token Address of token being transferred
-		@param _id IDs of sender and receiver
-		@param _stillOwner Is sender still a beneficial owner after transfer?
-		@return bytes32 ID of custodian
-		@return uint8[] ratings of sender and receiver
-		@return uint16[] countries of sender and receiver
+		@notice internal investor ID fetch
+		@param _addr Investor address
+		@return bytes32 investor ID
 	 */
-	function checkTransferCustodian(
-		address _cust,
-		address _token,
-		bytes32[2] _id,
-		bool _stillOwner
+	function _getID(address _addr) internal returns (bytes32 _id) {
+		_id = idMap[_addr].id;
+		if (authorityData[_id].addressCount > 0) {
+			require(!idMap[_addr].restricted, "Restricted Authority Address");
+			return ownerID;
+		}
+		if (
+			(
+				accounts[_id].regKey > 0 &&
+				!registrars[accounts[_id].regKey].restricted
+			) || accounts[_id].custodian != 0
+		) {
+			return _id;
+		}
+		if (_id == 0) {
+			for (uint256 i = 1; i < registrars.length; i++) {
+				if (!registrars[i].restricted) {
+					_id = registrars[i].addr.getID(_addr);
+					/* prevent investor / authority ID collisions */
+					if (_id != 0 && authorityData[_id].addressCount == 0) {
+						idMap[_addr].id = _id;
+						if (!accounts[_id].set) {
+							accounts[_id].set = true;
+							accounts[_id].regKey = uint8(i);
+						} else if (accounts[_id].regKey != i) {
+							continue;
+						}
+						accounts[_id].regKey = uint8(i);
+						return _id;
+					}
+				}
+			}
+		} else {
+			for (i = 1; i < registrars.length; i++) {
+				if (registrars[i].restricted) continue;
+				if (_id != registrars[i].addr.getID(_addr)) continue;
+				accounts[_id].regKey = uint8(i);
+				return _id;
+			}
+			revert("Registrar restricted");
+		}
+		revert("Address not registered");
+	}
+
+	/**
+		@notice Internal function for fetching investor data from registrars
+		@dev Either _addr or _id may be given as an empty array
+		@param _addr array of investor addresses
+		@param _key array of registrar indexes
+		@return permissions, ratings, and countries of investors
+	 */
+	function _getInvestors(
+		address[2] _addr,
+		uint8[2] _key
 	)
-		external
+		internal
+		view
 		returns (
-			bytes32 _custID,
+			bool[2] _permitted,
 			uint8[2] _rating,
 			uint16[2] _country
 		)
 	{
-		require(
-			custodians[idMap[_cust].id].addr == _cust,
-			"Custodian not registered"
-		);
-		require(custodians[_id[1]].addr == 0, "Receiver is custodian");
-		_getID(0, _id[0]);
-		_getID(0, _id[1]);
-		bool[2] memory _allowed;
-		(
-			_allowed,
-			_rating,
-			_country
-		) = _getInvestors(
-			[address(0), address(0)],
-			_id,
-			[accounts[_id[0]].regKey, accounts[_id[1]].regKey]
-		);
-		_setRating(_id[0], _rating[0], _country[0]);
-		_setRating(_id[1], _rating[1], _country[1]);
-		if (accounts[_id[0]].count > 0 && !_stillOwner) {
-			uint32 _count = accounts[_id[0]].count.sub(1);
-		} else {
-			_count = accounts[_id[0]].count;
+		/* If both investors are in the same registry, call getInvestors */
+		KYCRegistrar r = registrars[_key[0]].addr;
+		if (_key[0] > 0 && _key[0] == _key[1]) {
+			(, _permitted, _rating, _country) = r.getInvestors(_addr[0], _addr[1]);
+			return (_permitted, _rating, _country);
 		}
-		_checkTransfer(
-			_token,
-			idMap[_cust].id,
-			_id,
-			_allowed,
-			_rating,
-			_country,
-			_count,
-			0)
-		;
-		return (idMap[_cust].id, _rating, _country);
+		/* Otherwise, call getInvestor at each registry */
+		if (_key[0] != 0) {
+			(, _permitted[0], _rating[0], _country[0]) = r.getInvestor(_addr[0]);
+		} else {
+			/* If key == 0 the address belongs to the issuer or a custodian. */
+			_permitted[0] = true;
+		}
+		if (_key[1] != 0) {
+			r = registrars[_key[1]].addr;
+			(, _permitted[1], _rating[1], _country[1]) = r.getInvestor(_addr[1]);
+		} else {
+			_permitted[1] = true;
+		}
+		return (_permitted, _rating, _country);
 	}
 
 	/**
 		@notice internal check if transfer is permitted
-		@param _token address of token being transferred
 		@param _authID id hash of caller
 		@param _id addresses of sender and receiver
-		@param _allowed array of permission bools from registrar
+		@param _permitted array of permission bools from registrar
 		@param _rating array of investor ratings
 		@param _country array of investor countries
 		@param _tokenCount sender accounts.count value after transfer
-		@param _value amount being transferred
 	 */
 	function _checkTransfer(
-		address _token,
 		bytes32 _authID,
 		bytes32[2] _id,
-		bool[2] _allowed,
+		bool[2] _permitted,
 		uint8[2] _rating,
 		uint16[2] _country,
-		uint32 _tokenCount,
-		uint256 _value
+		uint32 _tokenCount
 	)
 		internal
 	{	
-		require(tokens[_token].set);
+		require(tokens[msg.sender].set);
 		/* If issuer is not the authority, check the sender is not restricted */
 		if (_authID != ownerID) {
 			require(!locked, "Transfers locked: Issuer");
-			require(!tokens[_token].restricted, "Transfers locked: Token");
+			require(!tokens[msg.sender].restricted, "Transfers locked: Token");
 			require(!accounts[_id[0]].restricted, "Sender restricted: Issuer");
-			require(_allowed[0], "Sender restricted: Registrar");	
+			require(_permitted[0], "Sender restricted: Registrar");
+			require(!accounts[_authID].restricted, "Authority restricted");
 		}
 		/* Always check the receiver is not restricted. */
 		require(!accounts[_id[1]].restricted, "Receiver restricted: Issuer");
-		require(_allowed[1], "Receiver restricted: Registrar");
+		require(_permitted[1], "Receiver restricted: Registrar");
 		if (_id[0] != _id[1]) {
 			/*
 				A rating of 0 implies the receiver is the issuer or a
@@ -390,7 +589,7 @@ contract IssuingEntity is Modular, MultiSig {
 			*/
 			if (_rating[1] != 0) {
 				Country storage c = countries[_country[1]];
-				require(c.allowed, "Reciever blocked: Country");
+				require(c.permitted, "Receiver blocked: Country");
 				require(_rating[1] >= c.minRating, "Receiver blocked: Rating");
 				/*  
 					If the receiving investor currently has 0 balance and no
@@ -451,301 +650,83 @@ contract IssuingEntity is Modular, MultiSig {
 				}
 			}
 		}
-		/* bytes4 signature for issuer module checkTransfer() */
-		_callModules(
-			0x47fca5df,
-			abi.encode(_token, _authID, _id, _rating, _country, _value)
-		);
-	}
-
-	/**
-		@notice External view to fetch an investor ID from an address
-		@param _addr address of token being transferred
-		@return bytes32 investor ID
-	 */
-	function getID(address _addr) external view returns (bytes32) {
-		(bytes32 _id, uint8 _key) = _getIDView(_addr, 0);
-		return _id;
-	}
-
-	/**
-		@notice internal investor ID fetch, updates local record
-		@dev Either of the params may be given as 0
-		@param _addr Investor address
-		@param _id Investor ID
-		@return bytes32 investor ID
-	 */
-	function _getID(address _addr, bytes32 _id) internal returns (bytes32) {
-		uint8 _key;
-		(_id, _key) = _getIDView(_addr, _id);
-		if (_addr != 0 && idMap[_addr].id == 0) {
-			idMap[_addr].id = _id;
-		}
-		if (accounts[_id].regKey != _key) {
-			accounts[_id].regKey = _key;
-		}
-		return _id;
-	}
-
-	/**
-		@notice internal investor ID fetch
-		@dev common logic for getID() and _getID()
-		@dev Either of the params may be given as 0
-		@param _addr Investor address
-		@param _id Investor ID
-		@return bytes32 investor ID, uint8 registrar index
-	 */
-	function _getIDView(
-		address _addr,
-		bytes32 _id
-	)
-		internal
-		view
-		returns (bytes32, uint8)
-	{
-		if (_id == 0) {
-			_id = idMap[_addr].id;
-		}
-		if (
-			authorityData[_id].addressCount > 0 ||
-			_addr == address(this)
-		) {
-			return (ownerID, 0);
-		}
-		if (_id == 0) {
-			for (uint256 i = 1; i < registrars.length; i++) {
-				if (!registrars[i].restricted) {
-					_id = registrars[i].addr.getID(_addr);
-					if (_id != 0) {
-						return (_id, uint8(i));
-					}
-				}
-			}
-			revert("Address not registered");
-		}
-		if (custodians[_id].addr != 0) {
-			return (_id, 0);
-		}
-		if (
-			accounts[_id].regKey == 0 ||
-			registrars[accounts[_id].regKey].restricted
-		) {
-			for (i = 1; i < registrars.length; i++) {
-				if (registrars[i].restricted) continue;
-				if (
-					(_addr != 0 && _id == registrars[i].addr.getID(_addr)) ||
-					(_addr == 0 && registrars[i].addr.isRegistered(_id))
-				) {
-					return (_id, uint8(i));
-				}
-			}
-			if (registrars[accounts[_id].regKey].restricted) {
-				revert("Registrar restricted");
-			}
-			revert("Address not registered");
-		}
-		return (_id, accounts[_id].regKey);
-	}
-
-	/**
-		@notice Internal function for fetching investor data from registrars
-		@dev Either _addr or _id may be given as an empty array
-		@param _addr array of investor addresses
-		@param _id Array of investor IDs
-		@param _key array of registrar indexes
-		@return permissions, ratings, and countries of investors
-	 */
-	function _getInvestors(
-		address[2] _addr,
-		bytes32[2] _id,
-		uint8[2] _key
-	)
-		internal
-		view
-		returns (
-			bool[2] _allowed,
-			uint8[2] _rating,
-			uint16[2] _country
-		)
-	{
-		/* If key == 0 the address belongs to the issuer or a custodian. */
-		if (_key[0] == 0) {
-			_allowed[0] = true;
-			_rating[0] = 0;
-			_country[0] = 0;
-		}
-		if (_key[1] == 0) {
-			_allowed[1] = true;
-			_rating[1] = 0;
-			_country[1] = 0;
-		}
-		/* If both investors are in the same registry, call getInvestors */
-		KYCRegistrar r = registrars[_key[0]].addr;
-		if (_key[0] == _key[1] && _key[0] != 0) {
-			if (_addr[0] != 0) {
-
-				(
-					_id,
-					_allowed,
-					_rating,
-					_country
-				) = r.getInvestors(_addr[0], _addr[1]);
-			} else {
-				(
-					_allowed,
-					_rating,
-					_country
-				) = r.getInvestorsByID(_id[0], _id[1]);
-			}
-		/* Otherwise, call getInvestor at each registry */
-		} else if (_addr[0] != 0) {
-			if (_key[0] != 0) {
-				(
-					_id[0],
-					_allowed[0],
-					_rating[0],
-					_country[0]
-				) = r.getInvestor(_addr[0]);
-			}
-			if (_key[1] != 0) {
-				(
-					_id[1],
-					_allowed[1],
-					_rating[1],
-					_country[1]
-				) = registrars[_key[1]].addr.getInvestor(_addr[1]);
-			}	
-		} else {
-			if (_key[0] != 0) {
-				(
-					_allowed[0],
-					_rating[0],
-					_country[0]
-				) = r.getInvestorByID(_id[0]);
-			}
-			if (_key[1] != 0) {
-				(
-					_allowed[1],
-					_rating[1],
-					_country[1]
-				) = registrars[_key[1]].addr.getInvestorByID(_id[1]);
-			}
-		}
-		return (_allowed, _rating, _country);
 	}
 
 	/**
 		@notice Transfer tokens through the issuing entity level
 		@dev only callable through SecurityToken
-		@param _id Array of sender/receiver IDs
-		@param _rating Array of sender/receiver ratings
-		@param _country Array of sender/receiver countries
-		@param _value Number of tokens being transferred
-		@param _zero Array - Is balance now zero? Was receiver balance zero?
-		@return bool success
+		@param _auth Caller address
+		@param _from Sender address
+		@param _to Receiver address
+		@param _zero Array of zero balance booleans
+			Is sender balance now zero?
+			Was receiver balance zero?
+			Is sender custodial balance now zero?
+			Was receiver custodial balance zero?
+		@return authority ID, IDs/ratings/countries for sender/receiver
 	 */
 	function transferTokens(
-		bytes32[2] _id,
-		uint8[2] _rating,
-		uint16[2] _country,
-		uint256 _value,
-		bool[2] _zero
+		address _auth,
+		address _from,
+		address _to,
+		bool[4] _zero
 	)
 		external
-		onlyToken
-		returns (bool)
+		returns (
+			bytes32 _authID,
+			bytes32[2] _id,
+			uint8[2] _rating,
+			uint16[2] _country
+		)
 	{
-		/* custodian re-entrancy guard */
-		require (!mutex);
-		Account storage _from = accounts[_id[0]];
-		Account storage _to = accounts[_id[1]];
-		if (_zero[0]) {
-			_from.count = _from.count.sub(1);
-		}
-		if (_zero[1]) {
-			_to.count = _to.count.add(1);
-		}
-		
+		(_authID, _id, _rating, _country) = checkTransfer(_auth, _from, _to, _zero[0]);
+
 		/* If no transfer of ownership, return true immediately */
-		if (_id[0] == _id[1]) return true;
-		/*
-			If receiver is a custodian and sender is an investor, notify
-			the custodian contract.
-		*/
-		if (custodians[_id[1]].addr != 0) {
-			MiniCustodian c = MiniCustodian(custodians[_id[1]].addr);
-			mutex = true;
-			require(c.receiveTransfer(msg.sender, _id[0], _value));
-			if (_rating[0] > 0 && !_from.custodians[_id[1]]) {
-				_from.count = _from.count.add(1);
-				_from.custodians[_id[1]] = true;
-				emit BeneficialOwnerSet(address(c), _id[0], true);
-			}
-			mutex = false;
-		} else if (custodians[_id[0]].addr == 0) {
-			emit TransferOwnership(msg.sender, _id[0], _id[1], _value);
-		}
-		
+		if (_id[0] == _id[1]) return;
+
+		/* if sender is a normal investor */
 		if (_rating[0] != 0) {
 			_setRating(_id[0], _rating[0], _country[0]);
-			/* If investor account balance was 0, increase investor counts */
-			if (_from.count == 0) {
-				_decrementCount(_rating[0], _country[0]);
+			if (_zero[0]) {
+				Account storage a = accounts[_id[0]];
+				a.count = a.count.sub(1);
+				/* If investor account balance is now 0, lower investor counts */
+				if (a.count == 0) {
+					_decrementCount(_rating[0], _country[0]);
+				}
+			}
+		/* if receiver is not the issuer, and sender is a custodian */
+		} else if (_id[0] != ownerID && _id[1] != ownerID) {
+			if (_zero[2]) {
+				a = accounts[_id[1]];
+				a.count = a.count.sub(1);
+				if (a.count == 0) {
+					_decrementCount(_rating[1], _country[1]);
+				}
 			}
 		}
+		/* if receiver is a normal investor */
 		if (_rating[1] != 0) {
 			_setRating(_id[1], _rating[1], _country[1]);
-			/* If investor account balance was 0, increase investor counts */
-			if (_to.count == 1) {
-				_incrementCount(_rating[1], _country[1]);
+			if (_zero[1]) {
+				a = accounts[_id[1]];
+				a.count = a.count.add(1);
+				/* If investor account balance was 0, increase investor counts */
+				if (a.count == 1) {
+					_incrementCount(_rating[1], _country[1]);
+				}
+			}
+		/* if sender is not the issuer, and receiver is a custodian */
+		} else if (_id[0] != ownerID && _id[1] != ownerID) {
+			if (_zero[3]) {
+				a = accounts[_id[0]];
+				a.count = a.count.add(1);
+				if (a.count == 1) {
+					_incrementCount(_rating[0], _country[0]);
+				}
 			}
 		}
-		/* bytes4 signature for issuer module transferTokens() */
-		_callModules(
-			0x0cfb54c9,
-			abi.encode(msg.sender, _id, _rating, _country, _value)
-		);
-		
-		return true;
-	}
-
-	/**
-		@notice Registrer change of beneficial ownership in custodian
-		@dev only callable through Custodian.transferInternal
-		@param _custID Custodian ID
-		@param _id Array of sender/receiver IDs
-		@param _rating Array of sender/receiver ratings
-		@param _country Array of sender/receiver countries
-		@param _value Number of tokens being transferred
-		@param _stillOwner Is sender still a beneficial owner?
-		@return bool success
-	 */
-	function transferCustodian(
-		bytes32 _custID,
-		bytes32[2] _id,
-		uint8[2] _rating,
-		uint16[2] _country,
-		uint256 _value,
-		bool _stillOwner
-	)
-		external
-		onlyToken
-		returns (bool)
-	{
-
-		_setBeneficialOwners(_custID, _id[0], _stillOwner);
-		_setBeneficialOwners(_custID, _id[1], true);
-
-		/* bytes4 signature for token module transferTokensCustodian() */
-		_callModules(0x3b59c439, abi.encode(
-			msg.sender,
-			custodians[_custID].addr,
-			_id,
-			_rating,
-			_country,
-			_value
-		));
-		return true;
+		return (_authID, _id, _rating, _country);
 	}
 
 	/**
@@ -762,44 +743,35 @@ contract IssuingEntity is Modular, MultiSig {
 		uint256 _new
 	)
 		external
-		onlyToken
 		returns (
 			bytes32 _id,
 			uint8 _rating,
 			uint16 _country
 		)
 	{
+		require(tokens[msg.sender].set);
+		require(!tokens[msg.sender].restricted);
 		if (_owner == address(this)) {
 			_id = ownerID;
-			_rating = 0;
-			_country = 0;
 		} else {
-			bool _allowed;
+			require(accounts[idMap[_owner].id].custodian == 0, "dev: custodian");
 			uint8 _key = accounts[idMap[_owner].id].regKey;
-			(
-				_id,
-				_allowed,
-				_rating,
-				_country
-			) = registrars[_key].addr.getInvestor(_owner);
+			(_id, , _rating, _country) = registrars[_key].addr.getInvestor(_owner);
 		}
 		Account storage a = accounts[_id];
-		if (_old == 0) {
-			a.count = a.count.add(1);
-			if (a.count == 1) {
-				_incrementCount(_rating, _country);
-			}
-		} else if (_new == 0) {
-			a.count = a.count.sub(1);
-			if (a.count == 0) {
-				_decrementCount(_rating, _country);
+		if (_id != ownerID) {
+			if (_old == 0) {
+				a.count = a.count.add(1);
+				if (a.count == 1) {
+					_incrementCount(_rating, _country);
+				}
+			} else if (_new == 0) {
+				a.count = a.count.sub(1);
+				if (a.count == 0) {
+					_decrementCount(_rating, _country);
+				}
 			}
 		}
-		/* bytes4 signature for token module tokenTotalSupplyChanged() */
-		_callModules(
-			0xb446f3ca,
-			abi.encode(msg.sender, _id, _rating, _country, _old, _new)
-		);
 		return (_id, _rating, _country);
 	}
 
@@ -848,165 +820,6 @@ contract IssuingEntity is Modular, MultiSig {
 	}
 
 	/**
-		@notice Set document hash
-		@param _documentID Document ID being hashed
-		@param _hash Hash of the document
-		@return bool success
-	 */
-	function setDocumentHash(
-		string _documentID,
-		bytes32 _hash
-	)
-		external
-		returns (bool)
-	{
-		if (!_checkMultiSig()) return false;
-		require(documentHashes[_documentID] == 0);
-		documentHashes[_documentID] = _hash;
-		emit NewDocumentHash(_documentID, _hash);
-		return true;
-	}
-
-	/**
-		@notice Fetch document hash
-		@param _documentID Document ID to fetch
-		@return document hash
-	 */
-	function getDocumentHash(string _documentID) external view returns (bytes32) {
-		return documentHashes[_documentID];
-	}
-
-	/**
-		@notice Attach or remove a KYCRegistrar contract
-		@param _registrar address of registrar
-		@param _allowed registrar permission
-		@return bool success
-	 */
-	function setRegistrar(
-		KYCRegistrar _registrar,
-		bool _allowed
-	)
-		external
-		returns (bool)
-	{
-		if (!_checkMultiSig()) return false;
-		for (uint256 i = 1; i < registrars.length; i++) {
-			if (registrars[i].addr == _registrar) {
-				registrars[i].restricted = !_allowed;
-				emit RegistrarSet(_registrar, _allowed);
-				return true;
-			}
-		}
-		if (_allowed) {
-			registrars.push(RegistrarContract(_registrar, false));
-			emit RegistrarSet(_registrar, _allowed);
-			return true;
-		}
-		revert();		
-	}
-
-	/**
-		@notice Get address of the registrar an investor is associated with
-		@param _id Investor ID
-		@return registrar address
-	 */
-	function getInvestorRegistrar(bytes32 _id) external view returns (address) {
-		return registrars[accounts[_id].regKey].addr;
-	}
-
-	/**
-		@notice Add a custodian
-		@dev
-			Custodians are entities such as broker or exchanges that are approved
-			to hold tokens for 1 or more beneficial owners.
-			https://sft-protocol.readthedocs.io/en/latest/custodian.html
-		@param _custodian address of custodian contract
-		@return bool success
-	 */
-	function addCustodian(address _custodian) external returns (bool) {
-		if (!_checkMultiSig()) return false;
-		bytes32 _id = MiniCustodian(_custodian).ownerID();
-		idMap[_custodian].id = _id;
-		custodians[_id].addr = _custodian;
-		emit CustodianAdded(_custodian);
-		return true;
-	}
-
-	/**
-		@notice Add a new security token contract
-		@param _token Token contract address
-		@return bool success
-	 */
-	function addToken(address _token) external returns (bool) {
-		if (!_checkMultiSig()) return false;
-		SecurityToken token = SecurityToken(_token);
-		require(!tokens[_token].set);
-		require(token.ownerID() == ownerID);
-		require(token.circulatingSupply() == 0);
-		tokens[_token].set = true;
-		emit TokenAdded(_token);
-		return true;
-	}
-
-	/**
-		@notice Set restriction on an investor ID
-		@dev
-			This is used for regular investors or custodians. Restrictions
-			on sub-authorities must be handled with MultiSig functions.
-		@param _id investor ID
-		@param _allowed permission bool
-		@return bool success
-	 */
-	function setInvestorRestriction(
-		bytes32 _id,
-		bool _allowed
-	)
-		external
-		returns (bool)
-	{
-		if (!_checkMultiSig()) return false;
-		accounts[_id].restricted = !_allowed;
-		emit InvestorRestriction(_id, _allowed);
-		return true;
-	}
-
-	/**
-		@notice Set restriction on a token
-		@dev
-			Only the issuer can transfer restricted tokens. Useful in dealing
-			with a security breach or a token migration.
-		@param _token Address of the token
-		@param _allowed permission bool
-		@return bool success
-	 */
-	function setTokenRestriction(
-		address _token,
-		bool _allowed
-	)
-		external
-		returns (bool)
-	{
-		if (!_checkMultiSig()) return false;
-		require(tokens[_token].set);
-		tokens[_token].restricted = !_allowed;
-		emit TokenRestriction(_token, _allowed);
-		return true;
-	}
-
-	/**
-		@notice Set restriction on all tokens for this issuer
-		@dev Only the issuer can transfer restricted tokens.
-		@param _allowed permission bool
-		@return bool success
-	 */
-	function setGlobalRestriction(bool _allowed) external returns (bool) {
-		if (!_checkMultiSig()) return false;
-		locked = !_allowed;
-		emit GlobalRestriction(_allowed);
-		return true;
-	}
-
-	/**
 		@notice Attach a module to IssuingEntity or SecurityToken
 		@dev
 			Modules have a lot of permission and flexibility in what they
@@ -1019,18 +832,16 @@ contract IssuingEntity is Modular, MultiSig {
 	 */
 	function attachModule(
 		address _target,
-		address _module
+		IBaseModule _module
 	)
 		external
 		returns (bool)
 	{
 		if (!_checkMultiSig()) return false;
-		if (_target == address(this)) {
-			_attachModule(_module);
-		} else {
-			require(tokens[_target].set);
-			SecurityToken(_target).attachModule(_module);
-		}
+		address _owner = _module.getOwner();
+		require(tokens[_target].set, "dev: unknown target");
+		require (_owner == _target || _owner == address(this), "dev: wrong owner");
+		require(SecurityToken(_target).attachModule(_module));
 		return true;
 	}
 
@@ -1048,79 +859,10 @@ contract IssuingEntity is Modular, MultiSig {
 		external
 		returns (bool)
 	{
-		if (_module != msg.sender) {
-			if (!_checkMultiSig()) return false;
-		} else {
-			/* msg.sig = 0x3556099d */
-			require(isPermittedModule(msg.sender, msg.sig));
-		}
-		if (_target == address(this)) {
-			_detachModule(_module);
-		} else {
-			require(tokens[_target].set);
-			SecurityToken(_target).detachModule(_module);
-		}
+		if (!_checkMultiSig()) return false;
+		require(tokens[_target].set, "dev: unknown target");
+		require(SecurityToken(_target).detachModule(_module));
 		return true;
-	}
-
-	/**
-		@notice Remove an investor from a custodian's beneficial owners
-		@dev Only callable by a custodian or the issuer
-		@param _custID Custodian ID
-		@param _id investor ID
-		@return bool success
-	 */
-	function releaseOwnership(
-		bytes32 _custID,
-		bytes32 _id
-	)
-		external
-		returns (bool)
-	{
-		/* custodian re-entrancy guard */
-		require (!mutex);
-		if (custodians[_custID].addr != msg.sender) {
-			if (!_checkMultiSig()) return false;
-		}
-		_setBeneficialOwners(_custID, _id, false);
-		return true;
-	}
-
-	/**
-		@notice Add or remove an investor from a custodian's beneficial owners
-		@param _custID Custodian ID
-		@param _id investor ID
-		@param _add is investor a beneficial owner?
-	 */
-	function _setBeneficialOwners(
-		bytes32 _custID,
-		bytes32 _id,
-		bool _add
-	)
-		internal
-	{
-		if (_id == ownerID || custodians[_id].addr != 0) return;
-		Account storage a = accounts[_id];
-		if (a.custodians[_custID] == _add) return;
-		a.custodians[_custID] = _add;
-		emit BeneficialOwnerSet(msg.sender, _id, _add);
-		if (_add) {
-			a.count = a.count.add(1);
-			if (a.count == 1) {
-				_incrementCount(
-					a.rating,
-					registrars[a.regKey].addr.getCountry(_id)
-				);
-			}
-		} else {
-			a.count = a.count.sub(1);
-			if (a.count == 0) {
-				_decrementCount(
-					a.rating,
-					registrars[a.regKey].addr.getCountry(_id)
-				);
-			}
-		}
 	}
 
 }
