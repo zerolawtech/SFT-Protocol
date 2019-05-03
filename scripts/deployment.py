@@ -16,7 +16,7 @@ def main(token_contract=SecurityToken):
     product = itertools.product([1, 2, 3], [1, 2])
     for count, country, rating in [(c, i[0], i[1]) for c, i in enumerate(product, start=1)]:
         kyc.addInvestor(
-            "investor" + str(count),
+            ("investor" + str(count)).encode(),
             country,
             '0x000001',
             rating,
