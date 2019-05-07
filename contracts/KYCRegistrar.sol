@@ -9,7 +9,7 @@ contract KYCRegistrar is KYCBase {
 
 	struct Authority {
 		mapping (bytes32 => address[]) multiSigAuth;
-		uint256[8] countries;
+		uint256[4] countries;
 		uint32 multiSigThreshold;
 		uint32 addressCount;
 		bool restricted;
@@ -139,13 +139,13 @@ contract KYCRegistrar is KYCBase {
 		@param _permitted Boolean to set countries to
 	 */
 	function _setCountries(
-		uint256[8] storage _countries,
+		uint256[4] storage _countries,
 		uint16[] memory _toSet,
 		bool _permitted
 	)
 		internal
 	{
-		uint256[8] memory _bitfield = _countries;
+		uint256[4] memory _bitfield = _countries;
 		for (uint256 i; i < _toSet.length; i++) {
 			uint256 _idx = _toSet[i] / 256;
 			if (_permitted) {
@@ -160,7 +160,7 @@ contract KYCRegistrar is KYCBase {
 				);
 			}
 		}
-		for (i = 0; i < 8; i++) {
+		for (i = 0; i < 4; i++) {
 			if (_bitfield[i] != _countries[i]) {
 				_countries[i] = _bitfield[i];
 			}

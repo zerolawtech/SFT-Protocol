@@ -67,7 +67,7 @@ contract CheckpointModuleBase is STModuleBase {
 		hooks[1] = 0x8b5f1240;
 		hooks[2] = 0x741b5078;
 		
-		return (hooks, permissions, uint256(-1));
+		return (hooks, permissions, ~uint256(0));
 	}
 
 	/**

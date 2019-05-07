@@ -73,7 +73,7 @@ contract VestedOptions is STModuleBase {
 		hooks = new bytes4[](2);
 		hooks[0] = 0xb1a1a455;
 		hooks[1] = 0x741b5078;
-		return (permissions, hooks, uint256(-1));
+		return (permissions, hooks, ~uint256(0));
 	}
 
 	/**
