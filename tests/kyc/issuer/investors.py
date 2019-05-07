@@ -5,7 +5,6 @@ from scripts.deployment import main
 
 
 def setup():
-    config['test']['always_transact'] = False
     global kyc, issuer, owner_id
     issuer = a[0].deploy(IssuingEntity, (a[0],), 1)
     kyc = a[0].deploy(KYCIssuer, issuer)
@@ -66,7 +65,7 @@ def update_investor():
     check.true(kyc.isRegistered("0x1111"))
     check.equal(kyc.getInvestor(a[-3])[1:], (False, 4, 1))
     check.equal(kyc.getExpires("0x1111"), 1234567890)
-    check.equal(kyc.getRegion("0x1111"), 2)
+    check.equal(kyc.getRegion("0x1111"), "0x000002")
 
 
 def update_investor_unknown_id():

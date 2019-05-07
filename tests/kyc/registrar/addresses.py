@@ -5,7 +5,6 @@ from scripts.deployment import main
 
 
 def setup():
-    config['test']['always_transact'] = False
     global kyc, owner_id, auth_id
     kyc = a[0].deploy(KYCRegistrar, [a[0]], 1)
     kyc.addAuthority((a[-1],a[-2]), (1,), 1, {'from': a[0]})

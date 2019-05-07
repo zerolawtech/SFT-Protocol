@@ -2,11 +2,7 @@ from brownie import *
 from scripts.deployment import main
 
 
-zero = "0x0000000000000000000000000000000000000000"
-
-
 def setup():
-    config['test']['always_transact'] = False
     config['test']['default_contract_owner'] = True
     main(NFToken)
     global token, issuer
@@ -22,17 +18,17 @@ def add_tags_via_mint():
     token.mint(a[4], 1000, 0, "0x0123")
     check.equal(
         token.getRange(1),
-        (a[1], 1, 1001, 0, "0x0100", zero)
+        (a[1], 1, 1001, 0, "0x0100", "0x00")
     )
     check.equal(
         token.getRange(1001),
-        (a[2], 1001, 2001, 0, "0x0002", zero)
+        (a[2], 1001, 2001, 0, "0x0002", "0x00")
     )
     check.equal(
         token.getRange(2001),
-        (a[3], 2001, 3001, 0, "0xff33", zero)
+        (a[3], 2001, 3001, 0, "0xff33", "0x00")
     )
     check.equal(
         token.getRange(3001),
-        (a[4], 3001, 4001, 0, "0x0123", zero)
+        (a[4], 3001, 4001, 0, "0x0123", "0x00")
     )

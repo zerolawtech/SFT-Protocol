@@ -5,7 +5,6 @@ from scripts.deployment import main
 
 
 def setup():
-    config['test']['always_transact'] = False
     global kyc, issuer, owner_id
     issuer = a[0].deploy(IssuingEntity, a[0:3], 1)
     kyc = a[0].deploy(KYCIssuer, issuer)

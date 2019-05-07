@@ -2,11 +2,7 @@ from brownie import *
 from scripts.deployment import main
 
 
-zero = "0x0000000000000000000000000000000000000000"
-
-
 def setup():
-    config['test']['always_transact'] = False
     config['test']['default_contract_owner'] = True
     main(NFToken)
     global token, issuer
@@ -22,15 +18,15 @@ def modify_range():
     token.modifyRange(1001, 0, "0x1234")
     check.equal(
         token.getRange(1),
-        (a[1], 1, 1001, 0, "0x0001", zero)
+        (a[1], 1, 1001, 0, "0x0001", "0x00")
     )
     check.equal(
         token.getRange(1001),
-        (a[2], 1001, 2001, 0, "0x1234", zero)
+        (a[2], 1001, 2001, 0, "0x1234", "0x00")
     )
     check.equal(
         token.getRange(2001),
-        (a[3], 2001, 3001, 0, "0x0001", zero)
+        (a[3], 2001, 3001, 0, "0x0001", "0x00")
     )
 
 
@@ -64,23 +60,23 @@ def modify_many():
     token.modifyRanges(1480, 2200, 0, "0x9999")
     check.equal(
         token.getRange(501),
-        (a[1], 500, 700, 0, "0x1234", zero)
+        (a[1], 500, 700, 0, "0x1234", "0x00")
     )
     check.equal(
         token.getRange(701),
-        (a[1], 700, 1001, 0, "0x1111", zero)
+        (a[1], 700, 1001, 0, "0x1111", "0x00")
     )
     check.equal(
         token.getRange(1002),
-        (a[2], 1001, 1480, 0, "0x1111", zero)
+        (a[2], 1001, 1480, 0, "0x1111", "0x00")
     )
     check.equal(
         token.getRange(1481),
-        (a[2], 1480, 2001, 0, "0x9999", zero)
+        (a[2], 1480, 2001, 0, "0x9999", "0x00")
     )
     check.equal(
         token.getRange(2002),
-        (a[3], 2001, 2200, 0, "0x9999", zero)
+        (a[3], 2001, 2200, 0, "0x9999", "0x00")
     )
 
 

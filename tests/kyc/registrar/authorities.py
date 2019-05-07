@@ -5,7 +5,6 @@ from scripts.deployment import main
 
 
 def setup():
-    config['test']['always_transact'] = False
     global kyc, auth_id
     kyc = a[0].deploy(KYCRegistrar, [a[0]], 1)
     kyc.addAuthority((a[-1],a[-2]), [], 1, {'from': a[0]})
@@ -97,7 +96,7 @@ def threshold_too_high():
 
 def country():
     '''set countries'''
-    countries = (10,300,700,1022,1024,1027,1100)
+    countries = (10, 300, 510, 512, 515, 600, 700)
     kyc.setAuthorityCountries(auth_id, countries, True, {'from': a[0]})
     for c in countries:
         _check_country(c)

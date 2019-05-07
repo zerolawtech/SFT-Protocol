@@ -3,7 +3,6 @@ from scripts.deployment import main
 
 
 def setup():
-    config['test']['always_transact'] = False
     config['test']['default_contract_owner'] = True
     main(NFToken)
     global token, issuer
