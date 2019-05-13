@@ -4,7 +4,7 @@ from brownie import *
 from scripts.deployment import main
 
 
-def setup():
+def setup(always_transact=False):
     main(NFToken)
     global token, issuer
     token = NFToken[0]
@@ -73,7 +73,7 @@ def one():
     _totalSupply(6)
 
 
-def split():
+def split(skip="coverage"):
     '''many ranges'''
     token.modifyAuthorizedSupply("1000 gwei", {'from': accounts[0]})
     token.mint(issuer, "100 gwei", 0, "0x00", {'from': accounts[0]})

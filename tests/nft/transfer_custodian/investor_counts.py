@@ -4,7 +4,7 @@ from brownie import *
 from scripts.deployment import main
 
 
-def setup():
+def setup(always_transact=False):
     main(NFToken)
     global token, issuer, cust
     token = NFToken[0]

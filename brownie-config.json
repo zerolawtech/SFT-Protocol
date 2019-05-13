@@ -9,7 +9,7 @@
         "development": {
             "test-rpc": "ganache-cli -a 25 -m wallets --allowUnlimitedContractSize --gasLimit 8000000",
             "host": "http://127.0.0.1:8545",
-            "broadcast_reverting_tx": false
+            "broadcast_reverting_tx": true
         },
         "ropsten": {
             "host": "https://ropsten.infura.io/",
@@ -17,7 +17,7 @@
         }
     },
     "test":{
-        "always_transact": true,
+        "broadcast_reverting_tx": true,
         "gas_limit": 8000000,
         "default_contract_owner": false
     },
