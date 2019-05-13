@@ -9,7 +9,7 @@ def setup():
     global token, issuer, cust
     token = NFToken[0]
     issuer = IssuingEntity[0]
-    cust = OwnedCustodian.deploy(a[0], [a[0]], 1)
+    cust = a[0].deploy(OwnedCustodian, [a[0]], 1)
     issuer.addCustodian(cust, {'from': a[0]})
     token.mint(issuer, 100000, 0, "0x00", {'from': a[0]})
 

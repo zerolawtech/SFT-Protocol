@@ -68,7 +68,7 @@ def setup():
     global issuer, nft, cust, module
     nft = NFToken[0]
     issuer = IssuingEntity[0]
-    cust = OwnedCustodian.deploy(a[0], [a[0]], 1)
+    cust = a[0].deploy(OwnedCustodian, [a[0]], 1)
     issuer.addCustodian(cust, {'from': a[0]})
     nft.mint(a[1], 100, 0, "0x0000", {'from': a[0]}) #    1 - 100
     nft.mint(a[1], 100, 0, "0xaa01", {'from': a[0]}) # 101 - 200
@@ -76,7 +76,7 @@ def setup():
     nft.mint(a[1], 100, 0, "0xff00", {'from': a[0]}) # 301 - 400
     nft.mint(a[1], 100, 0, "0xff01", {'from': a[0]}) # 401 - 500
     nft.mint(a[1], 100, 0, "0xff02", {'from': a[0]}) # 501 - 600
-    module = compile_source(module_source)[0].deploy(a[0], nft)
+    module = compile_source(module_source)[0].deploy(nft, {'from': a[0]})
     issuer.attachModule(nft, module, {'from': a[0]})
 
 

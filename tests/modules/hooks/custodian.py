@@ -48,7 +48,7 @@ def setup():
     global token, issuer, cust
     token = SecurityToken[0]
     issuer = IssuingEntity[0]
-    cust = OwnedCustodian.deploy(a[0], [a[0]], 1)
+    cust = a[0].deploy(OwnedCustodian, [a[0]], 1)
     issuer.addCustodian(cust, {'from': a[0]})
     token.mint(issuer, 100000, {'from': a[0]})
     token.transfer(a[2], 10000, {'from': a[0]})
@@ -83,7 +83,7 @@ def custodian_internalTransfer():
 
 def _hook(fn, args, source, sig):
     args = list(args)+[{'from': a[0]}]
-    module = compile_source(module_source.format(sig, source))[0].deploy(a[0], cust)
+    module = compile_source(module_source.format(sig, source))[0].deploy(cust, {'from': a[0]})
     fn(*args)
     cust.attachModule(module, {'from': a[0]})
     fn(*args)

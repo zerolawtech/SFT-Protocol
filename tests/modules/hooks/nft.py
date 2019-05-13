@@ -48,7 +48,7 @@ def setup():
     global issuer, nft, cust
     nft = NFToken[0]
     issuer = IssuingEntity[0]
-    cust = OwnedCustodian.deploy(a[0], [a[0]], 1)
+    cust = a[0].deploy(OwnedCustodian, [a[0]], 1)
     issuer.addCustodian(cust, {'from': a[0]})
     nft.mint(issuer, 100000, 0, "0x00", {'from': a[0]})
 
@@ -72,7 +72,7 @@ def checkTransferRange():
         uint8[2] _rating,
         uint16[2] _country,
         uint48[2] _range'''
-    module = compile_source(module_source.format("0x2d79c6d7", source))[0].deploy(a[0], nft)
+    module = compile_source(module_source.format("0x2d79c6d7", source))[0].deploy(nft, {'from': a[0]})
     nft.transferRange(a[1], 100, 200, {'from': a[0]})
     issuer.attachModule(nft, module, {'from': a[0]})
     nft.transferRange(a[1], 300, 400, {'from': a[0]})
@@ -124,7 +124,7 @@ def totalSupplyChanged():
 
 def _hook(contract, fn, args, source, sig):
     args = list(args)+[{'from': a[0]}]
-    module = compile_source(module_source.format(sig, source))[0].deploy(a[0], contract)
+    module = compile_source(module_source.format(sig, source))[0].deploy(contract, {'from': a[0]})
     fn(*args)
     issuer.attachModule(contract, module, {'from': a[0]})
     fn(*args)
@@ -134,7 +134,7 @@ def _hook(contract, fn, args, source, sig):
     fn(*args)
 
 def _burn(contract, source, sig):
-    module = compile_source(module_source.format(sig, source))[0].deploy(a[0], contract)
+    module = compile_source(module_source.format(sig, source))[0].deploy(contract, {'from': a[0]})
     nft.burn(100, 200, {'from': a[0]})
     issuer.attachModule(contract, module, {'from': a[0]})
     nft.burn(300, 400, {'from': a[0]})

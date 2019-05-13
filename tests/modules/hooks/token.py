@@ -48,7 +48,7 @@ def setup():
     global token, issuer, cust
     token = SecurityToken[0]
     issuer = IssuingEntity[0]
-    cust = OwnedCustodian.deploy(a[0], [a[0]], 1)
+    cust = a[0].deploy(OwnedCustodian, [a[0]], 1)
     issuer.addCustodian(cust, {'from': a[0]})
     token.mint(issuer, 100000, {'from': a[0]})
 
@@ -108,7 +108,7 @@ def totalSupplyChanged():
 
 def _hook(contract, fn, args, source, sig):
     args = list(args)+[{'from': a[0]}]
-    module = compile_source(module_source.format(sig, source))[0].deploy(a[0], contract)
+    module = compile_source(module_source.format(sig, source))[0].deploy(contract, {'from': a[0]})
     fn(*args)
     issuer.attachModule(contract, module, {'from': a[0]})
     fn(*args)

@@ -9,7 +9,7 @@ def setup():
     global token, issuer, cust
     token = SecurityToken[0]
     issuer = IssuingEntity[0]
-    cust = OwnedCustodian.deploy(a[0], [a[0]], 1)
+    cust = a[0].deploy(OwnedCustodian, [a[0]], 1)
     issuer.addCustodian(cust, {'from': a[0]})
     token.mint(issuer, 100000, {'from': a[0]})
 
@@ -35,7 +35,7 @@ def exceed():
 
 def cust_to_cust():
     '''custodian to custodian'''
-    cust2 = OwnedCustodian.deploy(a[0], [a[0]], 1)
+    cust2 = a[0].deploy(OwnedCustodian, [a[0]], 1)
     issuer.addCustodian(cust2, {'from': a[0]})
     token.transfer(a[2], 10000, {'from': a[0]})
     token.transfer(cust, 5000, {'from': a[2]})

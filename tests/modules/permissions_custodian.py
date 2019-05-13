@@ -41,7 +41,7 @@ def setup():
     token = SecurityToken[0]
     issuer = IssuingEntity[0]
     token.mint(issuer, 100000, {'from': a[0]})
-    cust = OwnedCustodian.deploy(a[0], [a[0]], 1)
+    cust = a[0].deploy(OwnedCustodian, [a[0]], 1)
     issuer.addCustodian(cust, {'from': a[0]})
     token.transfer(a[2], 1000, {'from': a[0]})
     token.transfer(cust, 1000, {'from': a[2]})
@@ -49,7 +49,7 @@ def setup():
 
 def is_permitted():
     '''check permitted'''
-    module = compile_source(module_source.format('0xbb2a8522'))[0].deploy(a[0], cust)
+    module = compile_source(module_source.format('0xbb2a8522'))[0].deploy(cust, {'from': a[0]})
     check.false(cust.isPermittedModule(module, "0xbb2a8522"))
     check.false(cust.isPermittedModule(module, "0xbeabacc8"))
     cust.attachModule(module, {'from': a[0]})
@@ -62,7 +62,7 @@ def is_permitted():
 
 def token_detachModule():
     '''detach module'''
-    module = compile_source(module_source.format('0xbb2a8522'))[0].deploy(a[0], cust)
+    module = compile_source(module_source.format('0xbb2a8522'))[0].deploy(cust, {'from': a[0]})
     check.reverts(
         module.test,
         (cust.detachModule.encode_abi(module), {'from': a[0]})
@@ -99,7 +99,7 @@ def custodian_transferInternal():
 def _check_permission(sig, calldata):
     
     # deploy the module
-    module = compile_source(module_source.format(sig))[0].deploy(a[0], cust)
+    module = compile_source(module_source.format(sig))[0].deploy(cust, {'from': a[0]})
     
     # check that call fails prior to attaching module
     check.reverts(module.test, (calldata, {'from': a[0]}))

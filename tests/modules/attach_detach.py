@@ -35,8 +35,8 @@ def setup():
     token = SecurityToken[0]
     issuer = IssuingEntity[0]
     TestModule = compile_source(module_source)[0]
-    module_token = TestModule.deploy(a[0], token)
-    module_issuer = TestModule.deploy(a[0], issuer)
+    module_token = a[0].deploy(TestModule, token)
+    module_issuer = a[0].deploy(TestModule, issuer)
 
 def attach_token():
     '''attach a token module'''

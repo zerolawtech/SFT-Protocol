@@ -20,7 +20,7 @@ def setup():
     token = SecurityToken[0]
     issuer = IssuingEntity[0]
     TestCustodian = compile_source(source)[0]
-    cust = TestCustodian.deploy(a[0])
+    cust = a[0].deploy(TestCustodian)
 
 
 def add():
@@ -37,7 +37,7 @@ def add_twice():
         (cust, {'from': a[0]}),
         "dev: known address"
     )
-    c = TestCustodian.deploy(a[0])
+    c = a[1].deploy(TestCustodian)
     check.reverts(
         issuer.addCustodian,
         (c, {'from': a[0]}),

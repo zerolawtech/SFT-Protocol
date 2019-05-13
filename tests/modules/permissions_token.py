@@ -41,14 +41,14 @@ def setup():
     token = SecurityToken[0]
     issuer = IssuingEntity[0]
     token.mint(issuer, 100000, {'from': a[0]})
-    nft = NFToken.deploy(a[0], issuer, "NFToken", "TST", 1000000)
+    nft = a[0].deploy(NFToken, issuer, "NFToken", "TST", 1000000)
     issuer.addToken(nft, {'from': a[0]})
     nft.mint(issuer, 100000, 0, "0x00", {'from': a[0]})
 
 
 def is_permitted():
     '''check permitted'''
-    module = compile_source(module_source.format('0xbb2a8522'))[0].deploy(a[0], token)
+    module = compile_source(module_source.format('0xbb2a8522'))[0].deploy(token, {'from': a[0]})
     check.false(token.isPermittedModule(module, "0xbb2a8522"))
     issuer.attachModule(token, module, {'from': a[0]})
     check.true(token.isPermittedModule(module, "0xbb2a8522"))
@@ -58,7 +58,7 @@ def is_permitted():
 
 def token_detachModule():
     '''detach module'''
-    module = compile_source(module_source.format('0xbb2a8522'))[0].deploy(a[0], token)
+    module = compile_source(module_source.format('0xbb2a8522'))[0].deploy(token, {'from': a[0]})
     check.reverts(
         module.test,
         (token.detachModule.encode_abi(module), {'from': a[0]})
@@ -159,7 +159,7 @@ def nft_modifyRanges():
 def _check_permission(contract, sig, calldata):
     
     # deploy the module
-    module = compile_source(module_source.format(sig))[0].deploy(a[0], contract)
+    module = compile_source(module_source.format(sig))[0].deploy(contract, {'from': a[0]})
     
     # check that call fails prior to attaching module
     check.reverts(module.test, (calldata, {'from': a[0]}))
