@@ -11,8 +11,8 @@ contract CheckpointModuleBase is STModuleBase {
 
 	using SafeMath for uint256;
 
-	uint256 time;
 	uint256 totalSupply;
+	uint256 public checkpointTime;
 
 	mapping (address => uint256) balances;
 	mapping (address => bool) zeroBalances;
@@ -25,19 +25,19 @@ contract CheckpointModuleBase is STModuleBase {
 		@notice Base constructor
 		@param _token SecurityToken contract address
 		@param _issuer IssuingEntity contract address
-		@param _time Epoch time of balance checkpoint
+		@param _checkpointTime Epoch time of balance checkpoint
 	 */
 	constructor(
 		address _token,
 		address _issuer,
-		uint256 _time
+		uint256 _checkpointTime
 	)
 		STModuleBase(_token, _issuer)
 		public
 	{
-		require (_time >= now);
+		require (_checkpointTime >= now);
 		totalSupply = token.totalSupply();
-		time = _time;
+		checkpointTime = _checkpointTime;
 	}
 
 	/**
@@ -188,8 +188,8 @@ contract CheckpointModuleBase is STModuleBase {
 		external
 		returns (bool)
 	{
-		_onlyOwner();
-		if (now < time) return true;
+		require(msg.sender == address(token));
+		if (now < checkpointTime) return true;
 		if (_rating[0] == 0 && _id[0] != ownerID) {
 			_custodianSent(_addr[1], _addr[0], _value);
 		} else if (!_isBalanceSet(_addr[0])) {
@@ -221,7 +221,8 @@ contract CheckpointModuleBase is STModuleBase {
 		external
 		returns (bool)
 	{
-		if (now >= time) {
+		require(msg.sender == address(token));
+		if (now >= checkpointTime) {
 			_custodianSent(_addr[0], _cust, _value);
 			_custodianReceived(_addr[1], _cust, _value);
 		}
@@ -246,8 +247,8 @@ contract CheckpointModuleBase is STModuleBase {
 		external
 		returns (bool)
 	{
-		_onlyOwner();
-		if (now < time) {
+		require(msg.sender == address(token));
+		if (now < checkpointTime) {
 			totalSupply = totalSupply.add(_new).sub(_old);
 			return true;
 		}

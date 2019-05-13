@@ -569,6 +569,7 @@ contract IssuingEntity is MultiSig {
 		uint32 _tokenCount
 	)
 		internal
+		view
 	{	
 		require(tokens[msg.sender].set);
 		/* If issuer is not the authority, check the sender is not restricted */
@@ -760,6 +761,7 @@ contract IssuingEntity is MultiSig {
 		}
 		Account storage a = accounts[_id];
 		if (_id != ownerID) {
+			_setRating(_id, _rating, _country);
 			if (_old == 0) {
 				a.count = a.count.add(1);
 				if (a.count == 1) {

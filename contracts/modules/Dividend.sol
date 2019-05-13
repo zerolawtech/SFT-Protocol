@@ -31,14 +31,14 @@ contract DividendModule is CheckpointModuleBase {
 		@notice Base constructor
 		@param _token SecurityToken contract address
 		@param _issuer IssuingEntity contract address
-		@param _time Epoch time of balance checkpoint
+		@param _checkpointTime Epoch time of balance checkpoint
 	 */
 	constructor(
 		address _token,
 		address _issuer,
-		uint256 _time
+		uint256 _checkpointTime
 	)
-		CheckpointModuleBase(_token, _issuer, _time)
+		CheckpointModuleBase(_token, _issuer, _checkpointTime)
 		public
 	{
 		return;
@@ -53,6 +53,7 @@ contract DividendModule is CheckpointModuleBase {
 	 */
 	function issueDividend(uint256 _claimPeriod) external payable returns (bool) {
 		require (claimExpiration == 0);
+		require (now > checkpointTime);
 		if (!_onlyAuthority()) return false;
 		require (address(this).balance > 0);
 		claimExpiration = now.add(_claimPeriod);
