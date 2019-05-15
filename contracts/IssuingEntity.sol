@@ -96,6 +96,15 @@ contract IssuingEntity is MultiSig {
 	}
 
 	/**
+		@notice Check if a token is associated to this contract and unrestricted
+		@param _token address to check
+		@return boolean
+	 */
+	function isActiveToken(address _token) external view returns (bool) {
+		return tokens[_token].set && !tokens[_token].restricted;
+	}
+
+	/**
 		@notice External view to fetch an investor ID from an address
 		@param _addr address to check
 		@return bytes32 investor ID

@@ -167,6 +167,20 @@ Transfer restrictions can be applied at varying levels.
         IssuingEntity.setGlobalRestriction confirmed - block: 14   gas used: 53384 (0.67%)
         <Transaction object '0xc03ac4c6d36e971f980297e365f30752ac5097e391213c59fd52544829a87479'>
 
+Getters
+-------
+
+.. method:: IssuingEntity.isActiveToken(address _token)
+
+    Returns a boolean indicating if the given address is a token contract that is associated with the ``IssuingEntity`` not currently restricted.
+
+    .. code-block:: python
+
+        >>> issuer.isActiveToken(SecurityToken[0])
+        True
+        >>> issuer.isActiveToken(accounts[2])
+        False
+
 Investors
 =========
 
