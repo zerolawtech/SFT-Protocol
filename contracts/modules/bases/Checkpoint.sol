@@ -28,7 +28,7 @@ contract CheckpointModuleBase is STModuleBase {
 		@param _checkpointTime Epoch time of balance checkpoint
 	 */
 	constructor(
-		address _token,
+		SecurityToken _token,
 		address _issuer,
 		uint256 _checkpointTime
 	)
@@ -67,7 +67,7 @@ contract CheckpointModuleBase is STModuleBase {
 		hooks[1] = 0x8b5f1240;
 		hooks[2] = 0x741b5078;
 		
-		return (hooks, permissions, ~uint256(0));
+		return (permissions, hooks, ~uint256(0));
 	}
 
 	/**

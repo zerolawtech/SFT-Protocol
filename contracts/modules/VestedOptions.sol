@@ -87,7 +87,7 @@ contract VestedOptions is STModuleBase {
 		@param _receiver address to send ETH to when options are exercised
 	 */
 	constructor(
-		address _token,
+		SecurityToken _token,
 		address _issuer,
 		uint256 _ethPeg,
 		uint32 _expiry,
