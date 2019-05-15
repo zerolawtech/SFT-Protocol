@@ -1,7 +1,9 @@
 pragma solidity >=0.4.24 <0.5.0;
 
-import "../../SecurityToken.sol";
+
 import "../../bases/MultiSig.sol";
+import "../../IssuingEntity.sol";
+import "../../SecurityToken.sol";
 
 /**
 	@title ModuleBase Abstract Base Contract
@@ -10,6 +12,7 @@ import "../../bases/MultiSig.sol";
 contract ModuleBaseABC {
 	function getPermissions() external pure returns (bytes4[], bytes4[], uint256);
 }
+
 
 /**
 	@title Module Base Contract
@@ -26,7 +29,7 @@ contract ModuleBase is ModuleBaseABC {
 	 */
 	constructor(address _owner) public {
 		owner = _owner;
-		ownerID = MultiSig(owner).ownerID();
+		ownerID = MultiSig(_owner).ownerID();
 	}
 
 	/** @dev Check that call originates from approved authority, allows multisig */
@@ -48,9 +51,10 @@ contract ModuleBase is ModuleBaseABC {
 
 }
 
+
 /**
 	@title Token Module Base Contract
-	@dev Inherited contract for all SecurityToken or NFToken modules
+	@dev Inherited contract for SecurityToken or NFToken modules
  */
 contract STModuleBase is ModuleBase {
 
@@ -62,14 +66,20 @@ contract STModuleBase is ModuleBase {
 		@param _token SecurityToken contract address
 		@param _issuer IssuingEntity contract address
 	 */
-	constructor(address _token, address _issuer) public ModuleBase(_issuer) {
-		token = SecurityToken(_token);
+	constructor(
+		SecurityToken _token,
+		address _issuer
+	)
+		public
+		ModuleBase(_issuer)
+	{
+		token = _token;
 		issuer = IssuingEntity(_issuer);
 	}
 
-	/** @dev Check that call originates from issuer or token contract */
-	function _onlyOwner() internal view {
-		require(msg.sender == address(token) || msg.sender == address(owner));
+	/** @dev Check that call originates from parent token contract */
+	function _onlyToken() internal view {
+		require(msg.sender == address(token));
 	}
 
 	/**
@@ -78,6 +88,30 @@ contract STModuleBase is ModuleBase {
 	*/
 	function getOwner() public view returns (address) {
 		return address(token);
+	}
+
+}
+
+
+contract IssuerModuleBase is ModuleBase {
+
+	IssuingEntity public issuer;
+	mapping (address => bool) parents;
+
+	/**
+		@notice Base constructor
+		@param _issuer IssuingEntity contract address
+	 */
+	constructor(address _issuer) public ModuleBase(_issuer) {
+		issuer = IssuingEntity(_issuer);
+	}
+
+	/** @dev Check that call originates from token contract */
+	function _onlyToken() internal {
+		if (!parents[msg.sender]) {
+			parents[msg.sender] = issuer.isActiveToken(msg.sender);
+		}
+		require (parents[msg.sender]);
 	}
 
 }
