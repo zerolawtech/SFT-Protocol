@@ -4,6 +4,7 @@ import "./open-zeppelin/SafeMath.sol";
 import "./KYCRegistrar.sol";
 import "./SecurityToken.sol";
 import "./interfaces/IBaseCustodian.sol";
+import "./interfaces/IGovernance.sol";
 import "./bases/MultiSig.sol";
 
 /** @title Issuing Entity */
@@ -43,6 +44,7 @@ contract IssuingEntity is MultiSig {
 		bool restricted;
 	}
 
+	IGovernance public governance;
 	bool locked;
 	RegistrarContract[] registrars;
 	uint32[8] counts;
@@ -60,6 +62,7 @@ contract IssuingEntity is MultiSig {
 	);
 	event InvestorLimitsSet(uint32[8] limits);
 	event NewDocumentHash(string indexed document, bytes32 documentHash);
+	event GovernanceSet(address indexed governance);
 	event RegistrarSet(address indexed registrar, bool permitted);
 	event CustodianAdded(address indexed custodian);
 	event TokenAdded(address indexed token);
@@ -192,15 +195,19 @@ contract IssuingEntity is MultiSig {
 
 	/**
 		@notice Add a new security token contract
+		@dev Requires permission from governance module
 		@param _token Token contract address
 		@return bool success
 	 */
 	function addToken(address _token) external returns (bool) {
 		if (!_checkMultiSig()) return false;
 		SecurityToken token = SecurityToken(_token);
-		require(!tokens[_token].set);
-		require(token.ownerID() == ownerID);
+		require(!tokens[_token].set, "dev: already set");
+		require(token.ownerID() == ownerID, "dev: wrong owner");
 		require(token.circulatingSupply() == 0);
+		if (address(governance) != 0x00) {
+			require(governance.addToken(_token), "Action has not been approved");
+		}
 		tokens[_token].set = true;
 		emit TokenAdded(_token);
 		return true;
@@ -248,6 +255,22 @@ contract IssuingEntity is MultiSig {
 		accounts[_id].custodian = _custodian;
 		accounts[_id].set = true;
 		emit CustodianAdded(_custodian);
+		return true;
+	}
+
+	/**
+		@notice Set the governance module
+		@dev Setting the address to 0x00 is equivalent to disabling it
+		@param _governance Governance module address
+		@return bool success
+	 */
+	function setGovernance(IGovernance _governance) external returns (bool) {
+		if (!_checkMultiSig()) return false;
+		if (address(_governance) != 0x00) {
+			require (_governance.issuer() == address(this), "dev: wrong issuer");
+		}
+		governance = _governance;
+		emit GovernanceSet(_governance);
 		return true;
 	}
 
@@ -828,6 +851,24 @@ contract IssuingEntity is MultiSig {
 		counts[_r] = counts[_r].sub(1);
 		countries[_c].counts[0] = countries[_c].counts[0].sub(1);
 		countries[_c].counts[_r] = countries[_c].counts[_r].sub(1);
+	}
+
+	/**
+		@notice Modify authorized supply
+		@dev Called by a token, requires permission from governance module
+		@param _value New authorized supply value
+		@return bool
+	 */
+	function modifyAuthorizedSupply(uint256 _value) external returns (bool) {
+		require(tokens[msg.sender].set);
+		require(!tokens[msg.sender].restricted);
+		if (address(governance) != 0x00) {
+			require(
+				governance.modifyAuthorizedSupply(msg.sender, _value),
+				"Action has not been approved"
+			);
+		}
+		return true;
 	}
 
 	/**

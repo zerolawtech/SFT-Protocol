@@ -103,23 +103,6 @@ contract ISTModule is IBaseModule {
 		external
 		returns (bool);
 
-
-	/**
-		@notice Modify authorized supply
-		@dev
-			Called before modifying the authorized supply of a token
-			Hook signature: 0xa5f502c1
-		@param _oldSupply Current authorized supply
-		@param _newSupply New authorized suppply
-		@return bool success
-	 */
-	function modifyAuthorizedSupply(
-		uint256 _oldSupply,
-		uint256 _newSupply
-	)
-		external
-		returns (bool);
-
 	/**
 		@notice Total supply changed
 		@dev
