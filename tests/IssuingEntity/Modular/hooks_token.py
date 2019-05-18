@@ -87,13 +87,6 @@ def transferTokensCustodian():
     _hook(token, cust.transferInternal, (token, a[2], a[3], 100), source, "0x8b5f1240")
 
 
-def modifyAuthorizedSupply():
-    source = '''modifyAuthorizedSupply(
-        uint256 _oldSupply,
-        uint256 _newSupply'''
-    _hook(token, token.modifyAuthorizedSupply, (100000000,), source, "0xa5f502c1")
-
-
 def totalSupplyChanged():
     source = '''totalSupplyChanged(
         address _addr,

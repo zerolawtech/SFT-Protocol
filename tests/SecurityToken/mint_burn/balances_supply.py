@@ -71,18 +71,3 @@ def burn_from_investors():
     check.equal(token.totalSupply(), 0)
     check.equal(token.balanceOf(a[1]), 0)
     check.equal(token.balanceOf(a[2]), 0)
-
-def authorized_supply():
-    '''modify authorized supply'''
-    token.modifyAuthorizedSupply(10000, {'from': a[0]})
-    check.equal(token.authorizedSupply(), 10000)
-    check.equal(token.totalSupply(), 0)
-    token.modifyAuthorizedSupply(0, {'from': a[0]})
-    check.equal(token.authorizedSupply(), 0)
-    check.equal(token.totalSupply(), 0)
-    token.modifyAuthorizedSupply(1234567, {'from': a[0]})
-    check.equal(token.authorizedSupply(), 1234567)
-    check.equal(token.totalSupply(), 0)
-    token.modifyAuthorizedSupply(2400000000, {'from': a[0]})
-    check.equal(token.authorizedSupply(), 2400000000)
-    check.equal(token.totalSupply(), 0)
