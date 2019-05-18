@@ -13,8 +13,8 @@ There are two broad categories of custodians:
 
 It may be useful to view source code for the following contracts while reading this section:
 
-* `OwnedCustodian.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/custodians/OwnedCustodian.sol>`__: Standard owned custodian contract with ``Multisig`` and ``Modular`` functionality.
-* `IMiniCustodian.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/interfaces/IMiniCustodian.sol>`__: The minimum contract interface required for a custodian to interact with an ``IssuingEntity`` contract.
+* `OwnedCustodian.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/custodians/OwnedCustodian.sol>`__: Standard owned custodian contract with ``Multisig`` and ``Modular`` functionality.
+* `IBaseCustodian.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/interfaces/IBaseCustodian.sol>`__: The minimum contract interface required for a custodian to interact with an ``IssuingEntity`` contract.
 
 .. warning:: An issuer should not approve a Custodian if the contract source code cannot be verified, or it is using a non-standard implementation that has not undergone a thorough audit. The SFT protocol includes a standard owned Custodian contract that allows for customization through modules.
 

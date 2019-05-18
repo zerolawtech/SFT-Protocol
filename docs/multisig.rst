@@ -9,7 +9,7 @@ MultiSig Implementation
 ``KYCRegistrar`` contracts use a slightly modified implementation. See the :ref:`kyc-registrar` documentation for more information.
 
 It may be useful to also view the
-`MultiSig.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/bases/MultiSig.sol>`__ source code
+`MultiSig.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/bases/MultiSig.sol>`__ source code
 while reading this document.
 
 .. note::

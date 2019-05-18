@@ -33,7 +33,7 @@ Country Codes
 
 Based on the `ISO-3166-1 numeric <https://en.wikipedia.org/wiki/ISO_3166-1_numeric>`__ standard. Country codes are stored as a uint16 and follow the standard exactly.
 
-A CSV of country and region codes is available `here <https://github.com/SFT-Protocol/security-token/tree/master/docs/country-and-region-codes.csv>`__.
+A CSV of country and region codes is available `here <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/docs/country-and-region-codes.csv>`__.
 
 Region Codes
 ------------
@@ -55,4 +55,4 @@ A quick example to generate region codes using python:
 * Original code: ``US-AL``
 * Resulting bytes3: ``0x414c00``
 
-A CSV of country and region codes is available `here <https://github.com/SFT-Protocol/security-token/tree/master/docs/country-and-region-codes.csv>`__.
+A CSV of country and region codes is available `here <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/docs/country-and-region-codes.csv>`__.

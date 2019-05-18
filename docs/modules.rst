@@ -15,9 +15,9 @@ In short: hooks involve calls from a parent contract into a module, permissions 
 
 It may be useful to view source code for the following contracts while reading this document:
 
-* `Modular.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/bases/Modular.sol>`__: Inherited by modular contracts. Provides functionality around attaching, detaching, and calling modules.
-* `Module.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/modules/bases/Module.sol>`__: Inherited by modules. Provide required functionality for modules to be able to attach or detach.
-* `IModules.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/interfaces/IModules.sol>`__: Interfaces outlining standard module functionality. Includes inputs for all possible hook methods.
+* `Modular.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/bases/Modular.sol>`__: Inherited by modular contracts. Provides functionality around attaching, detaching, and calling modules.
+* `Module.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/modules/bases/Module.sol>`__: Inherited by modules. Provide required functionality for modules to be able to attach or detach.
+* `IModules.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/interfaces/IModules.sol>`__: Interfaces outlining standard module functionality. Includes inputs for all possible hook methods.
 
 .. note:: In order to minimize gas costs, modules should be attached only when their functionality is required and detached as soon as they are no longer needed.
 
@@ -154,8 +154,6 @@ SecurityToken
 
     Modifies the authorized supply.
 
-    Calling this method will also call any hooked in ``STModule.modifyAuthorizedSupply`` methods.
-
 .. method:: SecurityToken.mint(address _owner, uint256 _value)
 
     * Permission signature: ``0x40c10f19``
@@ -194,8 +192,6 @@ NFToken
     * Permission signature: ``0xc39f42ed``
 
     Modifies the authorized supply.
-
-    Calling this method will also call any hooked in ``NFTModule.modifyAuthorizedSupply`` methods.
 
 .. method:: NFToken.mint(address _owner, uint48 _value, uint32 _time, bytes2 _tag)
 
@@ -332,7 +328,7 @@ Hookable Module Methods
 
 The following methods may be included in modules and given as hook points via ``getPermissions``.
 
-Inputs and outputs of all hook points are also defined in `IModules.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/interfaces/IModules.sol>`__. This can be a useful starting point when writing your own modules.
+Inputs and outputs of all hook points are also defined in `IModules.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/interfaces/IModules.sol>`__. This can be a useful starting point when writing your own modules.
 
 SecurityToken
 *************
@@ -373,15 +369,6 @@ SecurityToken
     * ``_rating``: Sender and receiver investor ratings.
     * ``_country``: Sender and receiver country codes.
     * ``_value``: Amount that was transferred.
-
-.. method:: STModule.modifyAuthorizedSupply(uint256 _oldSupply, uint256 _newSupply)
-
-    * Hook signature: ``0xa5f502c1``
-
-    Called before changing the authorized supply of a token.
-
-    * ``_oldSupply``: Current authorized supply
-    * ``_newSupply``: New authorized supply
 
 .. method:: STModule.totalSupplyChanged(address _addr, bytes32 _id, uint8 _rating, uint16 _country, uint256 _old, uint256 _new)
 

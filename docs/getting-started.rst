@@ -16,7 +16,7 @@ To setup a simple test environment using the brownie console:
     Brownie environment is ready.
     >>> run('deployment')
 
-This runs the ``main`` function in `scripts/deployment.py <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/scripts/deployment.py>`__ which:
+This runs the ``main`` function in `scripts/deployment.py <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/scripts/deployment.py>`__ which:
 
 * Deploys ``KYCRegistrar`` from ``accounts[0]``
 * Deploys ``IssuingEntity`` from ``accounts[0]``
@@ -47,8 +47,8 @@ KYC Registrar
 
 There are two types of investor registry contracts:
 
-* `KYCRegistrar.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/KYCRegistrar.sol>`__ can be maintained by one or more authorities and used as a shared whitelist by many issuers
-* `KYCIssuer.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/KYCIssuer.sol>`__ is a more bare-bones registry, unique to a single issuer
+* `KYCRegistrar.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/KYCRegistrar.sol>`__ can be maintained by one or more authorities and used as a shared whitelist by many issuers
+* `KYCIssuer.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/KYCIssuer.sol>`__ is a more bare-bones registry, unique to a single issuer
 
 Owner addresses are able to add investors to the registrar whitelist using ``KYCRegistrar.addInvestor``.
 
@@ -75,7 +75,7 @@ Issuing Tokens
 
 Issuing tokens and being able to transfer them requires the following steps:
 
-**1.** Deploy `IssuingEntity.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/IssuingEntity.sol>`__.
+**1.** Deploy `IssuingEntity.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/IssuingEntity.sol>`__.
 
     .. code-block:: python
 
@@ -96,7 +96,7 @@ Issuing tokens and being able to transfer them requires the following steps:
         IssuingEntity.setRegistrar confirmed - block: 3   gas used: 61246 (0.77%)
         <Transaction object '0x606326c8b2b8f1541c333ef5a5cd44592efb50530c6326e260e728095b3ec2bd'>
 
-**3.** Deploy `SecurityToken.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/SecurityToken.sol>`__. Enter the address of the issuer contract from step one in the constructor. The authorized supply is set at deployment, the initial total supply will be zero.
+**3.** Deploy `SecurityToken.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/SecurityToken.sol>`__. Enter the address of the issuer contract from step one in the constructor. The authorized supply is set at deployment, the initial total supply will be zero.
 
     .. code-block:: python
 
@@ -147,7 +147,7 @@ See the :ref:`issuing-entity` and :ref:`security-token` pages for detailed expla
 Transferring Tokens
 ===================
 
-`SecurityToken.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/SecurityToken.sol>`__ is based on the `ERC20 Token Standard <https://theethereum.wiki/w/index.php/ERC20_Token_Standard>`__. Token transfers may be performed in the same ways as any token using this standard. However, in order to send or receive tokens you must:
+`SecurityToken.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/SecurityToken.sol>`__ is based on the `ERC20 Token Standard <https://theethereum.wiki/w/index.php/ERC20_Token_Standard>`__. Token transfers may be performed in the same ways as any token using this standard. However, in order to send or receive tokens you must:
 
 * Be approved in one of the KYC registries associated to the token issuer
 * Meet the approved country and rating requirements as set by the issuer
@@ -174,7 +174,7 @@ See the :ref:`security-token` page for a detailed explanation of how to use this
 Custodians
 ==========
 
-There are many types of custodians possible. Included in the core SFT contracts is `OwnedCustodian.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/custodians/OwnedCustodian.sol>`__, which is a basic implementation with a real-world owner.
+There are many types of custodians possible. Included in the core SFT contracts is `OwnedCustodian.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/custodians/OwnedCustodian.sol>`__, which is a basic implementation with a real-world owner.
 
 Once a custodian contract is deployed you must attach it to an IssuingEntity with ``IssuingEntity.addCustodian``.
 

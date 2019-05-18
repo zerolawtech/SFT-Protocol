@@ -9,7 +9,7 @@ OwnedCustodian
 
 Owned Custodian contracts include the standard SFT protocol :ref:`multisig` and :ref:`modules` functionality. See the respective documents for detailed information on these components.
 
-It may be useful to view the `OwnedCustodian.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/custodians/OwnedCustodian.sol>`__ source code for the following contracts while reading this document.
+It may be useful to view the `OwnedCustodian.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/custodians/OwnedCustodian.sol>`__ source code for the following contracts while reading this document.
 
 Deployment
 ==========

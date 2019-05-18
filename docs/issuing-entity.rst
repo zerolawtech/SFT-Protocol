@@ -10,7 +10,7 @@ Each issuer contract includes standard SFT protocol multis-gi functionality. See
 
 This documentation only explains contract methods that are meant to be accessed directly. External methods that will revert unless called through another contract, such as a token or module, are not included.
 
-It may be useful to also view the `IsssuingEntity.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/IssuingEntity.sol>`__ source code while reading this document.
+It may be useful to also view the `IsssuingEntity.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/IssuingEntity.sol>`__ source code while reading this document.
 
 Deployment
 ==========
@@ -47,23 +47,26 @@ The following public variables cannot be changed after contract deployment.
         >>> issuer.ownerID()
         0xce1e12589ad8fb3eed11af5b9ef8788c25b574d4073d23c871e003021400c429
 
-Tokens, Registrars and Custodians
-=================================
+Tokens, Registrars, Custodians, Governance
+==========================================
 
 The ``IssuingEntity`` contract is a center point through which other contracts are linked. Each contract must be associated to it before it will function properly.
 
 * :ref:`security-token` contracts must be associated before tokens can be transferred, so that the issuer contract can accurately track investor counts.
 * :ref:`kyc` contracts must be associated to provide KYC data on investors before they can receive or send tokens.
 * :ref:`custodian` contracts must be approved in order to send or receive tokens from investors.
+* A :ref:`governance` contract may optionally be associated. Once attached, it requires the issuer to receive on-chain approval before creating or minting additional tokens.
 
 Associating Contracts
 ---------------------
 
 .. method:: IssuingEntity.addToken(address _token)
 
-    Associates a :ref:`security-token` contract with the issuer contract.
+    Associates a new :ref:`security-token` contract with the issuer contract.
 
     Once added, the token can be restricted with ``IssuingEntity.setTokenRestriction``.
+
+    If a :ref:`governance` module has been set, it must provide approval whenever this method is called.
 
     Emits the ``TokenAdded`` event.
 
@@ -110,6 +113,20 @@ Associating Contracts
         Transaction sent: 0xbae451ce98691dc37dad6a67d8daf410a3eeebf34b59ab60eaeef7c3f3a2654c
         IssuingEntity.addCustodian confirmed - block: 25   gas used: 78510 (0.98%)
         <Transaction object '0xbae451ce98691dc37dad6a67d8daf410a3eeebf34b59ab60eaeef7c3f3a2654c'>
+
+.. method:: IssuingEntity.setGovernance(address _governance)
+
+    Sets the active :ref:`Governance` contract.
+
+    Setting the address to ``0x00`` disables governance functionality.
+
+    .. code-block:: python
+
+        >>> issuer.setGovernance(GovernanceMinimal[0])
+
+        Transaction sent: 0x8e93cd6b85d1e993755e9fe31eb14ce600706eaf98d606156447d8e431db5db9
+        IssuingEntity.addCustodian confirmed - block: 26   gas used: 63182 (0.98%)
+        <Transaction object '0x8e93cd6b85d1e993755e9fe31eb14ce600706eaf98d606156447d8e431db5db9'>
 
 Setting Restrictions
 --------------------
@@ -180,6 +197,15 @@ Getters
         True
         >>> issuer.isActiveToken(accounts[2])
         False
+
+.. method:: IssuingEntity.governance()
+
+    Returns the address of the associated ``Governance`` contract. If none is set, returns ``0x00``.
+
+    .. code-block:: python
+
+        >>> issuer.governance()
+        "0x14b0Ed2a7C4cC60DD8F676AE44D0831d3c9b2a9E"
 
 Investors
 =========

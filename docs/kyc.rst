@@ -6,10 +6,10 @@ KYC
 
 KYC registry contracts are whitelists that hold information on the identity, region, and rating of investors. Depending on the use case there are two implementations:
 
-* `KYCIssuer.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/KYCIssuer.sol>`__ is a streamlined whitelist contract designed for use with a single ``IssuingEntity``.
-* `KYCRegistrar.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/KYCRegistrar.sol>`__ is a more robust implementation. It is maintainable by one or more entities across many jurisdictions, and designed to supply KYC data to many ``IssuingEntity`` contracts.
+* `KYCIssuer.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/KYCIssuer.sol>`__ is a streamlined whitelist contract designed for use with a single ``IssuingEntity``.
+* `KYCRegistrar.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/KYCRegistrar.sol>`__ is a more robust implementation. It is maintainable by one or more entities across many jurisdictions, and designed to supply KYC data to many ``IssuingEntity`` contracts.
 
-Both contracts are derived from a common base `KYC.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/bases/KYC.sol>`__ that defines standard getter functions and events.
+Both contracts are derived from a common base `KYC.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/bases/KYC.sol>`__ that defines standard getter functions and events.
 
 Contract authorities associate addresses to ID hashes that denote the identity of the investor who controls the address. More than one address may be associated to the same hash. Anyone can call ``KYCBase.getID`` to see which hash is associated to an address, and then using this ID call functions to query information about the investor's region and accreditation rating.
 

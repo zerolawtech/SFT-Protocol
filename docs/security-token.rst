@@ -11,8 +11,8 @@ Token contracts include :ref:`multisig` and :ref:`modules` via the associated :r
 
 It may be useful to view source code for the following contracts while reading this document:
 
-* `SecurityToken.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/SecurityToken.sol>`__: the deployed contract, with functionality specific to ``SecurityToken``.
-* `Token.sol <https://github.com/HyperLink-Technology/SFT-Protocol/tree/master/contracts/bases/Token.sol>`__: the base contract that both ``SecurityToken`` and ``NFToken`` inherit functionality from.
+* `SecurityToken.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/SecurityToken.sol>`__: the deployed contract, with functionality specific to ``SecurityToken``.
+* `Token.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/bases/Token.sol>`__: the base contract that both ``SecurityToken`` and ``NFToken`` inherit functionality from.
 
 Deployment
 ==========
@@ -97,7 +97,7 @@ Authorized Supply
 
 Along with the ERC20 standard ``totalSupply``, token contracts include an ``authorizedSupply`` that represents the maximum allowable total supply. The issuer may mint new tokens using ``SecurityToken.mint`` until the total supply is equal to the authorized supply. The initial authorized supply is set during deployment and may be increased later using ``TokenBase.modifyAuthorizedSupply``.
 
-A governance module can be deployed to dictate when the issuer is allowed to modify the authorized supply.
+A :ref:`governance` module can be deployed to dictate when the issuer is allowed to modify the authorized supply.
 
 .. method:: TokenBase.modifyAuthorizedSupply(uint256 _value)
 
@@ -105,7 +105,7 @@ A governance module can be deployed to dictate when the issuer is allowed to mod
 
     This method is callable directly by the issuer, implementing multi-sig via ``MultiSig.checkMultiSigExternal``. It may also be called by a permitted module.
 
-    Modules can hook into this method via ``STModule.modifyAuthorizedSupply``. The modules are called before the authorized supply is changed.
+    If a :ref:`governance` module has been set on the associated ``IssuingEntity``, it must provide approval whenever this method is called.
 
     Emits the ``AuthorizedSupplyChanged`` event.
 
