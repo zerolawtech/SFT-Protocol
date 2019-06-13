@@ -1,5 +1,5 @@
 {
-    "network_defaults":{
+    "network_defaults": {
         "name": "development",
         "persist": false,
         "gas_limit": 8000000,
@@ -16,19 +16,20 @@
             "persist": true
         }
     },
-    "test":{
+    "test": {
         "broadcast_reverting_tx": true,
         "gas_limit": 8000000,
         "default_contract_owner": false
     },
-    "solc":{
+    "solc": {
         "optimize": true,
         "runs": 200,
-        "version": "0.4.25"
+        "version": "0.4.25",
+        "minify_source": false
     },
     "logging": {
         "test": {
-            "tx": [0,2],
+            "tx": [0, 2],
             "exc": [1, 2]
 
         },
@@ -45,7 +46,7 @@
             "exc": [1, 2]
         }
     },
-    "colors":{
+    "colors": {
         "key": "",
         "value": "bright blue",
         "callable": "bright cyan",
