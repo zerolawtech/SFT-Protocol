@@ -18,7 +18,7 @@ contract KYCRegistrar is KYCBase {
 	mapping (bytes32 => Authority) authorityData;
 
 	event NewAuthority(bytes32 indexed id);
-	event AuthorityRestriction(bytes32 indexed id, bool permitted);
+	event AuthorityRestriction(bytes32 indexed id, bool restricted);
 	event MultiSigCall(
 		bytes32 indexed id,
 		bytes4 indexed callSignature,
@@ -57,13 +57,13 @@ contract KYCRegistrar is KYCBase {
 	function _checkMultiSig(bool _onlyOwner) internal returns (bool) {
 		bytes32 _id = idMap[msg.sender].id;
 		if (_onlyOwner) {
-			require(_id == ownerID, "dev: only owner");
-			require(!idMap[msg.sender].restricted, "dev: restricted owner");
+			require(_id == ownerID); // dev: only owner
+			require(!idMap[msg.sender].restricted); // dev: restricted owner
 		}
 		Authority storage a = authorityData[_id];
 		bytes32 _callHash = keccak256(msg.data);
 		for (uint256 i; i < a.multiSigAuth[_callHash].length; i++) {
-			require(a.multiSigAuth[_callHash][i] != msg.sender, "dev: repeat caller");
+			require(a.multiSigAuth[_callHash][i] != msg.sender); // dev: repeat caller
 		}
 		if (a.multiSigAuth[_callHash].length + 1 >= a.multiSigThreshold) {
 			delete a.multiSigAuth[_callHash];
@@ -88,16 +88,13 @@ contract KYCRegistrar is KYCBase {
 	 */
 	function _authorityCheck(uint16 _country) internal view {
 		bytes32 _id = idMap[msg.sender].id;
-		require(_country != 0, "dev: country 0");
+		require(_country != 0); // dev: country 0
 		Authority storage a = authorityData[_id];
-		require(!a.restricted, "dev: restricted ID");
-		require(!idMap[msg.sender].restricted, "dev: restricted address");
+		require(!a.restricted); // dev: restricted ID
+		require(!idMap[msg.sender].restricted); // dev: restricted address
 		if (_id == ownerID) return;
 		uint256 _idx = _country / 256;
-		require(
-			a.countries[_idx] >> (_country - _idx * 256) & uint256(1) == 1,
-			"dev: country"
-		);
+		require(a.countries[_idx] >> (_country - _idx * 256) & uint256(1) == 1); // dev: country
 	}
 
 	/**
@@ -125,7 +122,7 @@ contract KYCRegistrar is KYCBase {
 				_count++;
 			/* In all other cases, revert */
 			} else {
-				revert("dev: known address");
+				revert(); // dev: known address
 			}
 		}
 		emit RegisteredAddresses(_id, _addr, idMap[msg.sender].id);
@@ -183,50 +180,49 @@ contract KYCRegistrar is KYCBase {
 		returns (bool)
 	{
 		if (!_checkMultiSig(true)) return false;
-		require(_threshold > 0, "dev: zero threshold");
-		bytes32 _id = keccak256(abi.encodePacked(address(this), _addr[0]));
-		emit NewAuthority(_id);
-		require(investorData[_id].authority == 0, "dev: investor ID");
-		Authority storage a = authorityData[_id];
-		require(a.addressCount == 0, "dev: authority exists");
-		a.addressCount = _addAddresses(_id, _addr);
-		require(a.addressCount >= _threshold, "dev: threshold too high");
+		require(_threshold > 0); // dev: zero threshold
+		bytes32 _authID = keccak256(abi.encodePacked(address(this), _addr[0]));
+		require(investorData[_authID].authority == 0); // dev: investor ID
+		Authority storage a = authorityData[_authID];
+		require(a.addressCount == 0); // dev: authority exists
+		a.addressCount = _addAddresses(_authID, _addr);
+		require(a.addressCount >= _threshold); // dev: threshold too high
 		a.multiSigThreshold = _threshold;
 		_setCountries(a.countries, _countries, true);
-		emit NewAuthority(_id);
+		emit NewAuthority(_authID);
 		return true;
 	}
 
 	/**
 		@notice Modifies the number of calls needed by a multisig authority
-		@param _id Authority ID
+		@param _authID Authority ID
 		@param _threshold Minimum number of calls to a method for multisig
 		@return bool success
 	 */
 	function setAuthorityThreshold(
-		bytes32 _id,
+		bytes32 _authID,
 		uint32 _threshold
 	)
 		external
 		returns (bool)
 	{
 		if (!_checkMultiSig(true)) return false;
-		require(_threshold > 0, "dev: zero threshold");
-		require(authorityData[_id].addressCount > 0, "dev: not authority");
-		require(_threshold <= authorityData[_id].addressCount, "dev: threshold too high");
-		authorityData[_id].multiSigThreshold = _threshold;
+		require(_threshold > 0); // dev: zero threshold
+		require(authorityData[_authID].addressCount > 0); // dev: not authority
+		require(_threshold <= authorityData[_authID].addressCount); // dev: threshold too high
+		authorityData[_authID].multiSigThreshold = _threshold;
 		return true;
 	}
 
 	/**
 		@notice Sets approval of an authority to register entities in a country
-		@param _id Authority ID
+		@param _authID Authority ID
 		@param _countries Array of country IDs
 		@param _permitted boolean to set or restrict countries
 		@return bool succcess
 	 */
 	function setAuthorityCountries(
-		bytes32 _id,
+		bytes32 _authID,
 		uint16[] _countries,
 		bool _permitted
 	)
@@ -234,8 +230,8 @@ contract KYCRegistrar is KYCBase {
 		returns (bool)
 	{
 		if (!_checkMultiSig(true)) return false;
-		Authority storage a = authorityData[_id];
-		require(a.addressCount > 0, "dev: not authority");
+		Authority storage a = authorityData[_authID];
+		require(a.addressCount > 0); // dev: not authority
 		_setCountries(a.countries, _countries, _permitted);
 		return true;
 	}
@@ -245,22 +241,22 @@ contract KYCRegistrar is KYCBase {
 		@dev
 			Restricting an authority will also restrict every investor that
 			was approved by that authority.
-		@param _id Authority ID
-		@param _permitted Permission bool
+		@param _authID Authority ID
+		@param _restricted Permission bool
 		@return bool success
 	 */
 	function setAuthorityRestriction(
-		bytes32 _id,
-		bool _permitted
+		bytes32 _authID,
+		bool _restricted
 	)
 		external
 		returns (bool)
 	{
 		if (!_checkMultiSig(true)) return false;
-		require(_id != ownerID, "dev: owner");
-		require(authorityData[_id].addressCount > 0, "dev: not authority");
-		authorityData[_id].restricted = !_permitted;
-		emit AuthorityRestriction(_id, _permitted);
+		require(_authID != ownerID); // dev: owner
+		require(authorityData[_authID].addressCount > 0); // dev: not authority
+		authorityData[_authID].restricted = _restricted;
+		emit AuthorityRestriction(_authID, _restricted);
 		return true;
 	}
 
@@ -290,8 +286,8 @@ contract KYCRegistrar is KYCBase {
 		returns (bool)
 	{
 		_authorityCheck(_country);
-		require(authorityData[_id].addressCount == 0, "dev: authority ID");
-		require(investorData[_id].authority == 0, "dev: investor ID");
+		require(authorityData[_id].addressCount == 0); // dev: authority ID
+		require(investorData[_id].authority == 0); // dev: investor ID
 		if (!_checkMultiSig(false)) return false;
 		bytes32 _authID = idMap[msg.sender].id;
 		_setInvestor(_authID, _id, _country, _region, _rating, _expires);
@@ -330,20 +326,20 @@ contract KYCRegistrar is KYCBase {
 		@notice Set or remove an investor's restricted status
 		@dev This modifies restriciton on all addresses attached to the ID
 		@param _id Investor ID
-		@param _permitted Permission bool
+		@param _restricted Permission bool
 		@return bool success
 	 */
 	function setInvestorRestriction(
 		bytes32 _id,
-		bool _permitted
+		bool _restricted
 	)
 		external
 		returns (bool)
 	{
 		_authorityCheck(investorData[_id].country);
 		if (!_checkMultiSig(false)) return false;
-		investorData[_id].restricted = !_permitted;
-		emit InvestorRestriction(_id, _permitted, idMap[msg.sender].id);
+		investorData[_id].restricted = _restricted;
+		emit InvestorRestriction(_id, _restricted, idMap[msg.sender].id);
 		return true;
 	}
 
@@ -363,10 +359,10 @@ contract KYCRegistrar is KYCBase {
 		external
 		returns (bool)
 	{
-		require(authorityData[_authID].addressCount > 0, "dev: not authority");
+		require(authorityData[_authID].addressCount > 0); // dev: not authority
 		if (!_checkMultiSig(true)) return false;
 		for (uint256 i; i < _id.length; i++) {
-			require(investorData[_id[i]].country != 0, "dev: unknown ID");
+			require(investorData[_id[i]].country != 0); // dev: unknown ID
 			Investor storage inv = investorData[_id[i]];
 			inv.authority = _authID;
 			emit UpdatedInvestor(
@@ -400,8 +396,8 @@ contract KYCRegistrar is KYCBase {
 		Authority storage a = authorityData[_id];
 		if (a.addressCount > 0) {
 			/* Only the owner can register addresses for an authority. */
-			require(idMap[msg.sender].id == ownerID, "dev: not owner");
-			require(!idMap[msg.sender].restricted, "dev: restricted address");
+			require(idMap[msg.sender].id == ownerID); // dev: not owner
+			require(!idMap[msg.sender].restricted); // dev: restricted address
 			a.addressCount += _addAddresses(_id, _addr);
 		} else {
 			_authorityCheck(investorData[_id].country);
@@ -431,16 +427,17 @@ contract KYCRegistrar is KYCBase {
 		if (!_checkMultiSig(false)) return false;
 		if (authorityData[_id].addressCount > 0) {
 			/* Only the owner can unregister addresses for an authority. */
-			require(idMap[msg.sender].id == ownerID, "dev: not owner");
+			require(idMap[msg.sender].id == ownerID); // dev: not owner
 			Authority storage a = authorityData[_id];
+			require(a.addressCount >= _addr.length); // dev: addressCount underflow
 			a.addressCount -= uint32(_addr.length);
-			require(a.addressCount >= a.multiSigThreshold, "dev: below threshold");
+			require(a.addressCount >= a.multiSigThreshold); // dev: below threshold
 		} else {
 			_authorityCheck(investorData[_id].country);
 		}
 		for (uint256 i; i < _addr.length; i++) {
-			require(idMap[_addr[i]].id == _id, "dev: wrong ID");
-			require(!idMap[_addr[i]].restricted, "dev: already restricted");
+			require(idMap[_addr[i]].id == _id); // dev: wrong ID
+			require(!idMap[_addr[i]].restricted); // dev: already restricted
 			idMap[_addr[i]].restricted = true;
 		}
 		emit RestrictedAddresses(_id, _addr, idMap[msg.sender].id);
@@ -452,10 +449,10 @@ contract KYCRegistrar is KYCBase {
 		@param _addr Authority address
 		@return bytes32 Authority ID
 	 */
-	function getAuthorityID(address _addr) external view returns (bytes32 _id) {
-		_id = idMap[_addr].id;
-		require (authorityData[_id].addressCount > 0);
-		return _id;
+	function getAuthorityID(address _addr) external view returns (bytes32 _authID) {
+		_authID = idMap[_addr].id;
+		require (authorityData[_authID].addressCount > 0);
+		return _authID;
 	}
 
 	/**

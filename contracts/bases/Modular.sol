@@ -45,7 +45,7 @@ contract Modular {
 		@return bool success
 	 */
 	function _attachModule(address _module) internal {
-		require (!moduleData[_module].active, "dev: already active");
+		require (!moduleData[_module].active); // dev: already active
 		IBaseModule b = IBaseModule(_module);
 		Module storage m = moduleData[_module];
 		m.active = true;

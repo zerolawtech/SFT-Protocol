@@ -13,6 +13,9 @@ contract SecurityToken is TokenBase {
 
 	using SafeMath for uint256;
 
+	uint256 constant SENDER = 0;
+	uint256 constant RECEIVER = 1;
+
 	mapping (address => uint256) balances;
 
 	/**
@@ -113,24 +116,24 @@ contract SecurityToken is TokenBase {
 	{
 		require(_value > 0, "Cannot send 0 tokens");
 		/* Issuer tokens are held at the IssuingEntity contract address */
-		if (_id[0] == ownerID) {
-			_addr[0] = address(issuer);
+		if (_id[SENDER] == ownerID) {
+			_addr[SENDER] = address(issuer);
 		}
-		if (_id[1] == ownerID) {
-			_addr[1] = address(issuer);
+		if (_id[RECEIVER] == ownerID) {
+			_addr[RECEIVER] = address(issuer);
 		}
 		if (_cust != 0x00) {
 			/**
 				if transfer originates from custodian, check custodial balance
 				of receiver. Otherwise check custodial balance of sender
 			*/
-			address _owner = (_addr[0] == _cust ? _addr[1] : _addr[0]);
+			address _owner = (_addr[SENDER] == _cust ? _addr[RECEIVER] : _addr[SENDER]);
 			require(
 				custBalances[_owner][_cust] >= _value,
 				"Insufficient Custodial Balance"
 			);
 		} else {
-			require(balances[_addr[0]] >= _value, "Insufficient Balance");
+			require(balances[_addr[SENDER]] >= _value, "Insufficient Balance");
 		}
 
 		/* bytes4 signature for token module checkTransfer() */
@@ -211,55 +214,63 @@ contract SecurityToken is TokenBase {
 			uint16[2] memory _country
 		) = issuer.transferTokens(
 			_auth,
-			_addr[0],
-			_addr[1],
+			_addr[SENDER],
+			_addr[RECEIVER],
 			/*
 				Must send regular and custodial zero balances, as we do not
 				yet know which type of transfer this.
 			*/
 			[
-				balances[_addr[0]] == _value,
-				balances[_addr[1]] == 0,
-				custBalances[_addr[1]][_addr[0]] == _value,
-				custBalances[_addr[0]][_addr[1]] == 0
+				balances[_addr[SENDER]] == _value,
+				balances[_addr[RECEIVER]] == 0,
+				custBalances[_addr[RECEIVER]][_addr[SENDER]] == _value,
+				custBalances[_addr[SENDER]][_addr[RECEIVER]] == 0
 			]
 		);
 		_addr = _checkTransfer(
 			_authID,
 			_id,
 			/** is sender a custodian? */
-			(_rating[0] == 0 && _id[0] != ownerID) ? _addr[0] : 0x00,
+			(_rating[SENDER] == 0 && _id[SENDER] != ownerID) ? _addr[SENDER] : 0x00,
 			_addr,
 			_rating,
 			_country,
 			_value
 		);
 
-		if (_authID != _id[0] && _id[0] != _id[1] && _authID != ownerID) {
+		if (
+			_authID != _id[SENDER] &&
+			_id[SENDER] != _id[RECEIVER] &&
+			_authID != ownerID
+		) {
 			/*
 				If the call was not made by the issuer or the sender and involves
 				a change in ownership, subtract from the allowed mapping.
 			*/
-			require(allowed[_addr[0]][_auth] >= _value, "Insufficient allowance");
-			allowed[_addr[0]][_auth] = allowed[_addr[0]][_auth].sub(_value);
+			require(allowed[_addr[SENDER]][_auth] >= _value, "Insufficient allowance");
+			allowed[_addr[SENDER]][_auth] = allowed[_addr[SENDER]][_auth].sub(_value);
 		}
 
 		/*
 			balances are modified regardless of if the transfer involves a
 			custodian, to keep sum of balance mapping == totalSupply
 		 */
-		balances[_addr[0]] = balances[_addr[0]].sub(_value);
-		balances[_addr[1]] = balances[_addr[1]].add(_value);
+		balances[_addr[SENDER]] = balances[_addr[SENDER]].sub(_value);
+		balances[_addr[RECEIVER]] = balances[_addr[RECEIVER]].add(_value);
 
-		if (_rating[0] == 0 && _id[0] != ownerID) {
+		if (_rating[SENDER] == 0 && _id[SENDER] != ownerID) {
 			/* sender is custodian, reduce custodian balance */
-			custBalances[_addr[1]][_addr[0]] = custBalances[_addr[1]][_addr[0]].sub(_value);
+			custBalances[_addr[RECEIVER]][_addr[SENDER]] = (
+				custBalances[_addr[RECEIVER]][_addr[SENDER]].sub(_value)
+			);
 		}
 
-		if (_rating[1] == 0 && _id[1] != ownerID) {
+		if (_rating[RECEIVER] == 0 && _id[RECEIVER] != ownerID) {
 			/* receiver is custodian, increase custodian balance and notify */
-			custBalances[_addr[0]][_addr[1]] = custBalances[_addr[0]][_addr[1]].add(_value);
-			require(IBaseCustodian(_addr[1]).receiveTransfer(_addr[0], _value));
+			custBalances[_addr[SENDER]][_addr[RECEIVER]] = (
+				custBalances[_addr[SENDER]][_addr[RECEIVER]].add(_value)
+			);
+			require(IBaseCustodian(_addr[RECEIVER]).receiveTransfer(_addr[SENDER], _value));
 		}
 
 		/* bytes4 signature for token module transferTokens() */
@@ -268,7 +279,7 @@ contract SecurityToken is TokenBase {
 			0x00,
 			abi.encode(_addr, _id, _rating, _country, _value)
 		));
-		emit Transfer(_addr[0], _addr[1], _value);
+		emit Transfer(_addr[SENDER], _addr[RECEIVER], _value);
 	}
 
 	/**
@@ -292,8 +303,8 @@ contract SecurityToken is TokenBase {
 			zero[2:] can be set to false. set here to prevent stack depth error.
 		*/
 		bool[4] memory _zero = [
-			custBalances[_addr[0]][msg.sender] == _value,
-			custBalances[_addr[1]][msg.sender] == 0,
+			custBalances[_addr[SENDER]][msg.sender] == _value,
+			custBalances[_addr[RECEIVER]][msg.sender] == 0,
 			false,
 			false
 		];
@@ -302,7 +313,7 @@ contract SecurityToken is TokenBase {
 			bytes32[2] memory _id,
 			uint8[2] memory _rating,
 			uint16[2] memory _country
-		) = issuer.transferTokens(msg.sender, _addr[0], _addr[1], _zero);
+		) = issuer.transferTokens(msg.sender, _addr[SENDER], _addr[RECEIVER], _zero);
 
 		_addr = _checkTransfer(
 			_authID,
@@ -313,8 +324,12 @@ contract SecurityToken is TokenBase {
 			_country,
 			_value
 		);
-		custBalances[_addr[0]][msg.sender] = custBalances[_addr[0]][msg.sender].sub(_value);
-		custBalances[_addr[1]][msg.sender] = custBalances[_addr[1]][msg.sender].add(_value);
+		custBalances[_addr[SENDER]][msg.sender] = (
+			custBalances[_addr[SENDER]][msg.sender].sub(_value)
+		);
+		custBalances[_addr[RECEIVER]][msg.sender] = (
+			custBalances[_addr[RECEIVER]][msg.sender].add(_value)
+		);
 		/* bytes4 signature for token module transferTokensCustodian() */
 		require(_callModules(
 			0x8b5f1240,
@@ -334,7 +349,7 @@ contract SecurityToken is TokenBase {
 	function mint(address _owner, uint256 _value) external returns (bool) {
 		/* msg.sig = 0x40c10f19 */
 		if (!_checkPermitted()) return false;
-		require(_value > 0, "dev: mint 0");
+		require(_value > 0); // dev: mint 0
 		issuer.checkTransfer(
 			address(issuer),
 			address(issuer),
@@ -344,7 +359,7 @@ contract SecurityToken is TokenBase {
 		uint256 _old = balances[_owner];
 		balances[_owner] = _old.add(_value);
 		totalSupply = totalSupply.add(_value);
-		require(totalSupply <= authorizedSupply, "dev: exceed auth");
+		require(totalSupply <= authorizedSupply); // dev: exceed auth
 		emit Transfer(0x00, _owner, _value);
 		return _modifyTotalSupply(_owner, _old);
 	}
@@ -359,7 +374,7 @@ contract SecurityToken is TokenBase {
 	function burn(address _owner, uint256 _value) external returns (bool) {
 		/* msg.sig = 0x9dc29fac */
 		if (!_checkPermitted()) return false;
-		require(_value > 0, "dev: burn 0");
+		require(_value > 0); // dev: burn 0
 		uint256 _old = balances[_owner];
 		balances[_owner] = _old.sub(_value);
 		totalSupply = totalSupply.sub(_value);

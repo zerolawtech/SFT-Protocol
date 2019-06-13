@@ -206,7 +206,7 @@ contract TokenBase is Modular {
 	function modifyAuthorizedSupply(uint256 _value) external returns (bool) {
 		/* msg.sig = 0xc39f42ed */
 		if (!_checkPermitted()) return false;
-		require(_value >= totalSupply, "dev: auth below total");
+		require(_value >= totalSupply); // dev: auth below total
 		require(issuer.modifyAuthorizedSupply(_value));
 		emit AuthorizedSupplyChanged(authorizedSupply, _value);
 		authorizedSupply = _value;
@@ -248,7 +248,7 @@ contract TokenBase is Modular {
 		@return bool success
 	 */
 	function attachModule(address _module) external returns (bool) {
-		require(msg.sender == address(issuer), "dev: only issuer");
+		require(msg.sender == address(issuer)); // dev: only issuer
 		_attachModule(_module);
 		return true;
 	}
@@ -263,7 +263,7 @@ contract TokenBase is Modular {
 	 */
 	function detachModule(address _module) external returns (bool) {
 		if (_module != msg.sender) {
-			require(msg.sender == address(issuer), "dev: only issuer");
+			require(msg.sender == address(issuer)); // dev: only issuer
 		} else {
 			/* msg.sig = 0xbb2a8522 */
 			require(isPermittedModule(msg.sender, msg.sig));
