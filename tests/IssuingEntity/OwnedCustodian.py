@@ -15,10 +15,8 @@ contract TestCustodian {
 
 
 def setup():
-    main(SecurityToken)
     global token, issuer, TestCustodian, cust
-    token = SecurityToken[0]
-    issuer = IssuingEntity[0]
+    token, issuer, _ = main(SecurityToken, (1,2), (1,))
     TestCustodian = compile_source(source)[0]
     cust = a[0].deploy(TestCustodian)
 

@@ -5,10 +5,8 @@ from scripts.deployment import main
 
 
 def setup():
-    main(SecurityToken)
     global token, issuer
-    token = SecurityToken[0]
-    issuer = IssuingEntity[0]
+    token, issuer, _ = main(SecurityToken, (1,), (1,))
 
 def add_authority():
     '''add an authority'''

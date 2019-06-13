@@ -1,14 +1,13 @@
 #!/usr/bin/python3
 
 from brownie import *
-from scripts.deployment import main
 
 
 def setup():
     global kyc, issuer, owner_id
     issuer = a[0].deploy(IssuingEntity, a[0:3], 1)
     kyc = a[0].deploy(KYCIssuer, issuer)
-    issuer.setRegistrar(kyc, True, {'from': a[0]})
+    issuer.setRegistrar(kyc, False, {'from': a[0]})
     kyc.addInvestor("0x1111", 1, 1, 1, 9999999999, a[3:5], {'from': a[0]})
     owner_id = issuer.ownerID()
 

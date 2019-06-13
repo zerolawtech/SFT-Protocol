@@ -1,25 +1,18 @@
 #!/usr/bin/python3
 
 from brownie import *
-from scripts.deployment import main
 
 
 def setup():
     global kyc, issuer, owner_id, auth_id
     issuer = a[0].deploy(IssuingEntity, a[0:3], 1)
-    issuer.addAuthority(a[3:6],[], 2000000000, 1, {'from': a[0]})
+    issuer.addAuthority(a[3:6], [], 2000000000, 1, {'from': a[0]})
     kyc = a[0].deploy(KYCIssuer, issuer)
-    issuer.setRegistrar(kyc, True, {'from': a[0]})
+    issuer.setRegistrar(kyc, False, {'from': a[0]})
     kyc.addInvestor("0x1111", 1, 1, 1, 9999999999, (a[6],), {'from': a[0]})
     owner_id = issuer.ownerID()
     auth_id = issuer.getID(a[3])
 
-
-# addInvestor
-# updateInvestor
-# setInvestorRestriction
-# registerAddresses
-# restrictAddresses
 
 def addInvestor():
     _multisig(kyc.addInvestor, "0x1234", 1, 1, 1, 9999999999, (a[7],))
@@ -55,5 +48,3 @@ def _multisig(fn, *args):
     check.reverts(fn, args, "dev: repeat caller")
     args[-1]['from'] = a[5]
     check.event_fired(fn(*args),'MultiSigCallApproved')
-    
-    

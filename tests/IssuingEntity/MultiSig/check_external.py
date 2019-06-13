@@ -5,10 +5,8 @@ from scripts.deployment import main
 
 
 def setup():
-    main(SecurityToken)
     global token, nft, issuer, ownerid, id1
-    token = SecurityToken[0]
-    issuer = IssuingEntity[0]
+    token, issuer, _ = main(SecurityToken, (1,2), (1,))
     nft = a[0].deploy(NFToken, issuer, "Test NFT", "NFT", 1000000)
     issuer.addToken(nft, {'from': a[0]})
     for i in range(6):
@@ -45,8 +43,6 @@ def nft_modifyRanges():
     _multisig(nft.modifyRanges, 30, 800, 0, "0xff")
 
 
-
-
 def _multisig(fn, *args):
     args = list(args)+[{'from':a[-6]}]
     # check for failed call, no permission
@@ -66,5 +62,3 @@ def _multisig(fn, *args):
     check.reverts(fn, args, "dev: repeat caller")
     args[-1]['from'] = a[-4]
     check.event_fired(fn(*args),'MultiSigCallApproved')
-    
-    

@@ -1,14 +1,13 @@
 #!/usr/bin/python3
 
 from brownie import *
-from scripts.deployment import main
 
 
 def setup():
     global kyc, issuer, owner_id
     issuer = a[0].deploy(IssuingEntity, (a[0],), 1)
     kyc = a[0].deploy(KYCIssuer, issuer)
-    issuer.setRegistrar(kyc, True, {'from': a[0]})
+    issuer.setRegistrar(kyc, False, {'from': a[0]})
     kyc.addInvestor("0x1111", 1, 1, 1, 9999999999, (a[-3],), {'from': a[0]})
     owner_id = issuer.ownerID()
 
@@ -95,7 +94,7 @@ def update_investor_rating_zero():
 def set_restriction():
     '''set investor restriction'''
     check.true(kyc.isPermittedID("0x1111"))
-    kyc.setInvestorRestriction("0x1111", False, {'from': a[0]})
-    check.false(kyc.isPermittedID("0x1111"))
     kyc.setInvestorRestriction("0x1111", True, {'from': a[0]})
+    check.false(kyc.isPermittedID("0x1111"))
+    kyc.setInvestorRestriction("0x1111", False, {'from': a[0]})
     check.true(kyc.isPermittedID("0x1111"))

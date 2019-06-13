@@ -5,31 +5,28 @@ from scripts.deployment import main
 
 
 def setup():
-    main(SecurityToken)
     global token, issuer, kyc
-    token = SecurityToken[0]
-    issuer = IssuingEntity[0]
-    kyc = KYCRegistrar[0]
+    token, issuer, kyc = main(SecurityToken, (1,), (1,2))
     token.mint(issuer, 1000000, {'from': a[0]})
 
 def sender_restricted():
     '''sender restricted - investor / investor'''
     id_ = kyc.getID(a[1])
     token.transfer(a[1], 1000, {'from': a[0]})
-    issuer.setEntityRestriction(id_, False, {'from': a[0]})
+    issuer.setEntityRestriction(id_, True, {'from': a[0]})
     check.reverts(
         token.transfer,
         (a[2], 1000, {'from': a[1]}),
         "Sender restricted: Issuer"
     )
-    issuer.setEntityRestriction(id_, True, {'from': a[0]})
+    issuer.setEntityRestriction(id_, False, {'from': a[0]})
     token.transfer(a[2], 1000, {'from': a[1]})
 
 def sender_restricted_issuer():
     '''sender restricted - issuer / investor'''
     check.reverts(
         issuer.setEntityRestriction,
-        (issuer.ownerID(), False, {'from': a[0]}),
+        (issuer.ownerID(), True, {'from': a[0]}),
         "dev: authority"
     )
     issuer.addAuthorityAddresses(issuer.ownerID(), [a[-1]], {'from':a[0]})
@@ -46,7 +43,7 @@ def sender_restricted_issuer():
 def sender_restricted_kyc_id():
     '''sender ID restricted at kyc'''
     token.transfer(a[1], 1000, {'from': a[0]})
-    kyc.setInvestorRestriction(kyc.getID(a[1]), False, {'from':a[0]})
+    kyc.setInvestorRestriction(kyc.getID(a[1]), True, {'from':a[0]})
     check.reverts(
         token.transfer,
         (a[2], 1000, {'from': a[1]}),
@@ -65,7 +62,7 @@ def sender_restricted_kyc_addr():
 
 def receiver_restricted_issuer():
     '''receiver restricted'''
-    issuer.setEntityRestriction(issuer.getID(a[1]), False, {'from': a[0]})
+    issuer.setEntityRestriction(issuer.getID(a[1]), True, {'from': a[0]})
     check.reverts(
         token.transfer,
         (a[1], 1000, {'from': a[0]}),
@@ -74,7 +71,7 @@ def receiver_restricted_issuer():
 
 def receiver_restricted_kyc_id():
     '''receiver ID restricted at kyc'''
-    kyc.setInvestorRestriction(kyc.getID(a[1]), False, {'from':a[0]})
+    kyc.setInvestorRestriction(kyc.getID(a[1]), True, {'from':a[0]})
     check.reverts(
         token.transfer,
         (a[1], 1000, {'from': a[0]}),

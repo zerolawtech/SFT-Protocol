@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 from brownie import *
-from scripts.deployment import main
 
 
 def setup():
@@ -132,15 +131,15 @@ def update_investor_authority_country():
 def set_restriction():
     '''set investor restriction'''
     check.true(kyc.isPermittedID("0x1111"))
-    kyc.setInvestorRestriction("0x1111", False, {'from': a[0]})
-    check.false(kyc.isPermittedID("0x1111"))
     kyc.setInvestorRestriction("0x1111", True, {'from': a[0]})
+    check.false(kyc.isPermittedID("0x1111"))
+    kyc.setInvestorRestriction("0x1111", False, {'from': a[0]})
     check.true(kyc.isPermittedID("0x1111"))
 
 def set_authority():
     '''set investor authority'''
     check.true(kyc.isPermittedID("0x1111"))
-    kyc.setAuthorityRestriction(auth_id, False, {'from':a[0]})
+    kyc.setAuthorityRestriction(auth_id, True, {'from':a[0]})
     check.true(kyc.isPermittedID("0x1111"))
     kyc.setInvestorAuthority(auth_id, ("0x1111",), {'from': a[0]})
     check.false(kyc.isPermittedID("0x1111"))

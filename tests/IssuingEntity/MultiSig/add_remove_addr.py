@@ -5,10 +5,8 @@ from scripts.deployment import main
 
 
 def setup():
-    main(SecurityToken)
     global token, issuer, ownerid, id1, id2
-    token = SecurityToken[0]
-    issuer = IssuingEntity[0]
+    token, issuer, _ = main(SecurityToken, (1,), (1,))
     for i in range(10):
         a.add()
     sigs = (
@@ -87,7 +85,7 @@ def add_known():
     )
 
 def add_other():
-    '''add already assocaited address'''
+    '''add already associated address'''
     token.mint(a[1], 100, {'from': a[0]})
     issuer.addAuthorityAddresses(id1, (a[-10],), {'from': a[0]})
     check.reverts(

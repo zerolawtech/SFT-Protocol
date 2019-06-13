@@ -36,10 +36,9 @@ contract TestModule {{
 
 
 def setup():
-    main(SecurityToken)
-    global token, issuer, nft
-    token = SecurityToken[0]
-    issuer = IssuingEntity[0]
+    
+    global issuer, nft, cust, token
+    token, issuer, _ = main(SecurityToken, (1,2,3), (1,))
     token.mint(issuer, 100000, {'from': a[0]})
     nft = a[0].deploy(NFToken, issuer, "NFToken", "TST", 1000000)
     issuer.addToken(nft, {'from': a[0]})

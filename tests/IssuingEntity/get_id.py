@@ -1,18 +1,14 @@
 #!/usr/bin/python3
 
 from brownie import *
-from scripts.deployment import main
+from scripts.deployment import deploy_contracts
 
 
 def setup():
     global token, issuer, kyc, kyc2
-    kyc = a[0].deploy(KYCRegistrar, [a[0]], 1)
+    token, issuer, kyc = deploy_contracts(SecurityToken)
     kyc2 = a[0].deploy(KYCRegistrar, [a[0]], 1)
-    issuer = a[0].deploy(IssuingEntity, [a[0]], 1)
-    token = a[0].deploy(SecurityToken, issuer, "Test", "TST", 1000000)
-    issuer.addToken(token, {'from': a[0]})
-    issuer.setRegistrar(kyc, True, {'from': a[0]})
-    issuer.setRegistrar(kyc2, True, {'from': a[0]})
+    issuer.setRegistrar(kyc2, False, {'from': a[0]})
     token.mint(issuer, 1000000, {'from': a[0]})
 
 
@@ -26,7 +22,7 @@ def registrar_restricted():
     '''registrar restricted'''
     kyc.addInvestor("0x1234", 1, 1, 1, 9999999999, (a[1],), {'from': a[0]})
     issuer.getID.transact(a[1])
-    issuer.setRegistrar(kyc, False, {'from': a[0]})
+    issuer.setRegistrar(kyc, True, {'from': a[0]})
     check.reverts(issuer.getID, (a[1],), "Registrar restricted")
 
 
@@ -44,7 +40,7 @@ def restrict_registrar():
     kyc.addInvestor("0x1234", 1, 1, 1, 9999999999, (a[1],a[3]), {'from': a[0]})
     kyc2.addInvestor("0x1234", 1, 1, 1, 9999999999, (a[1],a[2]), {'from': a[0]})
     issuer.getID(a[1])
-    issuer.setRegistrar(kyc, False, {'from': a[0]})
+    issuer.setRegistrar(kyc, True, {'from': a[0]})
     issuer.getID(a[1])
     issuer.getID(a[2])
     check.reverts(issuer.getID, (a[3],), "Address not registered")

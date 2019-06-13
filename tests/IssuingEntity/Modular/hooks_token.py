@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from brownie import *
-from scripts.deployment import main 
+from scripts.deployment import main, deploy_custodian
 
 module_source = """
 pragma solidity 0.4.25;
@@ -44,12 +44,9 @@ contract TestModule {{
 
 
 def setup():
-    main(SecurityToken)
     global token, issuer, cust
-    token = SecurityToken[0]
-    issuer = IssuingEntity[0]
-    cust = a[0].deploy(OwnedCustodian, [a[0]], 1)
-    issuer.addCustodian(cust, {'from': a[0]})
+    token, issuer, _ = main(SecurityToken, (1,2,3), (1,))
+    cust = deploy_custodian()
     token.mint(issuer, 100000, {'from': a[0]})
 
 

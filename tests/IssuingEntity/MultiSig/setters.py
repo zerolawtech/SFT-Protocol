@@ -1,21 +1,18 @@
 #!/usr/bin/python3
 
 from brownie import *
-from scripts.deployment import main
+from scripts.deployment import deploy_contracts
 
 
 def setup():
-    main(SecurityToken)
     global token, issuer, ownerid, id1, id2
-    token = SecurityToken[0]
-    issuer = IssuingEntity[0]
+    token, issuer, _ = deploy_contracts(SecurityToken)
     for i in range(10):
         a.add()
     sigs = (
         issuer.signatures['setAuthoritySignatures'],
         issuer.signatures['setAuthorityApprovedUntil'],
         issuer.signatures['setAuthorityThreshold']
-
     )
     issuer.addAuthority((a[-2],), sigs, 2000000000, 1, {'from': a[0]})
     issuer.addAuthority((a[-1], a[-3]), sigs, 2000000000, 1, {'from': a[0]})
@@ -24,6 +21,7 @@ def setup():
     ownerid = issuer.ownerID()
     id1 = issuer.getID(a[-2])
     id2 =issuer.getID(a[-1])
+
 
 def set_approval():
     '''set authrority approved until'''
@@ -56,6 +54,7 @@ def set_signatures():
     check.false(issuer.isApprovedAuthority(a[-2], sigs[0]))
     check.false(issuer.isApprovedAuthority(a[-2], sigs[1]))
 
+
 def set_sigs_as_authority():
     '''set authority signatures - as authority (reverts)'''
     check.reverts(
@@ -63,12 +62,14 @@ def set_sigs_as_authority():
         (id1, (issuer.signatures['setAuthoritySignatures'],), True, {'from': a[-2]})
     )
 
+
 def set_threshold():
     '''set threshold'''
     issuer.setAuthorityThreshold(id2, 2, {'from': a[0]})
     check.equal(issuer.getAuthority(id2), (2, 2, 2000000000))
     issuer.setAuthorityThreshold(id2, 1, {'from': a[0]})
     check.equal(issuer.getAuthority(id2), (2, 1, 2000000000))
+
 
 def set_threshold_as_authority():
     '''set threshold as authority'''
@@ -98,6 +99,7 @@ def set_other_authority_threshold():
         (id1, 1, {'from': a[-1]}),
         "dev: wrong authority"
     )
+
 
 def set_threshold_too_high():
     '''set threshold too high'''

@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 from brownie import *
-from scripts.deployment import main
 
 
 def setup():
@@ -23,7 +22,7 @@ def setAuthorityCountries():
     _owner_multisig(kyc.setAuthorityCountries, auth_id, (1,5,7), True)
 
 def setAuthorityRestriction():
-    _owner_multisig(kyc.setAuthorityRestriction, auth_id, False)
+    _owner_multisig(kyc.setAuthorityRestriction, auth_id, True)
 
 def setInvestorAuthority():
     _owner_multisig(kyc.setInvestorAuthority, auth_id, ("0x1111",))
@@ -35,7 +34,7 @@ def updateInvestor():
     _auth_multisig(kyc.updateInvestor, "0x1111", 2, 4, 1234567890)
 
 def setInvestorRestriction():
-    _auth_multisig(kyc.setInvestorRestriction, "0x1111", False)
+    _auth_multisig(kyc.setInvestorRestriction, "0x1111", True)
 
 def registerAddresses():
     _auth_multisig(kyc.registerAddresses, "0x1111", (a[6],))

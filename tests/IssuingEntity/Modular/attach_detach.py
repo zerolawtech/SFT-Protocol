@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from brownie import *
-from scripts.deployment import main 
+from scripts.deployment import deploy_contracts
 
 module_source = """
 pragma solidity 0.4.25;
@@ -25,18 +25,17 @@ contract TestModule {
     {
         return (permissions, hooks, 0);
     }
-    
+
 }"""
 
 
 def setup():
-    main(SecurityToken)
-    global token, issuer, TestModule, module_token, module_issuer
-    token = SecurityToken[0]
-    issuer = IssuingEntity[0]
+    global token, issuer, module_token, module_issuer
+    token, issuer, _ = deploy_contracts(SecurityToken)
     TestModule = compile_source(module_source)[0]
     module_token = a[0].deploy(TestModule, token)
     module_issuer = a[0].deploy(TestModule, issuer)
+
 
 def attach_token():
     '''attach a token module'''
@@ -44,20 +43,24 @@ def attach_token():
     issuer.attachModule(token, module_token, {'from': a[0]})
     check.true(token.isActiveModule(module_token))
 
+
 def detach_token():
     '''detach a token module'''
     issuer.attachModule(token, module_token, {'from': a[0]})
     issuer.detachModule(token, module_token, {'from': a[0]})
     check.false(token.isActiveModule(module_token))
 
+
 def attach_via_token():
     '''cannot attach directly via token'''
     check.reverts(token.attachModule, (module_token, {'from': a[0]}), "dev: only issuer")
+
 
 def detach_via_token():
     '''cannot detach directly via token'''
     issuer.attachModule(token, module_token, {'from': a[0]})
     check.reverts(token.detachModule, (module_token, {'from': a[0]}), "dev: only issuer")
+
 
 def attach_issuer():
     '''attach an issuer module'''
@@ -65,11 +68,13 @@ def attach_issuer():
     issuer.attachModule(token, module_issuer, {'from': a[0]})
     check.true(token.isActiveModule(module_issuer))
 
+
 def detach_issuer():
     '''detach an issuer module'''
     issuer.attachModule(token, module_issuer, {'from': a[0]})
     issuer.detachModule(token, module_issuer, {'from': a[0]})
     check.false(token.isActiveModule(module_issuer))
+
 
 def already_active():
     '''attach already active module'''
@@ -86,11 +91,13 @@ def already_active():
         "dev: already active"
     )
 
+
 def token_locked():
     '''attach and detach - locked token'''
-    issuer.setTokenRestriction(token, False, {'from': a[0]})
+    issuer.setTokenRestriction(token, True, {'from': a[0]})
     issuer.attachModule(token, module_token, {'from': a[0]})
     issuer.detachModule(token, module_token, {'from': a[0]})
+
 
 def attach_unknown_target():
     '''attach and detach - unknown target'''

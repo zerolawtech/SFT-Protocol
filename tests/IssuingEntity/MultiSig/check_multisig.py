@@ -1,14 +1,13 @@
 #!/usr/bin/python3
 
 from brownie import *
-from scripts.deployment import main
+from scripts.deployment import deploy_contracts
 
 
 def setup():
-    main(SecurityToken)
     global token, issuer, ownerid, id1
-    token = SecurityToken[0]
-    issuer = IssuingEntity[0]
+    token, issuer, _ = deploy_contracts(SecurityToken)
+
     a[0].deploy(SecurityToken, issuer, "Test", "TST", 1000000)
     a[0].deploy(OwnedCustodian, [a[0]], 1)
     for i in range(6):
@@ -31,7 +30,7 @@ def setDocumentHash():
     _multisig(issuer.setDocumentHash, "blah blah", "0x1234")
 
 def setRegistrar():
-    _multisig(issuer.setRegistrar, a[9], True)
+    _multisig(issuer.setRegistrar, a[9], False)
 
 def addCustodian():
     _multisig(issuer.addCustodian, OwnedCustodian[0])
@@ -40,13 +39,13 @@ def addToken():
     _multisig(issuer.addToken, SecurityToken[1])
 
 def setEntityRestriction():
-    _multisig(issuer.setEntityRestriction, "0x11", False)
+    _multisig(issuer.setEntityRestriction, "0x11", True)
 
 def setTokenRestriction():
-    _multisig(issuer.setTokenRestriction, token, True)
+    _multisig(issuer.setTokenRestriction, token, False)
 
 def setGlobalRestriction():
-    _multisig(issuer.setGlobalRestriction, False)
+    _multisig(issuer.setGlobalRestriction, True)
 
 def attachModule(skip=True):
     _multisig(issuer.attachModule)

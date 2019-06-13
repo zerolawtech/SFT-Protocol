@@ -69,32 +69,3 @@ def add_token_governance_removed():
     )
     issuer.setGovernance("0"*40, {'from': a[0]})
     issuer.addToken(token2, {'from': a[0]})
-
-
-# def authorized_supply_governance_false():
-#     '''modify authorized supply - blocked by governance module'''
-#     issuer.setGovernance(gov, {'from': a[0]})
-#     gov.setResult(False, {'from': a[0]})
-#     check.reverts(
-#         token.modifyAuthorizedSupply,
-#         (10000, {'from': a[0]}),
-#         "Action has not been approved"
-#     )
-
-# def authorized_supply_governance_true():
-#     '''modify authorized supply - allowed by governance module'''
-#     issuer.setGovernance(gov, {'from': a[0]})
-#     gov.setResult(True, {'from': a[0]})
-#     token.modifyAuthorizedSupply(10000, {'from': a[0]})
-
-# def authorized_supply_governance_removed():
-#     '''modify authorized supply - removed governance module'''
-#     issuer.setGovernance(gov, {'from': a[0]})
-#     gov.setResult(False, {'from': a[0]})
-#     check.reverts(
-#         token.modifyAuthorizedSupply,
-#         (10000, {'from': a[0]}),
-#         "Action has not been approved"
-#     )
-#     issuer.setGovernance("0"*40, {'from': a[0]})
-#     token.modifyAuthorizedSupply(10000, {'from': a[0]})

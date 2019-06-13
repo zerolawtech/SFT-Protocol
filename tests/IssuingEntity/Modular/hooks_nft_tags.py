@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 
 from brownie import *
-from scripts.deployment import main 
+from scripts.deployment import main, deploy_custodian
 
 module_source = """
 pragma solidity 0.4.25;
 
-interface Modular {
+interface IModular {
     function setHook(bytes4, bool, bool) external returns (bool);
     function setHookTags(bytes4, bool, bytes1, bytes1[]) external returns (bool);
     function clearHookTags(bytes4, bytes1[]) external returns (bool);
@@ -14,13 +14,13 @@ interface Modular {
 
 contract TestModule {
 
-    Modular owner;
+    IModular owner;
     bool hookReturn;
 
-    constructor(address _owner) public { owner = Modular(_owner); }
+    constructor(address _owner) public { owner = IModular(_owner); }
     function getOwner() external view returns (address) { return owner; }
     function setActive(bool _return) external { hookReturn = _return; }
-    
+
     function getPermissions() external pure returns(
         bytes4[] permissions, bytes4[] hooks, uint256 hookBools
     ) {
@@ -31,8 +31,8 @@ contract TestModule {
     }
 
     function setHook(
-		bytes4 _sig, bool _active, bool _always
-	) external returns (bool) {
+        bytes4 _sig, bool _active, bool _always
+    ) external returns (bool) {
         require(owner.setHook(_sig, _active, _always));
         return true;
     }
@@ -64,18 +64,15 @@ contract TestModule {
 
 
 def setup():
-    main(NFToken)
     global issuer, nft, cust, module
-    nft = NFToken[0]
-    issuer = IssuingEntity[0]
-    cust = a[0].deploy(OwnedCustodian, [a[0]], 1)
-    issuer.addCustodian(cust, {'from': a[0]})
-    nft.mint(a[1], 100, 0, "0x0000", {'from': a[0]}) #    1 - 100
-    nft.mint(a[1], 100, 0, "0xaa01", {'from': a[0]}) # 101 - 200
-    nft.mint(a[1], 100, 0, "0xaa02", {'from': a[0]}) # 201 - 300
-    nft.mint(a[1], 100, 0, "0xff00", {'from': a[0]}) # 301 - 400
-    nft.mint(a[1], 100, 0, "0xff01", {'from': a[0]}) # 401 - 500
-    nft.mint(a[1], 100, 0, "0xff02", {'from': a[0]}) # 501 - 600
+    nft, issuer, _ = main(NFToken, (1, 2), (1,))
+    cust = deploy_custodian()
+    nft.mint(a[1], 100, 0, "0x0000", {'from': a[0]})  # 1   - 100
+    nft.mint(a[1], 100, 0, "0xaa01", {'from': a[0]})  # 101 - 200
+    nft.mint(a[1], 100, 0, "0xaa02", {'from': a[0]})  # 201 - 300
+    nft.mint(a[1], 100, 0, "0xff00", {'from': a[0]})  # 301 - 400
+    nft.mint(a[1], 100, 0, "0xff01", {'from': a[0]})  # 401 - 500
+    nft.mint(a[1], 100, 0, "0xff02", {'from': a[0]})  # 501 - 600
     module = compile_source(module_source)[0].deploy(nft, {'from': a[0]})
     issuer.attachModule(nft, module, {'from': a[0]})
 
