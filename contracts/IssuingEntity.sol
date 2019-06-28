@@ -799,8 +799,9 @@ contract IssuingEntity is MultiSig {
 			uint16 _country
 		)
 	{
+		require(!locked); // dev: global lock
 		require(tokens[msg.sender].set);
-		require(!tokens[msg.sender].restricted);
+		require(!tokens[msg.sender].restricted); // dev: token locked
 		if (_owner == address(this)) {
 			_id = ownerID;
 		} else {
