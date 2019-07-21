@@ -61,13 +61,15 @@ The SFT Protocol is still under active development and has not yet undergone a t
 
 ## Testing and Deployment
 
-Unit testing and deployment of this project is performed with [Brownie](https://github.com/HyperLink-Technology/brownie).
+Unit testing and deployment of this project is performed with [Brownie](https://github.com/iamdefinitelyahuman/brownie).
 
 To run the tests:
 
 ```bash
-$ brownie test
+$ pytest test
 ```
+
+A [dockerfile](Dockerfile) is available if you are experiencing issues.
 
 ## Getting Started
 

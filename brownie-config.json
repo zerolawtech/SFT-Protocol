@@ -19,32 +19,14 @@
     "test": {
         "broadcast_reverting_tx": true,
         "gas_limit": 8000000,
-        "default_contract_owner": false
+        "default_contract_owner": false,
+        "revert_traceback": false
     },
     "solc": {
         "optimize": true,
         "runs": 200,
         "version": "0.4.25",
         "minify_source": false
-    },
-    "logging": {
-        "test": {
-            "tx": [0, 2],
-            "exc": [1, 2]
-
-        },
-        "run": {
-            "tx": [1, 2],
-            "exc": 2
-        },
-        "console": {
-            "tx": 1,
-            "exc": 2
-        },
-        "coverage": {
-            "tx": 0,
-            "exc": [1, 2]
-        }
     },
     "colors": {
         "key": "",
