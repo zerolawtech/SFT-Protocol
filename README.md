@@ -66,7 +66,7 @@ Unit testing and deployment of this project is performed with [Brownie](https://
 To run the tests:
 
 ```bash
-$ pytest test
+$ pytest tests/
 ```
 
 A [dockerfile](Dockerfile) is available if you are experiencing issues.

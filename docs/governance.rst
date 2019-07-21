@@ -10,8 +10,8 @@ SFT includes a very minimal proof of concept as a starting point for developing 
 
 It may be useful to view source code for the following contracts while reading this document:
 
-* `Governance.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/modules/Governance.sol>`__: A minimal implementation of ``Goverance``, intended for testing purposes or as a base for building a functional contract.
-* `IGovernance.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/interfaces/IGovernance.sol>`__: The minimum contract interface required for a governance module to interact with an ``IssuingEntity`` contract.
+* `Governance.sol <https://github.com/zerolawtech/SFT-Protocol/blob/master/contracts/modules/Governance.sol>`__: A minimal implementation of ``Goverance``, intended for testing purposes or as a base for building a functional contract.
+* `IGovernance.sol <https://github.com/zerolawtech/SFT-Protocol/blob/master/contracts/interfaces/IGovernance.sol>`__: The minimum contract interface required for a governance module to interact with an ``IssuingEntity`` contract.
 
 Public Constants
 ================

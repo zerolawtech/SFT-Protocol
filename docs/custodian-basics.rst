@@ -98,7 +98,7 @@ The Custodian contract can call the following token methods relating to  interna
 Minimal Implementation
 ======================
 
-The `IBaseCustodian <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/interfaces/IBaseCustodian.sol>`__ interface defines a minimal implementation required for custodian contracts to interact with an IssuingEntity contract. Notably absent from this interface are methods for internal custodian transfers, or to transfer out of the contract. Depending on the type of custodian and intended use case, outgoing transfers may be implemented in different ways.
+The `IBaseCustodian <https://github.com/zerolawtech/SFT-Protocol/blob/master/contracts/interfaces/IBaseCustodian.sol>`__ interface defines a minimal implementation required for custodian contracts to interact with an IssuingEntity contract. Notably absent from this interface are methods for internal custodian transfers, or to transfer out of the contract. Depending on the type of custodian and intended use case, outgoing transfers may be implemented in different ways.
 
 .. method:: IBaseCustodian.ownerID()
 

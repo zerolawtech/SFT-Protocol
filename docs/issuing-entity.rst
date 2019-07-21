@@ -10,7 +10,7 @@ Each issuer contract includes standard SFT protocol multis-gi functionality. See
 
 This documentation only explains contract methods that are meant to be accessed directly. External methods that will revert unless called through another contract, such as a token or module, are not included.
 
-It may be useful to also view the `IsssuingEntity.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/IssuingEntity.sol>`__ source code while reading this document.
+It may be useful to also view the `IsssuingEntity.sol <https://github.com/zerolawtech/SFT-Protocol/blob/master/contracts/IssuingEntity.sol>`__ source code while reading this document.
 
 Deployment
 ==========

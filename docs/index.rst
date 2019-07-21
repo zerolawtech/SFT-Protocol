@@ -4,11 +4,11 @@ SFT Protocol
 
 The Secured Financial Transaction Protocol (SFT) is a set of smart contracts, written in `Solidity <https://solidity.readthedocs.io/en/latest>`__ for the Ethereum blockchain, that allow for the tokenization of financial securities. It provides a robust, modular framework that is configurable for a wide range of jurisdictions, with consideration for real world needs based on today’s existing markets. SFT favors handling as much permissioning logic on-chain as possible, in order to maximize transparency for all parties involved.
 
-The SFT Protocol was developed by `HyperLink Technology <https://hyperlink.technology>`__.
+The SFT Protocol was developed by `Ben Hauser <https://github.com/iamdefinitelyahuman>`__ of `ZeroLaw Tech <https://zerolaw.tech>`__.
 
 .. note::
 
-    Code starting with ``$`` is meant to be run in your terminal. Code starting with ``>>>`` is meant to run inside the `Brownie <https://github.com/HyperLink-Technology/brownie>`__ console.
+    Code starting with ``$`` is meant to be run in your terminal. Code starting with ``>>>`` is meant to run inside the `Brownie <https://github.com/iamdefinitelyahuman/brownie>`__ console.
 
 How it Works
 ============
@@ -62,21 +62,18 @@ The SFT protocol is comprised of four core components:
 Source Code
 ===========
 
-Many core components of the SFT Protocol are open sourced. You can view the code on `GitHub <https://github.com/HyperLink-Technology/SFT-Protocol>`__.
+Many core components of the SFT Protocol are open sourced. You can view the code on `GitHub <https://github.com/zerolawtech/SFT-Protocol>`__.
 
 Testing and Deployment
 ======================
 
-Unit testing and deployment of this project is performed with `Brownie <https://github.com/HyperLink-Technology/brownie>`__.
+Unit testing and deployment of this project is performed with `Brownie <https://github.com/iamdefinitelyahuman/brownie>`__.
 
 To run the tests:
 
 ::
 
-    $ brownie test
-
-
-.. warning:: The SFT Protocol is still under active development and has not yet undergone a third party audit. Please notify us if you find any issues in the code. **We highly recommend against using these contracts on the main-net prior to an audit by a trusted third party**.
+    $ pytest test
 
 License
 =======

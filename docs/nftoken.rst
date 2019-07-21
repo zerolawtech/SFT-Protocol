@@ -11,8 +11,8 @@ Token contracts include :ref:`multisig` and :ref:`modules` via the associated :r
 
 It may be useful to view source code for the following contracts while reading this document:
 
-* `NFToken.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/NFToken.sol>`__: the deployed contract, with functionality specific to ``NFToken``.
-* `Token.sol <https://github.com/HyperLink-Technology/SFT-Protocol/blob/master/contracts/bases/Token.sol>`__: the base contract that both ``NFToken`` and ``SecurityToken`` inherit functionality from.
+* `NFToken.sol <https://github.com/zerolawtech/SFT-Protocol/blob/master/contracts/NFToken.sol>`__: the deployed contract, with functionality specific to ``NFToken``.
+* `Token.sol <https://github.com/zerolawtech/SFT-Protocol/blob/master/contracts/bases/Token.sol>`__: the base contract that both ``NFToken`` and ``SecurityToken`` inherit functionality from.
 
 .. _nftoken-range-intro:
 
