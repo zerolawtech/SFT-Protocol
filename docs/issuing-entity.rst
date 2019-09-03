@@ -78,7 +78,7 @@ Associating Contracts
         IssuingEntity.addToken confirmed - block: 5   gas used: 61630 (0.77%)
         <Transaction object '0x8e93cd6b85d1e993755e9fe31eb14ce600706eaf98d606156447d8e431db5db9'>
 
-.. method:: IssuingEntity.setRegistrar(address _registrar, bool _permitted)
+.. method:: IssuingEntity.setRegistrar(address _registrar, bool _restricted)
 
     Associates or removes a :ref:`kyc` contract.
 
@@ -92,7 +92,7 @@ Associating Contracts
 
     .. code-block:: python
 
-        >>> issuer.setRegistrar(KYCRegistrar[0], True, {'from': accounts[0]})
+        >>> issuer.setRegistrar(KYCRegistrar[0], False, {'from': accounts[0]})
 
         Transaction sent: 0x606326c8b2b8f1541c333ef5a5cd44592efb50530c6326e260e728095b3ec2bd
         IssuingEntity.setRegistrar confirmed - block: 3   gas used: 61246 (0.77%)
