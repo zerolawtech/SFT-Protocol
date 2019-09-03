@@ -133,7 +133,7 @@ Setting Restrictions
 
 Transfer restrictions can be applied at varying levels.
 
-.. method:: IssuingEntity.setEntityRestriction(bytes32 _id, bool _permitted)
+.. method:: IssuingEntity.setEntityRestriction(bytes32 _id, bool _restricted)
 
     Retricts or permits an investor or custodian from transferring tokens, based on their ID.
 
@@ -147,7 +147,7 @@ Transfer restrictions can be applied at varying levels.
 
         Transaction sent: 0x89bf6113bd5ccf9917d0749776fa4bed986d519d66221973def33c0190a2e6d2
         SecurityToken.transfer confirmed - block: 21   gas used: 192387 (2.40%)
-        >>> issuer.setEntityRestriction(id_, False)
+        >>> issuer.setEntityRestriction(id_, True)
 
         Transaction sent: 0xfc4dabf2c48b4502ab4a9d3edbfc0ea792e715069ede0f8b455697df180bfc9f
         IssuingEntity.setEntityRestriction confirmed - block: 22   gas used: 39978 (0.50%)
@@ -156,7 +156,7 @@ Transfer restrictions can be applied at varying levels.
           raise VirtualMachineError(e)
         VirtualMachineError: VM Exception while processing transaction: revert Sender restricted: Issuer
 
-.. method:: IssuingEntity.setTokenRestriction(address _token, bool _permitted)
+.. method:: IssuingEntity.setTokenRestriction(address _token, bool _restricted)
 
     Restricts or permits transfers of a token. When a token is restricted, only the issuer may perform transfers.
 
@@ -164,13 +164,13 @@ Transfer restrictions can be applied at varying levels.
 
     .. code-block:: python
 
-        >>> issuer.setTokenRestriction(SecurityToken[0], False, {'from': accounts[0]})
+        >>> issuer.setTokenRestriction(SecurityToken[0], True, {'from': accounts[0]})
 
         Transaction sent: 0xfe60d18d0315278bdd1cfd0896a040cdadb63ada255685737908672c0cd10cee
         IssuingEntity.setTokenRestriction confirmed - block: 13   gas used: 40369 (0.50%)
         <Transaction object '0xfe60d18d0315278bdd1cfd0896a040cdadb63ada255685737908672c0cd10cee'>
 
-.. method:: IssuingEntity.setGlobalRestriction(bool _permitted)
+.. method:: IssuingEntity.setGlobalRestriction(bool _restricted)
 
     Restricts or permits transfers of all associated tokens. Modifying the global restriction does not affect individual token restrictions - i.e. you cannot call this method to remove restrictions that were set with ``IssuingEntity.setTokenRestriction``.
 
@@ -178,7 +178,7 @@ Transfer restrictions can be applied at varying levels.
 
     .. code-block:: python
 
-        >>> issuer.setGlobalRestriction(False, {'from': accounts[0]})
+        >>> issuer.setGlobalRestriction(True, {'from': accounts[0]})
 
         Transaction sent: 0xc03ac4c6d36e971f980297e365f30752ac5097e391213c59fd52544829a87479
         IssuingEntity.setGlobalRestriction confirmed - block: 14   gas used: 53384 (0.67%)
@@ -443,7 +443,7 @@ The ``IssuingEntity`` contract includes the following events.
 
     Emitted after a new token contract has been associated via ``IssuingEntity.addToken``.
 
-.. method:: IssuingEntity.RegistrarSet(address indexed registrar, bool permitted)
+.. method:: IssuingEntity.RegistrarSet(address indexed registrar, bool restricted)
 
     Emitted by ``IssuingEntity.setRegistrar`` when a new KYC registrar contract is added, or an existing registrar is restricted or permitted.
 
@@ -451,15 +451,15 @@ The ``IssuingEntity`` contract includes the following events.
 
     Emitted when a new custodian contract is approved via ``IssuingEntity.addCustodian``.
 
-.. method:: IssuingEntity.EntityRestriction(bytes32 indexed id, bool permitted)
+.. method:: IssuingEntity.EntityRestriction(bytes32 indexed id, bool restricted)
 
     Emitted whenever an investor or custodian has a restriction set or removed with ``IssuingEntity.setEntityRestriction``.
 
-.. method:: IssuingEntity.TokenRestriction(address indexed token, bool permitted)
+.. method:: IssuingEntity.TokenRestriction(address indexed token, bool restricted)
 
     Emitted when a token restriction is set or removed via ``IssuingEntity.setTokenRestriction``.
 
-.. method:: IssuingEntity.GlobalRestriction(bool permitted)
+.. method:: IssuingEntity.GlobalRestriction(bool restricted)
 
     Emitted when a global restriction is set with ``IssuingEntity.setGlobalRestriction``.
 
