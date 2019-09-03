@@ -287,18 +287,17 @@ Setters
         IssuingEntity.setCountry confirmed - block: 26   gas used: 116709 (1.46%)
         <Transaction object '0x96f9a7e12e898fbd2fb6c7593a7ae82c4eea087c508929e616f86e98ae9b0db6'>
 
-.. method:: IssuingEntity.setCountries(uint16[] _country, bool _permitted, uint8[] _minRating, uint32[] _limit)
+.. method:: IssuingEntity.setCountries(uint16[] _country, uint8[] _minRating, uint32[] _limit)
 
-    Approve or restrict many countries at once.
+    Approve many countries at once.
 
     * ``_countries``: An array of country codes to modify
-    * ``_permitted``: Permission bool
     * ``_minRating``: Array of minimum investor ratings for each country.
     * ``_limits``: Array of total investor limits for each country.
 
     Each array must be the same length. The function will iterate through them at the same time: ``_countries[0]`` will require rating ``_minRating[0]`` and have a total investor limit of ``_limits[0]``.
 
-    This method is useful when approving many countries that do not require specific limits based on investor ratings. When you require specific limits for each rating, use ``IssuingEntity.setCountry``.
+    This method is useful when approving many countries that do not require specific limits based on investor ratings. When you require specific limits for each rating or to explicitly restrict an entire country, use ``IssuingEntity.setCountry``.
 
     Emits the ``CountryModified`` event once for each country that is modified.
 
