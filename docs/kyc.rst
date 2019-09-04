@@ -145,7 +145,7 @@ Modifying Authorities
           raise VirtualMachineError(e)
         VirtualMachineError: VM Exception while processing transaction: revert
 
-.. method:: KYCRegistrar.setAuthorityRestriction(bytes32 _id, bool _permitted)
+.. method:: KYCRegistrar.setAuthorityRestriction(bytes32 _id, bool _restricted)
 
     Modifies the permitted state of an authority.
 
@@ -159,7 +159,7 @@ Modifying Authorities
 
         >>> kyc.isApprovedAuthority(accounts[1], 784)
         True
-        >>> kyc.setAuthorityRestriction(id_, False)
+        >>> kyc.setAuthorityRestriction(id_, True)
 
         Transaction sent: 0xeb3456fae407fb9bd673075369903769326c9f8699b313feb46e92f7f199c72e
         KYCRegistrar.setAuthorityRestriction confirmed - block: 10   gas used: 40713 (28.93%)
@@ -258,7 +258,7 @@ Modifying Investors
         KYCRegistrar.updateInvestor confirmed - block: 4   gas used: 50443 (0.63%)
         <Transaction object '0xacfb17b530d2b565ea6016ab9b50051edb85e92e5ec6d2d85b1ac1708f897949'>
 
-.. method:: KYCBase.setInvestorRestriction(bytes32 _id, bool _permitted)
+.. method:: KYCBase.setInvestorRestriction(bytes32 _id, bool _restricted)
 
     Modifies the restricted status of an investor.  An investor who is restricted will be unable to send or receive tokens.
 
@@ -266,7 +266,7 @@ Modifying Investors
 
     .. code-block:: python
 
-        >>> kyc.setInvestorRestriction(id_, False, {'from': accounts[0]})
+        >>> kyc.setInvestorRestriction(id_, True, {'from': accounts[0]})
 
         Transaction sent: 0x175982346d2f00a25f00a69701cda6fa311d60ade94d801267f51eefa86dc49e
         KYCRegistrar.setInvestorRestriction confirmed - block: 5   gas used: 41825 (0.52%)
